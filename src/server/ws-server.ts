@@ -120,6 +120,9 @@ export class GameWsServer {
     }
   }
 
+  /** Delay between CPU monster picks so players can watch them happen. */
+  private static readonly PICK_INTERVAL_MS = 600;
+
   private startGame(hostId: string): void {
     const room = this.roomManager.getRoomByPlayer(hostId);
     if (!room) throw new Error('not in a room');
@@ -132,14 +135,12 @@ export class GameWsServer {
     });
     this.games.set(room.id, game);
     room.inGame = true;
-    game.advance();
+    // Broadcast the empty initial state so clients see all 8 monsters
+    // before any picks happen, then start driving the game forward.
     this.broadcastGameState(room);
-    if (game.state.phase === 'finished') {
-      this.persistChampion(game);
-      room.inGame = false;
-    }
     this.broadcastRoomState(room.id);
     this.broadcastRoomsList();
+    this.driveGame(room);
   }
 
   private runGameAction(playerId: string, fn: (game: GameRunner) => void): void {
@@ -147,17 +148,35 @@ export class GameWsServer {
     if (!room) throw new Error('not in a room');
     const game = this.games.get(room.id);
     if (!game) throw new Error('no game in this room');
-    const wasFinished = game.state.phase === 'finished';
     fn(game);
-    game.advance();
+    this.broadcastGameState(room);
+    this.driveGame(room);
+  }
+
+  /**
+   * Drive the game forward. CPU picks during pick_monster are stepped one at
+   * a time with a delay so clients can watch each pick happen. All other
+   * phases advance immediately.
+   */
+  private driveGame(room: Room): void {
+    const game = this.games.get(room.id);
+    if (!game) return;
+    const result = game.stepDelayedPick();
     this.broadcastGameState(room);
     if (game.state.phase === 'finished') {
-      if (!wasFinished) this.persistChampion(game);
-      // Allow lobby browsing again, but keep the game state available for review.
-      room.inGame = false;
-      this.broadcastRoomState(room.id);
-      this.broadcastRoomsList();
+      this.handleFinished(room, game);
+      return;
     }
+    if (result === 'pick_made') {
+      setTimeout(() => this.driveGame(room), GameWsServer.PICK_INTERVAL_MS);
+    }
+  }
+
+  private handleFinished(room: Room, game: GameRunner): void {
+    if (game.shouldPersistChampion()) this.persistChampion(game);
+    room.inGame = false;
+    this.broadcastRoomState(room.id);
+    this.broadcastRoomsList();
   }
 
   /** Renames don't progress the game state — just apply and broadcast. */

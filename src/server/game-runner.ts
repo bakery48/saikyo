@@ -27,6 +27,8 @@ export class GameRunner {
   /** Set of human player IDs (CPUs are everyone else). */
   private humanIds: Set<string>;
   readonly seed: number;
+  /** Set once the champion has been persisted to the hall of fame. */
+  private hasPersistedChampion = false;
 
   constructor(opts: {
     roomId: string;
@@ -44,6 +46,41 @@ export class GameRunner {
 
   isHuman(playerId: string): boolean {
     return this.humanIds.has(playerId);
+  }
+
+  /**
+   * Returns true exactly once after the game enters the 'finished' phase
+   * with a champion. Used by the WS layer so the champion is saved to the
+   * hall of fame at most once per game.
+   */
+  shouldPersistChampion(): boolean {
+    if (this.state.phase !== 'finished') return false;
+    if (!this.state.champion) return false;
+    if (this.hasPersistedChampion) return false;
+    this.hasPersistedChampion = true;
+    return true;
+  }
+
+  /**
+   * Single-step pick driver. If the current monster-pick turn belongs to a
+   * CPU, perform exactly that one pick and return 'pick_made'. Otherwise,
+   * fall back to the regular advance() which resolves auto phases until
+   * the game waits on a human or finishes; returns 'idle'.
+   *
+   * The WS layer uses this with a setTimeout to animate CPU picks at a
+   * human-watchable cadence instead of resolving them all at once.
+   */
+  stepDelayedPick(): 'pick_made' | 'idle' {
+    if (this.state.phase === 'pick_monster') {
+      const cur = this.state.pickOrder[this.state.pickIdx];
+      if (cur && !this.isHuman(cur)) {
+        const m = greedyPolicy.pickMonster(this.state, cur, this.state.monsterPool);
+        pickMonster(this.state, cur, m.baseId);
+        return 'pick_made';
+      }
+    }
+    this.advance();
+    return 'idle';
   }
 
   /** Run all auto/CPU steps until the game waits for human input or finishes. */
