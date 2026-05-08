@@ -103,11 +103,11 @@ export class GameWsServer {
         return;
       }
       case 'submit_pick': {
-        this.handleSubmitPick(playerId, msg.baseId);
+        this.runGameAction(playerId, (game) => game.submitPick(playerId, msg.baseId));
         return;
       }
       case 'submit_draft': {
-        this.handleSubmitDraft(playerId, msg.skillId);
+        this.runGameAction(playerId, (game) => game.submitDraft(playerId, msg.skillId));
         return;
       }
       case 'submit_reward': {
@@ -126,54 +126,6 @@ export class GameWsServer {
   /** How long to show the open reveal (all picks visible) before resolving. */
   private static readonly DRAFT_REVEAL_MS = 3000;
 
-  /**
-   * Monster-pick submit: if this was the last pending pick, broadcast a
-   * 2-second "open reveal" (all picks visible) before resolving.
-   */
-  private handleSubmitPick(playerId: string, baseId: string): void {
-    const room = this.roomManager.getRoomByPlayer(playerId);
-    if (!room) throw new Error('not in a room');
-    const game = this.games.get(room.id);
-    if (!game) throw new Error('no game in this room');
-    game.submitPick(playerId, baseId);
-    const pick = game.state.monsterPick;
-    const allIn = !!pick && pick.pendingPlayerIds.every((id) => !!pick.submittedPicks[id]);
-    if (allIn && pick) {
-      pick.revealing = true;
-      this.broadcastGameState(room);
-      setTimeout(() => {
-        if (game.state.monsterPick) game.state.monsterPick.revealing = false;
-        this.driveGame(room);
-      }, GameWsServer.DRAFT_REVEAL_MS);
-    } else {
-      this.driveGame(room);
-    }
-  }
-
-  /**
-   * Skill-draft submit: if this was the last pending pick, broadcast a
-   * 2-second "open reveal" before resolving.
-   */
-  private handleSubmitDraft(playerId: string, skillId: string): void {
-    const room = this.roomManager.getRoomByPlayer(playerId);
-    if (!room) throw new Error('not in a room');
-    const game = this.games.get(room.id);
-    if (!game) throw new Error('no game in this room');
-    game.submitDraft(playerId, skillId);
-    const draft = game.state.draft;
-    const allIn = !!draft && draft.pendingPlayerIds.every((id) => !!draft.submittedPicks[id]);
-    if (allIn && draft) {
-      draft.revealing = true;
-      this.broadcastGameState(room);
-      setTimeout(() => {
-        if (game.state.draft) game.state.draft.revealing = false;
-        this.driveGame(room);
-      }, GameWsServer.DRAFT_REVEAL_MS);
-    } else {
-      this.driveGame(room);
-    }
-  }
-
   private startGame(hostId: string): void {
     const room = this.roomManager.getRoomByPlayer(hostId);
     if (!room) throw new Error('not in a room');
@@ -183,6 +135,7 @@ export class GameWsServer {
       roomId: room.id,
       seed: Date.now() & 0x7fffffff,
       humans: room.players.map((p) => ({ id: p.id, name: p.name })),
+      pauseOnReveal: true,
     });
     this.games.set(room.id, game);
     room.inGame = true;
@@ -215,11 +168,47 @@ export class GameWsServer {
     if (!game) return;
     const phaseBefore = game.state.phase;
     game.advance();
+    if (this.maybeAutoReveal(room)) return;
     if (this.maybePostPickPause(room, phaseBefore)) return;
     this.broadcastGameState(room);
     if (game.state.phase === 'finished') {
       this.handleFinished(room, game);
     }
+  }
+
+  /**
+   * If the engine has paused for an open-reveal (every pending player in the
+   * current draft / monster-pick sub-round has submitted), broadcast the full
+   * picks for ~3 seconds, then clear `revealing`, resolve the sub-round and
+   * continue driving the game. Returns true when a reveal was scheduled so the
+   * normal post-advance broadcast is skipped.
+   */
+  private maybeAutoReveal(room: Room): boolean {
+    const game = this.games.get(room.id);
+    if (!game) return false;
+    const draft = game.state.draft;
+    if (draft?.revealing) {
+      this.broadcastGameState(room);
+      setTimeout(() => {
+        const d = game.state.draft;
+        if (d) d.revealing = false;
+        game.resolveDraftSubRoundNow();
+        this.driveGame(room);
+      }, GameWsServer.DRAFT_REVEAL_MS);
+      return true;
+    }
+    const pick = game.state.monsterPick;
+    if (pick?.revealing) {
+      this.broadcastGameState(room);
+      setTimeout(() => {
+        const p = game.state.monsterPick;
+        if (p) p.revealing = false;
+        game.resolveMonsterPickSubRoundNow();
+        this.driveGame(room);
+      }, GameWsServer.DRAFT_REVEAL_MS);
+      return true;
+    }
+    return false;
   }
 
   /**

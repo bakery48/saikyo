@@ -34,11 +34,20 @@ export class GameRunner {
   readonly seed: number;
   /** Set once the champion has been persisted to the hall of fame. */
   private hasPersistedChampion = false;
+  /**
+   * When true, draft / monster-pick sub-rounds pause for an external reveal
+   * (set `revealing = true` and stop) instead of auto-resolving. The ws layer
+   * uses this so every sub-round — including CPU-only ones — is shown to the
+   * player before being resolved. Defaults to false so unit tests still get
+   * fully synchronous resolution from `advance()`.
+   */
+  private pauseOnReveal: boolean;
 
   constructor(opts: {
     roomId: string;
     seed: number;
     humans: { id: string; name: string }[];
+    pauseOnReveal?: boolean;
   }) {
     this.seed = opts.seed;
     this.state = createInitialState({
@@ -47,6 +56,7 @@ export class GameRunner {
       players: opts.humans.map((h) => ({ id: h.id, name: h.name, isCPU: false })),
     });
     this.humanIds = new Set(opts.humans.map((h) => h.id));
+    this.pauseOnReveal = opts.pauseOnReveal ?? false;
   }
 
   isHuman(playerId: string): boolean {
@@ -111,6 +121,7 @@ export class GameRunner {
   private stepMonsterPick(): boolean {
     const draft = this.state.monsterPick;
     if (!draft) return true;
+    if (draft.revealing) return true; // ws layer is showing the reveal
     let waiting = false;
     for (const pid of draft.pendingPlayerIds) {
       if (draft.submittedPicks[pid]) continue;
@@ -122,6 +133,10 @@ export class GameRunner {
       }
     }
     if (waiting) return true;
+    if (this.pauseOnReveal && draft.pendingPlayerIds.length > 0) {
+      draft.revealing = true;
+      return true;
+    }
     resolveMonsterPickSubRound(this.state);
     return false;
   }
@@ -133,6 +148,7 @@ export class GameRunner {
       return false;
     }
     const draft = this.state.draft;
+    if (draft.revealing) return true; // ws layer is showing the reveal
     let waiting = false;
     for (const pid of draft.pendingPlayerIds) {
       if (draft.submittedPicks[pid]) continue;
@@ -144,6 +160,10 @@ export class GameRunner {
       }
     }
     if (waiting) return true;
+    if (this.pauseOnReveal && draft.pendingPlayerIds.length > 0) {
+      draft.revealing = true;
+      return true;
+    }
     resolveDraftSubRound(this.state);
     return false;
   }
@@ -164,6 +184,24 @@ export class GameRunner {
     if (waiting) return true;
     resolveRewardPhase(this.state);
     return false;
+  }
+
+  // ─── Reveal-driven sub-round resolution ───────────────────────────────────
+  // Used by the ws layer after the open-reveal pause to actually resolve the
+  // sub-round. Safe no-ops if not in the matching phase / picks not all in.
+
+  resolveDraftSubRoundNow(): void {
+    if (this.state.phase !== 'draft' || !this.state.draft) return;
+    const draft = this.state.draft;
+    if (!draft.pendingPlayerIds.every((id) => !!draft.submittedPicks[id])) return;
+    resolveDraftSubRound(this.state);
+  }
+
+  resolveMonsterPickSubRoundNow(): void {
+    if (this.state.phase !== 'pick_monster' || !this.state.monsterPick) return;
+    const pick = this.state.monsterPick;
+    if (!pick.pendingPlayerIds.every((id) => !!pick.submittedPicks[id])) return;
+    resolveMonsterPickSubRound(this.state);
   }
 
   // ─── Human-driven actions ──────────────────────────────────────────────────
