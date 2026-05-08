@@ -2,8 +2,11 @@
 import { useEffect, useState } from 'react';
 import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
-import { COLOR_HEX, COLOR_LABEL, pieceStyle } from '../../lib/colors';
+import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 import { MONSTERS } from '../../server/engine/cards/monsters';
+
+const PIECE_SIZE_CARD = 22;
+const PIECE_SIZE_LEGEND = 16;
 
 export function MonsterPickView({
   state,
@@ -33,7 +36,10 @@ export function MonsterPickView({
   const claimedBy = new Map<string, ClientGameState['players'][number]>();
   for (const p of state.players) if (p.monster) claimedBy.set(p.monster.baseId, p);
 
-  const pieces: Record<string, { committed: typeof state.players; tentative?: typeof state.players[number] }> = {};
+  const pieces: Record<
+    string,
+    { committed: ClientGameState['players']; tentative?: ClientGameState['players'][number] }
+  > = {};
   if (draft) {
     for (const [pid, baseId] of Object.entries(draft.submittedPicks)) {
       const player = state.players.find((p) => p.id === pid);
@@ -57,38 +63,67 @@ export function MonsterPickView({
     socket.send({ type: 'submit_pick', baseId: tentative });
   };
 
-  const isPoolMonster = (baseId: string): boolean => !!draft && draft.pool.some((m) => m.baseId === baseId);
+  const isPoolMonster = (baseId: string): boolean =>
+    !!draft && draft.pool.some((m) => m.baseId === baseId);
 
   return (
     <section style={{ display: 'grid', gap: 16 }}>
       <h2 style={{ margin: 0 }}>モンスター選択 (ドラフト)</h2>
-      <p style={{ margin: 0, opacity: 0.8 }}>
-        {!draft
-          ? '完了'
-          : iAmPending && !myCommittedPick
-            ? '👉 取りたいモンスターに駒を置いて「決定」を押してください。被ったら不選択モンスターから再ドラフトです。'
-            : myCommittedPick
-              ? `決定済み — 待機中… (${submittedCount}/${totalPending})`
-              : `(${submittedCount}/${totalPending}) 待機中…`}
+
+      {/* Always-visible color legend so you know who's who. */}
+      <PlayerLegend state={state} selfId={myId ?? null} />
+
+      <p style={{ margin: 0, opacity: 0.85 }}>
+        {!draft ? (
+          '完了'
+        ) : iAmPending && !myCommittedPick ? (
+          <>
+            {me && (
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  marginRight: 6,
+                }}
+              >
+                <span style={pieceStyle(me.color, { size: 14 })} />
+                <strong>あなた（{COLOR_LABEL[me.color]}）の番</strong>
+              </span>
+            )}
+            👉 取りたいモンスターをクリックして駒を置き、「決定」を押してください。
+          </>
+        ) : myCommittedPick ? (
+          `決定済み — 待機中… (${submittedCount}/${totalPending})`
+        ) : (
+          `(${submittedCount}/${totalPending}) 待機中…`
+        )}
       </p>
 
       {iAmPending && !myCommittedPick && (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <button onClick={confirm} disabled={!tentative}>
             決定 {tentative ? `(${MONSTERS.find((m) => m.baseId === tentative)?.name})` : ''}
           </button>
           <button onClick={() => setTentative(null)} disabled={!tentative} type="button">
             駒を戻す
           </button>
+          {!tentative && (
+            <span style={{ fontSize: 12, opacity: 0.6 }}>↑ まずモンスターをクリック</span>
+          )}
         </div>
       )}
 
-      <PendingStrip state={state} />
+      {draft && (
+        <div style={{ fontSize: 12, opacity: 0.7 }}>
+          試行 {draft.attempt + 1} 回目 · 提出 {submittedCount}/{totalPending}
+        </div>
+      )}
 
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
           gap: 8,
         }}
       >
@@ -109,84 +144,80 @@ export function MonsterPickView({
               onClick={() => placeOrCommit(m.baseId)}
               style={{
                 position: 'relative',
-                border: `2px solid ${
-                  myPieceHere ? '#0066cc' : conflict ? '#c44' : claimed ? '#aaa' : canClick ? '#0a8' : '#ccc'
+                border: `3px solid ${
+                  myPieceHere
+                    ? '#0066cc'
+                    : conflict
+                      ? '#c44'
+                      : claimed
+                        ? '#aaa'
+                        : canClick
+                          ? '#0a8'
+                          : '#ccc'
                 }`,
                 borderRadius: 8,
                 padding: 12,
-                paddingTop: 28,
                 background: claimed ? '#f0f0f0' : !inPool ? '#f6f6f6' : '#fff',
                 color: claimed ? '#666' : 'inherit',
                 cursor: canClick ? 'pointer' : 'default',
                 textAlign: 'left',
                 opacity: claimed ? 0.78 : 1,
-                minHeight: 110,
+                minHeight: 140,
+                display: 'grid',
+                gap: 6,
               }}
             >
-              {/* Pieces row */}
+              {/* Pieces row — pieces with player name labels. */}
               <div
                 style={{
-                  position: 'absolute',
-                  top: 6,
-                  left: 6,
-                  right: 6,
                   display: 'flex',
-                  gap: 4,
+                  gap: 6,
                   alignItems: 'center',
                   flexWrap: 'wrap',
+                  minHeight: PIECE_SIZE_CARD + 4,
                 }}
               >
                 {claimed && (
-                  <span
-                    title={`${claimed.name} が獲得`}
-                    style={{
-                      ...pieceStyle(claimed.color, { size: 14 }),
-                      outline: '2px solid #333',
-                    }}
+                  <PieceLabel
+                    player={claimed}
+                    note="獲得"
+                    extraStyle={{ outline: '2px solid #d4a000', outlineOffset: 2 }}
                   />
                 )}
                 {onCard?.committed.map((p) => (
-                  <span
-                    key={p.id}
-                    title={`${p.name} が決定`}
-                    style={pieceStyle(p.color, { size: 14 })}
-                  />
+                  <PieceLabel key={p.id} player={p} note="決定" />
                 ))}
                 {onCard?.tentative && (
-                  <span
-                    title="未確定（あなた）"
-                    style={{
-                      ...pieceStyle(onCard.tentative.color, { size: 14 }),
-                      opacity: 0.5,
-                      borderStyle: 'dashed',
-                    }}
+                  <PieceLabel
+                    player={onCard.tentative}
+                    note="未確定"
+                    extraStyle={{ opacity: 0.55, borderStyle: 'dashed' }}
                   />
                 )}
                 {conflict && (
                   <span
                     style={{
-                      fontSize: 10,
+                      fontSize: 11,
                       background: '#c44',
                       color: '#fff',
                       borderRadius: 4,
-                      padding: '1px 4px',
+                      padding: '1px 6px',
+                      fontWeight: 600,
                     }}
                   >
                     かぶり
                   </span>
                 )}
               </div>
-              <div style={{ fontWeight: 600 }}>{m.name}</div>
+              <div style={{ fontWeight: 600, fontSize: 15 }}>{m.name}</div>
               <div style={{ fontSize: 12, opacity: 0.85 }}>
                 HP{m.stats.hp} ATK{m.stats.atk} DEF{m.stats.def} SPD{m.stats.spd}
               </div>
-              <div style={{ fontSize: 11, marginTop: 4, opacity: 0.7 }}>
+              <div style={{ fontSize: 11, opacity: 0.7 }}>
                 {m.passives.map((p) => p.name).join(', ')}
               </div>
               {claimed && (
-                <div style={{ fontSize: 11, marginTop: 6, fontWeight: 600 }}>
-                  → {claimed.name}
-                </div>
+                <div style={{ fontSize: 11, fontWeight: 600 }}>→ {claimed.name} の獲得</div>
               )}
             </button>
           );
@@ -196,32 +227,101 @@ export function MonsterPickView({
   );
 }
 
-function PendingStrip({ state }: { state: ClientGameState }) {
-  const draft = state.monsterPick;
-  if (!draft) return null;
+/** Single piece + name chip so each color is unambiguous. */
+function PieceLabel({
+  player,
+  note,
+  extraStyle,
+}: {
+  player: ClientGameState['players'][number];
+  note?: string;
+  extraStyle?: React.CSSProperties;
+}) {
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, fontSize: 12, alignItems: 'center' }}>
-      <span style={{ opacity: 0.7 }}>進行: 試行 {draft.attempt + 1} 回目 ·</span>
+    <span
+      title={`${player.name}（${COLOR_LABEL[player.color]}）${note ? ` — ${note}` : ''}`}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        padding: '2px 6px 2px 2px',
+        background: '#fff',
+        border: '1px solid #ccc',
+        borderRadius: 999,
+        fontSize: 11,
+        lineHeight: 1,
+      }}
+    >
+      <span style={{ ...pieceStyle(player.color, { size: PIECE_SIZE_CARD }), ...extraStyle }} />
+      <span style={{ fontWeight: 600 }}>{player.name}</span>
+    </span>
+  );
+}
+
+/** Always-visible strip showing every player's color, name and current pick state. */
+function PlayerLegend({
+  state,
+  selfId,
+}: {
+  state: ClientGameState;
+  selfId: string | null;
+}) {
+  const draft = state.monsterPick;
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 6,
+        padding: 8,
+        background: '#fafafa',
+        border: '1px solid #ddd',
+        borderRadius: 6,
+        alignItems: 'center',
+      }}
+    >
       {state.players.map((p) => {
-        const pending = draft.pendingPlayerIds.includes(p.id);
-        const submitted = !!draft.submittedPicks[p.id];
+        const isSelf = p.id === selfId;
+        const submitted = !!(draft && draft.submittedPicks[p.id]);
+        const pending = !!(draft && draft.pendingPlayerIds.includes(p.id));
+        const done = !!p.monster;
+        const status = done
+          ? '獲得済'
+          : submitted
+            ? '決定'
+            : pending
+              ? '選択中'
+              : '待機';
+        const bg = done
+          ? '#bbb'
+          : submitted
+            ? '#0066cc'
+            : pending
+              ? '#fff'
+              : '#eee';
+        const fg = submitted || done ? '#fff' : '#333';
         return (
           <span
             key={p.id}
-            title={`${p.name}（${COLOR_LABEL[p.color]}）`}
+            title={`${p.name}（${COLOR_LABEL[p.color]}）${status}`}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
-              padding: '2px 6px',
-              borderRadius: 12,
-              background: !pending ? '#bbb' : submitted ? '#0066cc' : '#eee',
-              color: !pending || submitted ? '#fff' : '#333',
+              gap: 6,
+              padding: '4px 10px',
+              borderRadius: 999,
+              background: bg,
+              color: fg,
+              border: isSelf ? '2px solid #0066cc' : '1px solid #ccc',
+              fontSize: 12,
             }}
           >
-            <span style={pieceStyle(p.color, { size: 10 })} />
-            {p.name}
-            {!pending ? ' ✔' : submitted ? ' ●' : ''}
+            <span style={pieceStyle(p.color, { size: PIECE_SIZE_LEGEND })} />
+            <strong>{p.name}</strong>
+            {isSelf && <span>(you)</span>}
+            {p.isCPU && <span>🤖</span>}
+            {done && p.monster && <span>· {p.monster.name}</span>}
+            {!done && submitted && <span>· ●</span>}
           </span>
         );
       })}

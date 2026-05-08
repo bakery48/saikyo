@@ -23,23 +23,30 @@ export const COLOR_LABEL: Record<Color, string> = {
   white: '白',
 };
 
+/** Fallback color used when a player's `color` field is missing/unknown. */
+const FALLBACK_HEX = '#cccccc';
+
 /**
  * Render a player's color piece (a small filled circle).
  * Returns inline-style attributes so the caller can place it where it likes.
+ * Defensive: missing/unknown colors fall back to a visible gray fill so the
+ * piece is never an invisible empty circle.
  */
 export function pieceStyle(
-  color: Color,
+  color: Color | string | undefined | null,
   opts: { size?: number } = {},
 ): React.CSSProperties {
   const size = opts.size ?? 16;
+  const hex = (color && (COLOR_HEX as Record<string, string>)[color]) ?? FALLBACK_HEX;
   return {
     display: 'inline-block',
     width: size,
     height: size,
     borderRadius: '50%',
-    backgroundColor: COLOR_HEX[color],
-    border: color === 'white' ? '1px solid #888' : '1px solid #444',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+    backgroundColor: hex,
+    border: color === 'white' ? '2px solid #555' : '2px solid #333',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.35)',
     flexShrink: 0,
+    verticalAlign: 'middle',
   };
 }
