@@ -5,7 +5,7 @@ import { SKILLS } from '../src/server/engine/cards/skills';
 
 describe('Integration: full pipeline + persistence', () => {
   it('saves a champion produced by the GameRunner across many seeds', () => {
-    const store = new HallOfFameStore(':memory:');
+    const store = new HallOfFameStore(null);
     try {
       for (const seed of [1, 2, 3, 5, 11, 23, 41]) {
         const runner = new GameRunner({ roomId: `r-${seed}`, seed, humans: [] });

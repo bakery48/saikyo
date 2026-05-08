@@ -5,7 +5,7 @@ import { GameRunner } from '../src/server/game-runner';
 describe('HallOfFameStore', () => {
   let store: HallOfFameStore;
   beforeEach(() => {
-    store = new HallOfFameStore(':memory:');
+    store = new HallOfFameStore(null);
   });
   afterEach(() => store.close());
 

@@ -1,5 +1,4 @@
-import Database from 'better-sqlite3';
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { Champion, Monster } from './engine/types';
 
@@ -13,34 +12,35 @@ export type StoredChampion = {
   createdAt: number;
 };
 
+/**
+ * Tiny JSON-file backed store for hall-of-fame entries. Pure JS so it works
+ * on any Node version / OS without a native build step. Suitable for the
+ * small dataset this project produces.
+ *
+ * Pass `null` (or no path) for an in-memory store — useful for tests.
+ */
 export class HallOfFameStore {
-  private db: Database.Database;
+  private entries: StoredChampion[] = [];
+  private writeSeq = 0;
 
-  constructor(dbPath: string = ':memory:') {
-    if (dbPath !== ':memory:') {
-      mkdirSync(dirname(dbPath), { recursive: true });
+  constructor(private readonly path: string | null = null) {
+    if (path && existsSync(path)) {
+      try {
+        const raw = readFileSync(path, 'utf8');
+        const parsed: unknown = raw.trim() ? JSON.parse(raw) : [];
+        if (Array.isArray(parsed)) {
+          this.entries = parsed as StoredChampion[];
+        }
+      } catch (err) {
+        console.error(`hall-of-fame: failed to load ${path}, starting fresh:`, err);
+        this.entries = [];
+      }
     }
-    this.db = new Database(dbPath);
-    this.db.pragma('journal_mode = WAL');
-    this.init();
-  }
-
-  private init(): void {
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS hall_of_fame (
-        id          TEXT PRIMARY KEY,
-        owner_name  TEXT NOT NULL,
-        base_id     TEXT NOT NULL,
-        monster_name TEXT NOT NULL,
-        monster_json TEXT NOT NULL,
-        seed        INTEGER NOT NULL,
-        created_at  INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_hof_created_at ON hall_of_fame (created_at DESC);
-    `);
+    if (path) mkdirSync(dirname(path), { recursive: true });
   }
 
   save(args: { champion: Champion; ownerName: string; seed: number }): StoredChampion {
+    this.writeSeq += 1;
     const entry: StoredChampion = {
       id: cryptoId(),
       ownerName: args.ownerName,
@@ -48,81 +48,43 @@ export class HallOfFameStore {
       monsterName: args.champion.monster.name,
       monster: args.champion.monster,
       seed: args.seed,
-      createdAt: Date.now(),
+      createdAt: Date.now() * 1000 + this.writeSeq, // monotonic for ordering
     };
-    this.db
-      .prepare(
-        `INSERT INTO hall_of_fame (id, owner_name, base_id, monster_name, monster_json, seed, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      )
-      .run(
-        entry.id,
-        entry.ownerName,
-        entry.baseId,
-        entry.monsterName,
-        JSON.stringify(entry.monster),
-        entry.seed,
-        entry.createdAt,
-      );
+    this.entries.push(entry);
+    this.persist();
     return entry;
   }
 
   list(limit = 100): StoredChampion[] {
-    const rows = this.db
-      .prepare<unknown[], StoredRow>(
-        `SELECT id, owner_name, base_id, monster_name, monster_json, seed, created_at
-         FROM hall_of_fame
-         ORDER BY created_at DESC, rowid DESC
-         LIMIT ?`,
-      )
-      .all(limit);
-    return rows.map(rowToChampion);
+    return this.entries
+      .slice()
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, limit);
   }
 
   get(id: string): StoredChampion | null {
-    const row = this.db
-      .prepare<[string], StoredRow>(
-        `SELECT id, owner_name, base_id, monster_name, monster_json, seed, created_at
-         FROM hall_of_fame WHERE id = ?`,
-      )
-      .get(id);
-    return row ? rowToChampion(row) : null;
+    return this.entries.find((e) => e.id === id) ?? null;
   }
 
   count(): number {
-    const row = this.db.prepare<[], { c: number }>(`SELECT COUNT(*) AS c FROM hall_of_fame`).get();
-    return row?.c ?? 0;
+    return this.entries.length;
   }
 
   close(): void {
-    this.db.close();
+    // No-op for the JSON store; persist is synchronous on each save.
+  }
+
+  private persist(): void {
+    if (!this.path) return;
+    try {
+      writeFileSync(this.path, JSON.stringify(this.entries, null, 2));
+    } catch (err) {
+      console.error('hall-of-fame: persist failed:', err);
+    }
   }
 }
 
-type StoredRow = {
-  id: string;
-  owner_name: string;
-  base_id: string;
-  monster_name: string;
-  monster_json: string;
-  seed: number;
-  created_at: number;
-};
-
-function rowToChampion(r: StoredRow): StoredChampion {
-  return {
-    id: r.id,
-    ownerName: r.owner_name,
-    baseId: r.base_id,
-    monsterName: r.monster_name,
-    monster: JSON.parse(r.monster_json) as Monster,
-    seed: r.seed,
-    createdAt: r.created_at,
-  };
-}
-
 function cryptoId(): string {
-  // Browser/Node both have crypto.randomUUID since Node 19.
   return globalThis.crypto.randomUUID();
 }
 
@@ -131,7 +93,7 @@ let singleton: HallOfFameStore | null = null;
 /** Lazily-initialized process-wide store. Used by API routes and the WS server. */
 export function getStore(): HallOfFameStore {
   if (singleton) return singleton;
-  const path = process.env.SAIKYO_DB ?? join(process.cwd(), 'data', 'saikyo.db');
+  const path = process.env.SAIKYO_DB ?? join(process.cwd(), 'data', 'saikyo.json');
   singleton = new HallOfFameStore(path);
   return singleton;
 }
