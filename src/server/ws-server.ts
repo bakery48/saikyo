@@ -124,7 +124,7 @@ export class GameWsServer {
   /** Pause after the final pick so players can see the completed board. */
   private static readonly POST_PICK_PAUSE_MS = 2200;
   /** How long to show the open reveal (all picks visible) before resolving. */
-  private static readonly DRAFT_REVEAL_MS = 2000;
+  private static readonly DRAFT_REVEAL_MS = 3000;
 
   /**
    * Monster-pick submit: if this was the last pending pick, broadcast a
