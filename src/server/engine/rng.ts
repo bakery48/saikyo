@@ -31,4 +31,9 @@ export class RNG {
     if (arr.length === 0) throw new Error('pick from empty array');
     return arr[this.int(0, arr.length - 1)]!;
   }
+
+  /** Serializable internal state. Restore by passing to constructor. */
+  snapshot(): number {
+    return this.state >>> 0;
+  }
 }

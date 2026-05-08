@@ -137,3 +137,84 @@ export type BattleResult = {
   log: BattleEvent[];
   finalHp: { a: number; b: number };
 };
+
+// ─── Game (multi-phase) state ────────────────────────────────────────────────
+
+export type PendingStatBuff = {
+  stat: StatKey;
+  amount: number;
+  duration: 'next_battle' | 'permanent';
+};
+
+export type Player = {
+  id: string;
+  name: string;
+  isCPU: boolean;
+  monster: Monster | null;
+  /** Stat buffs queued by action cards that take effect on the next battle. */
+  pendingBuffs: PendingStatBuff[];
+};
+
+export type Phase =
+  | 'setup'
+  | 'pick_monster'
+  | 'event'
+  | 'action'
+  | 'draft'
+  | 'battle'
+  | 'tournament'
+  | 'finished';
+
+export type DraftState = {
+  /** Cards currently revealed and available for picking. */
+  pool: SkillCard[];
+  /** Player IDs that still need to make a pick. */
+  pendingPlayerIds: string[];
+  /** Submitted picks for the current draft sub-round. */
+  submittedPicks: Record<string, string>; // playerId -> skillCardId
+  /** Cards each player has acquired during this draft phase. */
+  acquired: Record<string, string[]>; // playerId -> skillCardIds
+  /** Cards removed from the pool because of conflicts. */
+  setAside: SkillCard[];
+  /** Number of resolution attempts so far (used to break ties). */
+  attempt: number;
+};
+
+export type GameEvent =
+  | { kind: 'phase_change'; phase: Phase; round: number; miniRound: number }
+  | { kind: 'monster_picked'; playerId: string; baseId: string }
+  | { kind: 'event_played'; cardId: string; targets: string[] }
+  | { kind: 'event_effect_applied'; cardId: string; playerId: string }
+  | { kind: 'action_played'; playerId: string; cardId: string }
+  | { kind: 'skill_acquired'; playerId: string; skillId: string; rarity: Rarity }
+  | { kind: 'draft_revealed'; cards: string[] }
+  | { kind: 'draft_pick_submitted'; playerId: string; skillId: string }
+  | { kind: 'draft_resolved'; assignments: Record<string, string> } // playerId -> skillId
+  | { kind: 'draft_conflict'; skillId: string; players: string[] }
+  | { kind: 'draft_fallback'; playerId: string; skillId: string };
+
+export type GameState = {
+  roomId: string;
+  rngState: number;
+  players: Player[];
+  /** Monsters not yet picked. */
+  monsterPool: MonsterBase[];
+  /** Pick order for the monster-pick phase. */
+  pickOrder: string[];
+  pickIdx: number;
+  round: number; // 1..3 (big rounds)
+  miniRound: number; // 1..3 (event/action/draft cycles within a round)
+  phase: Phase;
+  decks: {
+    event: EventCard[];
+    action: ActionCard[];
+    skill: SkillCard[];
+    eventGrave: EventCard[];
+    actionGrave: ActionCard[];
+    skillGrave: SkillCard[];
+  };
+  draft: DraftState | null;
+  /** Counter for generating unique skill instance IDs when adding to monsters. */
+  nextSkillInstanceSeq: number;
+  log: GameEvent[];
+};
