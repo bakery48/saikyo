@@ -1,0 +1,126 @@
+import type { RoomPlayerView, RoomSummary, RoomView } from '../shared/messages';
+
+const MAX_PLAYERS = 8;
+
+export type RoomPlayer = {
+  id: string; // session/player id
+  name: string;
+  isReady: boolean;
+};
+
+export type Room = {
+  id: string;
+  hostId: string;
+  players: RoomPlayer[];
+  createdAt: number;
+  inGame: boolean;
+};
+
+export class RoomManager {
+  private rooms = new Map<string, Room>();
+  private playerToRoom = new Map<string, string>();
+
+  createRoom(player: RoomPlayer): Room {
+    if (this.playerToRoom.has(player.id)) {
+      throw new Error('player already in a room');
+    }
+    const id = this.generateRoomId();
+    const room: Room = {
+      id,
+      hostId: player.id,
+      players: [{ ...player }],
+      createdAt: Date.now(),
+      inGame: false,
+    };
+    this.rooms.set(id, room);
+    this.playerToRoom.set(player.id, id);
+    return room;
+  }
+
+  joinRoom(roomId: string, player: RoomPlayer): Room {
+    if (this.playerToRoom.has(player.id)) {
+      throw new Error('player already in a room');
+    }
+    const room = this.rooms.get(roomId);
+    if (!room) throw new Error('room not found');
+    if (room.inGame) throw new Error('game already started');
+    if (room.players.length >= MAX_PLAYERS) throw new Error('room is full');
+    if (room.players.some((p) => p.id === player.id)) {
+      throw new Error('already in room');
+    }
+    room.players.push({ ...player });
+    this.playerToRoom.set(player.id, roomId);
+    return room;
+  }
+
+  /** Remove a player from whatever room they're in. Returns the room (or null) and whether it was destroyed. */
+  leavePlayer(playerId: string): { room: Room | null; destroyed: boolean } {
+    const roomId = this.playerToRoom.get(playerId);
+    if (!roomId) return { room: null, destroyed: false };
+    const room = this.rooms.get(roomId);
+    this.playerToRoom.delete(playerId);
+    if (!room) return { room: null, destroyed: false };
+    room.players = room.players.filter((p) => p.id !== playerId);
+    if (room.players.length === 0) {
+      this.rooms.delete(room.id);
+      return { room: null, destroyed: true };
+    }
+    if (room.hostId === playerId) {
+      room.hostId = room.players[0]!.id;
+    }
+    return { room, destroyed: false };
+  }
+
+  setReady(playerId: string, isReady: boolean): Room | null {
+    const roomId = this.playerToRoom.get(playerId);
+    if (!roomId) return null;
+    const room = this.rooms.get(roomId);
+    if (!room) return null;
+    const player = room.players.find((p) => p.id === playerId);
+    if (!player) return null;
+    player.isReady = isReady;
+    return room;
+  }
+
+  getRoomByPlayer(playerId: string): Room | null {
+    const roomId = this.playerToRoom.get(playerId);
+    if (!roomId) return null;
+    return this.rooms.get(roomId) ?? null;
+  }
+
+  getRoom(roomId: string): Room | null {
+    return this.rooms.get(roomId) ?? null;
+  }
+
+  listSummaries(): RoomSummary[] {
+    return Array.from(this.rooms.values()).map((r) => ({
+      id: r.id,
+      hostName: r.players.find((p) => p.id === r.hostId)?.name ?? '???',
+      playerCount: r.players.length,
+      inGame: r.inGame,
+    }));
+  }
+
+  toRoomView(room: Room): RoomView {
+    const players: RoomPlayerView[] = room.players.map((p) => ({
+      id: p.id,
+      name: p.name,
+      isReady: p.isReady,
+      isHost: p.id === room.hostId,
+    }));
+    return { id: room.id, hostId: room.hostId, players, inGame: room.inGame };
+  }
+
+  private generateRoomId(): string {
+    // 4-char base36, retry on collision.
+    for (let i = 0; i < 5; i++) {
+      const id = Math.floor(Math.random() * 36 ** 4)
+        .toString(36)
+        .padStart(4, '0')
+        .toUpperCase();
+      if (!this.rooms.has(id)) return id;
+    }
+    // Fallback to longer id.
+    return Math.random().toString(36).slice(2, 10).toUpperCase();
+  }
+}
