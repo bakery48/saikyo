@@ -22,8 +22,8 @@ export function createInitialState(opts: {
   seed: number;
   players: PlayerSeed[]; // 1..8 humans
 }): GameState {
-  if (opts.players.length < 1 || opts.players.length > 8) {
-    throw new Error('players must be 1..8');
+  if (opts.players.length < 0 || opts.players.length > 8) {
+    throw new Error('players must be 0..8 (CPUs fill remaining slots)');
   }
   const rng = new RNG(opts.seed);
 

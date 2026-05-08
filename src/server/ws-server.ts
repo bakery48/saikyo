@@ -1,12 +1,15 @@
 import type { WebSocket } from 'ws';
 import type { ClientMessage, ServerMessage } from '../shared/messages';
-import { RoomManager } from './rooms';
+import { type Room, RoomManager } from './rooms';
+import { GameRunner } from './game-runner';
 import { randomUUID } from 'node:crypto';
 
 export class GameWsServer {
   private connections = new Map<string, WebSocket>(); // playerId -> ws
   private playerNames = new Map<string, string>(); // playerId -> name
   private roomManager = new RoomManager();
+  /** Active games keyed by roomId. */
+  private games = new Map<string, GameRunner>();
 
   /** Called by the HTTP server on every accepted ws upgrade. */
   handleConnection(ws: WebSocket): void {
@@ -33,7 +36,6 @@ export class GameWsServer {
       this.handleDisconnect(playerId);
     });
 
-    // Send initial room list.
     this.sendRoomsList(ws);
   }
 
@@ -61,12 +63,27 @@ export class GameWsServer {
         });
         this.broadcastRoomState(room.id);
         this.broadcastRoomsList();
+        // If a game is already running in this room (rejoiner), send state.
+        const game = this.games.get(room.id);
+        if (game) this.send(ws, { type: 'game_state', state: game.toClientState() });
         return;
       }
-      case 'leave_room': {
+      case 'leave_room':
+      case 'leave_game': {
         const { room, destroyed } = this.roomManager.leavePlayer(playerId);
         this.send(ws, { type: 'left_room' });
-        if (room && !destroyed) this.broadcastRoomState(room.id);
+        if (room && !destroyed) {
+          this.broadcastRoomState(room.id);
+          // If everyone left, drop the game.
+          if (room.players.length === 0) this.games.delete(room.id);
+        }
+        if (destroyed) {
+          // Was the only player; drop game if any.
+          // Find the destroyed room id by iterating games.
+          for (const [rid] of this.games) {
+            if (this.roomManager.getRoom(rid) === null) this.games.delete(rid);
+          }
+        }
         this.broadcastRoomsList();
         return;
       }
@@ -79,6 +96,66 @@ export class GameWsServer {
         this.sendRoomsList(ws);
         return;
       }
+      case 'start_game': {
+        this.startGame(playerId);
+        return;
+      }
+      case 'submit_pick': {
+        this.runGameAction(playerId, (game) => game.submitPick(playerId, msg.baseId));
+        return;
+      }
+      case 'submit_draft': {
+        this.runGameAction(playerId, (game) => game.submitDraft(playerId, msg.skillId));
+        return;
+      }
+      case 'submit_reward': {
+        this.runGameAction(playerId, (game) => game.submitReward(playerId, msg.choice));
+        return;
+      }
+    }
+  }
+
+  private startGame(hostId: string): void {
+    const room = this.roomManager.getRoomByPlayer(hostId);
+    if (!room) throw new Error('not in a room');
+    if (room.hostId !== hostId) throw new Error('only the host can start');
+    if (room.inGame) throw new Error('game already started');
+    const game = new GameRunner({
+      roomId: room.id,
+      seed: Date.now() & 0x7fffffff,
+      humans: room.players.map((p) => ({ id: p.id, name: p.name })),
+    });
+    this.games.set(room.id, game);
+    room.inGame = true;
+    game.advance();
+    this.broadcastGameState(room);
+    this.broadcastRoomState(room.id);
+    this.broadcastRoomsList();
+  }
+
+  private runGameAction(playerId: string, fn: (game: GameRunner) => void): void {
+    const room = this.roomManager.getRoomByPlayer(playerId);
+    if (!room) throw new Error('not in a room');
+    const game = this.games.get(room.id);
+    if (!game) throw new Error('no game in this room');
+    fn(game);
+    game.advance();
+    this.broadcastGameState(room);
+    if (game.state.phase === 'finished') {
+      // Allow lobby browsing again, but keep the game state available for review.
+      room.inGame = false;
+      this.broadcastRoomState(room.id);
+      this.broadcastRoomsList();
+    }
+  }
+
+  private broadcastGameState(room: Room): void {
+    const game = this.games.get(room.id);
+    if (!game) return;
+    const state = game.toClientState();
+    for (const p of room.players) {
+      const ws = this.connections.get(p.id);
+      if (ws) this.send(ws, { type: 'game_state', state });
     }
   }
 
@@ -86,7 +163,10 @@ export class GameWsServer {
     const { room, destroyed } = this.roomManager.leavePlayer(playerId);
     this.connections.delete(playerId);
     this.playerNames.delete(playerId);
-    if (room && !destroyed) this.broadcastRoomState(room.id);
+    if (room && !destroyed) {
+      this.broadcastRoomState(room.id);
+      if (room.players.length === 0) this.games.delete(room.id);
+    }
     this.broadcastRoomsList();
   }
 
@@ -112,7 +192,6 @@ export class GameWsServer {
   private broadcastRoomsList(): void {
     const summaries = this.roomManager.listSummaries();
     for (const [playerId, ws] of this.connections) {
-      // Only send to clients not currently in a room (lobby clients).
       if (!this.roomManager.getRoomByPlayer(playerId)) {
         this.send(ws, { type: 'rooms_list', rooms: summaries });
       }

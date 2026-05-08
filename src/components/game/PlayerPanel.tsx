@@ -1,0 +1,49 @@
+'use client';
+import type { ClientPlayer } from '../../shared/messages';
+
+export function PlayerPanel({
+  players,
+  selfId,
+  highlight,
+}: {
+  players: ClientPlayer[];
+  selfId: string | null;
+  /** Optional player ID to highlight (e.g., active turn). */
+  highlight?: string | null;
+}) {
+  return (
+    <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 6 }}>
+      {players.map((p) => (
+        <li
+          key={p.id}
+          style={{
+            border: '1px solid #ccc',
+            borderColor: p.id === highlight ? '#0066cc' : '#ccc',
+            padding: '6px 10px',
+            borderRadius: 6,
+            background: p.id === selfId ? '#f0f8ff' : 'white',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: 14,
+          }}
+        >
+          <span>
+            {p.name}
+            {p.isCPU ? ' 🤖' : ''}
+            {p.id === selfId ? ' (you)' : ''}
+            {p.id === highlight ? ' ◀' : ''}
+          </span>
+          {p.monster ? (
+            <span style={{ opacity: 0.85 }}>
+              {p.monster.name} HP{p.monster.stats.hp} ATK{p.monster.stats.atk} DEF
+              {p.monster.stats.def} SPD{p.monster.stats.spd} · {p.monster.actives.length}skills
+            </span>
+          ) : (
+            <span style={{ opacity: 0.5 }}>未選択</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}

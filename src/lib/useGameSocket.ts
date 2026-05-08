@@ -1,12 +1,19 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import type { ClientMessage, RoomSummary, RoomView, ServerMessage } from '../shared/messages';
+import type {
+  ClientGameState,
+  ClientMessage,
+  RoomSummary,
+  RoomView,
+  ServerMessage,
+} from '../shared/messages';
 
 export type GameSocket = {
   connected: boolean;
   playerId: string | null;
   room: RoomView | null;
   rooms: RoomSummary[];
+  game: ClientGameState | null;
   error: string | null;
   send: (msg: ClientMessage) => void;
 };
@@ -16,6 +23,7 @@ export function useGameSocket(): GameSocket {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [room, setRoom] = useState<RoomView | null>(null);
   const [rooms, setRooms] = useState<RoomSummary[]>([]);
+  const [game, setGame] = useState<ClientGameState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -45,6 +53,10 @@ export function useGameSocket(): GameSocket {
           break;
         case 'left_room':
           setRoom(null);
+          setGame(null);
+          break;
+        case 'game_state':
+          setGame(msg.state);
           break;
         case 'error':
           setError(msg.message);
@@ -64,5 +76,5 @@ export function useGameSocket(): GameSocket {
     }
   };
 
-  return { connected, playerId, room, rooms, error, send };
+  return { connected, playerId, room, rooms, game, error, send };
 }

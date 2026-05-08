@@ -27,10 +27,7 @@ describe('Game setup', () => {
     expect(ids.size).toBe(8);
   });
 
-  it('rejects 0 or 9+ humans', () => {
-    expect(() =>
-      createInitialState({ roomId: 'r1', seed: 1, players: [] }),
-    ).toThrow();
+  it('rejects 9+ humans', () => {
     expect(() =>
       createInitialState({
         roomId: 'r1',
@@ -38,6 +35,12 @@ describe('Game setup', () => {
         players: Array.from({ length: 9 }, (_, i) => ({ id: `p${i}`, name: `P${i}`, isCPU: false })),
       }),
     ).toThrow();
+  });
+
+  it('allows 0 humans (all CPU room) for testing', () => {
+    const state = createInitialState({ roomId: 'r1', seed: 1, players: [] });
+    expect(state.players).toHaveLength(8);
+    expect(state.players.every((p) => p.isCPU)).toBe(true);
   });
 
   it('progresses to event phase after all monsters picked', () => {

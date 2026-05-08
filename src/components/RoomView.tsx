@@ -46,6 +46,9 @@ export function RoomView({ socket }: { socket: GameSocket }) {
         >
           {isReady ? 'Cancel Ready' : 'Ready'}
         </button>
+        {me?.isHost && !room.inGame && (
+          <button onClick={() => socket.send({ type: 'start_game' })}>ゲーム開始</button>
+        )}
         <button onClick={() => socket.send({ type: 'leave_room' })}>退出</button>
       </div>
     </section>
