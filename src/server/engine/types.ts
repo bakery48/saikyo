@@ -209,6 +209,8 @@ export type DraftState = {
   setAside: SkillCard[];
   /** Number of resolution attempts so far (used to break ties). */
   attempt: number;
+  /** True for ~2s after all picks are submitted so clients can show everyone's choices. */
+  revealing?: boolean;
 };
 
 /** Monster pick draft — analogous to skill DraftState but for monsters. */
@@ -221,6 +223,8 @@ export type MonsterPickState = {
   submittedPicks: Record<string, string>; // playerId -> baseId
   /** Number of resolution attempts so far. */
   attempt: number;
+  /** True for ~2s after all picks are submitted so clients can show everyone's choices. */
+  revealing?: boolean;
 };
 
 export type BattleMatch = {

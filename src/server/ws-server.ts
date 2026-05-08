@@ -103,11 +103,11 @@ export class GameWsServer {
         return;
       }
       case 'submit_pick': {
-        this.runGameAction(playerId, (game) => game.submitPick(playerId, msg.baseId));
+        this.handleSubmitPick(playerId, msg.baseId);
         return;
       }
       case 'submit_draft': {
-        this.runGameAction(playerId, (game) => game.submitDraft(playerId, msg.skillId));
+        this.handleSubmitDraft(playerId, msg.skillId);
         return;
       }
       case 'submit_reward': {
@@ -123,6 +123,56 @@ export class GameWsServer {
 
   /** Pause after the final pick so players can see the completed board. */
   private static readonly POST_PICK_PAUSE_MS = 2200;
+  /** How long to show the open reveal (all picks visible) before resolving. */
+  private static readonly DRAFT_REVEAL_MS = 2000;
+
+  /**
+   * Monster-pick submit: if this was the last pending pick, broadcast a
+   * 2-second "open reveal" (all picks visible) before resolving.
+   */
+  private handleSubmitPick(playerId: string, baseId: string): void {
+    const room = this.roomManager.getRoomByPlayer(playerId);
+    if (!room) throw new Error('not in a room');
+    const game = this.games.get(room.id);
+    if (!game) throw new Error('no game in this room');
+    game.submitPick(playerId, baseId);
+    const pick = game.state.monsterPick;
+    const allIn = !!pick && pick.pendingPlayerIds.every((id) => !!pick.submittedPicks[id]);
+    if (allIn && pick) {
+      pick.revealing = true;
+      this.broadcastGameState(room);
+      setTimeout(() => {
+        if (game.state.monsterPick) game.state.monsterPick.revealing = false;
+        this.driveGame(room);
+      }, GameWsServer.DRAFT_REVEAL_MS);
+    } else {
+      this.driveGame(room);
+    }
+  }
+
+  /**
+   * Skill-draft submit: if this was the last pending pick, broadcast a
+   * 2-second "open reveal" before resolving.
+   */
+  private handleSubmitDraft(playerId: string, skillId: string): void {
+    const room = this.roomManager.getRoomByPlayer(playerId);
+    if (!room) throw new Error('not in a room');
+    const game = this.games.get(room.id);
+    if (!game) throw new Error('no game in this room');
+    game.submitDraft(playerId, skillId);
+    const draft = game.state.draft;
+    const allIn = !!draft && draft.pendingPlayerIds.every((id) => !!draft.submittedPicks[id]);
+    if (allIn && draft) {
+      draft.revealing = true;
+      this.broadcastGameState(room);
+      setTimeout(() => {
+        if (game.state.draft) game.state.draft.revealing = false;
+        this.driveGame(room);
+      }, GameWsServer.DRAFT_REVEAL_MS);
+    } else {
+      this.driveGame(room);
+    }
+  }
 
   private startGame(hostId: string): void {
     const room = this.roomManager.getRoomByPlayer(hostId);

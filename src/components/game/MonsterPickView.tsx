@@ -36,16 +36,25 @@ export function MonsterPickView({
   const claimedBy = new Map<string, ClientGameState['players'][number]>();
   for (const p of state.players) if (p.monster) claimedBy.set(p.monster.baseId, p);
 
-  // Show only own pick (committed or tentative) — hide other players' in-progress picks.
+  // During reveal: show all picks. During normal picking: show only own pick.
   const pieces: Record<
     string,
     { committed: ClientGameState['players']; tentative?: ClientGameState['players'][number] }
   > = {};
-  if (me && myCommittedPick) {
-    pieces[myCommittedPick] = { committed: [me] };
-  }
-  if (tentative && me && !myCommittedPick) {
-    pieces[tentative] = { committed: [], tentative: me };
+  if (draft?.revealing) {
+    for (const [pid, baseId] of Object.entries(draft.submittedPicks)) {
+      const player = state.players.find((p) => p.id === pid);
+      if (!player) continue;
+      pieces[baseId] = pieces[baseId] ?? { committed: [] };
+      pieces[baseId]!.committed = [...pieces[baseId]!.committed, player];
+    }
+  } else {
+    if (me && myCommittedPick) {
+      pieces[myCommittedPick] = { committed: [me] };
+    }
+    if (tentative && me && !myCommittedPick) {
+      pieces[tentative] = { committed: [], tentative: me };
+    }
   }
 
   const placeOrCommit = (baseId: string): void => {
@@ -68,32 +77,47 @@ export function MonsterPickView({
       {/* Always-visible color legend so you know who's who. */}
       <PlayerLegend state={state} selfId={myId ?? null} />
 
-      <p style={{ margin: 0, opacity: 0.85 }}>
-        {!draft ? (
-          '完了'
-        ) : iAmPending && !myCommittedPick ? (
-          <>
-            {me && (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  marginRight: 6,
-                }}
-              >
-                <span style={pieceStyle(me.color, { size: 14 })} />
-                <strong>あなた（{COLOR_LABEL[me.color]}）の番</strong>
-              </span>
-            )}
-            👉 取りたいモンスターをクリックして駒を置き、「決定」を押してください。
-          </>
-        ) : myCommittedPick ? (
-          `決定済み — 待機中… (${submittedCount}/${totalPending})`
-        ) : (
-          `(${submittedCount}/${totalPending}) 待機中…`
-        )}
-      </p>
+      {draft?.revealing ? (
+        <div
+          style={{
+            background: '#fff3cd',
+            border: '2px solid #ffc107',
+            borderRadius: 8,
+            padding: '10px 14px',
+            fontWeight: 700,
+            fontSize: 15,
+          }}
+        >
+          🃏 オープン！ — 全員のピックを確認中…
+        </div>
+      ) : (
+        <p style={{ margin: 0, opacity: 0.85 }}>
+          {!draft ? (
+            '完了'
+          ) : iAmPending && !myCommittedPick ? (
+            <>
+              {me && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    marginRight: 6,
+                  }}
+                >
+                  <span style={pieceStyle(me.color, { size: 14 })} />
+                  <strong>あなた（{COLOR_LABEL[me.color]}）の番</strong>
+                </span>
+              )}
+              👉 取りたいモンスターをクリックして駒を置き、「決定」を押してください。
+            </>
+          ) : myCommittedPick ? (
+            `決定済み — 待機中… (${submittedCount}/${totalPending})`
+          ) : (
+            `(${submittedCount}/${totalPending}) 待機中…`
+          )}
+        </p>
+      )}
 
       {iAmPending && !myCommittedPick && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -126,7 +150,8 @@ export function MonsterPickView({
           const claimed = claimedBy.get(m.baseId);
           const inPool = isPoolMonster(m.baseId);
           const onCard = pieces[m.baseId];
-          const canClick = iAmPending && !myCommittedPick && inPool;
+          const conflict = !!draft?.revealing && (onCard?.committed.length ?? 0) > 1;
+          const canClick = iAmPending && !myCommittedPick && inPool && !draft?.revealing;
           const myPieceHere =
             myCommittedPick === m.baseId ||
             tentative === m.baseId ||
@@ -141,11 +166,13 @@ export function MonsterPickView({
                 border: `3px solid ${
                   myPieceHere
                     ? '#0066cc'
-                    : claimed
-                      ? '#aaa'
-                      : canClick
-                        ? '#0a8'
-                        : '#ccc'
+                    : conflict
+                      ? '#c44'
+                      : claimed
+                        ? '#aaa'
+                        : canClick
+                          ? '#0a8'
+                          : '#ccc'
                 }`,
                 borderRadius: 8,
                 padding: 12,
@@ -185,6 +212,20 @@ export function MonsterPickView({
                     note="未確定"
                     extraStyle={{ opacity: 0.55, borderStyle: 'dashed' }}
                   />
+                )}
+                {conflict && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      background: '#c44',
+                      color: '#fff',
+                      borderRadius: 4,
+                      padding: '1px 6px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    かぶり
+                  </span>
                 )}
               </div>
               <div style={{ fontWeight: 600, fontSize: 15 }}>{m.name}</div>
