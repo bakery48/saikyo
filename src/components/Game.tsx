@@ -23,7 +23,6 @@ const PHASE_LABEL: Record<string, string> = {
 export function Game({ socket }: { socket: GameSocket }) {
   const state = socket.game;
   if (!state) return <p>ゲームデータを待機中...</p>;
-  const currentPickerId = state.phase === 'pick_monster' ? state.pickOrder[state.pickIdx] : null;
 
   return (
     <section style={{ display: 'grid', gap: 16 }}>
@@ -52,11 +51,7 @@ export function Game({ socket }: { socket: GameSocket }) {
 
       <div>
         <h4 style={{ marginBottom: 6 }}>プレイヤー</h4>
-        <PlayerPanel
-          players={state.players}
-          selfId={socket.playerId}
-          highlight={currentPickerId ?? null}
-        />
+        <PlayerPanel players={state.players} selfId={socket.playerId} />
       </div>
 
       {state.recentLog.length > 0 && state.phase !== 'finished' && (

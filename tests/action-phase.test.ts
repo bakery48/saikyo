@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createInitialState, pickMonster } from '../src/server/engine/state';
+import { createInitialState } from '../src/server/engine/state';
 import { resolveActionPhase } from '../src/server/engine/phases/action';
-import { greedyPolicy } from '../src/server/engine/policy';
 import type { GameState } from '../src/server/engine/types';
+import { completeMonsterPicks } from './helpers';
 
 function setupAtAction(seed = 2): GameState {
   const state = createInitialState({
@@ -10,11 +10,7 @@ function setupAtAction(seed = 2): GameState {
     seed,
     players: [{ id: 'p1', name: 'A', isCPU: false }],
   });
-  while (state.phase === 'pick_monster') {
-    const id = state.pickOrder[state.pickIdx]!;
-    const m = greedyPolicy.pickMonster(state, id, state.monsterPool);
-    pickMonster(state, id, m.baseId);
-  }
+  completeMonsterPicks(state);
   // Skip event by switching directly.
   state.phase = 'action';
   return state;
@@ -45,7 +41,7 @@ describe('Action phase', () => {
       state.decks.action = [card, ...state.decks.action.filter((c) => c.id !== 'ac-005')];
     }
     // Make our target the first to act by reshuffling pickOrder.
-    state.pickOrder = [target.id, ...state.pickOrder.filter((id) => id !== target.id)];
+    state.players = [target, ...state.players.filter((p) => p.id !== target.id)];
     const beforeAtk = target.monster!.stats.atk;
     resolveActionPhase(state);
     expect(target.monster!.stats.atk).toBe(beforeAtk + 1);
@@ -57,7 +53,7 @@ describe('Action phase', () => {
     if (card) {
       state.decks.action = [card, ...state.decks.action.filter((c) => c.id !== 'ac-001')];
     }
-    state.pickOrder = [target.id, ...state.pickOrder.filter((id) => id !== target.id)];
+    state.players = [target, ...state.players.filter((p) => p.id !== target.id)];
     resolveActionPhase(state);
     expect(target.pendingBuffs.length).toBeGreaterThan(0);
     const buff = target.pendingBuffs[0]!;
@@ -72,7 +68,7 @@ describe('Action phase', () => {
     if (card) {
       state.decks.action = [card, ...state.decks.action.filter((c) => c.id !== 'ac-010')];
     }
-    state.pickOrder = [target.id, ...state.pickOrder.filter((id) => id !== target.id)];
+    state.players = [target, ...state.players.filter((p) => p.id !== target.id)];
     const before = target.monster!.actives.length + target.monster!.passives.length;
     resolveActionPhase(state);
     const after = target.monster!.actives.length + target.monster!.passives.length;

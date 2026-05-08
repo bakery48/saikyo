@@ -1,5 +1,27 @@
 export type Rarity = 'N' | 'R' | 'SR' | 'SSR';
 
+/** Player marker color, one per seat. */
+export type Color =
+  | 'red'
+  | 'blue'
+  | 'yellow'
+  | 'green'
+  | 'orange'
+  | 'purple'
+  | 'black'
+  | 'white';
+
+export const PLAYER_COLORS: readonly Color[] = [
+  'red',
+  'blue',
+  'yellow',
+  'green',
+  'orange',
+  'purple',
+  'black',
+  'white',
+];
+
 export type Stats = {
   hp: number;
   atk: number;
@@ -159,6 +181,8 @@ export type Player = {
   monster: Monster | null;
   /** Stat buffs queued by action cards that take effect on the next battle. */
   pendingBuffs: PendingStatBuff[];
+  /** The player's seat color used for draft pieces. */
+  color: Color;
 };
 
 export type Phase =
@@ -184,6 +208,18 @@ export type DraftState = {
   /** Cards removed from the pool because of conflicts. */
   setAside: SkillCard[];
   /** Number of resolution attempts so far (used to break ties). */
+  attempt: number;
+};
+
+/** Monster pick draft — analogous to skill DraftState but for monsters. */
+export type MonsterPickState = {
+  /** Monsters currently revealed and available for claiming. */
+  pool: MonsterBase[];
+  /** Players still without a monster, who must submit a pick. */
+  pendingPlayerIds: string[];
+  /** Submitted picks this sub-round. */
+  submittedPicks: Record<string, string>; // playerId -> baseId
+  /** Number of resolution attempts so far. */
   attempt: number;
 };
 
@@ -231,6 +267,10 @@ export type Champion = {
 
 export type GameEvent =
   | { kind: 'phase_change'; phase: Phase; round: number; miniRound: number }
+  | { kind: 'monster_pick_revealed'; baseIds: string[] }
+  | { kind: 'monster_pick_submitted'; playerId: string; baseId: string }
+  | { kind: 'monster_pick_resolved'; assignments: Record<string, string> }
+  | { kind: 'monster_pick_conflict'; baseId: string; players: string[] }
   | { kind: 'monster_picked'; playerId: string; baseId: string }
   | { kind: 'event_played'; cardId: string; targets: string[] }
   | { kind: 'event_effect_applied'; cardId: string; playerId: string }
@@ -250,11 +290,8 @@ export type GameState = {
   roomId: string;
   rngState: number;
   players: Player[];
-  /** Monsters not yet picked. */
-  monsterPool: MonsterBase[];
-  /** Pick order for the monster-pick phase. */
-  pickOrder: string[];
-  pickIdx: number;
+  /** Monster pick draft state (null outside of pick_monster phase). */
+  monsterPick: MonsterPickState | null;
   round: number; // 1..3 (big rounds)
   miniRound: number; // 1..3 (event/action/draft cycles within a round)
   phase: Phase;

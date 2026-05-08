@@ -44,6 +44,14 @@ function formatEvent(
   switch (e.kind) {
     case 'phase_change':
       return `→ ${e.phase} (R${e.round} M${e.miniRound})`;
+    case 'monster_pick_revealed':
+      return `monster pool: ${e.baseIds.length} revealed`;
+    case 'monster_pick_submitted':
+      return `${name(e.playerId)} → ${e.baseId} (placed)`;
+    case 'monster_pick_resolved':
+      return `monster pick resolved: ${Object.keys(e.assignments).length} unique`;
+    case 'monster_pick_conflict':
+      return `monster conflict: ${e.baseId} (${e.players.map(name).join(', ')})`;
     case 'monster_picked':
       return `${name(e.playerId)} → ${e.baseId}`;
     case 'event_played':

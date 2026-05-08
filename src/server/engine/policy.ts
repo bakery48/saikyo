@@ -15,16 +15,31 @@ function monsterScore(m: MonsterBase): number {
   return m.stats.hp + m.stats.atk * 3 + m.stats.def * 2 + m.stats.spd * 2;
 }
 
+function hashCode(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return h;
+}
+
 const RARITY_RANK: Record<string, number> = { N: 1, R: 2, SR: 3, SSR: 4 };
 
 /** Default CPU policy: greedy by simple heuristics. */
 export const greedyPolicy: Policy = {
-  pickMonster(_state, _playerId, available) {
-    let best = available[0]!;
-    for (const m of available) {
-      if (monsterScore(m) > monsterScore(best)) best = m;
-    }
-    return best;
+  pickMonster(state, playerId, available) {
+    // Score-rank, then pick from the top-3 using a hash that mixes the player
+    // ID, the seed, and the current pick attempt. The attempt term is what
+    // breaks deadlocks when multiple CPUs initially collide on the same
+    // top-rated monster — they all rotate to different choices on the next
+    // sub-round.
+    const sorted = available
+      .slice()
+      .sort((a, b) => monsterScore(b) - monsterScore(a));
+    const top = sorted.slice(0, Math.min(3, sorted.length));
+    if (top.length === 0) return available[0]!;
+    const attempt = state.monsterPick?.attempt ?? 0;
+    const idx =
+      Math.abs(hashCode(playerId) ^ state.rngState ^ (attempt * 1000003)) % top.length;
+    return top[idx]!;
   },
   pickDraftCard(_state, _playerId, pool) {
     let best = pool[0]!;

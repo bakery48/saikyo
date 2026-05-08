@@ -48,14 +48,13 @@ function applyActionEffect(state: GameState, player: Player, card: ActionCard): 
 }
 
 /**
- * Resolve action phase for all players in turn order.
+ * Resolve action phase for all players in seat order.
  * Each player draws 1 card from the common action deck and plays it.
  */
 export function resolveActionPhase(state: GameState): void {
   if (state.phase !== 'action') throw new Error('not in action phase');
-  for (const playerId of state.pickOrder) {
-    const player = state.players.find((p) => p.id === playerId);
-    if (!player || !player.monster) continue;
+  for (const player of state.players) {
+    if (!player.monster) continue;
     const rng = makeRng(state);
     const card = drawTop(state.decks.action, state.decks.actionGrave, rng);
     saveRng(state, rng);

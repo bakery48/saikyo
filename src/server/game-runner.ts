@@ -1,6 +1,11 @@
 import type { ClientGameState, ClientPlayer } from '../shared/messages';
 import type { GameState, RewardChoice } from './engine/types';
-import { createInitialState, pickMonster } from './engine/state';
+import {
+  allMonsterPicksIn,
+  createInitialState,
+  resolveMonsterPickSubRound,
+  submitMonsterPick,
+} from './engine/state';
 import { resolveEventPhase } from './engine/phases/event';
 import { resolveActionPhase } from './engine/phases/action';
 import {
@@ -61,28 +66,6 @@ export class GameRunner {
     return true;
   }
 
-  /**
-   * Single-step pick driver. If the current monster-pick turn belongs to a
-   * CPU, perform exactly that one pick and return 'pick_made'. Otherwise,
-   * fall back to the regular advance() which resolves auto phases until
-   * the game waits on a human or finishes; returns 'idle'.
-   *
-   * The WS layer uses this with a setTimeout to animate CPU picks at a
-   * human-watchable cadence instead of resolving them all at once.
-   */
-  stepDelayedPick(): 'pick_made' | 'idle' {
-    if (this.state.phase === 'pick_monster') {
-      const cur = this.state.pickOrder[this.state.pickIdx];
-      if (cur && !this.isHuman(cur)) {
-        const m = greedyPolicy.pickMonster(this.state, cur, this.state.monsterPool);
-        pickMonster(this.state, cur, m.baseId);
-        return 'pick_made';
-      }
-    }
-    this.advance();
-    return 'idle';
-  }
-
   /** Run all auto/CPU steps until the game waits for human input or finishes. */
   advance(): void {
     // Iteration limit guards against runaway state.
@@ -100,13 +83,8 @@ export class GameRunner {
   /** Returns true if the runner is now waiting on a human action. */
   private step(): boolean {
     switch (this.state.phase) {
-      case 'pick_monster': {
-        const currentId = this.state.pickOrder[this.state.pickIdx]!;
-        if (this.isHuman(currentId)) return true;
-        const m = greedyPolicy.pickMonster(this.state, currentId, this.state.monsterPool);
-        pickMonster(this.state, currentId, m.baseId);
-        return false;
-      }
+      case 'pick_monster':
+        return this.stepMonsterPick();
       case 'event':
         resolveEventPhase(this.state);
         return false;
@@ -128,6 +106,24 @@ export class GameRunner {
       case 'setup':
         return true;
     }
+  }
+
+  private stepMonsterPick(): boolean {
+    const draft = this.state.monsterPick;
+    if (!draft) return true;
+    let waiting = false;
+    for (const pid of draft.pendingPlayerIds) {
+      if (draft.submittedPicks[pid]) continue;
+      if (this.isHuman(pid)) {
+        waiting = true;
+      } else {
+        const m = greedyPolicy.pickMonster(this.state, pid, draft.pool);
+        submitMonsterPick(this.state, pid, m.baseId);
+      }
+    }
+    if (waiting) return true;
+    resolveMonsterPickSubRound(this.state);
+    return false;
   }
 
   private stepDraft(): boolean {
@@ -173,12 +169,7 @@ export class GameRunner {
   // ─── Human-driven actions ──────────────────────────────────────────────────
 
   submitPick(playerId: string, baseId: string): void {
-    if (this.state.phase !== 'pick_monster') {
-      throw new Error('not in monster pick phase');
-    }
-    const expected = this.state.pickOrder[this.state.pickIdx];
-    if (expected !== playerId) throw new Error('not your turn');
-    pickMonster(this.state, playerId, baseId);
+    submitMonsterPick(this.state, playerId, baseId);
   }
 
   submitDraft(playerId: string, skillId: string): void {
@@ -220,15 +211,14 @@ export class GameRunner {
       id: p.id,
       name: p.name,
       isCPU: p.isCPU,
+      color: p.color,
       monster: p.monster,
       pendingBuffsCount: p.pendingBuffs.length,
     }));
     return {
       roomId: s.roomId,
       players,
-      monsterPool: s.monsterPool,
-      pickOrder: s.pickOrder,
-      pickIdx: s.pickIdx,
+      monsterPick: s.monsterPick,
       round: s.round,
       miniRound: s.miniRound,
       phase: s.phase,
@@ -256,8 +246,12 @@ export class GameRunner {
       s.phase,
       s.round,
       s.miniRound,
-      s.pickIdx,
-      s.draft ? `${s.draft.pool.length}/${Object.keys(s.draft.submittedPicks).length}` : '-',
+      s.monsterPick
+        ? `mp:${s.monsterPick.pool.length}/${Object.keys(s.monsterPick.submittedPicks).length}/${s.monsterPick.pendingPlayerIds.length}/a${s.monsterPick.attempt}`
+        : '-',
+      s.draft
+        ? `dr:${s.draft.pool.length}/${Object.keys(s.draft.submittedPicks).length}/a${s.draft.attempt}`
+        : '-',
       s.reward ? Object.keys(s.reward.choices).length : '-',
     ].join('|');
   }

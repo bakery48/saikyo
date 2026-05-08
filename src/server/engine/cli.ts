@@ -4,7 +4,11 @@
  *
  * Usage: npx tsx src/server/engine/cli.ts [seed]
  */
-import { createInitialState, pickMonster } from './state';
+import {
+  createInitialState,
+  resolveMonsterPickSubRound,
+  submitMonsterPick,
+} from './state';
 import { resolveEventPhase } from './phases/event';
 import { resolveActionPhase } from './phases/action';
 import {
@@ -52,13 +56,19 @@ export function runOneRound(state: GameState, policy: Policy = greedyPolicy): vo
   }
 }
 
-export function runFullGame(state: GameState, policy: Policy = greedyPolicy): void {
-  // Auto-pick monsters.
-  while (state.phase === 'pick_monster') {
-    const playerId = state.pickOrder[state.pickIdx]!;
-    const baseMon = policy.pickMonster(state, playerId, state.monsterPool);
-    pickMonster(state, playerId, baseMon.baseId);
+export function runMonsterPickPhase(state: GameState, policy: Policy): void {
+  while (state.phase === 'pick_monster' && state.monsterPick) {
+    const draft = state.monsterPick;
+    for (const pid of draft.pendingPlayerIds) {
+      const m = policy.pickMonster(state, pid, draft.pool);
+      submitMonsterPick(state, pid, m.baseId);
+    }
+    if (resolveMonsterPickSubRound(state)) break;
   }
+}
+
+export function runFullGame(state: GameState, policy: Policy = greedyPolicy): void {
+  runMonsterPickPhase(state, policy);
 
   while (state.phase !== 'finished') {
     if (state.phase === 'event') {

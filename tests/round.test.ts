@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createInitialState, pickMonster } from '../src/server/engine/state';
+import { createInitialState } from '../src/server/engine/state';
 import { runOneRound } from '../src/server/engine/cli';
 import { greedyPolicy } from '../src/server/engine/policy';
+import { completeMonsterPicks } from './helpers';
 
 describe('Full round (3 × event/action/draft)', () => {
   it('completes one round and ends in battle phase', () => {
@@ -10,11 +11,7 @@ describe('Full round (3 × event/action/draft)', () => {
       seed: 42,
       players: [{ id: 'p1', name: 'You', isCPU: false }],
     });
-    while (state.phase === 'pick_monster') {
-      const id = state.pickOrder[state.pickIdx]!;
-      const m = greedyPolicy.pickMonster(state, id, state.monsterPool);
-      pickMonster(state, id, m.baseId);
-    }
+    completeMonsterPicks(state);
     runOneRound(state, greedyPolicy);
     expect(state.phase).toBe('battle');
     expect(state.miniRound).toBe(3);
@@ -41,11 +38,7 @@ describe('Full round (3 × event/action/draft)', () => {
       players: [{ id: 'p1', name: 'A', isCPU: false }],
     });
     for (const s of [a, b]) {
-      while (s.phase === 'pick_monster') {
-        const id = s.pickOrder[s.pickIdx]!;
-        const m = greedyPolicy.pickMonster(s, id, s.monsterPool);
-        pickMonster(s, id, m.baseId);
-      }
+      completeMonsterPicks(s);
       runOneRound(s, greedyPolicy);
     }
     expect(a.players.map((p) => ({ id: p.id, stats: p.monster!.stats, actives: p.monster!.actives.length })))

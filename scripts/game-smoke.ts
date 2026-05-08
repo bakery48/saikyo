@@ -98,8 +98,17 @@ async function main(): Promise<void> {
   let safety = 400;
   while (c.game && c.game.phase !== 'finished' && safety-- > 0) {
     const state = c.game;
-    if (state.phase === 'pick_monster' && state.pickOrder[state.pickIdx] === c.playerId) {
-      c.send({ type: 'submit_pick', baseId: state.monsterPool[0]!.baseId });
+    if (
+      state.phase === 'pick_monster' &&
+      state.monsterPick &&
+      state.monsterPick.pendingPlayerIds.includes(c.playerId!) &&
+      !state.monsterPick.submittedPicks[c.playerId!]
+    ) {
+      const used = new Set(Object.values(state.monsterPick.submittedPicks));
+      const pick =
+        state.monsterPick.pool.find((m) => !used.has(m.baseId)) ??
+        state.monsterPick.pool[0]!;
+      c.send({ type: 'submit_pick', baseId: pick.baseId });
     } else if (
       state.phase === 'draft' &&
       state.draft &&

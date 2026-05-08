@@ -1,15 +1,13 @@
 'use client';
 import type { ClientPlayer } from '../../shared/messages';
+import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 
 export function PlayerPanel({
   players,
   selfId,
-  highlight,
 }: {
   players: ClientPlayer[];
   selfId: string | null;
-  /** Optional player ID to highlight (e.g., active turn). */
-  highlight?: string | null;
 }) {
   return (
     <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 6 }}>
@@ -18,7 +16,6 @@ export function PlayerPanel({
           key={p.id}
           style={{
             border: '1px solid #ccc',
-            borderColor: p.id === highlight ? '#0066cc' : '#ccc',
             padding: '6px 10px',
             borderRadius: 6,
             background: p.id === selfId ? '#f0f8ff' : 'white',
@@ -26,13 +23,14 @@ export function PlayerPanel({
             justifyContent: 'space-between',
             alignItems: 'center',
             fontSize: 14,
+            gap: 8,
           }}
         >
-          <span>
+          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+            <span title={COLOR_LABEL[p.color]} style={pieceStyle(p.color, { size: 12 })} />
             {p.name}
             {p.isCPU ? ' 🤖' : ''}
             {p.id === selfId ? ' (you)' : ''}
-            {p.id === highlight ? ' ◀' : ''}
           </span>
           {p.monster ? (
             <span style={{ opacity: 0.85 }}>

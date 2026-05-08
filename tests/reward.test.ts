@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createInitialState, pickMonster } from '../src/server/engine/state';
+import { createInitialState } from '../src/server/engine/state';
 import { runBattlePhase } from '../src/server/engine/phases/battle';
 import {
   resolveRewardPhase,
   STAT_UP_AMOUNT,
   submitReward,
 } from '../src/server/engine/phases/reward';
-import { greedyPolicy } from '../src/server/engine/policy';
 import type { GameState } from '../src/server/engine/types';
+import { completeMonsterPicks } from './helpers';
 
 function setupAtReward(seed = 13): GameState {
   const state = createInitialState({
@@ -15,11 +15,7 @@ function setupAtReward(seed = 13): GameState {
     seed,
     players: [{ id: 'p1', name: 'A', isCPU: false }],
   });
-  while (state.phase === 'pick_monster') {
-    const id = state.pickOrder[state.pickIdx]!;
-    const m = greedyPolicy.pickMonster(state, id, state.monsterPool);
-    pickMonster(state, id, m.baseId);
-  }
+  completeMonsterPicks(state);
   state.phase = 'battle';
   runBattlePhase(state);
   return state;

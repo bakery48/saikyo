@@ -1,14 +1,15 @@
 import type {
+  BattleMatch,
   Champion,
+  Color,
   DraftState,
+  GameEvent,
   Monster,
-  MonsterBase,
+  MonsterPickState,
   Phase,
   RewardChoice,
-  TournamentState,
-  GameEvent,
-  BattleMatch,
   RewardState,
+  TournamentState,
 } from '../server/engine/types';
 
 /** Public view of a player inside a room. */
@@ -40,6 +41,7 @@ export type ClientPlayer = {
   id: string;
   name: string;
   isCPU: boolean;
+  color: Color;
   monster: Monster | null;
   pendingBuffsCount: number;
 };
@@ -48,9 +50,7 @@ export type ClientPlayer = {
 export type ClientGameState = {
   roomId: string;
   players: ClientPlayer[];
-  monsterPool: MonsterBase[];
-  pickOrder: string[];
-  pickIdx: number;
+  monsterPick: MonsterPickState | null;
   round: number;
   miniRound: number;
   phase: Phase;

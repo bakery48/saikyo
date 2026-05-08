@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createInitialState, pickMonster, addSkillCardToMonster } from '../src/server/engine/state';
-import { greedyPolicy } from '../src/server/engine/policy';
+import { createInitialState, addSkillCardToMonster } from '../src/server/engine/state';
 import { GameRunner } from '../src/server/game-runner';
 import { getAvailableTags, validateMonsterName } from '../src/server/engine/naming';
 import { SKILLS } from '../src/server/engine/cards/skills';
 import type { GameState, SkillCard } from '../src/server/engine/types';
+import { completeMonsterPicks } from './helpers';
 
 function setupReady(): GameState {
   const state = createInitialState({
@@ -12,11 +12,7 @@ function setupReady(): GameState {
     seed: 1,
     players: [{ id: 'p1', name: 'A', isCPU: false }],
   });
-  while (state.phase === 'pick_monster') {
-    const id = state.pickOrder[state.pickIdx]!;
-    const m = greedyPolicy.pickMonster(state, id, state.monsterPool);
-    pickMonster(state, id, m.baseId);
-  }
+  completeMonsterPicks(state);
   return state;
 }
 
@@ -105,9 +101,22 @@ describe('GameRunner.renameMonster', () => {
   it('updates monster name when valid', () => {
     const runner = new GameRunner({ roomId: 'r', seed: 5, humans: [{ id: 'h1', name: 'Hero' }] });
     runner.advance();
-    runner.submitPick('h1', runner.state.monsterPool[0]!.baseId);
-    runner.advance();
-    // We're now in draft; submit a single skill so we have a tag.
+    // Resolve any remaining pick conflicts: keep picking from the pool until
+    // the human is no longer pending.
+    let safety = 16;
+    while (
+      runner.state.phase === 'pick_monster' &&
+      runner.state.monsterPick?.pendingPlayerIds.includes('h1') &&
+      safety-- > 0
+    ) {
+      const draft = runner.state.monsterPick!;
+      const used = new Set(Object.values(draft.submittedPicks));
+      const choice =
+        draft.pool.find((m) => !used.has(m.baseId)) ?? draft.pool[0]!;
+      runner.submitPick('h1', choice.baseId);
+      runner.advance();
+    }
+    // Now in draft; submit a single skill so we have a tag.
     const draft = runner.state.draft!;
     const used = new Set(Object.values(draft.submittedPicks));
     const card = draft.pool.find((c) => !used.has(c.id))!;
@@ -122,7 +131,7 @@ describe('GameRunner.renameMonster', () => {
   it('throws when the name uses unknown tags', () => {
     const runner = new GameRunner({ roomId: 'r', seed: 5, humans: [{ id: 'h1', name: 'Hero' }] });
     runner.advance();
-    runner.submitPick('h1', runner.state.monsterPool[0]!.baseId);
+    runner.submitPick('h1', runner.state.monsterPick!.pool[0]!.baseId);
     expect(() => runner.renameMonster('h1', 'ノットアタグ')).toThrow();
   });
 

@@ -121,10 +121,8 @@ export class GameWsServer {
     }
   }
 
-  /** Delay between CPU monster picks so players can watch them happen. */
-  private static readonly PICK_INTERVAL_MS = 900;
   /** Pause after the final pick so players can see the completed board. */
-  private static readonly POST_PICK_PAUSE_MS = 2000;
+  private static readonly POST_PICK_PAUSE_MS = 2200;
 
   private startGame(hostId: string): void {
     const room = this.roomManager.getRoomByPlayer(hostId);
@@ -151,43 +149,34 @@ export class GameWsServer {
     if (!room) throw new Error('not in a room');
     const game = this.games.get(room.id);
     if (!game) throw new Error('no game in this room');
-    const phaseBefore = game.state.phase;
     fn(game);
-    if (this.maybePostPickPause(room, phaseBefore)) return;
-    this.broadcastGameState(room);
     this.driveGame(room);
   }
 
   /**
-   * Drive the game forward. CPU picks during pick_monster are stepped one at
-   * a time with a delay so clients can watch each pick happen. All other
-   * phases advance immediately. After the final pick the pick board is held
-   * on screen briefly before the auto phases run.
+   * Drive the game forward. Runs all auto / CPU steps until the game waits
+   * on a human or finishes, then broadcasts the resulting state. When the
+   * monster pick phase has just completed, the pick board is held on screen
+   * briefly before the post-pick state is broadcast so players can absorb
+   * the final selections.
    */
   private driveGame(room: Room): void {
     const game = this.games.get(room.id);
     if (!game) return;
     const phaseBefore = game.state.phase;
-    const result = game.stepDelayedPick();
+    game.advance();
     if (this.maybePostPickPause(room, phaseBefore)) return;
     this.broadcastGameState(room);
     if (game.state.phase === 'finished') {
       this.handleFinished(room, game);
-      return;
-    }
-    if (result === 'pick_made') {
-      setTimeout(() => this.driveGame(room), GameWsServer.PICK_INTERVAL_MS);
     }
   }
 
   /**
    * If the most recent state change pushed us out of the pick_monster phase,
    * broadcast the completed pick board (with phase forced back to
-   * 'pick_monster') for a moment so clients can see all 8 selections, then
-   * resume the real game state and continue driving.
-   *
-   * Returns true if a pause was scheduled and the caller should not perform
-   * its usual broadcast/driveGame.
+   * 'pick_monster') for a moment so clients can see the assignments, then
+   * resume the real game state.
    */
   private maybePostPickPause(room: Room, phaseBefore: Phase): boolean {
     const game = this.games.get(room.id);
@@ -199,9 +188,7 @@ export class GameWsServer {
       this.broadcastGameState(room);
       if (game.state.phase === 'finished') {
         this.handleFinished(room, game);
-        return;
       }
-      this.driveGame(room);
     }, GameWsServer.POST_PICK_PAUSE_MS);
     return true;
   }

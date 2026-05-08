@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createInitialState, pickMonster } from '../src/server/engine/state';
+import { createInitialState } from '../src/server/engine/state';
 import { runTournament } from '../src/server/engine/phases/tournament';
-import { greedyPolicy } from '../src/server/engine/policy';
 import type { GameState } from '../src/server/engine/types';
+import { completeMonsterPicks } from './helpers';
 
 function setupAtTournament(seed = 17): GameState {
   const state = createInitialState({
@@ -10,11 +10,7 @@ function setupAtTournament(seed = 17): GameState {
     seed,
     players: [{ id: 'p1', name: 'A', isCPU: false }],
   });
-  while (state.phase === 'pick_monster') {
-    const id = state.pickOrder[state.pickIdx]!;
-    const m = greedyPolicy.pickMonster(state, id, state.monsterPool);
-    pickMonster(state, id, m.baseId);
-  }
+  completeMonsterPicks(state);
   state.phase = 'tournament';
   state.round = 3;
   return state;

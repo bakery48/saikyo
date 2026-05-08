@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import { getAvailableTags, NAME_SEPARATOR, validateMonsterName } from '../../server/engine/naming';
+import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 
 const RARITY_COLOR: Record<string, string> = {
   N: '#888',
@@ -63,7 +64,8 @@ export function MyMonsterPanel({
         background: '#f0f8ff',
       }}
     >
-      <summary style={{ fontWeight: 600 }}>
+      <summary style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <span title={COLOR_LABEL[me.color]} style={pieceStyle(me.color, { size: 14 })} />
         あなたのモンスター: {monster.name} (HP{monster.stats.hp} ATK{monster.stats.atk} DEF
         {monster.stats.def} SPD{monster.stats.spd})
       </summary>
