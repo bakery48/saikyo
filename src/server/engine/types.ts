@@ -34,6 +34,8 @@ export type ActiveSkill = {
   order: number;
   name: string;
   rarity?: Rarity;
+  /** Short noun (e.g. "パワー") used to compose monster display names. */
+  nameTag?: string;
   effect: SkillEffect;
 };
 
@@ -60,6 +62,8 @@ export type PassiveSkill = {
   name: string;
   trigger: PassiveTrigger;
   effect: PassiveEffect;
+  /** Short noun (e.g. "ガード") used to compose monster display names. */
+  nameTag?: string;
 };
 
 export type MonsterBase = {
@@ -112,10 +116,12 @@ export type SkillCard = {
   id: string;
   name: string;
   rarity: Rarity;
+  /** Noun used to compose monster names (e.g. "パワー"). */
+  nameTag: string;
   /** If undefined this skill becomes an active skill (default). */
   isPassive?: boolean;
-  active?: Omit<ActiveSkill, 'id' | 'order' | 'name'>;
-  passive?: Omit<PassiveSkill, 'id' | 'name'>;
+  active?: Omit<ActiveSkill, 'id' | 'order' | 'name' | 'nameTag'>;
+  passive?: Omit<PassiveSkill, 'id' | 'name' | 'nameTag'>;
 };
 
 export type BattleEvent =

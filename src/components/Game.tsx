@@ -6,6 +6,7 @@ import { AutoPhaseView } from './game/AutoPhaseView';
 import { RewardView } from './game/RewardView';
 import { ChampionView } from './game/ChampionView';
 import { PlayerPanel } from './game/PlayerPanel';
+import { MyMonsterPanel } from './game/MyMonsterPanel';
 
 const PHASE_LABEL: Record<string, string> = {
   setup: 'セットアップ',
@@ -44,6 +45,8 @@ export function Game({ socket }: { socket: GameSocket }) {
           {state.deckCounts.skill}
         </span>
       </header>
+
+      <MyMonsterPanel state={state} socket={socket} />
 
       {renderPhase(state.phase, state, socket)}
 

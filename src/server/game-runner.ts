@@ -12,6 +12,7 @@ import { runBattlePhase } from './engine/phases/battle';
 import { resolveRewardPhase, submitReward } from './engine/phases/reward';
 import { runTournament } from './engine/phases/tournament';
 import { greedyPolicy } from './engine/policy';
+import { validateMonsterName } from './engine/naming';
 
 /**
  * Drives a single game's state machine for a room. Humans submit actions when
@@ -155,6 +156,23 @@ export class GameRunner {
       throw new Error('not in reward phase');
     }
     submitReward(this.state, playerId, choice);
+  }
+
+  /**
+   * Rename the player's monster. Allowed any time the player has a monster and
+   * the game is still running. The new name must be composed of the monster's
+   * own acquired skill tags joined by `・`.
+   */
+  renameMonster(playerId: string, newName: string): void {
+    if (this.state.phase === 'finished') {
+      throw new Error('game has finished');
+    }
+    const player = this.state.players.find((p) => p.id === playerId);
+    if (!player?.monster) throw new Error('no monster yet');
+    if (!validateMonsterName(newName, player.monster)) {
+      throw new Error('name must use this monster\'s acquired skill tags');
+    }
+    player.monster.name = newName.trim();
   }
 
   // ─── Serialization ─────────────────────────────────────────────────────────

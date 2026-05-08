@@ -82,6 +82,7 @@ export type ClientMessage =
   | { type: 'submit_pick'; baseId: string }
   | { type: 'submit_draft'; skillId: string }
   | { type: 'submit_reward'; choice: RewardChoice }
+  | { type: 'rename_monster'; name: string }
   | { type: 'leave_game' };
 
 /** Messages the server sends to the client. */

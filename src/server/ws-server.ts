@@ -113,6 +113,10 @@ export class GameWsServer {
         this.runGameAction(playerId, (game) => game.submitReward(playerId, msg.choice));
         return;
       }
+      case 'rename_monster': {
+        this.handleRename(playerId, msg.name);
+        return;
+      }
     }
   }
 
@@ -154,6 +158,16 @@ export class GameWsServer {
       this.broadcastRoomState(room.id);
       this.broadcastRoomsList();
     }
+  }
+
+  /** Renames don't progress the game state — just apply and broadcast. */
+  private handleRename(playerId: string, name: string): void {
+    const room = this.roomManager.getRoomByPlayer(playerId);
+    if (!room) throw new Error('not in a room');
+    const game = this.games.get(room.id);
+    if (!game) throw new Error('no game in this room');
+    game.renameMonster(playerId, name);
+    this.broadcastGameState(room);
   }
 
   private persistChampion(game: GameRunner): void {
