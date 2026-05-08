@@ -76,4 +76,67 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-002', name: '神殺しの一撃', rarity: 'SSR', active: { effect: { kind: 'true_damage', amount: 12 } } },
   { id: 'sk-ssr-003', name: '神域の守り', rarity: 'SSR', active: { effect: { kind: 'shield', amount: 12 } } },
   { id: 'sk-ssr-004', name: '時止め', rarity: 'SSR', active: { effect: { kind: 'next_amp', mult: 4.0 } } },
+
+  // ─── Passive skill cards ───────────────────────────────────────────────────
+  // These unlock as passive abilities on the monster instead of as actives.
+  {
+    id: 'sk-rp-001',
+    name: '先制の構え (passive)',
+    rarity: 'R',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'first_attack' },
+      effect: { kind: 'first_attack_amp', amount: 1 },
+    },
+  },
+  {
+    id: 'sk-rp-002',
+    name: '再生 (passive)',
+    rarity: 'R',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_own_turn_start' },
+      effect: { kind: 'turn_start_heal', amount: 1 },
+    },
+  },
+  {
+    id: 'sk-srp-001',
+    name: '鋼の体 (passive)',
+    rarity: 'SR',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'damage_reduction', amount: 1 },
+    },
+  },
+  {
+    id: 'sk-srp-002',
+    name: '見切りの構え (passive)',
+    rarity: 'SR',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'damage_negate_chance', oneIn: 6 },
+    },
+  },
+  {
+    id: 'sk-ssrp-001',
+    name: '影討ち (passive)',
+    rarity: 'SSR',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'first_attack' },
+      effect: { kind: 'first_attack_true' },
+    },
+  },
+  {
+    id: 'sk-ssrp-002',
+    name: '時の積層 (passive)',
+    rarity: 'SSR',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'first_attack' },
+      effect: { kind: 'amp_each_active', amount: 1 },
+    },
+  },
 ];

@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useState } from 'react';
 import type { GameSocket } from '../lib/useGameSocket';
 
@@ -9,7 +10,7 @@ export function Lobby({ socket }: { socket: GameSocket }) {
 
   return (
     <section style={{ display: 'grid', gap: 16, maxWidth: 640 }}>
-      <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <label>
           Name:{' '}
           <input
@@ -19,6 +20,7 @@ export function Lobby({ socket }: { socket: GameSocket }) {
             style={{ padding: '4px 8px' }}
           />
         </label>
+        <Link href="/hall-of-fame" style={{ fontSize: 14 }}>🏆 殿堂</Link>
       </div>
 
       <div style={{ display: 'flex', gap: 8 }}>

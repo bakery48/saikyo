@@ -2,6 +2,7 @@ import type { WebSocket } from 'ws';
 import type { ClientMessage, ServerMessage } from '../shared/messages';
 import { type Room, RoomManager } from './rooms';
 import { GameRunner } from './game-runner';
+import { getStore } from './db';
 import { randomUUID } from 'node:crypto';
 
 export class GameWsServer {
@@ -129,6 +130,10 @@ export class GameWsServer {
     room.inGame = true;
     game.advance();
     this.broadcastGameState(room);
+    if (game.state.phase === 'finished') {
+      this.persistChampion(game);
+      room.inGame = false;
+    }
     this.broadcastRoomState(room.id);
     this.broadcastRoomsList();
   }
@@ -138,14 +143,31 @@ export class GameWsServer {
     if (!room) throw new Error('not in a room');
     const game = this.games.get(room.id);
     if (!game) throw new Error('no game in this room');
+    const wasFinished = game.state.phase === 'finished';
     fn(game);
     game.advance();
     this.broadcastGameState(room);
     if (game.state.phase === 'finished') {
+      if (!wasFinished) this.persistChampion(game);
       // Allow lobby browsing again, but keep the game state available for review.
       room.inGame = false;
       this.broadcastRoomState(room.id);
       this.broadcastRoomsList();
+    }
+  }
+
+  private persistChampion(game: GameRunner): void {
+    const champion = game.state.champion;
+    if (!champion) return;
+    const player = game.state.players.find((p) => p.id === champion.playerId);
+    try {
+      getStore().save({
+        champion,
+        ownerName: player?.name ?? 'Anonymous',
+        seed: game.seed,
+      });
+    } catch (err) {
+      console.error('hall-of-fame save failed:', err);
     }
   }
 

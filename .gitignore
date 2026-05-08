@@ -10,3 +10,5 @@ coverage/
 .tsbuildinfo
 tsconfig.tsbuildinfo
 next-env.d.ts
+data/
+

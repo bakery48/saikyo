@@ -25,12 +25,14 @@ export class GameRunner {
   state: GameState;
   /** Set of human player IDs (CPUs are everyone else). */
   private humanIds: Set<string>;
+  readonly seed: number;
 
   constructor(opts: {
     roomId: string;
     seed: number;
     humans: { id: string; name: string }[];
   }) {
+    this.seed = opts.seed;
     this.state = createInitialState({
       roomId: opts.roomId,
       seed: opts.seed,

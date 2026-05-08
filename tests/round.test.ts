@@ -18,9 +18,10 @@ describe('Full round (3 × event/action/draft)', () => {
     runOneRound(state, greedyPolicy);
     expect(state.phase).toBe('battle');
     expect(state.miniRound).toBe(3);
-    // Each player should have at least 3 active skills (one from each draft).
+    // Each player should have gained 3 skills (active or passive) across 3 mini-rounds.
     for (const p of state.players) {
-      expect(p.monster!.actives.length).toBeGreaterThanOrEqual(3);
+      const acquired = p.monster!.actives.length + p.monster!.passives.length;
+      expect(acquired).toBeGreaterThanOrEqual(3);
     }
     // Some action grave should have entries (8 players * 3 mini-rounds).
     expect(state.decks.actionGrave.length).toBe(24);

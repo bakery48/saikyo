@@ -1,7 +1,9 @@
 'use client';
+import { useState } from 'react';
 import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import type { StatKey } from '../../server/engine/types';
+import { BattleLogView } from './BattleLogView';
 
 const STAT_LABEL: Record<StatKey, string> = {
   hp: 'HP +5',
@@ -68,27 +70,49 @@ export function RewardView({
         </p>
       )}
 
-      <div>
-        <h4 style={{ marginBottom: 6 }}>このラウンドの試合結果</h4>
-        <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 4, fontSize: 13 }}>
-          {matchInfo.map((m, i) => {
-            const ap = state.players.find((p) => p.id === m.a)?.name ?? m.a.slice(0, 6);
-            const bp = state.players.find((p) => p.id === m.b)?.name ?? m.b.slice(0, 6);
-            const verdict =
-              m.winner === 'a'
-                ? `${ap} 勝`
-                : m.winner === 'b'
-                  ? `${bp} 勝`
-                  : '引き分け';
-            return (
-              <li key={i} style={{ padding: '4px 8px', background: '#fafafa', borderRadius: 4 }}>
-                {ap} vs {bp} → {verdict} (HP {m.finalHpA} / {m.finalHpB})
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      <BattleResultsSection state={state} />
     </section>
+  );
+}
+
+function BattleResultsSection({ state }: { state: ClientGameState }) {
+  const matchInfo = state.battle?.matches ?? [];
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  return (
+    <div>
+      <h4 style={{ marginBottom: 6 }}>このラウンドの試合結果</h4>
+      <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 4, fontSize: 13 }}>
+        {matchInfo.map((m, i) => {
+          const ap = state.players.find((p) => p.id === m.a)?.name ?? m.a.slice(0, 6);
+          const bp = state.players.find((p) => p.id === m.b)?.name ?? m.b.slice(0, 6);
+          const verdict =
+            m.winner === 'a'
+              ? `${ap} 勝`
+              : m.winner === 'b'
+                ? `${bp} 勝`
+                : '引き分け';
+          const isOpen = openIdx === i;
+          return (
+            <li key={i} style={{ display: 'grid', gap: 4 }}>
+              <button
+                onClick={() => setOpenIdx(isOpen ? null : i)}
+                style={{
+                  textAlign: 'left',
+                  padding: '4px 8px',
+                  background: '#fafafa',
+                  border: '1px solid #eee',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                }}
+              >
+                {ap} vs {bp} → {verdict} (HP {m.finalHpA} / {m.finalHpB}) {isOpen ? '▾' : '▸'}
+              </button>
+              {isOpen && <BattleLogView match={m} players={state.players} />}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
