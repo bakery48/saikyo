@@ -72,6 +72,10 @@ export function createInitialState(opts: {
       skillGrave: [],
     },
     draft: null,
+    battle: null,
+    reward: null,
+    tournament: null,
+    champion: null,
     nextSkillInstanceSeq: 1,
     log: [],
   };

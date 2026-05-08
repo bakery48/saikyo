@@ -162,6 +162,7 @@ export type Phase =
   | 'action'
   | 'draft'
   | 'battle'
+  | 'reward'
   | 'tournament'
   | 'finished';
 
@@ -180,6 +181,48 @@ export type DraftState = {
   attempt: number;
 };
 
+export type BattleMatch = {
+  a: string; // playerId
+  b: string;
+  winner: 'a' | 'b' | 'draw' | null;
+  finalHpA: number;
+  finalHpB: number;
+  log: BattleEvent[];
+};
+
+export type BattlePhaseState = {
+  matches: BattleMatch[];
+};
+
+export type RewardChoice =
+  | { kind: 'stat_up'; stat: StatKey }
+  | { kind: 'skill_top' };
+
+export type RewardState = {
+  pendingPlayerIds: string[];
+  choices: Record<string, RewardChoice>;
+};
+
+export type TournamentMatch = {
+  round: number; // 1=quarter, 2=semi, 3=final
+  matchIdx: number;
+  a: string;
+  b: string;
+  winner: string | null;
+  log: BattleEvent[];
+};
+
+export type TournamentState = {
+  bracket: TournamentMatch[];
+  currentMatchIdx: number;
+  champion: string | null;
+};
+
+export type Champion = {
+  playerId: string;
+  monster: Monster;
+};
+
 export type GameEvent =
   | { kind: 'phase_change'; phase: Phase; round: number; miniRound: number }
   | { kind: 'monster_picked'; playerId: string; baseId: string }
@@ -191,7 +234,11 @@ export type GameEvent =
   | { kind: 'draft_pick_submitted'; playerId: string; skillId: string }
   | { kind: 'draft_resolved'; assignments: Record<string, string> } // playerId -> skillId
   | { kind: 'draft_conflict'; skillId: string; players: string[] }
-  | { kind: 'draft_fallback'; playerId: string; skillId: string };
+  | { kind: 'draft_fallback'; playerId: string; skillId: string }
+  | { kind: 'battle_match'; a: string; b: string; winner: 'a' | 'b' | 'draw' }
+  | { kind: 'reward_chosen'; playerId: string; choice: RewardChoice }
+  | { kind: 'tournament_match'; round: number; a: string; b: string; winner: string }
+  | { kind: 'champion'; playerId: string };
 
 export type GameState = {
   roomId: string;
@@ -214,6 +261,10 @@ export type GameState = {
     skillGrave: SkillCard[];
   };
   draft: DraftState | null;
+  battle: BattlePhaseState | null;
+  reward: RewardState | null;
+  tournament: TournamentState | null;
+  champion: Champion | null;
   /** Counter for generating unique skill instance IDs when adding to monsters. */
   nextSkillInstanceSeq: number;
   log: GameEvent[];

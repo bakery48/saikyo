@@ -11,6 +11,11 @@ export function startDraft(state: GameState): void {
   const rng = makeRng(state);
   const pool = drawN(state.decks.skill, state.decks.skillGrave, DRAFT_POOL_SIZE, rng);
   saveRng(state, rng);
+  if (pool.length === 0) {
+    // Skill deck is fully exhausted — skip drafting and advance to next phase.
+    advanceAfterDraft(state);
+    return;
+  }
   const draft: DraftState = {
     pool,
     pendingPlayerIds: state.players.filter((p) => p.monster).map((p) => p.id),
@@ -156,23 +161,21 @@ function finishDraft(state: GameState): void {
   // Discard remaining pool and set-aside cards into graveyard.
   state.decks.skillGrave.push(...draft.pool, ...draft.setAside);
   state.draft = null;
-  // Advance to next mini round or to battle.
+  advanceAfterDraft(state);
+}
+
+function advanceAfterDraft(state: GameState): void {
+  // Advance to next mini round, or to battle/tournament if mini-round 3 is done.
   if (state.miniRound < 3) {
     state.miniRound += 1;
     state.phase = 'event';
-    state.log.push({
-      kind: 'phase_change',
-      phase: 'event',
-      round: state.round,
-      miniRound: state.miniRound,
-    });
   } else {
-    state.phase = 'battle';
-    state.log.push({
-      kind: 'phase_change',
-      phase: 'battle',
-      round: state.round,
-      miniRound: state.miniRound,
-    });
+    state.phase = state.round >= 3 ? 'tournament' : 'battle';
   }
+  state.log.push({
+    kind: 'phase_change',
+    phase: state.phase,
+    round: state.round,
+    miniRound: state.miniRound,
+  });
 }

@@ -1,6 +1,6 @@
 /**
- * Tiny CLI demo: run setup -> pick -> 3 mini-rounds of (event/action/draft)
- * for 8 CPU players. Useful as a smoke test that the phase machine wires up.
+ * CLI demo: run a full 8-CPU game from setup through tournament and print
+ * the champion. Useful smoke test for the entire phase machine.
  *
  * Usage: npx tsx src/server/engine/cli.ts [seed]
  */
@@ -12,8 +12,17 @@ import {
   submitDraftPick,
   resolveDraftSubRound,
 } from './phases/draft';
+import { runBattlePhase } from './phases/battle';
+import { resolveRewardPhase, submitReward } from './phases/reward';
+import { runTournament } from './phases/tournament';
 import { greedyPolicy, type Policy } from './policy';
 import type { GameState } from './types';
+
+function expectPhase(state: GameState, expected: GameState['phase']): void {
+  if (state.phase !== expected) {
+    throw new Error(`expected ${expected}, got ${state.phase}`);
+  }
+}
 
 function runDraftPhase(state: GameState, policy: Policy): void {
   startDraft(state);
@@ -23,26 +32,49 @@ function runDraftPhase(state: GameState, policy: Policy): void {
       const card = policy.pickDraftCard(state, playerId, draft.pool);
       submitDraftPick(state, playerId, card.id);
     }
-    const finished = resolveDraftSubRound(state);
-    if (finished) break;
+    if (resolveDraftSubRound(state)) break;
   }
 }
 
+export function runMiniRound(state: GameState, policy: Policy): void {
+  expectPhase(state, 'event');
+  resolveEventPhase(state);
+  expectPhase(state, 'action');
+  resolveActionPhase(state);
+  expectPhase(state, 'draft');
+  runDraftPhase(state, policy);
+}
+
+/** Run all 3 mini-rounds (event/action/draft) of a single big round. */
 export function runOneRound(state: GameState, policy: Policy = greedyPolicy): void {
-  // 3 mini-rounds of event/action/draft.
   for (let i = 0; i < 3; i++) {
-    expectPhase(state, 'event');
-    resolveEventPhase(state);
-    expectPhase(state, 'action');
-    resolveActionPhase(state);
-    expectPhase(state, 'draft');
-    runDraftPhase(state, policy);
+    runMiniRound(state, policy);
   }
 }
 
-function expectPhase(state: GameState, expected: GameState['phase']): void {
-  if (state.phase !== expected) {
-    throw new Error(`expected ${expected}, got ${state.phase}`);
+export function runFullGame(state: GameState, policy: Policy = greedyPolicy): void {
+  // Auto-pick monsters.
+  while (state.phase === 'pick_monster') {
+    const playerId = state.pickOrder[state.pickIdx]!;
+    const baseMon = policy.pickMonster(state, playerId, state.monsterPool);
+    pickMonster(state, playerId, baseMon.baseId);
+  }
+
+  while (state.phase !== 'finished') {
+    if (state.phase === 'event') {
+      runMiniRound(state, policy);
+    } else if (state.phase === 'battle') {
+      runBattlePhase(state);
+    } else if (state.phase === 'reward') {
+      for (const pid of state.reward!.pendingPlayerIds) {
+        submitReward(state, pid, policy.chooseReward(state, pid));
+      }
+      resolveRewardPhase(state);
+    } else if (state.phase === 'tournament') {
+      runTournament(state);
+    } else {
+      throw new Error(`unexpected phase: ${state.phase}`);
+    }
   }
 }
 
@@ -53,18 +85,25 @@ function main(): void {
     seed,
     players: [{ id: 'p1', name: 'You', isCPU: false }],
   });
-  // Auto-pick monsters for everyone using the greedy policy.
-  while (state.phase === 'pick_monster') {
-    const playerId = state.pickOrder[state.pickIdx]!;
-    const baseMon = greedyPolicy.pickMonster(state, playerId, state.monsterPool);
-    pickMonster(state, playerId, baseMon.baseId);
+  runFullGame(state, greedyPolicy);
+
+  console.log(`\n=== Game finished (seed ${seed}) ===`);
+  if (state.champion) {
+    const c = state.champion;
+    const player = state.players.find((p) => p.id === c.playerId)!;
+    console.log(`Champion: ${player.name} (${c.monster.name})`);
+    console.log(
+      `  HP${c.monster.stats.hp} ATK${c.monster.stats.atk} DEF${c.monster.stats.def} SPD${c.monster.stats.spd}`,
+    );
+    console.log(`  actives=${c.monster.actives.length}, passives=${c.monster.passives.length}`);
+  } else {
+    console.log('No champion (something went wrong).');
   }
-  runOneRound(state, greedyPolicy);
-  console.log('phase=', state.phase, 'round=', state.round, 'mini=', state.miniRound);
+  console.log('\nFinal standings:');
   for (const p of state.players) {
     if (!p.monster) continue;
     console.log(
-      `${p.name}\t${p.monster.name}\tHP${p.monster.stats.hp} ATK${p.monster.stats.atk} ` +
+      `  ${p.name}\t${p.monster.name}\tHP${p.monster.stats.hp} ATK${p.monster.stats.atk} ` +
         `DEF${p.monster.stats.def} SPD${p.monster.stats.spd}\tactives=${p.monster.actives.length}`,
     );
   }
