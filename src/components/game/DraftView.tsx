@@ -256,5 +256,25 @@ function describeSkill(c: import('../../server/engine/types').SkillCard): string
         return `相手の次のスキルを無効`;
     }
   }
-  return c.passive ? '(パッシブスキル)' : '';
+  if (c.passive) return `パッシブ：${describePassive(c.passive)}`;
+  return '';
+}
+
+type PassiveSkillPartial = Omit<import('../../server/engine/types').PassiveSkill, 'id' | 'name' | 'nameTag'>;
+
+function describePassive(p: PassiveSkillPartial): string {
+  const e = p.effect;
+  let effect: string;
+  switch (e.kind) {
+    case 'stat_mod':        effect = `${e.stat.toUpperCase()}+${e.amount}`; break;
+    case 'first_attack_amp': effect = `初撃ダメージ×${e.amount}`; break;
+    case 'first_attack_true': effect = `初撃がDEF無視`; break;
+    case 'spd_roll_bonus':  effect = `SPDロール+${e.amount}`; break;
+    case 'damage_reduction': effect = `被ダメ−${e.amount}`; break;
+    case 'turn_start_heal': effect = `ターン開始時 HP+${e.amount}`; break;
+    case 'damage_negate_chance': effect = `${e.oneIn}分の1で被ダメ無効`; break;
+    case 'pick_higher_buff': effect = `バフを高い方+${e.amount}`; break;
+    case 'amp_each_active': effect = `アクティブごとに威力×${e.amount}`; break;
+  }
+  return effect;
 }
