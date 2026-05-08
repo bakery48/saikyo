@@ -1,6 +1,6 @@
 'use client';
 import type { ClientPlayer } from '../../shared/messages';
-import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
+import { COLOR_HEX, COLOR_LABEL, pieceStyle } from '../../lib/colors';
 
 export function PlayerPanel({
   players,
@@ -16,6 +16,7 @@ export function PlayerPanel({
           key={p.id}
           style={{
             border: '1px solid #ccc',
+            borderLeft: `4px solid ${COLOR_HEX[p.color] ?? '#ccc'}`,
             padding: '6px 10px',
             borderRadius: 6,
             background: p.id === selfId ? '#f0f8ff' : 'white',

@@ -34,20 +34,16 @@ export function DraftView({
   const submittedCount = Object.keys(draft.submittedPicks).length;
   const totalPending = draft.pendingPlayerIds.length;
 
-  // Map cardId -> pieces on it.
+  // Map cardId -> own piece only (other players' picks are hidden during draft).
   const pieces: Record<
     string,
     { committed: typeof state.players; tentative?: typeof state.players[number] }
   > = {};
-  for (const [pid, cid] of Object.entries(draft.submittedPicks)) {
-    const player = state.players.find((p) => p.id === pid);
-    if (!player) continue;
-    pieces[cid] = pieces[cid] ?? { committed: [] };
-    pieces[cid]!.committed = [...pieces[cid]!.committed, player];
+  if (me && myCommitted) {
+    pieces[myCommitted] = { committed: [me] };
   }
   if (tentative && me && !myCommitted) {
-    pieces[tentative] = pieces[tentative] ?? { committed: [] };
-    pieces[tentative]!.tentative = me;
+    pieces[tentative] = { committed: [], tentative: me };
   }
 
   const placeOrCommit = (cardId: string): void => {
@@ -93,7 +89,6 @@ export function DraftView({
       >
         {draft.pool.map((c) => {
           const onCard = pieces[c.id];
-          const conflict = (onCard?.committed.length ?? 0) > 1;
           const myPieceHere = myCommitted === c.id || tentative === c.id;
           const canClick = iAmPending && !myCommitted;
           return (
@@ -106,9 +101,7 @@ export function DraftView({
                 border: `2px solid ${
                   myPieceHere
                     ? '#0066cc'
-                    : conflict
-                      ? '#c44'
-                      : RARITY_COLOR[c.rarity] ?? '#aaa'
+                    : RARITY_COLOR[c.rarity] ?? '#aaa'
                 }`,
                 borderRadius: 8,
                 padding: 12,
@@ -147,19 +140,6 @@ export function DraftView({
                       borderStyle: 'dashed',
                     }}
                   />
-                )}
-                {conflict && (
-                  <span
-                    style={{
-                      fontSize: 10,
-                      background: '#c44',
-                      color: '#fff',
-                      borderRadius: 4,
-                      padding: '1px 4px',
-                    }}
-                  >
-                    かぶり
-                  </span>
                 )}
               </div>
               <div style={{ fontSize: 11, color: RARITY_COLOR[c.rarity] ?? '#888' }}>{c.rarity}</div>

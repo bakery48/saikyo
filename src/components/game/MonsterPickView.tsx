@@ -36,21 +36,16 @@ export function MonsterPickView({
   const claimedBy = new Map<string, ClientGameState['players'][number]>();
   for (const p of state.players) if (p.monster) claimedBy.set(p.monster.baseId, p);
 
+  // Show only own pick (committed or tentative) — hide other players' in-progress picks.
   const pieces: Record<
     string,
     { committed: ClientGameState['players']; tentative?: ClientGameState['players'][number] }
   > = {};
-  if (draft) {
-    for (const [pid, baseId] of Object.entries(draft.submittedPicks)) {
-      const player = state.players.find((p) => p.id === pid);
-      if (!player) continue;
-      pieces[baseId] = pieces[baseId] ?? { committed: [] };
-      pieces[baseId]!.committed = [...pieces[baseId]!.committed, player];
-    }
+  if (me && myCommittedPick) {
+    pieces[myCommittedPick] = { committed: [me] };
   }
   if (tentative && me && !myCommittedPick) {
-    pieces[tentative] = pieces[tentative] ?? { committed: [] };
-    pieces[tentative]!.tentative = me;
+    pieces[tentative] = { committed: [], tentative: me };
   }
 
   const placeOrCommit = (baseId: string): void => {
@@ -131,7 +126,6 @@ export function MonsterPickView({
           const claimed = claimedBy.get(m.baseId);
           const inPool = isPoolMonster(m.baseId);
           const onCard = pieces[m.baseId];
-          const conflict = (onCard?.committed.length ?? 0) > 1;
           const canClick = iAmPending && !myCommittedPick && inPool;
           const myPieceHere =
             myCommittedPick === m.baseId ||
@@ -147,13 +141,11 @@ export function MonsterPickView({
                 border: `3px solid ${
                   myPieceHere
                     ? '#0066cc'
-                    : conflict
-                      ? '#c44'
-                      : claimed
-                        ? '#aaa'
-                        : canClick
-                          ? '#0a8'
-                          : '#ccc'
+                    : claimed
+                      ? '#aaa'
+                      : canClick
+                        ? '#0a8'
+                        : '#ccc'
                 }`,
                 borderRadius: 8,
                 padding: 12,
@@ -193,20 +185,6 @@ export function MonsterPickView({
                     note="未確定"
                     extraStyle={{ opacity: 0.55, borderStyle: 'dashed' }}
                   />
-                )}
-                {conflict && (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      background: '#c44',
-                      color: '#fff',
-                      borderRadius: 4,
-                      padding: '1px 6px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    かぶり
-                  </span>
                 )}
               </div>
               <div style={{ fontWeight: 600, fontSize: 15 }}>{m.name}</div>
