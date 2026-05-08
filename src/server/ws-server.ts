@@ -1,5 +1,6 @@
 import type { WebSocket } from 'ws';
 import type { ClientMessage, ServerMessage } from '../shared/messages';
+import type { Phase } from './engine/types';
 import { type Room, RoomManager } from './rooms';
 import { GameRunner } from './game-runner';
 import { getStore } from './db';
@@ -121,7 +122,9 @@ export class GameWsServer {
   }
 
   /** Delay between CPU monster picks so players can watch them happen. */
-  private static readonly PICK_INTERVAL_MS = 600;
+  private static readonly PICK_INTERVAL_MS = 900;
+  /** Pause after the final pick so players can see the completed board. */
+  private static readonly POST_PICK_PAUSE_MS = 2000;
 
   private startGame(hostId: string): void {
     const room = this.roomManager.getRoomByPlayer(hostId);
@@ -148,7 +151,9 @@ export class GameWsServer {
     if (!room) throw new Error('not in a room');
     const game = this.games.get(room.id);
     if (!game) throw new Error('no game in this room');
+    const phaseBefore = game.state.phase;
     fn(game);
+    if (this.maybePostPickPause(room, phaseBefore)) return;
     this.broadcastGameState(room);
     this.driveGame(room);
   }
@@ -156,12 +161,15 @@ export class GameWsServer {
   /**
    * Drive the game forward. CPU picks during pick_monster are stepped one at
    * a time with a delay so clients can watch each pick happen. All other
-   * phases advance immediately.
+   * phases advance immediately. After the final pick the pick board is held
+   * on screen briefly before the auto phases run.
    */
   private driveGame(room: Room): void {
     const game = this.games.get(room.id);
     if (!game) return;
+    const phaseBefore = game.state.phase;
     const result = game.stepDelayedPick();
+    if (this.maybePostPickPause(room, phaseBefore)) return;
     this.broadcastGameState(room);
     if (game.state.phase === 'finished') {
       this.handleFinished(room, game);
@@ -169,6 +177,43 @@ export class GameWsServer {
     }
     if (result === 'pick_made') {
       setTimeout(() => this.driveGame(room), GameWsServer.PICK_INTERVAL_MS);
+    }
+  }
+
+  /**
+   * If the most recent state change pushed us out of the pick_monster phase,
+   * broadcast the completed pick board (with phase forced back to
+   * 'pick_monster') for a moment so clients can see all 8 selections, then
+   * resume the real game state and continue driving.
+   *
+   * Returns true if a pause was scheduled and the caller should not perform
+   * its usual broadcast/driveGame.
+   */
+  private maybePostPickPause(room: Room, phaseBefore: Phase): boolean {
+    const game = this.games.get(room.id);
+    if (!game) return false;
+    if (phaseBefore !== 'pick_monster') return false;
+    if (game.state.phase === 'pick_monster') return false;
+    this.broadcastGameStateWithPhase(room, 'pick_monster');
+    setTimeout(() => {
+      this.broadcastGameState(room);
+      if (game.state.phase === 'finished') {
+        this.handleFinished(room, game);
+        return;
+      }
+      this.driveGame(room);
+    }, GameWsServer.POST_PICK_PAUSE_MS);
+    return true;
+  }
+
+  private broadcastGameStateWithPhase(room: Room, phase: Phase): void {
+    const game = this.games.get(room.id);
+    if (!game) return;
+    const cs = game.toClientState();
+    const overridden = { ...cs, phase };
+    for (const p of room.players) {
+      const ws = this.connections.get(p.id);
+      if (ws) this.send(ws, { type: 'game_state', state: overridden });
     }
   }
 
