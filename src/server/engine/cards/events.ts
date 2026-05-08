@@ -1,0 +1,28 @@
+import type { EventCard } from '../types';
+
+export const EVENTS: EventCard[] = [
+  { id: 'ev-001', name: '豊穣の雨', target: 'all', effect: { kind: 'heal', amount: 3 } },
+  { id: 'ev-002', name: '荒野の風', target: 'all', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
+  { id: 'ev-003', name: '武闘大会', target: 'all', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+  { id: 'ev-004', name: '砦の壁', target: 'all', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
+  { id: 'ev-005', name: '滋養の地', target: 'all', effect: { kind: 'stat_mod', stat: 'hp', amount: 2 } },
+  { id: 'ev-006', name: '災厄の流星', target: 'all', effect: { kind: 'damage', amount: 3 } },
+  { id: 'ev-007', name: '弱者狩り', target: 'lowestHp', effect: { kind: 'damage', amount: 4 } },
+  { id: 'ev-008', name: '凱旋の盾', target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'def', amount: 2 } },
+  { id: 'ev-009', name: '気まぐれな神', target: 'random', effect: { kind: 'add_skill_top' } },
+  { id: 'ev-010', name: '稲妻の試練', target: 'random', effect: { kind: 'damage', amount: 5 } },
+  { id: 'ev-011', name: '嵐の使者', target: 'random', effect: { kind: 'stat_mod', stat: 'spd', amount: 2 } },
+  { id: 'ev-012', name: '太陽の祝福', target: 'all', effect: { kind: 'heal', amount: 5 } },
+  { id: 'ev-013', name: '集中特訓', target: 'lowestHp', effect: { kind: 'stat_mod', stat: 'atk', amount: 2 } },
+  { id: 'ev-014', name: '鍛冶屋', target: 'all', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+  { id: 'ev-015', name: '装甲整備', target: 'all', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
+  { id: 'ev-016', name: '迷宮探索', target: 'random', effect: { kind: 'add_skill_top' } },
+  { id: 'ev-017', name: '沼地の毒霧', target: 'all', effect: { kind: 'damage', amount: 2 } },
+  { id: 'ev-018', name: '天才教師', target: 'lowestHp', effect: { kind: 'stat_mod', stat: 'def', amount: 2 } },
+  { id: 'ev-019', name: '逆転の女神', target: 'lowestHp', effect: { kind: 'heal', amount: 6 } },
+  { id: 'ev-020', name: '英雄の試練', target: 'highestAtk', effect: { kind: 'damage', amount: 4 } },
+  { id: 'ev-021', name: '加速の祭壇', target: 'all', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
+  { id: 'ev-022', name: '休息の宿屋', target: 'all', effect: { kind: 'heal', amount: 2 } },
+  { id: 'ev-023', name: '謎の商人', target: 'random', effect: { kind: 'add_skill_top' } },
+  { id: 'ev-024', name: '世界樹の恵み', target: 'all', effect: { kind: 'stat_mod', stat: 'hp', amount: 3 } },
+];

@@ -1,0 +1,79 @@
+import type { SkillCard } from '../types';
+
+/**
+ * Skill deck. Distribution roughly N:28 / R:20 / SR:12 / SSR:4 = 64 cards.
+ * Most are active skills; a few unlock as passives.
+ */
+export const SKILLS: SkillCard[] = [
+  // ─── N (Normal) ────────────────────────────────────────────────────────────
+  { id: 'sk-n-001', name: '体当たり', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk' } } },
+  { id: 'sk-n-002', name: '殴打', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk' } } },
+  { id: 'sk-n-003', name: '猛打', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'atk' } } },
+  { id: 'sk-n-004', name: '蹴り', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk' } } },
+  { id: 'sk-n-005', name: 'ひっかき', rarity: 'N', active: { effect: { kind: 'attack', mult: 0.9, useStat: 'atk' } } },
+  { id: 'sk-n-006', name: '噛みつき', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.1, useStat: 'atk' } } },
+  { id: 'sk-n-007', name: '突進', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'spd' } } },
+  { id: 'sk-n-008', name: '速攻', rarity: 'N', active: { effect: { kind: 'attack', mult: 0.9, useStat: 'spd' } } },
+  { id: 'sk-n-009', name: '小回復', rarity: 'N', active: { effect: { kind: 'heal', amount: 3 } } },
+  { id: 'sk-n-010', name: '小盾', rarity: 'N', active: { effect: { kind: 'shield', amount: 2 } } },
+  { id: 'sk-n-011', name: '気合溜め', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 2, duration: 'once' } } },
+  { id: 'sk-n-012', name: '構え', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'def', amount: 2, duration: 'once' } } },
+  { id: 'sk-n-013', name: '威嚇', rarity: 'N', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 1, duration: 'battle' } } },
+  { id: 'sk-n-014', name: '砂かけ', rarity: 'N', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 1, duration: 'battle' } } },
+  { id: 'sk-n-015', name: '叫び', rarity: 'N', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 1, duration: 'battle' } } },
+  { id: 'sk-n-016', name: '小傷', rarity: 'N', active: { effect: { kind: 'true_damage', amount: 2 } } },
+  { id: 'sk-n-017', name: '足払い', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'spd' } } },
+  { id: 'sk-n-018', name: '低空タックル', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk' } } },
+  { id: 'sk-n-019', name: '雑な一撃', rarity: 'N', active: { effect: { kind: 'attack', mult: 0.8, useStat: 'atk' } } },
+  { id: 'sk-n-020', name: '硬化', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'def', amount: 1, duration: 'battle' } } },
+  { id: 'sk-n-021', name: '集中', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 1, duration: 'battle' } } },
+  { id: 'sk-n-022', name: '加速', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 1, duration: 'battle' } } },
+  { id: 'sk-n-023', name: '地味な回復', rarity: 'N', active: { effect: { kind: 'heal', amount: 2 } } },
+  { id: 'sk-n-024', name: '盾構え', rarity: 'N', active: { effect: { kind: 'shield', amount: 3 } } },
+  { id: 'sk-n-025', name: '反撃の構え', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 1, duration: 'once' } } },
+  { id: 'sk-n-026', name: '小細工', rarity: 'N', active: { effect: { kind: 'true_damage', amount: 1 } } },
+  { id: 'sk-n-027', name: '岩投げ', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.1, useStat: 'atk' } } },
+  { id: 'sk-n-028', name: '影刺し', rarity: 'N', active: { effect: { kind: 'true_damage', amount: 2 } } },
+
+  // ─── R (Rare) ──────────────────────────────────────────────────────────────
+  { id: 'sk-r-001', name: '強打', rarity: 'R', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk' } } },
+  { id: 'sk-r-002', name: '貫通刺突', rarity: 'R', active: { effect: { kind: 'true_damage', amount: 4 } } },
+  { id: 'sk-r-003', name: '回復術', rarity: 'R', active: { effect: { kind: 'heal', amount: 6 } } },
+  { id: 'sk-r-004', name: '大盾', rarity: 'R', active: { effect: { kind: 'shield', amount: 5 } } },
+  { id: 'sk-r-005', name: '気力解放', rarity: 'R', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 3, duration: 'once' } } },
+  { id: 'sk-r-006', name: '岩石防御', rarity: 'R', active: { effect: { kind: 'buff_self', stat: 'def', amount: 3, duration: 'once' } } },
+  { id: 'sk-r-007', name: '加速装置', rarity: 'R', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 2, duration: 'battle' } } },
+  { id: 'sk-r-008', name: '威圧', rarity: 'R', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 2, duration: 'battle' } } },
+  { id: 'sk-r-009', name: '装甲剥がし', rarity: 'R', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 2, duration: 'battle' } } },
+  { id: 'sk-r-010', name: '鈍化', rarity: 'R', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 2, duration: 'battle' } } },
+  { id: 'sk-r-011', name: '次撃倍化', rarity: 'R', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
+  { id: 'sk-r-012', name: '見切り', rarity: 'R', active: { effect: { kind: 'nullify_next' } } },
+  { id: 'sk-r-013', name: '疾風斬り', rarity: 'R', active: { effect: { kind: 'attack', mult: 1.3, useStat: 'spd' } } },
+  { id: 'sk-r-014', name: '溜め攻撃', rarity: 'R', active: { effect: { kind: 'attack', mult: 1.4, useStat: 'atk' } } },
+  { id: 'sk-r-015', name: '癒しの風', rarity: 'R', active: { effect: { kind: 'heal', amount: 4 } } },
+  { id: 'sk-r-016', name: '中盾', rarity: 'R', active: { effect: { kind: 'shield', amount: 4 } } },
+  { id: 'sk-r-017', name: '攻防一体', rarity: 'R', active: { effect: { kind: 'buff_self', stat: 'def', amount: 1, duration: 'battle' } } },
+  { id: 'sk-r-018', name: '雷光', rarity: 'R', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'spd' } } },
+  { id: 'sk-r-019', name: '裂破', rarity: 'R', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk' } } },
+  { id: 'sk-r-020', name: '反射シールド', rarity: 'R', active: { effect: { kind: 'shield', amount: 6 } } },
+
+  // ─── SR (Super Rare) ───────────────────────────────────────────────────────
+  { id: 'sk-sr-001', name: '必殺斬り', rarity: 'SR', active: { effect: { kind: 'attack', mult: 2.0, useStat: 'atk' } } },
+  { id: 'sk-sr-002', name: '光速突き', rarity: 'SR', active: { effect: { kind: 'attack', mult: 1.8, useStat: 'spd' } } },
+  { id: 'sk-sr-003', name: '貫通の理', rarity: 'SR', active: { effect: { kind: 'true_damage', amount: 7 } } },
+  { id: 'sk-sr-004', name: '完全治癒', rarity: 'SR', active: { effect: { kind: 'heal', amount: 10 } } },
+  { id: 'sk-sr-005', name: '聖盾', rarity: 'SR', active: { effect: { kind: 'shield', amount: 8 } } },
+  { id: 'sk-sr-006', name: '剛力解放', rarity: 'SR', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 3, duration: 'battle' } } },
+  { id: 'sk-sr-007', name: '鋼鉄化', rarity: 'SR', active: { effect: { kind: 'buff_self', stat: 'def', amount: 3, duration: 'battle' } } },
+  { id: 'sk-sr-008', name: '神速', rarity: 'SR', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 3, duration: 'battle' } } },
+  { id: 'sk-sr-009', name: '威圧の咆哮', rarity: 'SR', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 3, duration: 'battle' } } },
+  { id: 'sk-sr-010', name: '次撃3倍', rarity: 'SR', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
+  { id: 'sk-sr-011', name: '完全見切り', rarity: 'SR', active: { effect: { kind: 'nullify_next' } } },
+  { id: 'sk-sr-012', name: '装甲粉砕', rarity: 'SR', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 3, duration: 'battle' } } },
+
+  // ─── SSR ───────────────────────────────────────────────────────────────────
+  { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', active: { effect: { kind: 'attack', mult: 3.0, useStat: 'atk' } } },
+  { id: 'sk-ssr-002', name: '神殺しの一撃', rarity: 'SSR', active: { effect: { kind: 'true_damage', amount: 12 } } },
+  { id: 'sk-ssr-003', name: '神域の守り', rarity: 'SSR', active: { effect: { kind: 'shield', amount: 12 } } },
+  { id: 'sk-ssr-004', name: '時止め', rarity: 'SSR', active: { effect: { kind: 'next_amp', mult: 4.0 } } },
+];
