@@ -28,12 +28,12 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'terragon',
-    name: 'テラゴン',
+    baseId: 'golem',
+    name: 'ゴーレム',
     stats: { hp: 20, atk: 5, def: 7, spd: 2 },
     passives: [
       {
-        id: 'terragon-p1',
+        id: 'golem-p1',
         name: '岩鎧',
         trigger: { kind: 'on_take_damage' },
         effect: { kind: 'damage_reduction', amount: 1 },
