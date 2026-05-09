@@ -48,6 +48,10 @@ export class GameRunner {
    * can play the per-skill battle animation on the client.
    */
   private battleResolvedSinceConsume = false;
+  /** Same idea for the event phase: the ws layer pauses to display the card. */
+  private eventResolvedSinceConsume = false;
+  /** Same idea for the action phase. */
+  private actionResolvedSinceConsume = false;
 
   constructor(opts: {
     roomId: string;
@@ -92,6 +96,12 @@ export class GameRunner {
       if (phaseBefore === 'battle' && this.state.phase !== 'battle') {
         this.battleResolvedSinceConsume = true;
       }
+      if (phaseBefore === 'event' && this.state.phase !== 'event') {
+        this.eventResolvedSinceConsume = true;
+      }
+      if (phaseBefore === 'action' && this.state.phase !== 'action') {
+        this.actionResolvedSinceConsume = true;
+      }
       if (waiting || this.state.phase === 'finished') return;
       if (this.snapshotKey() === before) {
         // No progress made; bail to avoid infinite loop.
@@ -107,6 +117,18 @@ export class GameRunner {
   consumeBattleResolved(): boolean {
     const v = this.battleResolvedSinceConsume;
     this.battleResolvedSinceConsume = false;
+    return v;
+  }
+
+  consumeEventResolved(): boolean {
+    const v = this.eventResolvedSinceConsume;
+    this.eventResolvedSinceConsume = false;
+    return v;
+  }
+
+  consumeActionResolved(): boolean {
+    const v = this.actionResolvedSinceConsume;
+    this.actionResolvedSinceConsume = false;
     return v;
   }
 
@@ -285,6 +307,8 @@ export class GameRunner {
       reward: s.reward,
       tournament: s.tournament,
       champion: s.champion,
+      eventPhaseSummary: s.eventPhaseSummary,
+      actionPhaseSummary: s.actionPhaseSummary,
       recentLog: s.log.slice(-80),
       deckCounts: {
         event: s.decks.event.length,

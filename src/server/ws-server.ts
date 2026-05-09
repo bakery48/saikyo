@@ -129,6 +129,10 @@ export class GameWsServer {
   private static readonly BATTLE_STEP_MS = 2000;
   /** Buffer added to the battle animation duration so the result is briefly visible. */
   private static readonly BATTLE_TAIL_MS = 1500;
+  /** How long the event-phase card+effect stays on screen before advancing. */
+  private static readonly EVENT_PHASE_MS = 3000;
+  /** How long the action-phase summary stays on screen before advancing. */
+  private static readonly ACTION_PHASE_MS = 4500;
 
   private startGame(hostId: string): void {
     const room = this.roomManager.getRoomByPlayer(hostId);
@@ -172,6 +176,8 @@ export class GameWsServer {
     if (!game) return;
     const phaseBefore = game.state.phase;
     game.advance();
+    if (this.maybeEventPhasePause(room)) return;
+    if (this.maybeActionPhasePause(room)) return;
     if (this.maybeAutoReveal(room)) return;
     if (this.maybeBattleAnimationPause(room)) return;
     if (this.maybePostPickPause(room, phaseBefore)) return;
@@ -179,6 +185,39 @@ export class GameWsServer {
     if (game.state.phase === 'finished') {
       this.handleFinished(room, game);
     }
+  }
+
+  /**
+   * Hold the client on a forced 'event' phase view for EVENT_PHASE_MS
+   * after the engine resolved an event card, so players can see what
+   * happened. After the timeout, drives the game forward.
+   */
+  private maybeEventPhasePause(room: Room): boolean {
+    const game = this.games.get(room.id);
+    if (!game) return false;
+    if (!game.consumeEventResolved()) return false;
+    if (!game.state.eventPhaseSummary) return false;
+    this.broadcastGameStateWithPhase(room, 'event');
+    setTimeout(() => {
+      this.driveGame(room);
+    }, GameWsServer.EVENT_PHASE_MS);
+    return true;
+  }
+
+  /**
+   * Hold the client on a forced 'action' phase view for ACTION_PHASE_MS
+   * after the engine resolved every player's action card.
+   */
+  private maybeActionPhasePause(room: Room): boolean {
+    const game = this.games.get(room.id);
+    if (!game) return false;
+    if (!game.consumeActionResolved()) return false;
+    if (!game.state.actionPhaseSummary) return false;
+    this.broadcastGameStateWithPhase(room, 'action');
+    setTimeout(() => {
+      this.driveGame(room);
+    }, GameWsServer.ACTION_PHASE_MS);
+    return true;
   }
 
   /**

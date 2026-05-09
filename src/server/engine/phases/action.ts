@@ -1,6 +1,7 @@
-import type { ActionCard, GameState, Player } from '../types';
+import type { ActionCard, ActionPhaseSummary, GameState, Player } from '../types';
 import { drawTop } from '../deck';
 import { addSkillCardToMonster, makeRng, saveRng } from '../state';
+import { describeActionEffect } from '../../../lib/card-text';
 
 function applyActionEffect(state: GameState, player: Player, card: ActionCard): void {
   if (!player.monster) return;
@@ -53,6 +54,7 @@ function applyActionEffect(state: GameState, player: Player, card: ActionCard): 
  */
 export function resolveActionPhase(state: GameState): void {
   if (state.phase !== 'action') throw new Error('not in action phase');
+  const summary: ActionPhaseSummary = { plays: [] };
   for (const player of state.players) {
     if (!player.monster) continue;
     const rng = makeRng(state);
@@ -62,7 +64,14 @@ export function resolveActionPhase(state: GameState): void {
     state.log.push({ kind: 'action_played', playerId: player.id, cardId: card.id });
     applyActionEffect(state, player, card);
     state.decks.actionGrave.push(card);
+    summary.plays.push({
+      playerId: player.id,
+      cardId: card.id,
+      cardName: card.name,
+      effectDesc: describeActionEffect(card),
+    });
   }
+  state.actionPhaseSummary = summary.plays.length > 0 ? summary : null;
   state.phase = 'draft';
   state.log.push({
     kind: 'phase_change',

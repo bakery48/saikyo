@@ -271,6 +271,29 @@ export type Champion = {
   monster: Monster;
 };
 
+/** Snapshot of the most recent event phase, used for the client-side display. */
+export type EventPhaseSummary = {
+  cardId: string;
+  cardName: string;
+  /** Selector label, e.g. "全員" / "HP最少". */
+  targetLabel: string;
+  /** Effect description, e.g. "HP-3". */
+  effectDesc: string;
+  /** Players actually targeted after selection. */
+  targetIds: string[];
+};
+
+/** Snapshot of the most recent action phase, used for the client-side display. */
+export type ActionPhaseSummary = {
+  plays: {
+    playerId: string;
+    cardId: string;
+    cardName: string;
+    /** Effect description, e.g. "ATK+1 (永続)". */
+    effectDesc: string;
+  }[];
+};
+
 export type GameEvent =
   | { kind: 'phase_change'; phase: Phase; round: number; miniRound: number }
   | { kind: 'monster_pick_revealed'; baseIds: string[] }
@@ -317,4 +340,8 @@ export type GameState = {
   /** Counter for generating unique skill instance IDs when adding to monsters. */
   nextSkillInstanceSeq: number;
   log: GameEvent[];
+  /** Snapshot of the most recently resolved event phase (server populates, ws layer displays). */
+  eventPhaseSummary: EventPhaseSummary | null;
+  /** Snapshot of the most recently resolved action phase. */
+  actionPhaseSummary: ActionPhaseSummary | null;
 };

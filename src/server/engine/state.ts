@@ -86,6 +86,8 @@ export function createInitialState(opts: {
     champion: null,
     nextSkillInstanceSeq: 1,
     log: [],
+    eventPhaseSummary: null,
+    actionPhaseSummary: null,
   };
   state.rngState = rng.snapshot();
   state.log.push({ kind: 'monster_pick_revealed', baseIds: monsterPool.map((m) => m.baseId) });

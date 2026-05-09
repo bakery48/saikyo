@@ -1,8 +1,10 @@
 import type {
+  ActionPhaseSummary,
   BattleMatch,
   Champion,
   Color,
   DraftState,
+  EventPhaseSummary,
   GameEvent,
   Monster,
   MonsterPickState,
@@ -59,6 +61,10 @@ export type ClientGameState = {
   reward: RewardState | null;
   tournament: TournamentState | null;
   champion: Champion | null;
+  /** Snapshot of the most recently resolved event phase (set during the event display window). */
+  eventPhaseSummary: EventPhaseSummary | null;
+  /** Snapshot of the most recently resolved action phase. */
+  actionPhaseSummary: ActionPhaseSummary | null;
   /** Last ~80 game events. */
   recentLog: GameEvent[];
   deckCounts: {

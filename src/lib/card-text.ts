@@ -1,0 +1,51 @@
+import type { ActionCard, EventCard, EventTarget } from '../server/engine/types';
+
+/** Human-readable target label for an event card. */
+export function describeEventTarget(target: EventTarget): string {
+  switch (target) {
+    case 'all':
+      return '全員';
+    case 'random':
+      return 'ランダム1人';
+    case 'lowestHp':
+      return 'HP最少';
+    case 'highestAtk':
+      return 'ATK最高';
+  }
+}
+
+/** Short description of an event card's effect. */
+export function describeEventEffect(card: EventCard): string {
+  const e = card.effect;
+  switch (e.kind) {
+    case 'stat_mod':
+      return `${e.stat.toUpperCase()}${e.amount >= 0 ? '+' : ''}${e.amount}`;
+    case 'swap_stat':
+      return `${e.stat.toUpperCase()}を相手と入れ替え`;
+    case 'heal':
+      return `HP+${e.amount}`;
+    case 'damage':
+      return `HP-${e.amount}`;
+    case 'add_skill_top':
+      return `スキル山札から1枚追加`;
+  }
+}
+
+/** Short description of an action card's effect. */
+export function describeActionEffect(card: ActionCard): string {
+  const e = card.effect;
+  switch (e.kind) {
+    case 'stat_mod':
+      return `${e.stat.toUpperCase()}${e.amount >= 0 ? '+' : ''}${e.amount} (${
+        e.duration === 'permanent' ? '永続' : '次戦のみ'
+      })`;
+    case 'recover_skill_from_grave':
+      return 'スキル墓地から1枚回収';
+    case 'draw_skill_top':
+      return 'スキル山札から1枚追加';
+    case 'discard_random_active':
+      return 'アクティブ1枚ランダム破棄';
+    case 'gain_passive':
+      return `パッシブ獲得: ${e.passive.name}`;
+  }
+}

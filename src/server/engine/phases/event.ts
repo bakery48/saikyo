@@ -1,6 +1,7 @@
 import type { EventCard, EventTarget, GameState, Player } from '../types';
 import { drawTop } from '../deck';
 import { addSkillCardToMonster, makeRng, saveRng } from '../state';
+import { describeEventEffect, describeEventTarget } from '../../../lib/card-text';
 
 /** Pick which players an event card targets. Returns alive players only. */
 function selectTargets(target: EventTarget, state: GameState, rng = makeRng(state)): Player[] {
@@ -77,6 +78,7 @@ export function resolveEventPhase(state: GameState): void {
   const card = drawTop(state.decks.event, state.decks.eventGrave, rng);
   saveRng(state, rng);
   if (!card) {
+    state.eventPhaseSummary = null;
     advanceFromEvent(state);
     return;
   }
@@ -84,6 +86,13 @@ export function resolveEventPhase(state: GameState): void {
   state.log.push({ kind: 'event_played', cardId: card.id, targets: targets.map((t) => t.id) });
   applyEventEffect(state, card, targets);
   state.decks.eventGrave.push(card);
+  state.eventPhaseSummary = {
+    cardId: card.id,
+    cardName: card.name,
+    targetLabel: describeEventTarget(card.target),
+    effectDesc: describeEventEffect(card),
+    targetIds: targets.map((t) => t.id),
+  };
   advanceFromEvent(state);
 }
 

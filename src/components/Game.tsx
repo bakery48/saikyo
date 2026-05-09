@@ -4,6 +4,8 @@ import { MonsterPickView } from './game/MonsterPickView';
 import { DraftView } from './game/DraftView';
 import { AutoPhaseView } from './game/AutoPhaseView';
 import { BattleAnimationView } from './game/BattleAnimationView';
+import { EventPhaseView } from './game/EventPhaseView';
+import { ActionPhaseView } from './game/ActionPhaseView';
 import { RewardView } from './game/RewardView';
 import { ChampionView } from './game/ChampionView';
 import { PlayerPanel } from './game/PlayerPanel';
@@ -83,6 +85,10 @@ function renderPhase(
   switch (phase) {
     case 'pick_monster':
       return <MonsterPickView state={state} socket={socket} />;
+    case 'event':
+      return <EventPhaseView state={state} />;
+    case 'action':
+      return <ActionPhaseView state={state} selfId={socket.playerId} />;
     case 'draft':
       return <DraftView state={state} socket={socket} />;
     case 'battle':
