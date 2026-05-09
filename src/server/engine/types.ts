@@ -140,8 +140,8 @@ export type SkillCard = {
   id: string;
   name: string;
   rarity: Rarity;
-  /** Noun used to compose monster names (e.g. "パワー"). */
-  nameTag: string;
+  /** Noun used to compose monster names (e.g. "パワー"). Absent on N-rarity cards. */
+  nameTag?: string;
   /** If undefined this skill becomes an active skill (default). */
   isPassive?: boolean;
   active?: Omit<ActiveSkill, 'id' | 'order' | 'name' | 'nameTag'>;
