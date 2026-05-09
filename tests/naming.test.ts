@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createInitialState, addSkillCardToMonster } from '../src/server/engine/state';
 import { GameRunner } from '../src/server/game-runner';
-import { getAvailableTags, validateMonsterName } from '../src/server/engine/naming';
+import {
+  composeMonsterName,
+  getAvailableTags,
+  getBaseName,
+  NAME_SEPARATOR,
+  validateMonsterName,
+} from '../src/server/engine/naming';
 import { SKILLS } from '../src/server/engine/cards/skills';
 import type { GameState, SkillCard } from '../src/server/engine/types';
 import { completeMonsterPicks } from './helpers';
@@ -23,10 +29,14 @@ const findCard = (id: string): SkillCard => {
 };
 
 describe('Skill name tags', () => {
-  it('every card has a non-empty nameTag', () => {
+  it('every R/SR/SSR card has a non-empty nameTag (N cards have none)', () => {
     for (const c of SKILLS) {
-      expect(c.nameTag).toBeTypeOf('string');
-      expect(c.nameTag.length).toBeGreaterThan(0);
+      if (c.rarity === 'N') {
+        expect(c.nameTag).toBeUndefined();
+      } else {
+        expect(c.nameTag).toBeTypeOf('string');
+        expect((c.nameTag ?? '').length).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -60,22 +70,36 @@ describe('validateMonsterName', () => {
     addSkillCardToMonster(state, p, findCard('sk-ssr-001')); // ドラゴン
   });
 
-  it('accepts a name composed of all available tags', () => {
+  it('accepts the bare base monster name (no prefix)', () => {
     const monster = state.players[0]!.monster!;
-    expect(validateMonsterName('パワー・ウィザード・ドラゴン', monster)).toBe(true);
-    expect(validateMonsterName('ウィザード・パワー・ドラゴン', monster)).toBe(true);
+    expect(validateMonsterName(getBaseName(monster), monster)).toBe(true);
   });
 
-  it('accepts a subset of tags', () => {
+  it('accepts a name composed of all available tags + base name', () => {
     const monster = state.players[0]!.monster!;
-    expect(validateMonsterName('パワー・ドラゴン', monster)).toBe(true);
-    expect(validateMonsterName('パワー', monster)).toBe(true);
+    const base = getBaseName(monster);
+    expect(validateMonsterName(`パワー・ウィザード・ドラゴン・${base}`, monster)).toBe(true);
+    expect(validateMonsterName(`ウィザード・パワー・ドラゴン・${base}`, monster)).toBe(true);
+  });
+
+  it('accepts a subset of tags + base name', () => {
+    const monster = state.players[0]!.monster!;
+    const base = getBaseName(monster);
+    expect(validateMonsterName(`パワー・ドラゴン・${base}`, monster)).toBe(true);
+    expect(validateMonsterName(`パワー・${base}`, monster)).toBe(true);
+  });
+
+  it('rejects a name that does not end with the base monster name', () => {
+    const monster = state.players[0]!.monster!;
+    expect(validateMonsterName('パワー・ウィザード・ドラゴン', monster)).toBe(false);
+    expect(validateMonsterName('パワー', monster)).toBe(false);
   });
 
   it('rejects a tag the monster does not have', () => {
     const monster = state.players[0]!.monster!;
-    expect(validateMonsterName('セイント', monster)).toBe(false);
-    expect(validateMonsterName('パワー・セイント', monster)).toBe(false);
+    const base = getBaseName(monster);
+    expect(validateMonsterName(`セイント・${base}`, monster)).toBe(false);
+    expect(validateMonsterName(`パワー・セイント・${base}`, monster)).toBe(false);
   });
 
   it('rejects empty / whitespace-only name', () => {
@@ -87,13 +111,32 @@ describe('validateMonsterName', () => {
 
   it('cannot reuse a tag more times than the monster has acquired it', () => {
     const monster = state.players[0]!.monster!;
-    expect(validateMonsterName('パワー・パワー', monster)).toBe(false);
+    const base = getBaseName(monster);
+    expect(validateMonsterName(`パワー・パワー・${base}`, monster)).toBe(false);
   });
 
   it('allows duplicate tags up to multiplicity', () => {
     const monster = state.players[0]!.monster!;
+    const base = getBaseName(monster);
     addSkillCardToMonster(state, state.players[0]!, findCard('sk-r-001')); // 2nd パワー
-    expect(validateMonsterName('パワー・パワー', monster)).toBe(true);
+    expect(validateMonsterName(`パワー・パワー・${base}`, monster)).toBe(true);
+  });
+});
+
+describe('composeMonsterName', () => {
+  it('returns the bare base name when no prefix tags are given', () => {
+    const state = setupReady();
+    const monster = state.players[0]!.monster!;
+    expect(composeMonsterName([], monster)).toBe(getBaseName(monster));
+  });
+
+  it('joins prefix tags with the base name', () => {
+    const state = setupReady();
+    const monster = state.players[0]!.monster!;
+    const base = getBaseName(monster);
+    expect(composeMonsterName(['パワー', 'ガード'], monster)).toBe(
+      `パワー${NAME_SEPARATOR}ガード${NAME_SEPARATOR}${base}`,
+    );
   });
 });
 
@@ -101,8 +144,6 @@ describe('GameRunner.renameMonster', () => {
   it('updates monster name when valid', () => {
     const runner = new GameRunner({ roomId: 'r', seed: 5, humans: [{ id: 'h1', name: 'Hero' }] });
     runner.advance();
-    // Resolve any remaining pick conflicts: keep picking from the pool until
-    // the human is no longer pending.
     let safety = 16;
     while (
       runner.state.phase === 'pick_monster' &&
@@ -116,16 +157,36 @@ describe('GameRunner.renameMonster', () => {
       runner.submitPick('h1', choice.baseId);
       runner.advance();
     }
-    // Now in draft; submit a single skill so we have a tag.
+    // Now in either action (selecting from hand) or draft. Step until in draft.
+    safety = 32;
+    while (runner.state.phase !== 'draft' && safety-- > 0) {
+      if (runner.state.phase === 'action' && runner.state.actionPhase) {
+        const phase = runner.state.actionPhase;
+        if (phase.pendingPlayerIds.includes('h1') && !phase.submittedPlays['h1']) {
+          const player = runner.state.players.find((p) => p.id === 'h1')!;
+          runner.submitAction('h1', player.actionHand[0]!.id);
+          runner.advance();
+          continue;
+        }
+      }
+      runner.advance();
+      if (runner.state.phase === 'pick_monster') break;
+    }
+    if (runner.state.phase !== 'draft') return; // Game flow drifted; skip body.
     const draft = runner.state.draft!;
     const used = new Set(Object.values(draft.submittedPicks));
-    const card = draft.pool.find((c) => !used.has(c.id))!;
+    const taggedCards = draft.pool.filter((c) => !!c.nameTag);
+    const card = taggedCards.find((c) => !used.has(c.id)) ?? draft.pool.find((c) => !used.has(c.id))!;
     runner.submitDraft('h1', card.id);
     runner.advance();
     const player = runner.state.players.find((p) => p.id === 'h1')!;
-    const tag = player.monster!.actives[0]!.nameTag ?? player.monster!.passives.at(-1)!.nameTag!;
-    runner.renameMonster('h1', tag);
-    expect(player.monster!.name).toBe(tag);
+    const tag =
+      player.monster!.actives.find((a) => a.nameTag)?.nameTag ??
+      player.monster!.passives.find((p) => p.nameTag)?.nameTag;
+    if (!tag) return; // Drew an N-rarity skill (no tag); nothing to rename with.
+    const newName = composeMonsterName([tag], player.monster!);
+    runner.renameMonster('h1', newName);
+    expect(player.monster!.name).toBe(newName);
   });
 
   it('throws when the name uses unknown tags', () => {

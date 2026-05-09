@@ -2,7 +2,14 @@
 import { useEffect, useState } from 'react';
 import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
-import { getAvailableTags, NAME_SEPARATOR, validateMonsterName } from '../../server/engine/naming';
+import {
+  composeMonsterName,
+  extractPrefixTags,
+  getAvailableTags,
+  getBaseName,
+  NAME_SEPARATOR,
+  validateMonsterName,
+} from '../../server/engine/naming';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 import { activeTooltip, passiveTooltip } from '../../lib/skill-text';
 import { SkillNameHover } from './SkillNameHover';
@@ -23,11 +30,13 @@ export function MyMonsterPanel({
 }) {
   const me = state.players.find((p) => p.id === socket.playerId);
   const monster = me?.monster ?? null;
-  const [draftName, setDraftName] = useState('');
+  // Editable prefix only — the base monster name is fixed and always rendered as a suffix.
+  const [prefix, setPrefix] = useState('');
 
-  // Whenever the server sends a new monster name, sync the input.
+  // Sync the prefix from the server-side name on changes.
   useEffect(() => {
-    if (monster) setDraftName(monster.name);
+    if (!monster) return;
+    setPrefix(extractPrefixTags(monster.name, monster).join(NAME_SEPARATOR));
   }, [monster?.name]);
 
   if (!me || !monster) {
@@ -49,11 +58,17 @@ export function MyMonsterPanel({
 
   const tags = getAvailableTags(monster);
   const tagCounts = tagMultiset(tags);
-  const isValid = validateMonsterName(draftName, monster);
-  const canSubmit = isValid && draftName.trim() !== monster.name && state.phase !== 'finished';
+  const baseName = getBaseName(monster);
+  const prefixTags = prefix
+    .split(NAME_SEPARATOR)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  const composedName = composeMonsterName(prefixTags, monster);
+  const isValid = validateMonsterName(composedName, monster);
+  const canSubmit = isValid && composedName !== monster.name && state.phase !== 'finished';
 
   const appendTag = (tag: string): void => {
-    setDraftName((prev) => (prev.trim().length === 0 ? tag : `${prev}${NAME_SEPARATOR}${tag}`));
+    setPrefix((prev) => (prev.trim().length === 0 ? tag : `${prev}${NAME_SEPARATOR}${tag}`));
   };
 
   return (
@@ -126,32 +141,37 @@ export function MyMonsterPanel({
         <div>
           <h4 style={{ margin: '0 0 4px' }}>名前を変更</h4>
           <p style={{ fontSize: 11, opacity: 0.7, margin: '0 0 6px' }}>
-            獲得済みタグを「・」で繋いで名前を作れます (例: パワー・ウィザード・ドラゴン)。
+            獲得済みタグを「・」で繋いで「<strong>{baseName}</strong>」の前に付けられます (例: パワー・{baseName})。
           </p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             <input
-              value={draftName}
-              onChange={(e) => setDraftName(e.target.value)}
-              maxLength={60}
+              value={prefix}
+              onChange={(e) => setPrefix(e.target.value)}
+              placeholder="(タグなし)"
+              maxLength={60 - baseName.length - 1}
               style={{
-                flex: '1 1 240px',
+                flex: '1 1 200px',
                 padding: '4px 8px',
                 fontSize: 14,
                 border: `1px solid ${isValid ? '#ccc' : '#e88'}`,
                 borderRadius: 4,
               }}
             />
+            <span style={{ fontSize: 14, opacity: 0.85 }}>
+              {prefixTags.length > 0 ? NAME_SEPARATOR : ''}
+              <strong>{baseName}</strong>
+            </span>
             <button
-              onClick={() => socket.send({ type: 'rename_monster', name: draftName.trim() })}
+              onClick={() => socket.send({ type: 'rename_monster', name: composedName })}
               disabled={!canSubmit}
             >
               変更
             </button>
-            <button onClick={() => setDraftName('')} type="button" style={{ fontSize: 12 }}>
+            <button onClick={() => setPrefix('')} type="button" style={{ fontSize: 12 }}>
               クリア
             </button>
           </div>
-          {!isValid && draftName.trim().length > 0 && (
+          {!isValid && prefix.trim().length > 0 && (
             <p style={{ fontSize: 11, color: '#c44', margin: '4px 0 0' }}>
               使えないタグが含まれています。下のタグから選んでください。
             </p>
