@@ -64,6 +64,7 @@
   - `add_skill_top` — スキルデッキ先頭を引いてモンスターに追加
   - `reverse_actives_next_battle` — 次のバトルで全員のアクティブスキル順序が逆転（グローバル）
   - `skip_action_phase` — このアクションフェーズをスキップしてドラフトへ（グローバル）
+  - `skip_draft_phase` — このドラフトフェーズをスキップして次フェーズへ（グローバル）
   - `extra_battle` — 今すぐ追加バトル → そのまま今ミニラウンドのアクションへ復帰（グローバル）
 - 完了後 `phase = 'action'`、`state.eventPhaseSummary` に結果格納
 

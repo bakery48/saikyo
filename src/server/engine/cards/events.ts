@@ -28,4 +28,5 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-025', name: '時逆の風', target: 'all', effect: { kind: 'reverse_actives_next_battle' } },
   { id: 'ev-026', name: '休戦命令', target: 'all', effect: { kind: 'skip_action_phase' } },
   { id: 'ev-027', name: '飛び入り決闘', target: 'all', effect: { kind: 'extra_battle' } },
+  { id: 'ev-028', name: '商人不在', target: 'all', effect: { kind: 'skip_draft_phase' } },
 ];

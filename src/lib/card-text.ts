@@ -32,6 +32,8 @@ export function describeEventEffect(card: EventCard): string {
       return '次戦は全員のアクティブスキル順序を逆転';
     case 'skip_action_phase':
       return 'このアクションフェーズをスキップ';
+    case 'skip_draft_phase':
+      return 'このドラフトフェーズをスキップ';
     case 'extra_battle':
       return '今すぐ追加バトル → アクションフェーズへ';
   }

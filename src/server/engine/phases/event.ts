@@ -43,6 +43,9 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
     case 'skip_action_phase':
       state.skipNextActionPhase = true;
       return;
+    case 'skip_draft_phase':
+      state.skipNextDraftPhase = true;
+      return;
     case 'extra_battle':
       state.extraBattlePending = true;
       return;

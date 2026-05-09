@@ -109,6 +109,7 @@ export function createInitialState(opts: {
     actionPhaseSummary: null,
     nextBattleReverseActives: false,
     skipNextActionPhase: false,
+    skipNextDraftPhase: false,
     extraBattlePending: false,
     returnToActionAfterReward: false,
   };

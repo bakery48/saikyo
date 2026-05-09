@@ -119,6 +119,8 @@ export type EventEffect =
   | { kind: 'reverse_actives_next_battle' }
   /** Skip the upcoming action phase of this mini-round. */
   | { kind: 'skip_action_phase' }
+  /** Skip the upcoming draft phase of this mini-round. */
+  | { kind: 'skip_draft_phase' }
   /** Run a one-off battle now, then resume with action → draft of this mini-round. */
   | { kind: 'extra_battle' };
 
@@ -384,6 +386,8 @@ export type GameState = {
   nextBattleReverseActives: boolean;
   /** When true, the upcoming `advanceFromEvent` skips action and goes straight to draft. Cleared on use. */
   skipNextActionPhase: boolean;
+  /** When true, the upcoming `startDraft` call skips drafting and advances to the next phase. Cleared on use. */
+  skipNextDraftPhase: boolean;
   /** When true, the upcoming `advanceFromEvent` transitions to battle (extra battle). Cleared on use. */
   extraBattlePending: boolean;
   /** Set when an extra battle starts so the following reward returns to action instead of advancing the round. */

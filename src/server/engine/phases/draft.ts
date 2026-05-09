@@ -8,6 +8,12 @@ const DRAFT_POOL_SIZE = 8;
 export function startDraft(state: GameState): void {
   if (state.phase !== 'draft') throw new Error('not in draft phase');
   if (state.draft) throw new Error('draft already started');
+  // An event card may have flagged this draft to be skipped — advance straight away.
+  if (state.skipNextDraftPhase) {
+    state.skipNextDraftPhase = false;
+    advanceAfterDraft(state);
+    return;
+  }
   const rng = makeRng(state);
   const pool = drawN(state.decks.skill, state.decks.skillGrave, DRAFT_POOL_SIZE, rng);
   saveRng(state, rng);
