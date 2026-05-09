@@ -4,7 +4,7 @@ export const MONSTERS: MonsterBase[] = [
   {
     baseId: 'flameox',
     name: 'フレイモックス',
-    stats: { hp: 22, atk: 7, def: 3, spd: 4 },
+    stats: { hp: 12, atk: 7, def: 3, spd: 4 },
     passives: [
       {
         id: 'flameox-p1',
@@ -17,7 +17,7 @@ export const MONSTERS: MonsterBase[] = [
   {
     baseId: 'aqualith',
     name: 'アクアリス',
-    stats: { hp: 26, atk: 4, def: 5, spd: 4 },
+    stats: { hp: 16, atk: 4, def: 5, spd: 4 },
     passives: [
       {
         id: 'aqualith-p1',
@@ -30,7 +30,7 @@ export const MONSTERS: MonsterBase[] = [
   {
     baseId: 'terragon',
     name: 'テラゴン',
-    stats: { hp: 30, atk: 5, def: 7, spd: 2 },
+    stats: { hp: 20, atk: 5, def: 7, spd: 2 },
     passives: [
       {
         id: 'terragon-p1',
@@ -43,7 +43,7 @@ export const MONSTERS: MonsterBase[] = [
   {
     baseId: 'zephyrix',
     name: 'ゼピリクス',
-    stats: { hp: 20, atk: 5, def: 3, spd: 8 },
+    stats: { hp: 10, atk: 5, def: 3, spd: 8 },
     passives: [
       {
         id: 'zephyrix-p1',
@@ -56,7 +56,7 @@ export const MONSTERS: MonsterBase[] = [
   {
     baseId: 'voltank',
     name: 'ヴォルタンク',
-    stats: { hp: 24, atk: 6, def: 6, spd: 3 },
+    stats: { hp: 14, atk: 6, def: 6, spd: 3 },
     passives: [
       {
         id: 'voltank-p1',
@@ -69,7 +69,7 @@ export const MONSTERS: MonsterBase[] = [
   {
     baseId: 'umbrafox',
     name: 'ウンブラ',
-    stats: { hp: 22, atk: 6, def: 4, spd: 5 },
+    stats: { hp: 12, atk: 6, def: 4, spd: 5 },
     passives: [
       {
         id: 'umbrafox-p1',
@@ -82,7 +82,7 @@ export const MONSTERS: MonsterBase[] = [
   {
     baseId: 'lumibell',
     name: 'ルミベル',
-    stats: { hp: 24, atk: 5, def: 5, spd: 5 },
+    stats: { hp: 14, atk: 5, def: 5, spd: 5 },
     passives: [
       {
         id: 'lumibell-p1',
@@ -95,7 +95,7 @@ export const MONSTERS: MonsterBase[] = [
   {
     baseId: 'chronoa',
     name: 'クロノア',
-    stats: { hp: 20, atk: 4, def: 4, spd: 6 },
+    stats: { hp: 10, atk: 4, def: 4, spd: 6 },
     passives: [
       {
         id: 'chronoa-p1',
