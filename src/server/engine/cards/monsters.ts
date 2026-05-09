@@ -73,7 +73,7 @@ export const MONSTERS: MonsterBase[] = [
     passives: [
       {
         id: 'wyvern-p1',
-        name: '影討ち',
+        name: '急襲の本能',
         trigger: { kind: 'first_attack' },
         effect: { kind: 'first_attack_true' },
       },
