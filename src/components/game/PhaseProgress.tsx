@@ -17,9 +17,10 @@ const PHASE_TO_KEY: Record<string, (round: number, miniRound: number) => string 
   action: (r, m) => `r${r}m${m}-action`,
   draft: (r, m) => `r${r}m${m}-draft`,
   battle: (r) => `r${r}-battle`,
-  reward: (r) => `r${r}-reward`,
+  // Reward is shown as part of the battle step.
+  reward: (r) => `r${r}-battle`,
   tournament: () => 'tournament',
-  finished: () => 'tournament', // keep T highlighted on finished screen
+  finished: () => 'tournament',
 };
 
 function buildSteps(): Step[] {
@@ -34,9 +35,12 @@ function buildSteps(): Step[] {
         endsMini: m < 3,
       });
     }
-    steps.push({ key: `r${r}-battle`, label: 'B' });
-    steps.push({ key: `r${r}-reward`, label: 'R', endsRound: true });
+    if (r < 3) {
+      // Rounds 1-2 end with a battle (which includes the reward phase).
+      steps.push({ key: `r${r}-battle`, label: 'B', endsRound: true });
+    }
   }
+  // Round 3 transitions directly into the tournament — no per-round battle.
   steps.push({ key: 'tournament', label: 'T' });
   return steps;
 }
@@ -48,8 +52,7 @@ const LABELS: Record<string, string> = {
   I: 'イベント',
   A: 'アクション',
   D: 'ドラフト',
-  B: 'バトル',
-  R: '報酬',
+  B: 'バトル + 報酬',
   T: 'トーナメント',
 };
 
