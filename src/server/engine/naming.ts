@@ -4,7 +4,7 @@ import { MONSTERS_BY_ID } from './cards/monsters';
 export const NAME_SEPARATOR = '・';
 export const MAX_NAME_LENGTH = 60;
 
-/** The fixed base monster name (e.g. "アクアリス"). Cannot be edited away. */
+/** The fixed base monster name (e.g. "ユニコーン"). Cannot be edited away. */
 export function getBaseName(monster: Monster): string {
   return MONSTERS_BY_ID[monster.baseId]?.name ?? monster.name;
 }

@@ -15,13 +15,13 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'aqualith',
-    name: 'アクアリス',
+    baseId: 'unicorn',
+    name: 'ユニコーン',
     stats: { hp: 16, atk: 4, def: 5, spd: 4 },
     passives: [
       {
-        id: 'aqualith-p1',
-        name: '清水の加護',
+        id: 'unicorn-p1',
+        name: '清廉潔白',
         trigger: { kind: 'on_own_turn_start' },
         effect: { kind: 'turn_start_heal', amount: 1 },
       },
