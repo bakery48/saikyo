@@ -75,6 +75,9 @@ function scoreActionCard(card: ActionCard): number {
     case 'stat_mod':
       // Permanent buffs are worth more than next-battle ones.
       return card.effect.amount * (card.effect.duration === 'permanent' ? 4 : 2);
+    case 'stat_mod_choice':
+      // Same as a permanent stat_mod; the chosen stat is decided when played.
+      return card.effect.amount * (card.effect.duration === 'permanent' ? 4 : 2);
     case 'draw_skill_top':
       return 5;
     case 'recover_skill_from_grave':
@@ -84,6 +87,16 @@ function scoreActionCard(card: ActionCard): number {
     case 'discard_random_active':
       return -1;
   }
+}
+
+/** Pick the stat a CPU should bump for a stat_mod_choice card. */
+export function chooseStatForActionCard(stats: {
+  hp: number;
+  atk: number;
+  def: number;
+  spd: number;
+}): StatKey {
+  return weakestStat(stats);
 }
 
 function weakestStat(stats: { hp: number; atk: number; def: number; spd: number }): StatKey {

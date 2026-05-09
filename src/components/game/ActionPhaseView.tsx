@@ -2,8 +2,11 @@
 import { useEffect, useState } from 'react';
 import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
+import type { StatKey } from '../../server/engine/types';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 import { describeActionEffect } from '../../lib/card-text';
+
+const CHOICE_STATS: StatKey[] = ['hp', 'atk', 'def', 'spd'];
 
 export function ActionPhaseView({
   state,
@@ -23,15 +26,30 @@ export function ActionPhaseView({
 
   // Local tentative selection before pressing 決定.
   const [tentative, setTentative] = useState<string | null>(null);
+  const [tentativeStat, setTentativeStat] = useState<StatKey | null>(null);
   useEffect(() => {
     setTentative(null);
+    setTentativeStat(null);
   }, [!!myCommitted, iAmPending, !!phase]);
+  // Reset stat choice whenever the picked card changes.
+  useEffect(() => {
+    setTentativeStat(null);
+  }, [tentative]);
+
+  const tentativeCard = tentative ? myHand.find((c) => c.id === tentative) : undefined;
+  const isChoiceCard = tentativeCard?.effect.kind === 'stat_mod_choice';
+  const canConfirm = !!tentative && (!isChoiceCard || !!tentativeStat);
 
   // Selection mode: action phase is active and accepting plays.
   if (phase) {
     const confirm = (): void => {
       if (!tentative) return;
-      socket.send({ type: 'play_action_card', cardId: tentative });
+      if (isChoiceCard && !tentativeStat) return;
+      socket.send({
+        type: 'play_action_card',
+        cardId: tentative,
+        chosenStat: isChoiceCard ? tentativeStat ?? undefined : undefined,
+      });
     };
 
     return (
@@ -50,13 +68,49 @@ export function ActionPhaseView({
         {iAmPending && !myCommitted && (
           <>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button onClick={confirm} disabled={!tentative}>
-                決定 {tentative ? `(${myHand.find((c) => c.id === tentative)?.name})` : ''}
+              <button onClick={confirm} disabled={!canConfirm}>
+                決定 {tentative ? `(${tentativeCard?.name})` : ''}
+                {isChoiceCard && tentativeStat ? ` → ${tentativeStat.toUpperCase()}` : ''}
               </button>
               <button onClick={() => setTentative(null)} disabled={!tentative} type="button">
                 クリア
               </button>
             </div>
+            {isChoiceCard && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  padding: 8,
+                  background: '#fff8e1',
+                  border: '1px solid #d4a000',
+                  borderRadius: 6,
+                }}
+              >
+                <span style={{ fontSize: 13, fontWeight: 600 }}>
+                  どのステータスを上げる？
+                </span>
+                {CHOICE_STATS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setTentativeStat(s)}
+                    style={{
+                      padding: '4px 10px',
+                      border: `2px solid ${tentativeStat === s ? '#0066cc' : '#aaa'}`,
+                      borderRadius: 4,
+                      background: tentativeStat === s ? '#eef5ff' : '#fff',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {s.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            )}
             <div
               style={{
                 display: 'grid',

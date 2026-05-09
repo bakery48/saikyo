@@ -125,6 +125,8 @@ export type EventCard = {
 
 export type ActionEffect =
   | { kind: 'stat_mod'; stat: StatKey; amount: number; duration: 'next_battle' | 'permanent' }
+  /** Player picks one of HP/ATK/DEF/SPD to bump. Requires `chosenStat` on submission. */
+  | { kind: 'stat_mod_choice'; amount: number; duration: 'next_battle' | 'permanent' }
   | { kind: 'recover_skill_from_grave' }
   | { kind: 'draw_skill_top' }
   | { kind: 'discard_random_active' }
@@ -238,8 +240,14 @@ export type MonsterPickState = {
 /** Selection state during an action phase: each pending player must play one card from their hand. */
 export type ActionPhaseState = {
   pendingPlayerIds: string[];
-  /** playerId → cardId chosen this phase (must be in the player's hand). */
-  submittedPlays: Record<string, string>;
+  /** playerId → submitted play (cardId + any required choice payload). */
+  submittedPlays: Record<string, ActionPlay>;
+};
+
+export type ActionPlay = {
+  cardId: string;
+  /** Required for stat_mod_choice cards; ignored otherwise. */
+  chosenStat?: StatKey;
 };
 
 export type BattleMatch = {

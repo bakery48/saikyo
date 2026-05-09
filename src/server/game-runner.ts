@@ -1,5 +1,5 @@
 import type { ClientGameState, ClientPlayer } from '../shared/messages';
-import type { GameState, RewardChoice } from './engine/types';
+import type { GameState, RewardChoice, StatKey } from './engine/types';
 import {
   allMonsterPicksIn,
   createInitialState,
@@ -21,7 +21,7 @@ import {
 import { runBattlePhase } from './engine/phases/battle';
 import { resolveRewardPhase, submitReward } from './engine/phases/reward';
 import { runTournament } from './engine/phases/tournament';
-import { greedyPolicy } from './engine/policy';
+import { chooseStatForActionCard, greedyPolicy } from './engine/policy';
 import { validateMonsterName } from './engine/naming';
 
 /**
@@ -250,7 +250,11 @@ export class GameRunner {
           continue;
         }
         const card = greedyPolicy.pickActionCard(this.state, pid, player.actionHand);
-        submitActionPlay(this.state, pid, card.id);
+        const chosenStat =
+          card.effect.kind === 'stat_mod_choice' && player.monster
+            ? chooseStatForActionCard(player.monster.stats)
+            : undefined;
+        submitActionPlay(this.state, pid, card.id, chosenStat);
       }
     }
     if (waiting) return true;
@@ -308,11 +312,11 @@ export class GameRunner {
     submitDraftPick(this.state, playerId, skillId);
   }
 
-  submitAction(playerId: string, cardId: string): void {
+  submitAction(playerId: string, cardId: string, chosenStat?: StatKey): void {
     if (this.state.phase !== 'action' || !this.state.actionPhase) {
       throw new Error('not in action phase');
     }
-    submitActionPlay(this.state, playerId, cardId);
+    submitActionPlay(this.state, playerId, cardId, chosenStat);
   }
 
   submitReward(playerId: string, choice: RewardChoice): void {

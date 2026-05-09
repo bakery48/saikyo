@@ -1,9 +1,23 @@
-import type { ActionCard, ActionPhaseSummary, ActionPhaseState, GameState, Player } from '../types';
+import type {
+  ActionCard,
+  ActionPhaseSummary,
+  ActionPhaseState,
+  GameState,
+  Player,
+  StatKey,
+} from '../types';
 import { drawTop } from '../deck';
 import { addSkillCardToMonster, makeRng, saveRng } from '../state';
 import { describeActionEffect } from '../../../lib/card-text';
 
-function applyActionEffect(state: GameState, player: Player, card: ActionCard): void {
+const VALID_STATS: StatKey[] = ['hp', 'atk', 'def', 'spd'];
+
+function applyActionEffect(
+  state: GameState,
+  player: Player,
+  card: ActionCard,
+  chosenStat?: StatKey,
+): void {
   if (!player.monster) return;
   const rng = makeRng(state);
   switch (card.effect.kind) {
@@ -13,6 +27,19 @@ function applyActionEffect(state: GameState, player: Player, card: ActionCard): 
       } else {
         player.pendingBuffs.push({
           stat: card.effect.stat,
+          amount: card.effect.amount,
+          duration: 'next_battle',
+        });
+      }
+      break;
+    }
+    case 'stat_mod_choice': {
+      if (!chosenStat) break;
+      if (card.effect.duration === 'permanent') {
+        player.monster.stats[chosenStat] += card.effect.amount;
+      } else {
+        player.pendingBuffs.push({
+          stat: chosenStat,
           amount: card.effect.amount,
           duration: 'next_battle',
         });
@@ -72,8 +99,16 @@ export function startActionPhase(state: GameState): void {
   state.actionPhase = phaseState;
 }
 
-/** Submit a player's chosen card (must be present in their hand). */
-export function submitActionPlay(state: GameState, playerId: string, cardId: string): void {
+/**
+ * Submit a player's chosen card (must be present in their hand). For cards
+ * whose effect is `stat_mod_choice`, `chosenStat` must also be supplied.
+ */
+export function submitActionPlay(
+  state: GameState,
+  playerId: string,
+  cardId: string,
+  chosenStat?: StatKey,
+): void {
   if (state.phase !== 'action' || !state.actionPhase) {
     throw new Error('not in action phase');
   }
@@ -83,10 +118,14 @@ export function submitActionPlay(state: GameState, playerId: string, cardId: str
   }
   const player = state.players.find((p) => p.id === playerId);
   if (!player) throw new Error(`player not found: ${playerId}`);
-  if (!player.actionHand.some((c) => c.id === cardId)) {
-    throw new Error(`card ${cardId} not in player's hand`);
+  const card = player.actionHand.find((c) => c.id === cardId);
+  if (!card) throw new Error(`card ${cardId} not in player's hand`);
+  if (card.effect.kind === 'stat_mod_choice') {
+    if (!chosenStat || !VALID_STATS.includes(chosenStat)) {
+      throw new Error('chosenStat is required for this card');
+    }
   }
-  phase.submittedPlays[playerId] = cardId;
+  phase.submittedPlays[playerId] = { cardId, chosenStat };
 }
 
 export function allActionPlaysIn(state: GameState): boolean {
@@ -106,19 +145,19 @@ export function resolveActionPhase(state: GameState): void {
 
   const summary: ActionPhaseSummary = { plays: [] };
   for (const player of state.players) {
-    const cardId = state.actionPhase.submittedPlays[player.id];
-    if (!cardId) continue;
-    const idx = player.actionHand.findIndex((c) => c.id === cardId);
+    const play = state.actionPhase.submittedPlays[player.id];
+    if (!play) continue;
+    const idx = player.actionHand.findIndex((c) => c.id === play.cardId);
     if (idx < 0) continue;
     const card = player.actionHand.splice(idx, 1)[0]!;
     state.log.push({ kind: 'action_played', playerId: player.id, cardId: card.id });
-    applyActionEffect(state, player, card);
+    applyActionEffect(state, player, card, play.chosenStat);
     state.decks.actionGrave.push(card);
     summary.plays.push({
       playerId: player.id,
       cardId: card.id,
       cardName: card.name,
-      effectDesc: describeActionEffect(card),
+      effectDesc: describeActionEffect(card, play.chosenStat),
     });
   }
   state.actionPhase = null;

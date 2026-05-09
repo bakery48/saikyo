@@ -15,6 +15,7 @@ import type {
   RewardChoice,
   RewardState,
   SkillCard,
+  StatKey,
   TournamentState,
 } from '../server/engine/types';
 
@@ -128,7 +129,12 @@ export type ClientMessage =
     }
   | { type: 'submit_pick'; baseId: string }
   | { type: 'submit_draft'; skillId: string }
-  | { type: 'play_action_card'; cardId: string }
+  | {
+      type: 'play_action_card';
+      cardId: string;
+      /** Required when the card's effect is `stat_mod_choice`. */
+      chosenStat?: StatKey;
+    }
   | { type: 'submit_reward'; choice: RewardChoice }
   | { type: 'rename_monster'; name: string }
   | { type: 'leave_game' };
