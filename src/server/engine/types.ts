@@ -69,8 +69,21 @@ export type SkillEffect =
   | { kind: 'buff_self_all'; amount: number; duration: 'once' | 'battle' }
   /** Attack `hitCount` times in a single skill use, each hit at `mult` × `useStat`. */
   | { kind: 'multi_hit_attack'; mult: number; useStat: 'atk' | 'spd'; hitCount: number }
-  /** Restore HP to maxHp (battle-start HP). */
-  | { kind: 'heal_full' };
+  /** Restore floor(maxHp / denominator) HP. */
+  | { kind: 'heal_max_fraction'; denominator: number }
+  /**
+   * Replay one of the user's earlier active skills `rewindBy` slots before this
+   * one. Always self-damages by `selfDamage`. The skill is single-use per
+   * battle (can't be brought back via further rewinds). Fizzles harmlessly if
+   * the rewind target doesn't exist or is already consumed.
+   */
+  | { kind: 'rewind_skill'; rewindBy: number; selfDamage: number }
+  /**
+   * Attack with bonus ATK = number of times this exact skill has been used in
+   * the current battle (counting the current use). Damage formula otherwise
+   * matches `attack` with `mult` × `useStat`.
+   */
+  | { kind: 'deja_vu_attack'; mult: number; useStat: 'atk' | 'spd' };
 
 export type ActiveSkill = {
   id: string;

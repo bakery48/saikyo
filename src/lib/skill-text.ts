@@ -41,8 +41,14 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `自身のATK/DEF/SPD+${e.amount}（${e.duration === 'battle' ? 'バトル中' : '次の1回'}）`;
     case 'multi_hit_attack':
       return `${e.useStat.toUpperCase()}×${e.mult} 攻撃を${e.hitCount}回`;
-    case 'heal_full':
-      return `HP全回復`;
+    case 'heal_max_fraction':
+      return e.denominator === 1
+        ? `HP全回復`
+        : `最大HPの1/${e.denominator}を回復`;
+    case 'rewind_skill':
+      return `${e.rewindBy}つ前のアクティブスキルに戻る（廃棄・自分に${e.selfDamage}ダメージ）`;
+    case 'deja_vu_attack':
+      return `${e.useStat.toUpperCase()}+N で攻撃（N=このカードのバトル中の使用回数、mult ${e.mult}）`;
   }
 }
 

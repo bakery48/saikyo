@@ -71,6 +71,12 @@ type CombatStats = Stats & {
   pendingMultiAttackPenalty: number;
   /** Number of incoming-damage instances that will be fully absorbed by `absorb_first_hit`. */
   absorbHitsRemaining: number;
+  /** A skill queued for replay (set by `rewind_skill`). Consumed before the next normal active. */
+  pendingReplaySkill: ActiveSkill | null;
+  /** Skill instance IDs that have been consumed and cannot be replayed (rewind cards). */
+  consumedSkillIds: Set<string>;
+  /** Per-skill use counts for this battle (used by `deja_vu_attack`). */
+  skillUseCounts: Record<string, number>;
   passiveIds: string[];
 };
 
@@ -103,6 +109,9 @@ function initCombat(m: Monster): CombatStats {
     pendingMultiAttack: 0,
     pendingMultiAttackPenalty: 0,
     absorbHitsRemaining: m.passives.filter((p) => p.effect.kind === 'absorb_first_hit').length,
+    pendingReplaySkill: null,
+    consumedSkillIds: new Set(),
+    skillUseCounts: {},
     passiveIds: [],
   };
   return c;
@@ -572,6 +581,8 @@ function applySkill(args: {
   target: CombatStats;
   userPassives: PassiveSkill[];
   targetPassives: PassiveSkill[];
+  /** User's monster — needed for rewind/replay lookups in the actives list. */
+  userMon: Monster;
   /** Target's monster — needed by effects that mutate the opponent's actives (e.g. shuffle). */
   targetMon: Monster;
   skill: ActiveSkill;
@@ -580,7 +591,7 @@ function applySkill(args: {
   rng: RNG;
   log: BattleEvent[];
 }): void {
-  const { user, target, userPassives, targetPassives, targetMon, skill, userSide, targetSide, rng, log } = args;
+  const { user, target, userPassives, targetPassives, userMon, targetMon, skill, userSide, targetSide, rng, log } = args;
   // Nullification check: opponent flagged nullify on us.
   if (user.nullifyOpponentNext) {
     user.nullifyOpponentNext = false;
@@ -788,9 +799,66 @@ function applySkill(args: {
       if (rollExtraAttack(user, userPassives, userSide, rng, log)) runHit();
       break;
     }
-    case 'heal_full': {
-      const applied = healCapped(user, user.maxHp - user.hp);
+    case 'heal_max_fraction': {
+      const denom = Math.max(1, e.denominator);
+      const amount = Math.max(0, Math.floor(user.maxHp / denom));
+      const applied = healCapped(user, amount);
       log.push({ kind: 'heal', player: userSide, amount: applied, hpAfter: user.hp });
+      break;
+    }
+    case 'rewind_skill': {
+      // Self-damage always applies, even if the rewind itself fizzles.
+      if (e.selfDamage > 0) {
+        user.hp -= e.selfDamage;
+        log.push({ kind: 'damage', from: userSide, to: userSide, amount: e.selfDamage, hpAfter: user.hp });
+      }
+      // Mark this rewind card as consumed so it can't be replayed by another rewind.
+      user.consumedSkillIds.add(skill.id);
+      const sorted = userMon.actives.slice().sort((x, y) => x.order - y.order);
+      const thisIdx = sorted.findIndex((a) => a.id === skill.id);
+      const targetIdx = thisIdx - e.rewindBy;
+      const targetSkill = targetIdx >= 0 ? sorted[targetIdx] : undefined;
+      if (!targetSkill || user.consumedSkillIds.has(targetSkill.id)) {
+        log.push({ kind: 'skill_fizzle', player: userSide, skillId: skill.id, selfDamage: 0 });
+        break;
+      }
+      // Don't override an existing pending replay (very unlikely path: replay + rewind in same turn).
+      if (!user.pendingReplaySkill) {
+        user.pendingReplaySkill = targetSkill;
+      }
+      break;
+    }
+    case 'deja_vu_attack': {
+      const count = (user.skillUseCounts[skill.id] ?? 0) + 1;
+      user.skillUseCounts[skill.id] = count;
+      // Fold the bonus into the once-buff so resolveAttack picks it up; it will be cleared by consumeOnceBuffs.
+      user.onceBuffs.atk = (user.onceBuffs.atk ?? 0) + count;
+      log.push({ kind: 'buff', player: userSide, stat: 'atk', amount: count, duration: 'once' });
+      resolveAttack({
+        attacker: user,
+        defender: target,
+        attackerPassives: userPassives,
+        defenderPassives: targetPassives,
+        effect: { kind: 'attack', mult: e.mult, useStat: e.useStat },
+        attackerSide: userSide,
+        defenderSide: targetSide,
+        rng,
+        log,
+      });
+      user.firstAttackMade = true;
+      if (rollExtraAttack(user, userPassives, userSide, rng, log)) {
+        resolveAttack({
+          attacker: user,
+          defender: target,
+          attackerPassives: userPassives,
+          defenderPassives: targetPassives,
+          effect: { kind: 'attack', mult: e.mult, useStat: e.useStat },
+          attackerSide: userSide,
+          defenderSide: targetSide,
+          rng,
+          log,
+        });
+      }
       break;
     }
   }
@@ -883,25 +951,34 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
 
   // Track whether the side with HP<=0 already exists, but per spec we keep going
   // until both sides have exhausted actives.
+  const hasWork = (s: Side): boolean =>
+    sides[s].state.skillIdx < sides[s].mon.actives.length || sides[s].state.pendingReplaySkill !== null;
   let current: Side = first;
-  while (sides.a.state.skillIdx < sides.a.mon.actives.length || sides.b.state.skillIdx < sides.b.mon.actives.length) {
+  while (hasWork('a') || hasWork('b')) {
     const cur = sides[current];
     const opp = sides[other(current)];
     // 一時停止: opponent imposed a skip on us — consume it instead of using a skill.
     if (cur.state.skipTurnsRemaining > 0) {
       cur.state.skipTurnsRemaining -= 1;
       log.push({ kind: 'turn_skipped', player: current });
-    } else if (cur.state.skillIdx < cur.mon.actives.length) {
+    } else if (cur.state.pendingReplaySkill || cur.state.skillIdx < cur.mon.actives.length) {
       applyTurnStartPassives(cur.mon.passives, cur.state, current, log);
-      const skill = cur.mon.actives
-        .slice()
-        .sort((x, y) => x.order - y.order)[cur.state.skillIdx]!;
-      cur.state.skillIdx += 1;
+      let skill: import('./types').ActiveSkill;
+      if (cur.state.pendingReplaySkill) {
+        skill = cur.state.pendingReplaySkill;
+        cur.state.pendingReplaySkill = null;
+      } else {
+        skill = cur.mon.actives
+          .slice()
+          .sort((x, y) => x.order - y.order)[cur.state.skillIdx]!;
+        cur.state.skillIdx += 1;
+      }
       applySkill({
         user: cur.state,
         target: opp.state,
         userPassives: cur.mon.passives,
         targetPassives: opp.mon.passives,
+        userMon: cur.mon,
         targetMon: opp.mon,
         skill,
         userSide: current,
