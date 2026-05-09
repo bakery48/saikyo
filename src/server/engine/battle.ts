@@ -71,9 +71,7 @@ type CombatStats = Stats & {
   pendingMultiAttackPenalty: number;
   /** Number of incoming-damage instances that will be fully absorbed by `absorb_first_hit`. */
   absorbHitsRemaining: number;
-  /** A skill queued for replay (set by `rewind_skill`). Consumed before the next normal active. */
-  pendingReplaySkill: ActiveSkill | null;
-  /** Skill instance IDs that have been consumed and cannot be replayed (rewind cards). */
+  /** Skill instance IDs that have been consumed and should be skipped during forward play (rewind cards). */
   consumedSkillIds: Set<string>;
   /** Per-skill use counts for this battle (used by `deja_vu_attack`). */
   skillUseCounts: Record<string, number>;
@@ -109,7 +107,6 @@ function initCombat(m: Monster): CombatStats {
     pendingMultiAttack: 0,
     pendingMultiAttackPenalty: 0,
     absorbHitsRemaining: m.passives.filter((p) => p.effect.kind === 'absorb_first_hit').length,
-    pendingReplaySkill: null,
     consumedSkillIds: new Set(),
     skillUseCounts: {},
     passiveIds: [],
@@ -812,20 +809,18 @@ function applySkill(args: {
         user.hp -= e.selfDamage;
         log.push({ kind: 'damage', from: userSide, to: userSide, amount: e.selfDamage, hpAfter: user.hp });
       }
-      // Mark this rewind card as consumed so it can't be replayed by another rewind.
+      // Mark this rewind card as consumed so it's skipped on forward replay.
       user.consumedSkillIds.add(skill.id);
       const sorted = userMon.actives.slice().sort((x, y) => x.order - y.order);
       const thisIdx = sorted.findIndex((a) => a.id === skill.id);
       const targetIdx = thisIdx - e.rewindBy;
-      const targetSkill = targetIdx >= 0 ? sorted[targetIdx] : undefined;
-      if (!targetSkill || user.consumedSkillIds.has(targetSkill.id)) {
+      if (targetIdx < 0) {
+        // Not enough prior skills to rewind to — fizzle (self-damage already applied).
         log.push({ kind: 'skill_fizzle', player: userSide, skillId: skill.id, selfDamage: 0 });
         break;
       }
-      // Don't override an existing pending replay (very unlikely path: replay + rewind in same turn).
-      if (!user.pendingReplaySkill) {
-        user.pendingReplaySkill = targetSkill;
-      }
+      // Rewind: next forward fetch will start at targetIdx (or skip past consumed slots).
+      user.skillIdx = targetIdx;
       break;
     }
     case 'deja_vu_attack': {
@@ -951,8 +946,20 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
 
   // Track whether the side with HP<=0 already exists, but per spec we keep going
   // until both sides have exhausted actives.
-  const hasWork = (s: Side): boolean =>
-    sides[s].state.skillIdx < sides[s].mon.actives.length || sides[s].state.pendingReplaySkill !== null;
+  /** Advance skillIdx past any rewind-consumed slots so the next fetch lands on a playable card. */
+  const advancePastConsumed = (s: Side): void => {
+    const sorted = sides[s].mon.actives.slice().sort((x, y) => x.order - y.order);
+    while (
+      sides[s].state.skillIdx < sorted.length &&
+      sides[s].state.consumedSkillIds.has(sorted[sides[s].state.skillIdx]!.id)
+    ) {
+      sides[s].state.skillIdx += 1;
+    }
+  };
+  const hasWork = (s: Side): boolean => {
+    advancePastConsumed(s);
+    return sides[s].state.skillIdx < sides[s].mon.actives.length;
+  };
   let current: Side = first;
   while (hasWork('a') || hasWork('b')) {
     const cur = sides[current];
@@ -961,31 +968,28 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
     if (cur.state.skipTurnsRemaining > 0) {
       cur.state.skipTurnsRemaining -= 1;
       log.push({ kind: 'turn_skipped', player: current });
-    } else if (cur.state.pendingReplaySkill || cur.state.skillIdx < cur.mon.actives.length) {
-      applyTurnStartPassives(cur.mon.passives, cur.state, current, log);
-      let skill: import('./types').ActiveSkill;
-      if (cur.state.pendingReplaySkill) {
-        skill = cur.state.pendingReplaySkill;
-        cur.state.pendingReplaySkill = null;
-      } else {
-        skill = cur.mon.actives
+    } else {
+      advancePastConsumed(current);
+      if (cur.state.skillIdx < cur.mon.actives.length) {
+        applyTurnStartPassives(cur.mon.passives, cur.state, current, log);
+        const skill = cur.mon.actives
           .slice()
           .sort((x, y) => x.order - y.order)[cur.state.skillIdx]!;
         cur.state.skillIdx += 1;
+        applySkill({
+          user: cur.state,
+          target: opp.state,
+          userPassives: cur.mon.passives,
+          targetPassives: opp.mon.passives,
+          userMon: cur.mon,
+          targetMon: opp.mon,
+          skill,
+          userSide: current,
+          targetSide: other(current),
+          rng,
+          log,
+        });
       }
-      applySkill({
-        user: cur.state,
-        target: opp.state,
-        userPassives: cur.mon.passives,
-        targetPassives: opp.mon.passives,
-        userMon: cur.mon,
-        targetMon: opp.mon,
-        skill,
-        userSide: current,
-        targetSide: other(current),
-        rng,
-        log,
-      });
     }
     current = current === first ? second : first;
   }
