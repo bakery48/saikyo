@@ -28,7 +28,7 @@ export function describeActiveEffect(e: SkillEffect): string {
     case 'pause_opponent':
       return `相手の次のターンをスキップ`;
     case 'shuffle_opponent_actives':
-      return `相手の残りアクティブの順番をランダムに入替え`;
+      return `相手の残りスロット順をランダムに入替え`;
     case 'next_multi_attack':
       return `次の攻撃を${1 + e.extraCount}回行う（攻撃以外なら不発・自分に${e.failurePenalty}ダメージ）`;
     case 'pay_hp_shield':
@@ -46,7 +46,7 @@ export function describeActiveEffect(e: SkillEffect): string {
         ? `HP全回復`
         : `最大HPの1/${e.denominator}を回復`;
     case 'rewind_skill':
-      return `${e.rewindBy}つ前のアクティブスキルに戻る（廃棄・自分に${e.selfDamage}ダメージ）`;
+      return `スロットを${e.rewindBy}つ戻す（廃棄・自分に${e.selfDamage}ダメージ）`;
     case 'deja_vu_attack':
       return `${e.useStat.toUpperCase()}+N で攻撃（N=このカードのバトル中の使用回数、mult ${e.mult}）`;
   }
@@ -60,13 +60,13 @@ export function describePassiveTrigger(t: PassiveTrigger): string {
     case 'battle_start':
       return 'バトル開始時';
     case 'on_own_turn_start':
-      return '自分がアクティブスキルを使う直前';
+      return '自分がスロットを使う直前';
     case 'on_take_damage':
       return '被ダメ時';
     case 'on_deal_damage':
       return '与ダメ時';
     case 'on_own_active_used':
-      return '自分がアクティブスキルを発動した後';
+      return '自分がスロットを発動した後';
   }
 }
 
@@ -124,7 +124,7 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return parts.join('・');
     }
     case 'reverse_actives_both':
-      return `両者のアクティブスキルの順番が逆になる`;
+      return `両者のスロット順が逆になる`;
     case 'low_hp_damage_reduction':
       return `HPが半分以下のとき被ダメ-${e.amount}`;
     case 'crit_chance':

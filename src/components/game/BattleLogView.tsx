@@ -83,7 +83,7 @@ function formatBattleEvent(e: BattleEvent, aName: string, bName: string): string
     case 'turn_skipped':
       return `  ${who(e.player)} のターンをスキップ`;
     case 'actives_shuffled':
-      return `  ${who(e.player)} の残りアクティブ順をシャッフル`;
+      return `  ${who(e.player)} の残りスロット順をシャッフル`;
     case 'skill_fizzle':
       return e.selfDamage > 0
         ? `  ${who(e.player)} のスキルが不発（自分に ${e.selfDamage} ダメージ）`

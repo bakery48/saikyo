@@ -290,9 +290,9 @@ function describePassive(p: PassiveSkillPartial): string {
       if (e.atk > 0) parts.push(`ATK-${e.atk}`);
       if (e.def > 0) parts.push(`DEF-${e.def}`);
       if (e.spd > 0) parts.push(`SPD-${e.spd}`);
-      return `アクティブ発動後 ${parts.join('/')}`;
+      return `スロット発動後 ${parts.join('/')}`;
     }
-    case 'reverse_actives_both': return `両者のアクティブ順を逆転`;
+    case 'reverse_actives_both': return `両者のスロット順を逆転`;
     case 'low_hp_damage_reduction': return `HP半分以下で被ダメ-${e.amount}`;
     case 'crit_chance': return `攻撃時${e.percent}%でダメージ×${e.mult}`;
     case 'absorb_first_hit': return `1度だけ被ダメ無効`;

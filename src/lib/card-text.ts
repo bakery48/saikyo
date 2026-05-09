@@ -29,7 +29,7 @@ export function describeEventEffect(card: EventCard): string {
     case 'add_skill_top':
       return `スキル山札から1枚追加`;
     case 'reverse_actives_next_battle':
-      return '次戦は全員のアクティブスキル順序を逆転';
+      return '次戦は全員のスロット順を逆転';
     case 'skip_action_phase':
       return 'このアクションフェーズをスキップ';
     case 'skip_draft_phase':
@@ -59,10 +59,10 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
     case 'draw_skill_top':
       return 'スキル山札から1枚追加';
     case 'discard_random_active':
-      return 'アクティブスキル1枚をランダムに破棄';
+      return 'スロット1つをランダムに破棄';
     case 'gain_passive':
       return `パッシブ獲得: ${e.passive.name}`;
     case 'swap_actives':
-      return '誰かのアクティブスキル2つの順序を入れ替え';
+      return '誰かのスロット2つの順序を入れ替え';
   }
 }

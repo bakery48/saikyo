@@ -35,7 +35,7 @@ export function ChampionView({
           <ul style={{ marginTop: 4 }}>
             {champ.monster.actives.map((a) => (
               <li key={a.id} style={{ fontSize: 13 }}>
-                {a.order}. {a.name} {a.rarity ? `[${a.rarity}]` : ''}
+                スロット{a.order} {a.name} {a.rarity ? `[${a.rarity}]` : ''}
               </li>
             ))}
           </ul>

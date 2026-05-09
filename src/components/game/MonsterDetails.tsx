@@ -56,7 +56,7 @@ export function MonsterDetails({ monster }: { monster: Monster }) {
               key={a.id}
               style={{ fontSize: 12, display: 'flex', justifyContent: 'space-between' }}
             >
-              <SkillNameHover label={`${a.order}. ${a.name}`} tooltip={activeTooltip(a)}>
+              <SkillNameHover label={`スロット${a.order} ${a.name}`} tooltip={activeTooltip(a)}>
                 {a.rarity && (
                   <span style={{ color: RARITY_COLOR[a.rarity] ?? '#888', marginLeft: 4 }}>
                     [{a.rarity}]

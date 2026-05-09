@@ -208,7 +208,7 @@ export function ActionPhaseView({
                                 fontSize: 12,
                               }}
                             >
-                              {a.order}. {a.name}
+                              スロット{a.order} {a.name}
                             </button>
                           );
                         })}

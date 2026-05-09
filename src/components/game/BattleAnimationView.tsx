@@ -406,10 +406,11 @@ function MonsterColumn({
         >
           アクティブスキル
         </div>
-        <ol
+        <ul
           style={{
             margin: 0,
-            padding: '6px 8px 6px 24px',
+            padding: '6px 8px',
+            listStyle: 'none',
             display: 'grid',
             gap: 2,
           }}
@@ -433,14 +434,14 @@ function MonsterColumn({
                     transition: 'background 200ms, color 200ms',
                   }}
                 >
-                  {a.name}
+                  <span style={{ opacity: 0.5, fontSize: 11, marginRight: 3 }}>S{a.order}</span>{a.name}
                 </li>
               );
             })}
           {mon.actives.length === 0 && (
             <span style={{ fontSize: 12, opacity: 0.5 }}>(なし)</span>
           )}
-        </ol>
+        </ul>
       </div>
     </div>
   );
