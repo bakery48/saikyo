@@ -69,6 +69,8 @@ type CombatStats = Stats & {
   pendingMultiAttack: number;
   /** Self-damage taken if the next skill isn't an attack while `pendingMultiAttack` > 0. */
   pendingMultiAttackPenalty: number;
+  /** Number of incoming-damage instances that will be fully absorbed by `absorb_first_hit`. */
+  absorbHitsRemaining: number;
   passiveIds: string[];
 };
 
@@ -100,6 +102,7 @@ function initCombat(m: Monster): CombatStats {
     skipTurnsRemaining: 0,
     pendingMultiAttack: 0,
     pendingMultiAttackPenalty: 0,
+    absorbHitsRemaining: m.passives.filter((p) => p.effect.kind === 'absorb_first_hit').length,
     passiveIds: [],
   };
   return c;
@@ -235,6 +238,13 @@ function takeDamage(
   ignoreShield = false,
 ): number {
   if (rawDamage <= 0) return 0;
+  // 影武者 absorb_first_hit: fully eat the first incoming damage instance.
+  if (target.absorbHitsRemaining > 0) {
+    target.absorbHitsRemaining -= 1;
+    const passive = passives.find((p) => p.effect.kind === 'absorb_first_hit');
+    if (passive) log.push({ kind: 'passive', player: side, passiveId: passive.id });
+    return 0;
+  }
   // Random negation passive (e.g., voltank 1/6 chance).
   if (target.negateOneIn > 0 && rng.int(1, target.negateOneIn) === 1) {
     const passive = passives.find(
@@ -255,6 +265,16 @@ function takeDamage(
     );
     if (passive && dmg > 0) log.push({ kind: 'passive', player: side, passiveId: passive.id });
     dmg = Math.max(0, dmg - target.damageReduction);
+  }
+  // 逆境 low_hp_damage_reduction: extra reduction while at or below half HP.
+  if (target.maxHp > 0 && target.hp * 2 <= target.maxHp) {
+    for (const p of passives) {
+      if (p.effect.kind === 'low_hp_damage_reduction' && dmg > 0) {
+        const reduce = p.effect.amount;
+        dmg = Math.max(0, dmg - reduce);
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+      }
+    }
   }
   // rage_atk: gain ATK every time this side actually takes damage.
   if (dmg > 0) {
@@ -339,6 +359,14 @@ function resolveAttack(args: {
   let raw = Math.max(1, Math.floor(baseDamage - def));
   if (isFirstAttack && attacker.firstAttackDamageMult > 1) {
     raw = Math.max(1, Math.floor(raw * attacker.firstAttackDamageMult));
+  }
+  // クリティカル crit_chance: roll once per attack; on proc, multiply post-DEF damage.
+  for (const p of attackerPassives) {
+    if (p.effect.kind === 'crit_chance' && rng.next() < p.effect.percent / 100) {
+      raw = Math.max(1, Math.floor(raw * p.effect.mult));
+      log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+      break;
+    }
   }
   let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef);
   actual = clampWithEndure(defender, actual, defenderPassives, defenderSide, log);
@@ -704,6 +732,67 @@ function applySkill(args: {
       applySelfDecay(user, userPassives, userSide, log);
       return;
     }
+    case 'pay_hp_shield': {
+      user.hp -= e.hpCost;
+      log.push({ kind: 'damage', from: userSide, to: userSide, amount: e.hpCost, hpAfter: user.hp });
+      user.shield += e.shieldAmount;
+      log.push({ kind: 'shield', player: userSide, amount: e.shieldAmount });
+      break;
+    }
+    case 'pay_hp_debuff_all': {
+      user.hp -= e.hpCost;
+      log.push({ kind: 'damage', from: userSide, to: userSide, amount: e.hpCost, hpAfter: user.hp });
+      for (const stat of ['atk', 'def', 'spd'] as const) {
+        applyStatMod(target, stat, -e.amount, 'battle');
+        log.push({ kind: 'debuff', player: targetSide, stat, amount: e.amount, duration: 'battle' });
+      }
+      break;
+    }
+    case 'gamble_true_damage': {
+      const win = rng.next() < e.percent / 100;
+      if (win) {
+        let actual = takeDamage(target, e.amount, rng, targetPassives, targetSide, log, true);
+        actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+        target.hp -= actual;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+      } else {
+        user.hp -= e.amount;
+        log.push({ kind: 'damage', from: userSide, to: userSide, amount: e.amount, hpAfter: user.hp });
+      }
+      break;
+    }
+    case 'buff_self_all': {
+      for (const stat of ['atk', 'def', 'spd'] as const) {
+        applyStatMod(user, stat, e.amount, e.duration);
+        log.push({ kind: 'buff', player: userSide, stat, amount: e.amount, duration: e.duration });
+      }
+      break;
+    }
+    case 'multi_hit_attack': {
+      const attackEffect: Extract<typeof e, { kind: 'multi_hit_attack' }> = e;
+      const runHit = (): void => {
+        resolveAttack({
+          attacker: user,
+          defender: target,
+          attackerPassives: userPassives,
+          defenderPassives: targetPassives,
+          effect: { kind: 'attack', mult: attackEffect.mult, useStat: attackEffect.useStat },
+          attackerSide: userSide,
+          defenderSide: targetSide,
+          rng,
+          log,
+        });
+      };
+      for (let i = 0; i < e.hitCount; i++) runHit();
+      user.firstAttackMade = true;
+      if (rollExtraAttack(user, userPassives, userSide, rng, log)) runHit();
+      break;
+    }
+    case 'heal_full': {
+      const applied = healCapped(user, user.maxHp - user.hp);
+      log.push({ kind: 'heal', player: userSide, amount: applied, hpAfter: user.hp });
+      break;
+    }
   }
   // After applying, per-active counters update and once-buffs/amp consume.
   consumeOnceBuffs(user);
@@ -749,6 +838,19 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
   const log: BattleEvent[] = [];
   const sa = initCombat(a);
   const sb = initCombat(b);
+
+  // 同調 equalize_spd: average both sides' SPD when either side has the passive.
+  const equalizers = [
+    ...a.passives.filter((p) => p.effect.kind === 'equalize_spd'),
+    ...b.passives.filter((p) => p.effect.kind === 'equalize_spd'),
+  ];
+  if (equalizers.length > 0) {
+    const avg = Math.floor((sa.spd + sb.spd) / 2);
+    sa.spd = avg;
+    sb.spd = avg;
+    const owner: Side = a.passives.includes(equalizers[0]!) ? 'a' : 'b';
+    log.push({ kind: 'passive', player: owner, passiveId: equalizers[0]!.id });
+  }
 
   // 逆転する世界: any `reverse_actives_both` battle_start passive flips both
   // sides' active orders. Stacks by parity (odd=flip, even=cancel).

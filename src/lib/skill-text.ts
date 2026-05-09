@@ -31,6 +31,18 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `相手の残りアクティブの順番をランダムに入替え`;
     case 'next_multi_attack':
       return `次の攻撃を${1 + e.extraCount}回行う（攻撃以外なら不発・自分に${e.failurePenalty}ダメージ）`;
+    case 'pay_hp_shield':
+      return `自HP-${e.hpCost} → シールド+${e.shieldAmount}`;
+    case 'pay_hp_debuff_all':
+      return `自HP-${e.hpCost} → 相手のATK/DEF/SPD-${e.amount}（バトル中）`;
+    case 'gamble_true_damage':
+      return `${e.percent}%で相手に${e.amount}ダメージ、外れたら自分に${e.amount}ダメージ`;
+    case 'buff_self_all':
+      return `自身のATK/DEF/SPD+${e.amount}（${e.duration === 'battle' ? 'バトル中' : '次の1回'}）`;
+    case 'multi_hit_attack':
+      return `${e.useStat.toUpperCase()}×${e.mult} 攻撃を${e.hitCount}回`;
+    case 'heal_full':
+      return `HP全回復`;
   }
 }
 
@@ -107,6 +119,14 @@ export function describePassiveEffect(e: PassiveEffect): string {
     }
     case 'reverse_actives_both':
       return `両者のアクティブスキルの順番が逆になる`;
+    case 'low_hp_damage_reduction':
+      return `HPが半分以下のとき被ダメ-${e.amount}`;
+    case 'crit_chance':
+      return `攻撃時${e.percent}%でダメージ×${e.mult}`;
+    case 'absorb_first_hit':
+      return `1度だけ被ダメージを完全無効`;
+    case 'equalize_spd':
+      return `戦闘開始時に両者のSPDを平均値に揃える`;
   }
 }
 
@@ -118,7 +138,11 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'first_attack_true' ||
     p.effect.kind === 'first_attack_amp' ||
     p.effect.kind === 'first_attack_def_div' ||
-    p.effect.kind === 'first_attack_damage_mult'
+    p.effect.kind === 'first_attack_damage_mult' ||
+    p.effect.kind === 'reverse_actives_both' ||
+    p.effect.kind === 'low_hp_damage_reduction' ||
+    p.effect.kind === 'crit_chance' ||
+    p.effect.kind === 'equalize_spd'
   ) {
     return describePassiveEffect(p.effect);
   }

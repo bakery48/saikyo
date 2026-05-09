@@ -57,6 +57,10 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-018', name: '雷光', rarity: 'R', nameTag: 'ライトニング', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'spd' } } },
   { id: 'sk-r-019', name: '裂破', rarity: 'R', nameTag: 'デストロイヤー', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk' } } },
   { id: 'sk-r-020', name: '反射シールド', rarity: 'R', nameTag: 'リフレクター', active: { effect: { kind: 'shield', amount: 6 } } },
+  { id: 'sk-r-021', name: '生命変換', rarity: 'R', nameTag: 'コンバート', active: { effect: { kind: 'pay_hp_shield', hpCost: 3, shieldAmount: 5 } } },
+  { id: 'sk-r-022', name: '取引', rarity: 'R', nameTag: 'トレーダー', active: { effect: { kind: 'pay_hp_debuff_all', hpCost: 4, amount: 1 } } },
+  { id: 'sk-r-023', name: '賭け一閃', rarity: 'R', nameTag: 'ギャンブラー', active: { effect: { kind: 'gamble_true_damage', amount: 8, percent: 50 } } },
+  { id: 'sk-r-024', name: 'エネルギーチャージ', rarity: 'R', nameTag: 'バッテリー', active: { effect: { kind: 'buff_self_all', amount: 1, duration: 'battle' } } },
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
   { id: 'sk-sr-001', name: '必殺斬り', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 2.0, useStat: 'atk' } } },
@@ -74,6 +78,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-013', name: '一時停止', rarity: 'SR', nameTag: 'ポーズ', active: { effect: { kind: 'pause_opponent' } } },
   { id: 'sk-sr-014', name: 'ハリケーン', rarity: 'SR', nameTag: 'ストーム', active: { effect: { kind: 'shuffle_opponent_actives' } } },
   { id: 'sk-sr-015', name: '二重起動', rarity: 'SR', nameTag: 'ダブル', active: { effect: { kind: 'next_multi_attack', extraCount: 1, failurePenalty: 2 } } },
+  { id: 'sk-sr-016', name: '集中砲火', rarity: 'SR', nameTag: 'バリスタ', active: { effect: { kind: 'multi_hit_attack', mult: 0.8, useStat: 'atk', hitCount: 3 } } },
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
   { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'ドラゴン', active: { effect: { kind: 'attack', mult: 3.0, useStat: 'atk' } } },
@@ -81,6 +86,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-003', name: '神域の守り', rarity: 'SSR', nameTag: 'セレスチャル', active: { effect: { kind: 'shield', amount: 12 } } },
   { id: 'sk-ssr-004', name: '時止め', rarity: 'SSR', nameTag: 'クロノス', active: { effect: { kind: 'next_amp', mult: 4.0 } } },
   { id: 'sk-ssr-005', name: '三重起動', rarity: 'SSR', nameTag: 'トリプル', active: { effect: { kind: 'next_multi_attack', extraCount: 2, failurePenalty: 6 } } },
+  { id: 'sk-ssr-006', name: '時を巻き戻す', rarity: 'SSR', nameTag: 'リワインド', active: { effect: { kind: 'heal_full' } } },
 
   // ─── Passive skill cards ───────────────────────────────────────────────────
   {
@@ -154,6 +160,50 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'battle_start' },
       effect: { kind: 'reverse_actives_both' },
+    },
+  },
+  {
+    id: 'sk-rp-003',
+    name: '逆境 (passive)',
+    rarity: 'R',
+    nameTag: 'アンダードッグ',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'low_hp_damage_reduction', amount: 2 },
+    },
+  },
+  {
+    id: 'sk-srp-006',
+    name: 'クリティカル (passive)',
+    rarity: 'SR',
+    nameTag: 'スナイパー',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_deal_damage' },
+      effect: { kind: 'crit_chance', percent: 20, mult: 2 },
+    },
+  },
+  {
+    id: 'sk-srp-007',
+    name: '影武者 (passive)',
+    rarity: 'SR',
+    nameTag: 'シャドウ',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'absorb_first_hit' },
+    },
+  },
+  {
+    id: 'sk-srp-008',
+    name: '同調 (passive)',
+    rarity: 'SR',
+    nameTag: 'シンクロ',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'equalize_spd' },
     },
   },
 ];

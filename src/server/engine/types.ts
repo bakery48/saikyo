@@ -58,7 +58,19 @@ export type SkillEffect =
    * `true_damage`, run it `1 + extraCount` times. Otherwise the next skill
    * fizzles and the user takes `failurePenalty` self-damage.
    */
-  | { kind: 'next_multi_attack'; extraCount: number; failurePenalty: number };
+  | { kind: 'next_multi_attack'; extraCount: number; failurePenalty: number }
+  /** Spend `hpCost` HP, gain `shieldAmount` shield. */
+  | { kind: 'pay_hp_shield'; hpCost: number; shieldAmount: number }
+  /** Spend `hpCost` HP, debuff opponent's ATK/DEF/SPD by `amount` (battle-long). */
+  | { kind: 'pay_hp_debuff_all'; hpCost: number; amount: number }
+  /** With `percent` chance deal `amount` true damage to the opponent; otherwise self-damage by `amount`. */
+  | { kind: 'gamble_true_damage'; amount: number; percent: number }
+  /** Buff own ATK/DEF/SPD all by `amount` for `duration`. */
+  | { kind: 'buff_self_all'; amount: number; duration: 'once' | 'battle' }
+  /** Attack `hitCount` times in a single skill use, each hit at `mult` × `useStat`. */
+  | { kind: 'multi_hit_attack'; mult: number; useStat: 'atk' | 'spd'; hitCount: number }
+  /** Restore HP to maxHp (battle-start HP). */
+  | { kind: 'heal_full' };
 
 export type ActiveSkill = {
   id: string;
@@ -130,7 +142,15 @@ export type PassiveEffect =
    * if the total number of `reverse_actives_both` passives across the two
    * monsters is odd, the flip applies; even cancels out.
    */
-  | { kind: 'reverse_actives_both' };
+  | { kind: 'reverse_actives_both' }
+  /** While hp ≤ maxHp/2, reduce incoming damage by `amount`. */
+  | { kind: 'low_hp_damage_reduction'; amount: number }
+  /** When attacking, with `percent` chance multiply post-DEF damage by `mult`. */
+  | { kind: 'crit_chance'; percent: number; mult: number }
+  /** First time this side would take damage, fully absorb it. */
+  | { kind: 'absorb_first_hit' }
+  /** At battle start, set both sides' SPD to the average of their two SPDs. */
+  | { kind: 'equalize_spd' };
 
 export type PassiveSkill = {
   id: string;
