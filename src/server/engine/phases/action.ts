@@ -23,28 +23,12 @@ function applyActionEffect(
   const rng = makeRng(state);
   switch (card.effect.kind) {
     case 'stat_mod': {
-      if (card.effect.duration === 'permanent') {
-        player.monster.stats[card.effect.stat] += card.effect.amount;
-      } else {
-        player.pendingBuffs.push({
-          stat: card.effect.stat,
-          amount: card.effect.amount,
-          duration: 'next_battle',
-        });
-      }
+      player.monster.stats[card.effect.stat] += card.effect.amount;
       break;
     }
     case 'stat_mod_choice': {
       if (!chosenStat) break;
-      if (card.effect.duration === 'permanent') {
-        player.monster.stats[chosenStat] += card.effect.amount;
-      } else {
-        player.pendingBuffs.push({
-          stat: chosenStat,
-          amount: card.effect.amount,
-          duration: 'next_battle',
-        });
-      }
+      player.monster.stats[chosenStat] += card.effect.amount;
       break;
     }
     case 'recover_skill_from_grave': {

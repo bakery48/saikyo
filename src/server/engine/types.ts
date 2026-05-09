@@ -169,9 +169,9 @@ export type EventCard = {
 };
 
 export type ActionEffect =
-  | { kind: 'stat_mod'; stat: StatKey; amount: number; duration: 'next_battle' | 'permanent' }
+  | { kind: 'stat_mod'; stat: StatKey; amount: number }
   /** Player picks one of HP/ATK/DEF/SPD to bump. Requires `chosenStat` on submission. */
-  | { kind: 'stat_mod_choice'; amount: number; duration: 'next_battle' | 'permanent' }
+  | { kind: 'stat_mod_choice'; amount: number }
   | { kind: 'recover_skill_from_grave' }
   | { kind: 'draw_skill_top' }
   | { kind: 'discard_random_active' }
@@ -220,19 +220,11 @@ export type BattleResult = {
 
 // ─── Game (multi-phase) state ────────────────────────────────────────────────
 
-export type PendingStatBuff = {
-  stat: StatKey;
-  amount: number;
-  duration: 'next_battle' | 'permanent';
-};
-
 export type Player = {
   id: string;
   name: string;
   isCPU: boolean;
   monster: Monster | null;
-  /** Stat buffs queued by action cards that take effect on the next battle. */
-  pendingBuffs: PendingStatBuff[];
   /** The player's seat color used for draft pieces. */
   color: Color;
   /**
@@ -308,7 +300,7 @@ export type BattleMatch = {
   a: string; // playerId
   b: string;
   winner: 'a' | 'b' | 'draw' | null;
-  /** HP at the start of battle, after applying next_battle buffs. Used as the bar's max. */
+  /** HP at the start of battle. Used as the bar's max. */
   startHpA: number;
   startHpB: number;
   finalHpA: number;

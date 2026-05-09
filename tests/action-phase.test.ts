@@ -74,16 +74,6 @@ describe('Action phase', () => {
     expect(target.monster!.stats.atk).toBe(beforeAtk + 1);
   });
 
-  it('next_battle stat_mod queues a pending buff', () => {
-    const target = state.players[0]!;
-    startActionPhase(state);
-    forceCardInHand(state, target, 'ac-001'); // ATK +2 next_battle
-    playAll(state, target.id, 'ac-001');
-    expect(target.pendingBuffs.length).toBeGreaterThan(0);
-    const buff = target.pendingBuffs.find((b) => b.stat === 'atk' && b.amount === 2);
-    expect(buff?.duration).toBe('next_battle');
-  });
-
   it('draw_skill_top adds a skill to the player monster', () => {
     const target = state.players[0]!;
     startActionPhase(state);

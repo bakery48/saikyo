@@ -54,7 +54,6 @@ export type ClientPlayer = {
   isCPU: boolean;
   color: Color;
   monster: Monster | null;
-  pendingBuffsCount: number;
   /** Number of action cards in hand (contents only visible to the owner via myActionHand). */
   actionHandCount: number;
 };

@@ -14,13 +14,7 @@ const RARITY_COLOR: Record<string, string> = {
  * Read-only details view of a monster: stats + actives + passives.
  * Shared between MyMonsterPanel (for self) and PlayerPanel (for others).
  */
-export function MonsterDetails({
-  monster,
-  pendingBuffsCount,
-}: {
-  monster: Monster;
-  pendingBuffsCount?: number;
-}) {
+export function MonsterDetails({ monster }: { monster: Monster }) {
   return (
     <div style={{ display: 'grid', gap: 12 }}>
       <div style={{ display: 'flex', gap: 12, fontSize: 13, flexWrap: 'wrap' }}>
@@ -28,9 +22,6 @@ export function MonsterDetails({
         <span>ATK {monster.stats.atk}</span>
         <span>DEF {monster.stats.def}</span>
         <span>SPD {monster.stats.spd}</span>
-        {pendingBuffsCount !== undefined && pendingBuffsCount > 0 && (
-          <span style={{ opacity: 0.75 }}>次戦バフ ×{pendingBuffsCount}</span>
-        )}
       </div>
 
       <div>

@@ -51,7 +51,6 @@ export function createInitialState(opts: {
     name: p.name,
     isCPU: p.isCPU,
     monster: null,
-    pendingBuffs: [],
     actionHand: [],
   }));
   let cpuIdx = 1;
@@ -61,7 +60,6 @@ export function createInitialState(opts: {
       name: `CPU ${cpuIdx}`,
       isCPU: true,
       monster: null,
-      pendingBuffs: [],
       actionHand: [],
     });
     cpuIdx++;

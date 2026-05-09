@@ -9,28 +9,15 @@ import { runBattle } from '../battle';
 import { shuffle } from '../deck';
 import { makeRng, saveRng } from '../state';
 
-/**
- * Build a Monster snapshot for battle, applying and consuming any pendingBuffs
- * with `next_battle` duration.
- */
+/** Build a Monster snapshot for battle. */
 export function snapshotMonsterForBattle(player: Player): Monster {
   if (!player.monster) throw new Error(`player ${player.id} has no monster`);
-  const m: Monster = {
+  return {
     ...player.monster,
     stats: { ...player.monster.stats },
     passives: player.monster.passives.map((p) => ({ ...p })),
     actives: player.monster.actives.map((a) => ({ ...a })),
   };
-  const remaining: typeof player.pendingBuffs = [];
-  for (const buff of player.pendingBuffs) {
-    if (buff.duration === 'next_battle') {
-      m.stats[buff.stat] += buff.amount;
-    } else {
-      remaining.push(buff);
-    }
-  }
-  player.pendingBuffs = remaining;
-  return m;
 }
 
 /** Flip every active skill's `order` so the highest-ordered skill goes first this battle. */

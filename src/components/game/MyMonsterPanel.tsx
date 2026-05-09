@@ -79,7 +79,7 @@ export function MyMonsterPanel({
       </summary>
 
       <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
-        <MonsterDetails monster={monster} pendingBuffsCount={me.pendingBuffsCount} />
+        <MonsterDetails monster={monster} />
 
         <div>
           <h4 style={{ margin: '0 0 4px' }}>名前を変更</h4>

@@ -51,10 +51,7 @@ export function PlayerPanel({
                   </span>
                 </summary>
                 <div style={{ padding: '8px 12px 12px', borderTop: '1px dashed #ddd' }}>
-                  <MonsterDetails
-                    monster={p.monster}
-                    pendingBuffsCount={p.pendingBuffsCount}
-                  />
+                  <MonsterDetails monster={p.monster} />
                 </div>
               </details>
             ) : (

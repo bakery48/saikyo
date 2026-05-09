@@ -78,8 +78,7 @@
 - 手札の中身はオーナーのみ表示（`ClientGameState.myActionHand` に自分の分だけ入る）
 - 全員が選択を提出するまで待機（`state.actionPhase = { pendingPlayerIds, submittedPlays }`）
 - **効果：**
-  - `stat_mod` (duration: `permanent`) — ステータス永続変化
-  - `stat_mod` (duration: `next_battle`) — 次バトルのみ適用されるバフ（消費後削除）
+  - `stat_mod` — ステータス永続変化
   - `draw_skill_top` — スキルデッキ先頭を追加
   - `recover_skill_from_grave` — スキル墓地からランダムに1枚追加
   - `discard_random_active` — アクティブスキルをランダムに1枚廃棄
@@ -132,8 +131,7 @@
 ### 事前処理
 
 1. モンスターのスナップショットを作成
-2. `next_battle` バフを適用して消費
-3. バトル開始時パッシブを発動（`trigger.kind === 'battle_start'`）
+2. バトル開始時パッシブを発動（`trigger.kind === 'battle_start'`）
 
 ### イニシアチブ
 

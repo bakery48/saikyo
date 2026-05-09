@@ -373,7 +373,6 @@ export class GameRunner {
       isCPU: p.isCPU,
       color: p.color,
       monster: p.monster,
-      pendingBuffsCount: p.pendingBuffs.length,
       actionHandCount: p.actionHand.length,
     }));
     const me = viewerId ? s.players.find((p) => p.id === viewerId) : null;

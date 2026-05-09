@@ -27,7 +27,7 @@ const other = (s: Side): Side => (s === 'a' ? 'b' : 'a');
 export const SPD_DODGE_ENABLED = true;
 
 type CombatStats = Stats & {
-  /** Cap for hp during this battle. Frozen at the battle-start value (after next_battle buffs). */
+  /** Cap for hp during this battle. Frozen at the battle-start value. */
   maxHp: number;
   /** Battle-long stat modifiers — added on top of base. */
   atkMod: number;

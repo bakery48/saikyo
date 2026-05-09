@@ -47,15 +47,12 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
   const e = card.effect;
   switch (e.kind) {
     case 'stat_mod':
-      return `${e.stat.toUpperCase()}${e.amount >= 0 ? '+' : ''}${e.amount} (${
-        e.duration === 'permanent' ? '永続' : '次戦のみ'
-      })`;
+      return `${e.stat.toUpperCase()}${e.amount >= 0 ? '+' : ''}${e.amount}`;
     case 'stat_mod_choice': {
-      const dur = e.duration === 'permanent' ? '永続' : '次戦のみ';
       if (chosenStat) {
-        return `${chosenStat.toUpperCase()}+${e.amount} (${dur})`;
+        return `${chosenStat.toUpperCase()}+${e.amount}`;
       }
-      return `HP/ATK/DEF/SPDから1つ選んで+${e.amount} (${dur})`;
+      return `HP/ATK/DEF/SPDから1つ選んで+${e.amount}`;
     }
     case 'recover_skill_from_grave':
       return 'スキル墓地から1枚回収';

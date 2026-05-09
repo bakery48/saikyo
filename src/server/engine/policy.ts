@@ -92,11 +92,9 @@ export const greedyPolicy: Policy = {
 function scoreActionCard(card: ActionCard): number {
   switch (card.effect.kind) {
     case 'stat_mod':
-      // Permanent buffs are worth more than next-battle ones.
-      return card.effect.amount * (card.effect.duration === 'permanent' ? 4 : 2);
+      return card.effect.amount * 4;
     case 'stat_mod_choice':
-      // Same as a permanent stat_mod; the chosen stat is decided when played.
-      return card.effect.amount * (card.effect.duration === 'permanent' ? 4 : 2);
+      return card.effect.amount * 4;
     case 'draw_skill_top':
       return 5;
     case 'recover_skill_from_grave':

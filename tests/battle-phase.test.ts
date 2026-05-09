@@ -43,15 +43,11 @@ describe('Battle phase', () => {
     expect(state.reward!.pendingPlayerIds.length).toBe(expectedLosers);
   });
 
-  it('snapshotMonsterForBattle consumes next_battle pendingBuffs', () => {
+  it('snapshotMonsterForBattle returns a stat copy independent of the monster', () => {
     const player = state.players[0]!;
-    player.pendingBuffs.push({ stat: 'atk', amount: 3, duration: 'next_battle' });
     const original = player.monster!.stats.atk;
     const snap = snapshotMonsterForBattle(player);
-    expect(snap.stats.atk).toBe(original + 3);
-    // Original monster stats untouched.
+    snap.stats.atk += 5;
     expect(player.monster!.stats.atk).toBe(original);
-    // Pending buff consumed.
-    expect(player.pendingBuffs).toHaveLength(0);
   });
 });

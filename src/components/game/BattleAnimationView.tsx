@@ -91,8 +91,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
       : match.log.length;
   const appliedEvents = match.log.slice(0, upToLogIdx);
 
-  // Battle-start HP includes any next_battle buffs that were applied — use it
-  // as the HP bar's max so "current / max" never shows current > max.
+  // Battle-start HP is the bar's max so "current / max" never shows current > max.
   const aHpStart = match.startHpA || aMon?.stats.hp || 0;
   const bHpStart = match.startHpB || bMon?.stats.hp || 0;
   const aHp = computeHp(appliedEvents, 'a', aHpStart);
