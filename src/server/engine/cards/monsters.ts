@@ -106,12 +106,12 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'dracula',
-    name: 'ドラキュラ',
+    baseId: 'vampire',
+    name: 'ヴァンパイア',
     stats: { hp: 8, atk: 6, def: 3, spd: 5 },
     passives: [
       {
-        id: 'dracula-p1',
+        id: 'vampire-p1',
         name: '吸血',
         trigger: { kind: 'on_deal_damage' },
         effect: { kind: 'lifesteal', denominator: 2 },
