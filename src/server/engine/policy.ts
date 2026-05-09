@@ -22,6 +22,21 @@ function hashCode(s: string): number {
   return h;
 }
 
+/**
+ * FNV-1a-style mixing of several integers — strong enough to make the picked
+ * index differ between players even when the pool only has 2 entries (plain
+ * XOR + modulo collapses to a single LSB and locks two CPUs into perpetual
+ * conflict every sub-round).
+ */
+function mixHash(...nums: number[]): number {
+  let h = 0x811c9dc5 | 0;
+  for (const n of nums) {
+    h ^= n | 0;
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
 const RARITY_RANK: Record<string, number> = { N: 1, R: 2, SR: 3, SSR: 4 };
 
 /** Default CPU policy: greedy by simple heuristics. */
@@ -38,16 +53,20 @@ export const greedyPolicy: Policy = {
     const top = sorted.slice(0, Math.min(3, sorted.length));
     if (top.length === 0) return available[0]!;
     const attempt = state.monsterPick?.attempt ?? 0;
-    const idx =
-      Math.abs(hashCode(playerId) ^ state.rngState ^ (attempt * 1000003)) % top.length;
+    const idx = mixHash(hashCode(playerId), state.rngState, attempt) % top.length;
     return top[idx]!;
   },
-  pickDraftCard(_state, _playerId, pool) {
-    let best = pool[0]!;
-    for (const c of pool) {
-      if (RARITY_RANK[c.rarity]! > RARITY_RANK[best.rarity]!) best = c;
-    }
-    return best;
+  pickDraftCard(state, playerId, pool) {
+    if (pool.length === 0) return pool[0]!;
+    const maxRank = pool.reduce(
+      (m, c) => Math.max(m, RARITY_RANK[c.rarity] ?? 0),
+      0,
+    );
+    const best = pool.filter((c) => (RARITY_RANK[c.rarity] ?? 0) === maxRank);
+    if (best.length === 1) return best[0]!;
+    const attempt = state.draft?.attempt ?? 0;
+    const idx = mixHash(hashCode(playerId), state.rngState, attempt) % best.length;
+    return best[idx]!;
   },
   pickActionCard(_state, _playerId, hand) {
     let best = hand[0]!;
