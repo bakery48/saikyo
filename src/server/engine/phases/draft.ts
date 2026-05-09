@@ -70,13 +70,13 @@ export function resolveDraftSubRound(state: GameState): boolean {
 
   const assignments: Record<string, string> = {};
   const conflictPlayers: string[] = [];
-  const conflictCardIds: string[] = [];
 
   for (const [skillId, players] of groups) {
     if (players.length === 1) {
       assignments[players[0]!] = skillId;
     } else {
-      conflictCardIds.push(skillId);
+      // Conflict: card stays in the pool so the colliding players can re-pick
+      // it (or anything else) on the next sub-round.
       conflictPlayers.push(...players);
       state.log.push({ kind: 'draft_conflict', skillId, players });
     }
@@ -92,15 +92,6 @@ export function resolveDraftSubRound(state: GameState): boolean {
     draft.acquired[playerId]!.push(skillId);
   }
   state.log.push({ kind: 'draft_resolved', assignments });
-
-  // Conflict cards are set aside (cannot be picked again this draft).
-  for (const cid of conflictCardIds) {
-    const card = draft.pool.find((c) => c.id === cid);
-    if (card) {
-      draft.pool = draft.pool.filter((c) => c.id !== cid);
-      draft.setAside.push(card);
-    }
-  }
 
   // Update pending pickers and clear submissions.
   draft.pendingPlayerIds = conflictPlayers;

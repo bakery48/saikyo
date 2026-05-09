@@ -81,23 +81,27 @@ describe('Draft phase', () => {
     }
   });
 
-  it('after a conflict, re-pick continues; fallback ensures everyone gets a card', () => {
+  it('after a conflict, the colliding card stays in the pool for the re-pick', () => {
     const before = snapshotSkillCounts(state);
     startDraft(state);
     const draft = state.draft!;
     const players = draft.pendingPlayerIds.slice();
     const pool = draft.pool;
-    submitDraftPick(state, players[0]!, pool[0]!.id);
-    submitDraftPick(state, players[1]!, pool[0]!.id);
+    const conflictCardId = pool[0]!.id;
+    submitDraftPick(state, players[0]!, conflictCardId);
+    submitDraftPick(state, players[1]!, conflictCardId);
     for (let i = 2; i < players.length; i++) {
       submitDraftPick(state, players[i]!, pool[i]!.id);
     }
     expect(resolveDraftSubRound(state)).toBe(false);
     expect(state.draft!.pendingPlayerIds).toHaveLength(2);
-    expect(state.draft!.pool.length).toBe(1);
-    const remaining = state.draft!.pool[0]!.id;
-    submitDraftPick(state, players[0]!, remaining);
-    submitDraftPick(state, players[1]!, remaining);
+    // Conflict card stays available; the only untouched card (pool[1]) also stays.
+    expect(state.draft!.pool.some((c) => c.id === conflictCardId)).toBe(true);
+    expect(state.draft!.pool.length).toBe(2);
+    // p0 takes the previously-conflicted card alone, p1 takes the other.
+    const otherCard = state.draft!.pool.find((c) => c.id !== conflictCardId)!.id;
+    submitDraftPick(state, players[0]!, conflictCardId);
+    submitDraftPick(state, players[1]!, otherCard);
     expect(resolveDraftSubRound(state)).toBe(true);
     expect(state.draft).toBeNull();
     for (const pid of [players[0]!, players[1]!]) {
