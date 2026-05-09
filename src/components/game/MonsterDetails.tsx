@@ -34,30 +34,6 @@ export function MonsterDetails({
       </div>
 
       <div>
-        <h4 style={{ margin: '0 0 4px' }}>アクティブ ({monster.actives.length})</h4>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 4 }}>
-          {monster.actives.map((a) => (
-            <li
-              key={a.id}
-              style={{ fontSize: 12, display: 'flex', justifyContent: 'space-between' }}
-            >
-              <SkillNameHover label={`${a.order}. ${a.name}`} tooltip={activeTooltip(a)}>
-                {a.rarity && (
-                  <span style={{ color: RARITY_COLOR[a.rarity] ?? '#888', marginLeft: 4 }}>
-                    [{a.rarity}]
-                  </span>
-                )}
-              </SkillNameHover>
-              {a.nameTag && <em style={{ opacity: 0.65 }}>→ {a.nameTag}</em>}
-            </li>
-          ))}
-          {monster.actives.length === 0 && (
-            <li style={{ fontSize: 12, opacity: 0.6 }}>まだアクティブスキルがありません</li>
-          )}
-        </ul>
-      </div>
-
-      <div>
         <h4 style={{ margin: '0 0 4px' }}>パッシブ ({monster.passives.length})</h4>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 4 }}>
           {monster.passives.map((p) => (
@@ -77,6 +53,30 @@ export function MonsterDetails({
           ))}
           {monster.passives.length === 0 && (
             <li style={{ fontSize: 12, opacity: 0.6 }}>パッシブなし</li>
+          )}
+        </ul>
+      </div>
+
+      <div>
+        <h4 style={{ margin: '0 0 4px' }}>アクティブ ({monster.actives.length})</h4>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 4 }}>
+          {monster.actives.map((a) => (
+            <li
+              key={a.id}
+              style={{ fontSize: 12, display: 'flex', justifyContent: 'space-between' }}
+            >
+              <SkillNameHover label={`${a.order}. ${a.name}`} tooltip={activeTooltip(a)}>
+                {a.rarity && (
+                  <span style={{ color: RARITY_COLOR[a.rarity] ?? '#888', marginLeft: 4 }}>
+                    [{a.rarity}]
+                  </span>
+                )}
+              </SkillNameHover>
+              {a.nameTag && <em style={{ opacity: 0.65 }}>→ {a.nameTag}</em>}
+            </li>
+          ))}
+          {monster.actives.length === 0 && (
+            <li style={{ fontSize: 12, opacity: 0.6 }}>まだアクティブスキルがありません</li>
           )}
         </ul>
       </div>
