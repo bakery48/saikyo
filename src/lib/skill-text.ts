@@ -75,6 +75,16 @@ export function describePassiveEffect(e: PassiveEffect): string {
         : `攻撃ごとにATK+${e.amount}`;
     case 'lifesteal':
       return `与えたダメージの1/${e.denominator}を回復`;
+    case 'rage_atk':
+      return `被ダメ時にATK+${e.amount}（バトル中累積）`;
+    case 'hex_def':
+      return `与ダメ時に相手のDEF-${e.amount}（バトル中累積）`;
+    case 'extra_attack_chance':
+      return `攻撃時${e.percent}%で2回発動`;
+    case 'counter_damage':
+      return `被ダメの1/${e.denominator}（切り捨て）を相手に反射`;
+    case 'low_hp_atk_bonus':
+      return `HPが半分以下のときATK+${e.amount}`;
     case 'endure_fatal':
       return e.reviveDenominator
         ? `1度だけ最大HPの1/${e.reviveDenominator}（切り捨て）で耐える`

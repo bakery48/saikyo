@@ -241,6 +241,22 @@ function takeDamage(
     if (passive && dmg > 0) log.push({ kind: 'passive', player: side, passiveId: passive.id });
     dmg = Math.max(0, dmg - target.damageReduction);
   }
+  // rage_atk: gain ATK every time this side actually takes damage.
+  if (dmg > 0) {
+    for (const p of passives) {
+      if (p.effect.kind === 'rage_atk') {
+        target.atkMod += p.effect.amount;
+        log.push({
+          kind: 'buff',
+          player: side,
+          stat: 'atk',
+          amount: p.effect.amount,
+          duration: 'battle',
+        });
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+      }
+    }
+  }
   return dmg;
 }
 
@@ -280,6 +296,15 @@ function resolveAttack(args: {
       atkBoost += p.effect.amount * Math.floor(attacker.activesUsedCount / every);
     }
   }
+  // low_hp_atk_bonus: dynamic — only counts while at or below half HP.
+  const isLowHp = attacker.maxHp > 0 && attacker.hp * 2 <= attacker.maxHp;
+  if (isLowHp) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'low_hp_atk_bonus') {
+        atkBoost += p.effect.amount;
+      }
+    }
+  }
   const stat =
     effect.useStat === 'atk'
       ? effStat(attacker, 'atk') + atkBoost
@@ -311,6 +336,95 @@ function resolveAttack(args: {
     hpAfter: defender.hp,
   });
   applyLifesteal(attacker, attackerPassives, actual, attackerSide, log);
+  applyHexDef(attacker, attackerPassives, defender, attackerSide, defenderSide, actual, log);
+  applyCounterDamage(
+    defender,
+    defenderPassives,
+    attacker,
+    attackerPassives,
+    attackerSide,
+    defenderSide,
+    actual,
+    log,
+  );
+}
+
+/** ケルベロス extra_attack_chance: returns true if any proc fires (only one per skill use). */
+function rollExtraAttack(
+  user: CombatStats,
+  userPassives: PassiveSkill[],
+  userSide: Side,
+  rng: RNG,
+  log: BattleEvent[],
+): boolean {
+  for (const p of userPassives) {
+    if (p.effect.kind === 'extra_attack_chance') {
+      if (rng.next() < p.effect.percent / 100) {
+        log.push({ kind: 'passive', player: userSide, passiveId: p.id });
+        return true;
+      }
+      // Only one such passive should attempt to proc per skill use.
+      break;
+    }
+  }
+  return false;
+}
+
+/** ウィザード hex_def: each successful hit shaves DEF off the target permanently (battle-only). */
+function applyHexDef(
+  attacker: CombatStats,
+  attackerPassives: PassiveSkill[],
+  defender: CombatStats,
+  attackerSide: Side,
+  defenderSide: Side,
+  damageDealt: number,
+  log: BattleEvent[],
+): void {
+  if (damageDealt <= 0) return;
+  for (const p of attackerPassives) {
+    if (p.effect.kind === 'hex_def') {
+      defender.defMod -= p.effect.amount;
+      log.push({
+        kind: 'debuff',
+        player: defenderSide,
+        stat: 'def',
+        amount: p.effect.amount,
+        duration: 'battle',
+      });
+      log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+    }
+  }
+}
+
+/** カーバンクル counter_damage: reflect a fraction of incoming damage back to the attacker. */
+function applyCounterDamage(
+  defender: CombatStats,
+  defenderPassives: PassiveSkill[],
+  attacker: CombatStats,
+  attackerPassives: PassiveSkill[],
+  attackerSide: Side,
+  defenderSide: Side,
+  damageDealt: number,
+  log: BattleEvent[],
+): void {
+  if (damageDealt <= 0) return;
+  for (const p of defenderPassives) {
+    if (p.effect.kind === 'counter_damage') {
+      const denom = Math.max(1, p.effect.denominator);
+      let counter = Math.floor(damageDealt / denom);
+      if (counter <= 0) continue;
+      counter = clampWithEndure(attacker, counter, attackerPassives, attackerSide, log);
+      attacker.hp -= counter;
+      log.push({
+        kind: 'damage',
+        from: defenderSide,
+        to: attackerSide,
+        amount: counter,
+        hpAfter: attacker.hp,
+      });
+      log.push({ kind: 'passive', player: defenderSide, passiveId: p.id });
+    }
+  }
 }
 
 /**
@@ -404,33 +518,56 @@ function applySkill(args: {
   const e = skill.effect;
   switch (e.kind) {
     case 'attack': {
-      resolveAttack({
-        attacker: user,
-        defender: target,
-        attackerPassives: userPassives,
-        defenderPassives: targetPassives,
-        effect: e,
-        attackerSide: userSide,
-        defenderSide: targetSide,
-        rng,
-        log,
-      });
+      const runAttack = (): void => {
+        resolveAttack({
+          attacker: user,
+          defender: target,
+          attackerPassives: userPassives,
+          defenderPassives: targetPassives,
+          effect: e,
+          attackerSide: userSide,
+          defenderSide: targetSide,
+          rng,
+          log,
+        });
+      };
+      runAttack();
       user.firstAttackMade = true;
+      // ケルベロス extra_attack_chance: 一度だけ proc を試行して再発動。
+      if (rollExtraAttack(user, userPassives, userSide, rng, log)) {
+        runAttack();
+      }
       break;
     }
     case 'true_damage': {
-      if (rollDodge(user, target, rng)) {
-        log.push({ kind: 'miss', from: userSide, to: targetSide });
-        user.firstAttackMade = true;
-        break;
-      }
-      const dmg = Math.floor(e.amount * user.nextAmp);
-      let actual = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
-      actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
-      target.hp -= actual;
-      log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
-      applyLifesteal(user, userPassives, actual, userSide, log);
+      const runTrueDamage = (): void => {
+        if (rollDodge(user, target, rng)) {
+          log.push({ kind: 'miss', from: userSide, to: targetSide });
+          return;
+        }
+        const dmg = Math.floor(e.amount * user.nextAmp);
+        let actual = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
+        actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+        target.hp -= actual;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+        applyLifesteal(user, userPassives, actual, userSide, log);
+        applyHexDef(user, userPassives, target, userSide, targetSide, actual, log);
+        applyCounterDamage(
+          target,
+          targetPassives,
+          user,
+          userPassives,
+          userSide,
+          targetSide,
+          actual,
+          log,
+        );
+      };
+      runTrueDamage();
       user.firstAttackMade = true;
+      if (rollExtraAttack(user, userPassives, userSide, rng, log)) {
+        runTrueDamage();
+      }
       break;
     }
     case 'heal': {

@@ -131,6 +131,71 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
   },
+  {
+    baseId: 'berserker',
+    name: 'バーサーカー',
+    stats: { hp: 8, atk: 7, def: 2, spd: 5 },
+    passives: [
+      {
+        id: 'berserker-p1',
+        name: '怒りの咆哮',
+        trigger: { kind: 'on_take_damage' },
+        effect: { kind: 'rage_atk', amount: 1 },
+      },
+    ],
+  },
+  {
+    baseId: 'wizard',
+    name: 'ウィザード',
+    stats: { hp: 12, atk: 3, def: 5, spd: 5 },
+    passives: [
+      {
+        id: 'wizard-p1',
+        name: '装甲呪詛',
+        trigger: { kind: 'on_deal_damage' },
+        effect: { kind: 'hex_def', amount: 1 },
+      },
+    ],
+  },
+  {
+    baseId: 'cerberus',
+    name: 'ケルベロス',
+    stats: { hp: 12, atk: 5, def: 4, spd: 5 },
+    passives: [
+      {
+        id: 'cerberus-p1',
+        name: '三連の牙',
+        trigger: { kind: 'first_attack' },
+        effect: { kind: 'extra_attack_chance', percent: 10 },
+      },
+    ],
+  },
+  {
+    baseId: 'carbuncle',
+    name: 'カーバンクル',
+    stats: { hp: 14, atk: 4, def: 5, spd: 4 },
+    passives: [
+      {
+        id: 'carbuncle-p1',
+        name: '宝玉の反射',
+        trigger: { kind: 'on_take_damage' },
+        effect: { kind: 'counter_damage', denominator: 3 },
+      },
+    ],
+  },
+  {
+    baseId: 'knight',
+    name: 'ナイト',
+    stats: { hp: 14, atk: 5, def: 5, spd: 3 },
+    passives: [
+      {
+        id: 'knight-p1',
+        name: '背水の覚悟',
+        trigger: { kind: 'battle_start' },
+        effect: { kind: 'low_hp_atk_bonus', amount: 4 },
+      },
+    ],
+  },
 ];
 
 export const MONSTERS_BY_ID: Record<string, MonsterBase> = Object.fromEntries(

@@ -92,6 +92,16 @@ export type PassiveEffect =
   | { kind: 'atk_per_active'; amount: number; every?: number }
   /** Heal floor(damage / denominator) for every hit landed by this monster. */
   | { kind: 'lifesteal'; denominator: number }
+  /** Each time this side takes damage, gain `amount` ATK (battle-long, accumulating). */
+  | { kind: 'rage_atk'; amount: number }
+  /** Each time this side deals damage, reduce target's DEF by `amount` (battle-long, accumulating). */
+  | { kind: 'hex_def'; amount: number }
+  /** Each active skill use has a `percent` chance to fire a second time. */
+  | { kind: 'extra_attack_chance'; percent: number }
+  /** When taking damage, reflect floor(damage / denominator) back to the attacker. */
+  | { kind: 'counter_damage'; denominator: number }
+  /** While hp ≤ maxHp/2, gain `amount` ATK on attacks (dynamic check at attack time). */
+  | { kind: 'low_hp_atk_bonus'; amount: number }
   /**
    * Once per battle, an attack that would drop hp to 0 instead leaves
    * floor(maxHp / reviveDenominator) (clamped to ≥1). When `reviveDenominator`
