@@ -164,7 +164,7 @@ export const MONSTERS: MonsterBase[] = [
     passives: [
       {
         id: 'cerberus-p1',
-        name: '三連の牙',
+        name: '連携攻撃',
         trigger: { kind: 'first_attack' },
         effect: { kind: 'extra_attack_chance', percent: 10 },
       },
