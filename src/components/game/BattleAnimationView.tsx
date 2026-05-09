@@ -221,8 +221,31 @@ function MonsterColumn({
   const hpPct = Math.max(0, Math.min(100, Math.round((hp / Math.max(1, baseHp)) * 100)));
   const colorHex = COLOR_HEX[player.color] ?? '#888';
 
+  // Shake on hit. Re-runs whenever slashKey changes (i.e. a new damage event
+  // landed on this side).
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!slashKey) return;
+    const el = wrapperRef.current;
+    if (!el) return;
+    el.animate(
+      [
+        { transform: 'translateX(0) translateY(0) rotate(0deg)' },
+        { transform: 'translateX(-8px) translateY(2px) rotate(-1.5deg)' },
+        { transform: 'translateX(7px) translateY(-2px) rotate(1.5deg)' },
+        { transform: 'translateX(-6px) translateY(1px) rotate(-1deg)' },
+        { transform: 'translateX(5px) translateY(-1px) rotate(1deg)' },
+        { transform: 'translateX(-3px) translateY(1px) rotate(-0.5deg)' },
+        { transform: 'translateX(2px) translateY(0) rotate(0.5deg)' },
+        { transform: 'translateX(0) translateY(0) rotate(0deg)' },
+      ],
+      { duration: 520, easing: 'ease-out' },
+    );
+  }, [slashKey]);
+
   return (
     <div
+      ref={wrapperRef}
       style={{
         display: 'grid',
         gap: 8,
