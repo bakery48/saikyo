@@ -53,6 +53,8 @@ type CombatStats = Stats & {
   damageReduction: number;
   /** Random damage negation chance (1 in N). 0 = none. */
   negateOneIn: number;
+  /** Flat % bonus to the SPD dodge roll (added on top of SPD-diff %). */
+  dodgeBonusPercent: number;
   /** First-attack damage multiplier (additive amount applied as flat amp). */
   firstAttackAmp: number;
   /** First attack treats as true damage / ignores DEF. */
@@ -82,6 +84,7 @@ function initCombat(m: Monster): CombatStats {
     perActiveAtk: 0,
     damageReduction: 0,
     negateOneIn: 0,
+    dodgeBonusPercent: 0,
     firstAttackAmp: 0,
     firstAttackTrue: false,
     endureFatalAvailable: m.passives.some((p) => p.effect.kind === 'endure_fatal'),
@@ -153,6 +156,9 @@ function applyBattleStartPassives(
         break;
       case 'damage_negate_chance':
         self.negateOneIn = Math.max(self.negateOneIn, p.effect.oneIn);
+        break;
+      case 'dodge_bonus':
+        self.dodgeBonusPercent += p.effect.percent;
         break;
       case 'first_attack_amp':
         self.firstAttackAmp += p.effect.amount;
@@ -252,8 +258,8 @@ function resolveAttack(args: {
     rng,
     log,
   } = args;
-  // SPD-dodge: faster defenders may evade entirely before damage is computed.
-  if (rollSpdDodge(effStat(attacker, 'spd'), effStat(defender, 'spd'), rng)) {
+  // Dodge: SPD-diff + passive bonuses can fully evade the attack.
+  if (rollDodge(attacker, defender, rng)) {
     log.push({ kind: 'miss', from: attackerSide, to: defenderSide });
     return;
   }
@@ -287,16 +293,21 @@ function resolveAttack(args: {
 }
 
 /**
- * Roll the SPD-dodge: returns true if the attack should miss.
- * No-op when SPD_DODGE_ENABLED is false or the defender isn't faster.
+ * Total dodge percentage = SPD-diff curve (gated on SPD_DODGE_ENABLED) +
+ * any dodge_bonus passive on the defender. Returns true if the attack misses.
  */
-function rollSpdDodge(attackerSpd: number, defenderSpd: number, rng: RNG): boolean {
-  if (!SPD_DODGE_ENABLED) return false;
-  const diff = defenderSpd - attackerSpd;
-  if (diff <= 0) return false;
-  const clamped = Math.min(10, diff);
-  // 10% at diff=1, 50% at diff=10, linear in between.
-  const pct = 10 + ((clamped - 1) * 40) / 9;
+function rollDodge(attacker: CombatStats, defender: CombatStats, rng: RNG): boolean {
+  let pct = 0;
+  if (SPD_DODGE_ENABLED) {
+    const diff = effStat(defender, 'spd') - effStat(attacker, 'spd');
+    if (diff > 0) {
+      const clamped = Math.min(10, diff);
+      // 10% at diff=1, 50% at diff=10, linear in between.
+      pct = 10 + ((clamped - 1) * 40) / 9;
+    }
+  }
+  pct += defender.dodgeBonusPercent;
+  if (pct <= 0) return false;
   return rng.next() < pct / 100;
 }
 
@@ -387,7 +398,7 @@ function applySkill(args: {
       break;
     }
     case 'true_damage': {
-      if (rollSpdDodge(effStat(user, 'spd'), effStat(target, 'spd'), rng)) {
+      if (rollDodge(user, target, rng)) {
         log.push({ kind: 'miss', from: userSide, to: targetSide });
         user.firstAttackMade = true;
         break;

@@ -77,6 +77,8 @@ export type PassiveEffect =
   | { kind: 'damage_reduction'; amount: number }
   | { kind: 'turn_start_heal'; amount: number }
   | { kind: 'damage_negate_chance'; oneIn: number }
+  /** Flat % added to the SPD dodge roll on incoming attacks. */
+  | { kind: 'dodge_bonus'; percent: number }
   | { kind: 'pick_higher_buff'; amount: number }
   /** Each active skill used in this battle adds `amount` to ATK on subsequent attacks. */
   | { kind: 'atk_per_active'; amount: number }

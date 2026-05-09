@@ -61,6 +61,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `HP+${e.amount} 回復`;
     case 'damage_negate_chance':
       return `${e.oneIn}分の1で被ダメ無効`;
+    case 'dodge_bonus':
+      return `回避率+${e.percent}%`;
     case 'pick_higher_buff':
       return `ATKとDEFの高い方に+${e.amount}`;
     case 'atk_per_active':
