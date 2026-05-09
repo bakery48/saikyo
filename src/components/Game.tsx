@@ -15,6 +15,7 @@ import { ActionHandPanel } from './game/ActionHandPanel';
 import { DeckInspector } from './game/DeckInspector';
 import { DevTools } from './game/DevTools';
 import { PhaseProgress } from './game/PhaseProgress';
+import { RulesButton } from './game/RulesModal';
 
 const PHASE_LABEL: Record<string, string> = {
   setup: 'セットアップ',
@@ -62,8 +63,9 @@ export function Game({ socket }: { socket: GameSocket }) {
           paddingBottom: 8,
         }}
       >
-        <div style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <strong>{formatPhaseTitle(state)}</strong>
+          <RulesButton />
           <span style={{ marginLeft: 'auto', fontSize: 12, opacity: 0.6 }}>
             deck: event {state.deckCounts.event} · action {state.deckCounts.action} · skill{' '}
             {state.deckCounts.skill}
