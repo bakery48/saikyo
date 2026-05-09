@@ -147,7 +147,7 @@
 |------|------|
 | `attack` | ダメージ = max(1, floor(stat × mult × nextAmp + perActiveAmp × 使用数 − DEF)) |
 | `true_damage` | DEF・シールド無視のダメージ |
-| `heal` | 自分のHP回復 |
+| `heal` | 自分のHP回復（バトル開始時HP＝最大HPを超えない） |
 | `shield` | 次の被ダメージを軽減（1回限り） |
 | `buff_self` | 自分のステータスをバフ（once=次のアクティブのみ / battle=バトル中） |
 | `debuff_target` | 相手のステータスをデバフ |

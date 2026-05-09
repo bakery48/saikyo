@@ -14,6 +14,8 @@ type Side = 'a' | 'b';
 const other = (s: Side): Side => (s === 'a' ? 'b' : 'a');
 
 type CombatStats = Stats & {
+  /** Cap for hp during this battle. Frozen at the battle-start value (after next_battle buffs). */
+  maxHp: number;
   /** Battle-long stat modifiers — added on top of base. */
   atkMod: number;
   defMod: number;
@@ -48,6 +50,7 @@ type CombatStats = Stats & {
 function initCombat(m: Monster): CombatStats {
   const c: CombatStats = {
     hp: m.stats.hp,
+    maxHp: m.stats.hp,
     atk: m.stats.atk,
     def: m.stats.def,
     spd: m.stats.spd,
@@ -86,7 +89,18 @@ function applyStatMod(c: CombatStats, key: StatKey, amount: number, duration: 'o
   if (key === 'atk') c.atkMod += amount;
   else if (key === 'def') c.defMod += amount;
   else if (key === 'spd') c.spdMod += amount;
-  else if (key === 'hp') c.hp += amount;
+  else if (key === 'hp') healCapped(c, amount);
+}
+
+/** Increase hp without exceeding maxHp. Returns the actual amount applied. */
+function healCapped(c: CombatStats, amount: number): number {
+  if (amount <= 0) {
+    c.hp += amount;
+    return amount;
+  }
+  const applied = Math.max(0, Math.min(amount, c.maxHp - c.hp));
+  c.hp += applied;
+  return applied;
 }
 
 function consumeOnceBuffs(c: CombatStats): void {
@@ -153,9 +167,11 @@ function applyTurnStartPassives(
   for (const p of passives) {
     if (p.trigger.kind !== 'on_own_turn_start') continue;
     if (p.effect.kind === 'turn_start_heal') {
-      self.hp += p.effect.amount;
-      log.push({ kind: 'heal', player: side, amount: p.effect.amount, hpAfter: self.hp });
-      log.push({ kind: 'passive', player: side, passiveId: p.id });
+      const applied = healCapped(self, p.effect.amount);
+      if (applied > 0) {
+        log.push({ kind: 'heal', player: side, amount: applied, hpAfter: self.hp });
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+      }
     }
   }
 }
@@ -282,8 +298,8 @@ function applySkill(args: {
       break;
     }
     case 'heal': {
-      user.hp += e.amount;
-      log.push({ kind: 'heal', player: userSide, amount: e.amount, hpAfter: user.hp });
+      const applied = healCapped(user, e.amount);
+      log.push({ kind: 'heal', player: userSide, amount: applied, hpAfter: user.hp });
       break;
     }
     case 'shield': {
