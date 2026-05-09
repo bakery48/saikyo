@@ -42,6 +42,12 @@ export class GameRunner {
    * fully synchronous resolution from `advance()`.
    */
   private pauseOnReveal: boolean;
+  /**
+   * Set inside `advance()` whenever a step transitions out of the 'battle'
+   * phase. Read and cleared by the ws layer (`consumeBattleResolved`) so it
+   * can play the per-skill battle animation on the client.
+   */
+  private battleResolvedSinceConsume = false;
 
   constructor(opts: {
     roomId: string;
@@ -81,13 +87,27 @@ export class GameRunner {
     // Iteration limit guards against runaway state.
     for (let i = 0; i < 1000; i++) {
       const before = this.snapshotKey();
+      const phaseBefore = this.state.phase;
       const waiting = this.step();
+      if (phaseBefore === 'battle' && this.state.phase !== 'battle') {
+        this.battleResolvedSinceConsume = true;
+      }
       if (waiting || this.state.phase === 'finished') return;
       if (this.snapshotKey() === before) {
         // No progress made; bail to avoid infinite loop.
         return;
       }
     }
+  }
+
+  /**
+   * Returns true if a battle phase was resolved since the last call (and
+   * clears the flag). Used by the ws layer to drive the per-skill animation.
+   */
+  consumeBattleResolved(): boolean {
+    const v = this.battleResolvedSinceConsume;
+    this.battleResolvedSinceConsume = false;
+    return v;
   }
 
   /** Returns true if the runner is now waiting on a human action. */

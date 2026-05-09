@@ -125,6 +125,10 @@ export class GameWsServer {
   private static readonly POST_PICK_PAUSE_MS = 2200;
   /** How long to show the open reveal (all picks visible) before resolving. */
   private static readonly DRAFT_REVEAL_MS = 3000;
+  /** Per-skill animation step the client uses for the battle view. */
+  private static readonly BATTLE_STEP_MS = 2000;
+  /** Buffer added to the battle animation duration so the result is briefly visible. */
+  private static readonly BATTLE_TAIL_MS = 1500;
 
   private startGame(hostId: string): void {
     const room = this.roomManager.getRoomByPlayer(hostId);
@@ -169,11 +173,42 @@ export class GameWsServer {
     const phaseBefore = game.state.phase;
     game.advance();
     if (this.maybeAutoReveal(room)) return;
+    if (this.maybeBattleAnimationPause(room)) return;
     if (this.maybePostPickPause(room, phaseBefore)) return;
     this.broadcastGameState(room);
     if (game.state.phase === 'finished') {
       this.handleFinished(room, game);
     }
+  }
+
+  /**
+   * If the engine just resolved the 'battle' phase during this advance(),
+   * hold the client on a synthesized battle state long enough to play through
+   * every skill_use event at BATTLE_STEP_MS, then broadcast the real
+   * (post-battle) state.
+   */
+  private maybeBattleAnimationPause(room: Room): boolean {
+    const game = this.games.get(room.id);
+    if (!game) return false;
+    if (!game.consumeBattleResolved()) return false;
+    const matches = game.state.battle?.matches ?? [];
+    let maxSkillUses = 0;
+    for (const m of matches) {
+      let count = 0;
+      for (const e of m.log) if (e.kind === 'skill_use') count++;
+      if (count > maxSkillUses) maxSkillUses = count;
+    }
+    if (maxSkillUses === 0) return false; // nothing to animate (e.g. all byes)
+    const durationMs =
+      maxSkillUses * GameWsServer.BATTLE_STEP_MS + GameWsServer.BATTLE_TAIL_MS;
+    this.broadcastGameStateWithPhase(room, 'battle');
+    setTimeout(() => {
+      this.broadcastGameState(room);
+      if (game.state.phase === 'finished') {
+        this.handleFinished(room, game);
+      }
+    }, durationMs);
+    return true;
   }
 
   /**

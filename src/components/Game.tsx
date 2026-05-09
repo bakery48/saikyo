@@ -3,6 +3,7 @@ import type { GameSocket } from '../lib/useGameSocket';
 import { MonsterPickView } from './game/MonsterPickView';
 import { DraftView } from './game/DraftView';
 import { AutoPhaseView } from './game/AutoPhaseView';
+import { BattleAnimationView } from './game/BattleAnimationView';
 import { RewardView } from './game/RewardView';
 import { ChampionView } from './game/ChampionView';
 import { PlayerPanel } from './game/PlayerPanel';
@@ -84,6 +85,8 @@ function renderPhase(
       return <MonsterPickView state={state} socket={socket} />;
     case 'draft':
       return <DraftView state={state} socket={socket} />;
+    case 'battle':
+      return <BattleAnimationView state={state} socket={socket} />;
     case 'reward':
       return <RewardView state={state} socket={socket} />;
     case 'finished':
