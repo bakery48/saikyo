@@ -125,6 +125,12 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
   const damageToB = currentSkillEventRange.some(
     (e) => e.kind === 'damage' && e.to === 'b' && e.amount > 0,
   );
+  const missByA = currentSkillEventRange.some(
+    (e) => e.kind === 'miss' && e.to === 'a',
+  );
+  const missByB = currentSkillEventRange.some(
+    (e) => e.kind === 'miss' && e.to === 'b',
+  );
 
   // Pre-battle dice information (the LAST pair of rolls is the deciding one).
   const rolls = match.log.filter(
@@ -190,6 +196,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
           currentSkillId={currentSide === 'a' ? currentSkillId : null}
           usedSkillIds={usedSkillIdsA}
           slashKey={damageToA ? `a-${stepIdx}` : null}
+          missKey={missByA ? `miss-a-${stepIdx}` : null}
         />
         <div
           style={{
@@ -227,6 +234,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
             currentSkillId={currentSide === 'b' ? currentSkillId : null}
             usedSkillIds={usedSkillIdsB}
             slashKey={damageToB ? `b-${stepIdx}` : null}
+            missKey={missByB ? `miss-b-${stepIdx}` : null}
           />
         )}
       </div>
@@ -243,6 +251,7 @@ function MonsterColumn({
   currentSkillId,
   usedSkillIds,
   slashKey,
+  missKey,
 }: {
   player: ClientPlayer | undefined;
   mon: Monster | null;
@@ -253,6 +262,8 @@ function MonsterColumn({
   usedSkillIds: Set<string>;
   /** Non-null + unique key when this side just got hit; triggers a fresh slash animation. */
   slashKey: string | null;
+  /** Non-null + unique key when this side just dodged; pops a "MISS!" overlay. */
+  missKey: string | null;
 }) {
   if (!player || !mon) {
     return (
@@ -310,6 +321,7 @@ function MonsterColumn({
         <div style={{ position: 'relative', width: 80, height: 80 }}>
           <span style={{ ...pieceStyle(player.color, { size: 80 }), position: 'absolute', inset: 0 }} />
           {slashKey && <ClawSlash key={slashKey} />}
+          {missKey && <MissBadge key={missKey} />}
         </div>
         <div style={{ fontSize: 14, fontWeight: 600 }}>
           {player.name}（{COLOR_LABEL[player.color]}）
@@ -526,6 +538,43 @@ function RollSide({
       <div style={{ fontSize: 13 }}>
         SPD {roll.spd} + 🎲{roll.die} = <strong>{roll.total}</strong>
       </div>
+    </div>
+  );
+}
+
+/** "MISS!" overlay popping over the dodging side's avatar. */
+function MissBadge() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.animate(
+      [
+        { opacity: 0, transform: 'translate(-50%, -50%) scale(0.6) rotate(-8deg)' },
+        { opacity: 1, transform: 'translate(-50%, -55%) scale(1.15) rotate(-4deg)', offset: 0.3 },
+        { opacity: 1, transform: 'translate(-50%, -60%) scale(1.0) rotate(-2deg)', offset: 0.7 },
+        { opacity: 0, transform: 'translate(-50%, -70%) scale(0.95) rotate(0deg)' },
+      ],
+      { duration: 900, fill: 'forwards', easing: 'ease-out' },
+    );
+  }, []);
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        opacity: 0,
+        pointerEvents: 'none',
+        fontWeight: 800,
+        fontSize: 22,
+        color: '#ffd000',
+        textShadow: '0 0 4px #000, 0 0 2px #000, 1px 1px 0 #000',
+        letterSpacing: 1,
+      }}
+    >
+      MISS!
     </div>
   );
 }

@@ -13,6 +13,19 @@ import { RNG } from './rng';
 type Side = 'a' | 'b';
 const other = (s: Side): Side => (s === 'a' ? 'b' : 'a');
 
+/**
+ * Feature flag for the SPD-based dodge mechanic. Flip to false to disable
+ * with no other code changes — every miss check is gated on this.
+ *
+ * When enabled, before an attack lands the engine compares the defender's
+ * effective SPD with the attacker's. If the defender is faster, a percentage
+ * miss roll happens:
+ *   diff = 1   → 10% miss
+ *   diff ≥ 10  → 50% miss
+ *   diff 2-9   → linear interpolation between the two
+ */
+export const SPD_DODGE_ENABLED = true;
+
 type CombatStats = Stats & {
   /** Cap for hp during this battle. Frozen at the battle-start value (after next_battle buffs). */
   maxHp: number;
@@ -239,6 +252,11 @@ function resolveAttack(args: {
     rng,
     log,
   } = args;
+  // SPD-dodge: faster defenders may evade entirely before damage is computed.
+  if (rollSpdDodge(effStat(attacker, 'spd'), effStat(defender, 'spd'), rng)) {
+    log.push({ kind: 'miss', from: attackerSide, to: defenderSide });
+    return;
+  }
   // ATK is bumped linearly per active already used (atk_per_active passive).
   const atkBoost = attacker.perActiveAtk * attacker.activesUsedCount;
   const stat =
@@ -266,6 +284,20 @@ function resolveAttack(args: {
     hpAfter: defender.hp,
   });
   applyLifesteal(attacker, attackerPassives, actual, attackerSide, log);
+}
+
+/**
+ * Roll the SPD-dodge: returns true if the attack should miss.
+ * No-op when SPD_DODGE_ENABLED is false or the defender isn't faster.
+ */
+function rollSpdDodge(attackerSpd: number, defenderSpd: number, rng: RNG): boolean {
+  if (!SPD_DODGE_ENABLED) return false;
+  const diff = defenderSpd - attackerSpd;
+  if (diff <= 0) return false;
+  const clamped = Math.min(10, diff);
+  // 10% at diff=1, 50% at diff=10, linear in between.
+  const pct = 10 + ((clamped - 1) * 40) / 9;
+  return rng.next() < pct / 100;
 }
 
 /**
@@ -355,6 +387,11 @@ function applySkill(args: {
       break;
     }
     case 'true_damage': {
+      if (rollSpdDodge(effStat(user, 'spd'), effStat(target, 'spd'), rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        user.firstAttackMade = true;
+        break;
+      }
       const dmg = Math.floor(e.amount * user.nextAmp);
       let actual = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
       actual = clampWithEndure(target, actual, targetPassives, targetSide, log);

@@ -175,6 +175,7 @@ export type BattleEvent =
   | { kind: 'first'; player: 'a' | 'b' }
   | { kind: 'skill_use'; player: 'a' | 'b'; skillId: string; name: string }
   | { kind: 'damage'; from: 'a' | 'b'; to: 'a' | 'b'; amount: number; hpAfter: number }
+  | { kind: 'miss'; from: 'a' | 'b'; to: 'a' | 'b' }
   | { kind: 'heal'; player: 'a' | 'b'; amount: number; hpAfter: number }
   | { kind: 'buff'; player: 'a' | 'b'; stat: StatKey; amount: number; duration: 'once' | 'battle' }
   | { kind: 'debuff'; player: 'a' | 'b'; stat: StatKey; amount: number; duration: 'once' | 'battle' }
