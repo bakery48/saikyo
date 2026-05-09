@@ -25,6 +25,12 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `次の自分の攻撃×${e.mult}`;
     case 'nullify_next':
       return `相手の次のスキルを無効`;
+    case 'pause_opponent':
+      return `相手の次のターンをスキップ`;
+    case 'shuffle_opponent_actives':
+      return `相手の残りアクティブの順番をランダムに入替え`;
+    case 'next_multi_attack':
+      return `次の攻撃を${1 + e.extraCount}回行う（攻撃以外なら不発・自分に${e.failurePenalty}ダメージ）`;
   }
 }
 
@@ -99,6 +105,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       if (e.spd > 0) parts.push(`SPD-${e.spd}`);
       return parts.join('・');
     }
+    case 'reverse_actives_both':
+      return `両者のアクティブスキルの順番が逆になる`;
   }
 }
 

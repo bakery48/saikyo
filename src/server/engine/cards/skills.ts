@@ -71,12 +71,16 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-010', name: '次撃3倍', rarity: 'SR', nameTag: 'オーバードライブ', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
   { id: 'sk-sr-011', name: '完全見切り', rarity: 'SR', nameTag: 'セージ', active: { effect: { kind: 'nullify_next' } } },
   { id: 'sk-sr-012', name: '装甲粉砕', rarity: 'SR', nameTag: 'クラッシャー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 3, duration: 'battle' } } },
+  { id: 'sk-sr-013', name: '一時停止', rarity: 'SR', nameTag: 'ポーズ', active: { effect: { kind: 'pause_opponent' } } },
+  { id: 'sk-sr-014', name: 'ハリケーン', rarity: 'SR', nameTag: 'ストーム', active: { effect: { kind: 'shuffle_opponent_actives' } } },
+  { id: 'sk-sr-015', name: '二重起動', rarity: 'SR', nameTag: 'ダブル', active: { effect: { kind: 'next_multi_attack', extraCount: 1, failurePenalty: 2 } } },
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
   { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'ドラゴン', active: { effect: { kind: 'attack', mult: 3.0, useStat: 'atk' } } },
   { id: 'sk-ssr-002', name: '神殺しの一撃', rarity: 'SSR', nameTag: 'ゴッド', active: { effect: { kind: 'true_damage', amount: 12 } } },
   { id: 'sk-ssr-003', name: '神域の守り', rarity: 'SSR', nameTag: 'セレスチャル', active: { effect: { kind: 'shield', amount: 12 } } },
   { id: 'sk-ssr-004', name: '時止め', rarity: 'SSR', nameTag: 'クロノス', active: { effect: { kind: 'next_amp', mult: 4.0 } } },
+  { id: 'sk-ssr-005', name: '三重起動', rarity: 'SSR', nameTag: 'トリプル', active: { effect: { kind: 'next_multi_attack', extraCount: 2, failurePenalty: 6 } } },
 
   // ─── Passive skill cards ───────────────────────────────────────────────────
   {
@@ -139,6 +143,17 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'battle_start' },
       effect: { kind: 'atk_per_active', amount: 2, every: 2 },
+    },
+  },
+  {
+    id: 'sk-srp-005',
+    name: '逆転する世界 (passive)',
+    rarity: 'SR',
+    nameTag: 'リバース',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'reverse_actives_both' },
     },
   },
 ];

@@ -63,6 +63,12 @@ type CombatStats = Stats & {
   firstAttackDamageMult: number;
   /** True if this side has an unused endure_fatal passive (≤0 hp clamped to 1 once). */
   endureFatalAvailable: boolean;
+  /** Pending turn skips inflicted by `pause_opponent`. Decremented when this side's turn comes up. */
+  skipTurnsRemaining: number;
+  /** Extra repetitions queued by `next_multi_attack` for the next own active. */
+  pendingMultiAttack: number;
+  /** Self-damage taken if the next skill isn't an attack while `pendingMultiAttack` > 0. */
+  pendingMultiAttackPenalty: number;
   passiveIds: string[];
 };
 
@@ -91,9 +97,18 @@ function initCombat(m: Monster): CombatStats {
     firstAttackDefDiv: 1,
     firstAttackDamageMult: 1,
     endureFatalAvailable: m.passives.some((p) => p.effect.kind === 'endure_fatal'),
+    skipTurnsRemaining: 0,
+    pendingMultiAttack: 0,
+    pendingMultiAttackPenalty: 0,
     passiveIds: [],
   };
   return c;
+}
+
+/** Flip every active skill's `order` so the highest-ordered skill goes first. */
+function reverseMonsterActives(m: Monster): void {
+  const max = m.actives.length;
+  for (const a of m.actives) a.order = max + 1 - a.order;
 }
 
 function effStat(c: CombatStats, key: StatKey): number {
@@ -529,13 +544,15 @@ function applySkill(args: {
   target: CombatStats;
   userPassives: PassiveSkill[];
   targetPassives: PassiveSkill[];
+  /** Target's monster — needed by effects that mutate the opponent's actives (e.g. shuffle). */
+  targetMon: Monster;
   skill: ActiveSkill;
   userSide: Side;
   targetSide: Side;
   rng: RNG;
   log: BattleEvent[];
 }): void {
-  const { user, target, userPassives, targetPassives, skill, userSide, targetSide, rng, log } = args;
+  const { user, target, userPassives, targetPassives, targetMon, skill, userSide, targetSide, rng, log } = args;
   // Nullification check: opponent flagged nullify on us.
   if (user.nullifyOpponentNext) {
     user.nullifyOpponentNext = false;
@@ -547,6 +564,22 @@ function applySkill(args: {
   }
   log.push({ kind: 'skill_use', player: userSide, skillId: skill.id, name: skill.name });
   const e = skill.effect;
+  // Multi-attack pending: only attack/true_damage qualify; otherwise fizzle and self-damage.
+  if (user.pendingMultiAttack > 0 && e.kind !== 'attack' && e.kind !== 'true_damage') {
+    const penalty = user.pendingMultiAttackPenalty;
+    user.pendingMultiAttack = 0;
+    user.pendingMultiAttackPenalty = 0;
+    if (penalty > 0) {
+      user.hp -= penalty;
+      log.push({ kind: 'damage', from: userSide, to: userSide, amount: penalty, hpAfter: user.hp });
+    }
+    log.push({ kind: 'skill_fizzle', player: userSide, skillId: skill.id, selfDamage: penalty });
+    consumeOnceBuffs(user);
+    user.nextAmp = 1;
+    user.activesUsedCount += 1;
+    applySelfDecay(user, userPassives, userSide, log);
+    return;
+  }
   switch (e.kind) {
     case 'attack': {
       const runAttack = (): void => {
@@ -562,7 +595,10 @@ function applySkill(args: {
           log,
         });
       };
-      runAttack();
+      const repeats = 1 + user.pendingMultiAttack;
+      user.pendingMultiAttack = 0;
+      user.pendingMultiAttackPenalty = 0;
+      for (let i = 0; i < repeats; i++) runAttack();
       user.firstAttackMade = true;
       // ケルベロス extra_attack_chance: 一度だけ proc を試行して再発動。
       if (rollExtraAttack(user, userPassives, userSide, rng, log)) {
@@ -594,7 +630,10 @@ function applySkill(args: {
           log,
         );
       };
-      runTrueDamage();
+      const repeats = 1 + user.pendingMultiAttack;
+      user.pendingMultiAttack = 0;
+      user.pendingMultiAttackPenalty = 0;
+      for (let i = 0; i < repeats; i++) runTrueDamage();
       user.firstAttackMade = true;
       if (rollExtraAttack(user, userPassives, userSide, rng, log)) {
         runTrueDamage();
@@ -633,6 +672,37 @@ function applySkill(args: {
       target.nullifyOpponentNext = true;
       log.push({ kind: 'nullified', player: targetSide, skillId: 'pending' });
       break;
+    }
+    case 'pause_opponent': {
+      target.skipTurnsRemaining += 1;
+      // The actual skip is logged later when the opponent's turn is consumed.
+      break;
+    }
+    case 'shuffle_opponent_actives': {
+      const sorted = targetMon.actives.slice().sort((x, y) => x.order - y.order);
+      const remaining = sorted.slice(target.skillIdx);
+      if (remaining.length > 1) {
+        const orders = remaining.map((a) => a.order);
+        const shuffled = remaining.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = rng.int(0, i);
+          [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+        }
+        for (let i = 0; i < shuffled.length; i++) {
+          shuffled[i]!.order = orders[i]!;
+        }
+      }
+      log.push({ kind: 'actives_shuffled', player: targetSide });
+      break;
+    }
+    case 'next_multi_attack': {
+      user.pendingMultiAttack = e.extraCount;
+      user.pendingMultiAttackPenalty = e.failurePenalty;
+      // Mirror next_amp's bookkeeping: don't consume once-buffs/amp here, just
+      // count the active and return so the next skill carries the flag.
+      user.activesUsedCount += 1;
+      applySelfDecay(user, userPassives, userSide, log);
+      return;
     }
   }
   // After applying, per-active counters update and once-buffs/amp consume.
@@ -680,6 +750,23 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
   const sa = initCombat(a);
   const sb = initCombat(b);
 
+  // 逆転する世界: any `reverse_actives_both` battle_start passive flips both
+  // sides' active orders. Stacks by parity (odd=flip, even=cancel).
+  const reverseCount =
+    a.passives.filter((p) => p.effect.kind === 'reverse_actives_both' && p.trigger.kind === 'battle_start').length +
+    b.passives.filter((p) => p.effect.kind === 'reverse_actives_both' && p.trigger.kind === 'battle_start').length;
+  if (reverseCount % 2 === 1) {
+    reverseMonsterActives(a);
+    reverseMonsterActives(b);
+    const passive =
+      a.passives.find((p) => p.effect.kind === 'reverse_actives_both') ??
+      b.passives.find((p) => p.effect.kind === 'reverse_actives_both');
+    if (passive) {
+      const owner: Side = a.passives.includes(passive) ? 'a' : 'b';
+      log.push({ kind: 'passive', player: owner, passiveId: passive.id });
+    }
+  }
+
   const { spdRollBonus: aBonus } = applyBattleStartPassives(a.passives, sa, 'a', rng, log);
   const { spdRollBonus: bBonus } = applyBattleStartPassives(b.passives, sb, 'b', rng, log);
 
@@ -698,7 +785,11 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
   while (sides.a.state.skillIdx < sides.a.mon.actives.length || sides.b.state.skillIdx < sides.b.mon.actives.length) {
     const cur = sides[current];
     const opp = sides[other(current)];
-    if (cur.state.skillIdx < cur.mon.actives.length) {
+    // 一時停止: opponent imposed a skip on us — consume it instead of using a skill.
+    if (cur.state.skipTurnsRemaining > 0) {
+      cur.state.skipTurnsRemaining -= 1;
+      log.push({ kind: 'turn_skipped', player: current });
+    } else if (cur.state.skillIdx < cur.mon.actives.length) {
       applyTurnStartPassives(cur.mon.passives, cur.state, current, log);
       const skill = cur.mon.actives
         .slice()
@@ -709,6 +800,7 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
         target: opp.state,
         userPassives: cur.mon.passives,
         targetPassives: opp.mon.passives,
+        targetMon: opp.mon,
         skill,
         userSide: current,
         targetSide: other(current),

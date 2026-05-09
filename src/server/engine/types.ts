@@ -48,7 +48,17 @@ export type SkillEffect =
   /** Heal self. */
   | { kind: 'heal'; amount: number }
   /** Reduce next incoming damage by a flat amount. */
-  | { kind: 'shield'; amount: number };
+  | { kind: 'shield'; amount: number }
+  /** Cause the opponent to skip their next turn (no skill consumed, just delayed). */
+  | { kind: 'pause_opponent' }
+  /** Randomly shuffle the opponent's remaining (unused) active skills. */
+  | { kind: 'shuffle_opponent_actives' }
+  /**
+   * Make the user's next active skill repeat. If the next skill is `attack` or
+   * `true_damage`, run it `1 + extraCount` times. Otherwise the next skill
+   * fizzles and the user takes `failurePenalty` self-damage.
+   */
+  | { kind: 'next_multi_attack'; extraCount: number; failurePenalty: number };
 
 export type ActiveSkill = {
   id: string;
@@ -114,7 +124,13 @@ export type PassiveEffect =
    * skill: lose `hp` HP (true loss, ignores DEF / shields), and apply
    * battle-long −`atk` / −`def` / −`spd` stat modifiers.
    */
-  | { kind: 'self_decay'; hp: number; atk: number; def: number; spd: number };
+  | { kind: 'self_decay'; hp: number; atk: number; def: number; spd: number }
+  /**
+   * At battle start, reverse both sides' active-skill order. Stacking by parity:
+   * if the total number of `reverse_actives_both` passives across the two
+   * monsters is odd, the flip applies; even cancels out.
+   */
+  | { kind: 'reverse_actives_both' };
 
 export type PassiveSkill = {
   id: string;
@@ -210,6 +226,12 @@ export type BattleEvent =
   | { kind: 'amp_set'; player: 'a' | 'b'; mult: number }
   | { kind: 'shield'; player: 'a' | 'b'; amount: number }
   | { kind: 'passive'; player: 'a' | 'b'; passiveId: string }
+  /** A side's turn was skipped (consumed a pending pause flag). */
+  | { kind: 'turn_skipped'; player: 'a' | 'b' }
+  /** A side's remaining actives were shuffled. */
+  | { kind: 'actives_shuffled'; player: 'a' | 'b' }
+  /** A skill fizzled (e.g. multi-attack pending but the next skill wasn't an attack). */
+  | { kind: 'skill_fizzle'; player: 'a' | 'b'; skillId: string; selfDamage: number }
   | { kind: 'end'; winner: 'a' | 'b' | 'draw'; reason: 'hp_zero' | 'tiebreak_hp' | 'tiebreak_spd' | 'draw' };
 
 export type BattleResult = {

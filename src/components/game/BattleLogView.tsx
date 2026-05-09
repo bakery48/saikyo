@@ -80,6 +80,14 @@ function formatBattleEvent(e: BattleEvent, aName: string, bName: string): string
       return `  ${who(e.player)} 次ダメージ×${e.mult}`;
     case 'passive':
       return `  ${who(e.player)} パッシブ発動（${e.passiveId}）`;
+    case 'turn_skipped':
+      return `  ${who(e.player)} のターンをスキップ`;
+    case 'actives_shuffled':
+      return `  ${who(e.player)} の残りアクティブ順をシャッフル`;
+    case 'skill_fizzle':
+      return e.selfDamage > 0
+        ? `  ${who(e.player)} のスキルが不発（自分に ${e.selfDamage} ダメージ）`
+        : `  ${who(e.player)} のスキルが不発`;
     case 'end':
       return e.reason === 'draw'
         ? `=== 引き分け`
