@@ -66,7 +66,8 @@ export type PassiveTrigger =
   | { kind: 'first_attack' }
   | { kind: 'battle_start' }
   | { kind: 'on_own_turn_start' }
-  | { kind: 'on_take_damage' };
+  | { kind: 'on_take_damage' }
+  | { kind: 'on_deal_damage' };
 
 export type PassiveEffect =
   | { kind: 'stat_mod'; stat: StatKey; amount: number }
@@ -77,7 +78,11 @@ export type PassiveEffect =
   | { kind: 'turn_start_heal'; amount: number }
   | { kind: 'damage_negate_chance'; oneIn: number }
   | { kind: 'pick_higher_buff'; amount: number }
-  | { kind: 'amp_each_active'; amount: number };
+  | { kind: 'amp_each_active'; amount: number }
+  /** Heal floor(damage / denominator) for every hit landed by this monster. */
+  | { kind: 'lifesteal'; denominator: number }
+  /** Once per battle, an attack that would drop hp to 0 instead leaves it at 1. */
+  | { kind: 'endure_fatal' };
 
 export type PassiveSkill = {
   id: string;

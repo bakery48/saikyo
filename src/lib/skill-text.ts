@@ -39,6 +39,8 @@ export function describePassiveTrigger(t: PassiveTrigger): string {
       return 'ターン開始時';
     case 'on_take_damage':
       return '被ダメ時';
+    case 'on_deal_damage':
+      return '与ダメ時';
   }
 }
 
@@ -63,6 +65,10 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `バフを高い方+${e.amount}`;
     case 'amp_each_active':
       return `アクティブごとに威力×${e.amount}`;
+    case 'lifesteal':
+      return `与えたダメージの1/${e.denominator}を回復`;
+    case 'endure_fatal':
+      return `1度だけHP1で耐える`;
   }
 }
 

@@ -105,6 +105,32 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
   },
+  {
+    baseId: 'dracula',
+    name: 'ドラキュラ',
+    stats: { hp: 8, atk: 6, def: 3, spd: 5 },
+    passives: [
+      {
+        id: 'dracula-p1',
+        name: '吸血',
+        trigger: { kind: 'on_deal_damage' },
+        effect: { kind: 'lifesteal', denominator: 2 },
+      },
+    ],
+  },
+  {
+    baseId: 'phoenix',
+    name: 'フェニックス',
+    stats: { hp: 12, atk: 5, def: 4, spd: 5 },
+    passives: [
+      {
+        id: 'phoenix-p1',
+        name: '食いしばり',
+        trigger: { kind: 'on_take_damage' },
+        effect: { kind: 'endure_fatal' },
+      },
+    ],
+  },
 ];
 
 export const MONSTERS_BY_ID: Record<string, MonsterBase> = Object.fromEntries(

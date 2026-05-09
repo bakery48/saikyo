@@ -44,6 +44,8 @@ type CombatStats = Stats & {
   firstAttackAmp: number;
   /** First attack treats as true damage / ignores DEF. */
   firstAttackTrue: boolean;
+  /** True if this side has an unused endure_fatal passive (≤0 hp clamped to 1 once). */
+  endureFatalAvailable: boolean;
   passiveIds: string[];
 };
 
@@ -69,6 +71,7 @@ function initCombat(m: Monster): CombatStats {
     negateOneIn: 0,
     firstAttackAmp: 0,
     firstAttackTrue: false,
+    endureFatalAvailable: m.passives.some((p) => p.effect.kind === 'endure_fatal'),
     passiveIds: [],
   };
   return c;
@@ -217,6 +220,7 @@ function takeDamage(
 function resolveAttack(args: {
   attacker: CombatStats;
   defender: CombatStats;
+  attackerPassives: PassiveSkill[];
   defenderPassives: PassiveSkill[];
   effect: Extract<SkillEffect, { kind: 'attack' }>;
   attackerSide: Side;
@@ -224,7 +228,17 @@ function resolveAttack(args: {
   rng: RNG;
   log: BattleEvent[];
 }): void {
-  const { attacker, defender, defenderPassives, effect, attackerSide, defenderSide, rng, log } = args;
+  const {
+    attacker,
+    defender,
+    attackerPassives,
+    defenderPassives,
+    effect,
+    attackerSide,
+    defenderSide,
+    rng,
+    log,
+  } = args;
   const stat = effect.useStat === 'atk' ? effStat(attacker, 'atk') : effStat(attacker, 'spd');
   let mult = effect.mult * attacker.nextAmp;
   // Per-active stacking amp (e.g., chronoa).
@@ -240,7 +254,8 @@ function resolveAttack(args: {
   }
   const def = ignoreDef ? 0 : effStat(defender, 'def');
   const raw = Math.max(1, Math.floor(baseDamage - def));
-  const actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef);
+  let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef);
+  actual = clampWithEndure(defender, actual, defenderPassives, defenderSide, log);
   defender.hp -= actual;
   log.push({
     kind: 'damage',
@@ -249,6 +264,46 @@ function resolveAttack(args: {
     amount: actual,
     hpAfter: defender.hp,
   });
+  applyLifesteal(attacker, attackerPassives, actual, attackerSide, log);
+}
+
+/** If would drop ≤ 0 HP and endure_fatal is available, leave 1 HP and consume the passive. */
+function clampWithEndure(
+  defender: CombatStats,
+  damage: number,
+  passives: PassiveSkill[],
+  side: Side,
+  log: BattleEvent[],
+): number {
+  if (damage <= 0) return damage;
+  if (!defender.endureFatalAvailable) return damage;
+  if (defender.hp - damage > 0) return damage;
+  defender.endureFatalAvailable = false;
+  const passive = passives.find((p) => p.effect.kind === 'endure_fatal');
+  if (passive) log.push({ kind: 'passive', player: side, passiveId: passive.id });
+  // Leave 1 HP exactly.
+  return Math.max(0, defender.hp - 1);
+}
+
+/** Heal the attacker by floor(damage / denominator) per the lifesteal passive, if present. */
+function applyLifesteal(
+  attacker: CombatStats,
+  passives: PassiveSkill[],
+  damageDealt: number,
+  side: Side,
+  log: BattleEvent[],
+): void {
+  if (damageDealt <= 0) return;
+  const passive = passives.find((p) => p.effect.kind === 'lifesteal');
+  if (!passive || passive.effect.kind !== 'lifesteal') return;
+  const denom = Math.max(1, passive.effect.denominator);
+  const heal = Math.floor(damageDealt / denom);
+  if (heal <= 0) return;
+  const applied = healCapped(attacker, heal);
+  if (applied > 0) {
+    log.push({ kind: 'heal', player: side, amount: applied, hpAfter: attacker.hp });
+    log.push({ kind: 'passive', player: side, passiveId: passive.id });
+  }
 }
 
 function applySkill(args: {
@@ -262,7 +317,7 @@ function applySkill(args: {
   rng: RNG;
   log: BattleEvent[];
 }): void {
-  const { user, target, targetPassives, skill, userSide, targetSide, rng, log } = args;
+  const { user, target, userPassives, targetPassives, skill, userSide, targetSide, rng, log } = args;
   // Nullification check: opponent flagged nullify on us.
   if (user.nullifyOpponentNext) {
     user.nullifyOpponentNext = false;
@@ -279,6 +334,7 @@ function applySkill(args: {
       resolveAttack({
         attacker: user,
         defender: target,
+        attackerPassives: userPassives,
         defenderPassives: targetPassives,
         effect: e,
         attackerSide: userSide,
@@ -290,10 +346,12 @@ function applySkill(args: {
       break;
     }
     case 'true_damage': {
-      let dmg = Math.floor(e.amount * user.nextAmp);
-      const actual = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
+      const dmg = Math.floor(e.amount * user.nextAmp);
+      let actual = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
+      actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
       target.hp -= actual;
       log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+      applyLifesteal(user, userPassives, actual, userSide, log);
       user.firstAttackMade = true;
       break;
     }
