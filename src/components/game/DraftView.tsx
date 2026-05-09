@@ -69,7 +69,7 @@ export function DraftView({
 
   return (
     <section style={{ display: 'grid', gap: 16 }}>
-      <h2 style={{ margin: 0 }}>ドラフト (R{state.round} M{state.miniRound})</h2>
+      <h2 style={{ margin: 0 }}>ドラフト</h2>
       {draft.revealing ? (
         <div
           style={{

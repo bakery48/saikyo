@@ -33,7 +33,7 @@ export function RewardView({
 
   return (
     <section style={{ display: 'grid', gap: 12 }}>
-      <h2 style={{ margin: 0 }}>戦闘報酬 (R{state.round})</h2>
+      <h2 style={{ margin: 0 }}>戦闘報酬</h2>
       {iAmPending ? (
         <>
           <p style={{ margin: 0 }}>{lostMessage} 報酬を選んでください:</p>

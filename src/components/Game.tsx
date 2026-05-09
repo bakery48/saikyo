@@ -1,5 +1,6 @@
 'use client';
 import type { GameSocket } from '../lib/useGameSocket';
+import type { ClientGameState } from '../shared/messages';
 import { MonsterPickView } from './game/MonsterPickView';
 import { DraftView } from './game/DraftView';
 import { AutoPhaseView } from './game/AutoPhaseView';
@@ -26,6 +27,28 @@ const PHASE_LABEL: Record<string, string> = {
   finished: '終了',
 };
 
+/**
+ * Verbose phase title:
+ *   pick_monster      → "モンスター選択"
+ *   event/action/draft → "ラウンド1 ドラフトフェーズ2"
+ *   battle/reward     → "ラウンド1 戦闘フェーズ"
+ *   tournament/finished → label only
+ */
+function formatPhaseTitle(state: ClientGameState): string {
+  const label = PHASE_LABEL[state.phase] ?? state.phase;
+  switch (state.phase) {
+    case 'event':
+    case 'action':
+    case 'draft':
+      return `ラウンド${state.round} ${label}${state.miniRound}`;
+    case 'battle':
+    case 'reward':
+      return `ラウンド${state.round} ${label}`;
+    default:
+      return label;
+  }
+}
+
 export function Game({ socket }: { socket: GameSocket }) {
   const state = socket.game;
   if (!state) return <p>ゲームデータを待機中...</p>;
@@ -39,10 +62,7 @@ export function Game({ socket }: { socket: GameSocket }) {
         }}
       >
         <div style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
-          <strong>{PHASE_LABEL[state.phase] ?? state.phase}</strong>
-          <span style={{ opacity: 0.7, fontSize: 13 }}>
-            R{state.round} / mini {state.miniRound}
-          </span>
+          <strong>{formatPhaseTitle(state)}</strong>
           <span style={{ marginLeft: 'auto', fontSize: 12, opacity: 0.6 }}>
             deck: event {state.deckCounts.event} · action {state.deckCounts.action} · skill{' '}
             {state.deckCounts.skill}
