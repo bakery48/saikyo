@@ -55,6 +55,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `バトルでの最初の自分の攻撃はDEF無視`;
     case 'first_attack_def_div':
       return `バトルでの最初の自分の攻撃は相手のDEFを1/${e.denominator}（切り捨て）にする`;
+    case 'first_attack_damage_mult':
+      return `バトルでの最初の自分の攻撃はダメージ${e.mult}倍`;
     case 'spd_roll_bonus':
       return `先攻後攻判定のダイス出目に+${e.amount}`;
     case 'damage_reduction':
@@ -87,7 +89,8 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
   if (
     p.effect.kind === 'first_attack_true' ||
     p.effect.kind === 'first_attack_amp' ||
-    p.effect.kind === 'first_attack_def_div'
+    p.effect.kind === 'first_attack_def_div' ||
+    p.effect.kind === 'first_attack_damage_mult'
   ) {
     return describePassiveEffect(p.effect);
   }

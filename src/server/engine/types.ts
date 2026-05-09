@@ -75,6 +75,8 @@ export type PassiveEffect =
   | { kind: 'first_attack_true'; }
   /** First attack treats target's DEF as floor(DEF / denominator). */
   | { kind: 'first_attack_def_div'; denominator: number }
+  /** Final damage of the first attack (after DEF) is multiplied by `mult`. */
+  | { kind: 'first_attack_damage_mult'; mult: number }
   | { kind: 'spd_roll_bonus'; amount: number }
   | { kind: 'damage_reduction'; amount: number }
   | { kind: 'turn_start_heal'; amount: number }

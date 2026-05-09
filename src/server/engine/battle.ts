@@ -59,6 +59,8 @@ type CombatStats = Stats & {
   firstAttackTrue: boolean;
   /** First attack divides target's DEF by this value (1 = no effect). */
   firstAttackDefDiv: number;
+  /** First attack's final damage is multiplied by this value (1 = no effect). */
+  firstAttackDamageMult: number;
   /** True if this side has an unused endure_fatal passive (≤0 hp clamped to 1 once). */
   endureFatalAvailable: boolean;
   passiveIds: string[];
@@ -87,6 +89,7 @@ function initCombat(m: Monster): CombatStats {
     firstAttackAmp: 0,
     firstAttackTrue: false,
     firstAttackDefDiv: 1,
+    firstAttackDamageMult: 1,
     endureFatalAvailable: m.passives.some((p) => p.effect.kind === 'endure_fatal'),
     passiveIds: [],
   };
@@ -169,6 +172,10 @@ function applyBattleStartPassives(
       case 'first_attack_def_div':
         // Larger divisors override smaller ones if multiple stack.
         self.firstAttackDefDiv = Math.max(self.firstAttackDefDiv, p.effect.denominator);
+        break;
+      case 'first_attack_damage_mult':
+        // Multiplicative stacking when several effects layer.
+        self.firstAttackDamageMult *= p.effect.mult;
         break;
       case 'turn_start_heal':
         // handled per-turn
@@ -289,7 +296,10 @@ function resolveAttack(args: {
   if (!ignoreDef && isFirstAttack && attacker.firstAttackDefDiv > 1) {
     def = Math.floor(def / attacker.firstAttackDefDiv);
   }
-  const raw = Math.max(1, Math.floor(baseDamage - def));
+  let raw = Math.max(1, Math.floor(baseDamage - def));
+  if (isFirstAttack && attacker.firstAttackDamageMult > 1) {
+    raw = Math.max(1, Math.floor(raw * attacker.firstAttackDamageMult));
+  }
   let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef);
   actual = clampWithEndure(defender, actual, defenderPassives, defenderSide, log);
   defender.hp -= actual;

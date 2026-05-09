@@ -2,15 +2,15 @@ import type { MonsterBase } from '../types';
 
 export const MONSTERS: MonsterBase[] = [
   {
-    baseId: 'flameox',
-    name: 'フレイモックス',
-    stats: { hp: 12, atk: 7, def: 3, spd: 4 },
+    baseId: 'demon',
+    name: 'デーモン',
+    stats: { hp: 18, atk: 6, def: 6, spd: 2 },
     passives: [
       {
-        id: 'flameox-p1',
-        name: '初撃の灼熱',
+        id: 'demon-p1',
+        name: '悪の目醒め',
         trigger: { kind: 'first_attack' },
-        effect: { kind: 'first_attack_amp', amount: 2 },
+        effect: { kind: 'first_attack_damage_mult', mult: 2 },
       },
     ],
   },
@@ -69,7 +69,7 @@ export const MONSTERS: MonsterBase[] = [
   {
     baseId: 'wyvern',
     name: 'ワイバーン',
-    stats: { hp: 12, atk: 6, def: 4, spd: 5 },
+    stats: { hp: 8, atk: 6, def: 3, spd: 7 },
     passives: [
       {
         id: 'wyvern-p1',
