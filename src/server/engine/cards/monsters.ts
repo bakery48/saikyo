@@ -41,12 +41,12 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'zephyrix',
-    name: 'ゼピリクス',
+    baseId: 'fenrir',
+    name: 'フェンリル',
     stats: { hp: 10, atk: 5, def: 3, spd: 8 },
     passives: [
       {
-        id: 'zephyrix-p1',
+        id: 'fenrir-p1',
         name: '疾風の祝福',
         trigger: { kind: 'battle_start' },
         effect: { kind: 'spd_roll_bonus', amount: 2 },

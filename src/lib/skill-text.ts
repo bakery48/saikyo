@@ -54,7 +54,7 @@ export function describePassiveEffect(e: PassiveEffect): string {
     case 'first_attack_true':
       return `初撃がDEF無視`;
     case 'spd_roll_bonus':
-      return `SPDロール+${e.amount}`;
+      return `先攻後攻判定のダイス出目に+${e.amount}`;
     case 'damage_reduction':
       return `被ダメ−${e.amount}`;
     case 'turn_start_heal':
