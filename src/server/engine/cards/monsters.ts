@@ -99,7 +99,7 @@ export const MONSTERS: MonsterBase[] = [
     passives: [
       {
         id: 'ouroboros-p1',
-        name: '時の積層',
+        name: '時の輪廻',
         trigger: { kind: 'battle_start' },
         effect: { kind: 'atk_per_active', amount: 1 },
       },
