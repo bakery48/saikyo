@@ -11,15 +11,7 @@ import {
   validateMonsterName,
 } from '../../server/engine/naming';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
-import { activeTooltip, passiveTooltip } from '../../lib/skill-text';
-import { SkillNameHover } from './SkillNameHover';
-
-const RARITY_COLOR: Record<string, string> = {
-  N: '#888',
-  R: '#3a78ff',
-  SR: '#a050ff',
-  SSR: '#ffa033',
-};
+import { MonsterDetails } from './MonsterDetails';
 
 export function MyMonsterPanel({
   state,
@@ -33,7 +25,6 @@ export function MyMonsterPanel({
   // Editable prefix only — the base monster name is fixed and always rendered as a suffix.
   const [prefix, setPrefix] = useState('');
 
-  // Sync the prefix from the server-side name on changes.
   useEffect(() => {
     if (!monster) return;
     setPrefix(extractPrefixTags(monster.name, monster).join(NAME_SEPARATOR));
@@ -88,55 +79,7 @@ export function MyMonsterPanel({
       </summary>
 
       <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
-        <StatBlock monster={monster} pendingBuffsCount={me.pendingBuffsCount} />
-
-        <div>
-          <h4 style={{ margin: '0 0 4px' }}>アクティブ ({monster.actives.length})</h4>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 4 }}>
-            {monster.actives.map((a) => (
-              <li
-                key={a.id}
-                style={{ fontSize: 12, display: 'flex', justifyContent: 'space-between' }}
-              >
-                <SkillNameHover label={`${a.order}. ${a.name}`} tooltip={activeTooltip(a)}>
-                  {a.rarity && (
-                    <span style={{ color: RARITY_COLOR[a.rarity] ?? '#888', marginLeft: 4 }}>
-                      [{a.rarity}]
-                    </span>
-                  )}
-                </SkillNameHover>
-                {a.nameTag && <em style={{ opacity: 0.65 }}>→ {a.nameTag}</em>}
-              </li>
-            ))}
-            {monster.actives.length === 0 && (
-              <li style={{ fontSize: 12, opacity: 0.6 }}>まだアクティブスキルがありません</li>
-            )}
-          </ul>
-        </div>
-
-        <div>
-          <h4 style={{ margin: '0 0 4px' }}>パッシブ ({monster.passives.length})</h4>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 4 }}>
-            {monster.passives.map((p) => (
-              <li
-                key={p.id}
-                style={{ fontSize: 12, display: 'flex', justifyContent: 'space-between' }}
-              >
-                <SkillNameHover label={p.name} tooltip={passiveTooltip(p)}>
-                  {p.rarity && (
-                    <span style={{ color: RARITY_COLOR[p.rarity] ?? '#888', marginLeft: 4 }}>
-                      [{p.rarity}]
-                    </span>
-                  )}
-                </SkillNameHover>
-                {p.nameTag && <em style={{ opacity: 0.65 }}>→ {p.nameTag}</em>}
-              </li>
-            ))}
-            {monster.passives.length === 0 && (
-              <li style={{ fontSize: 12, opacity: 0.6 }}>パッシブなし</li>
-            )}
-          </ul>
-        </div>
+        <MonsterDetails monster={monster} pendingBuffsCount={me.pendingBuffsCount} />
 
         <div>
           <h4 style={{ margin: '0 0 4px' }}>名前を変更</h4>
@@ -206,26 +149,6 @@ export function MyMonsterPanel({
         </div>
       </div>
     </details>
-  );
-}
-
-function StatBlock({
-  monster,
-  pendingBuffsCount,
-}: {
-  monster: NonNullable<ClientGameState['players'][number]['monster']>;
-  pendingBuffsCount: number;
-}) {
-  return (
-    <div style={{ display: 'flex', gap: 12, fontSize: 13, flexWrap: 'wrap' }}>
-      <span>HP {monster.stats.hp}</span>
-      <span>ATK {monster.stats.atk}</span>
-      <span>DEF {monster.stats.def}</span>
-      <span>SPD {monster.stats.spd}</span>
-      {pendingBuffsCount > 0 && (
-        <span style={{ opacity: 0.75 }}>次戦バフ ×{pendingBuffsCount}</span>
-      )}
-    </div>
   );
 }
 
