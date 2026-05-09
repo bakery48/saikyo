@@ -254,7 +254,23 @@ export class GameRunner {
           card.effect.kind === 'stat_mod_choice' && player.monster
             ? chooseStatForActionCard(player.monster.stats)
             : undefined;
-        submitActionPlay(this.state, pid, card.id, chosenStat);
+        const swap =
+          card.effect.kind === 'swap_actives'
+            ? cpuPickSwapTarget(this.state, pid)
+            : undefined;
+        if (card.effect.kind === 'swap_actives' && !swap) {
+          // No valid target with ≥2 actives — replace with the next-best card if any.
+          const fallback = player.actionHand.find((c) => c.effect.kind !== 'swap_actives');
+          if (fallback) {
+            const fallbackStat =
+              fallback.effect.kind === 'stat_mod_choice' && player.monster
+                ? chooseStatForActionCard(player.monster.stats)
+                : undefined;
+            submitActionPlay(this.state, pid, fallback.id, { chosenStat: fallbackStat });
+            continue;
+          }
+        }
+        submitActionPlay(this.state, pid, card.id, { chosenStat, swap });
       }
     }
     if (waiting) return true;
@@ -312,11 +328,15 @@ export class GameRunner {
     submitDraftPick(this.state, playerId, skillId);
   }
 
-  submitAction(playerId: string, cardId: string, chosenStat?: StatKey): void {
+  submitAction(
+    playerId: string,
+    cardId: string,
+    extras?: { chosenStat?: StatKey; swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string } },
+  ): void {
     if (this.state.phase !== 'action' || !this.state.actionPhase) {
       throw new Error('not in action phase');
     }
-    submitActionPlay(this.state, playerId, cardId, chosenStat);
+    submitActionPlay(this.state, playerId, cardId, extras);
   }
 
   submitReward(playerId: string, choice: RewardChoice): void {
@@ -411,4 +431,27 @@ export class GameRunner {
       s.reward ? Object.keys(s.reward.choices).length : '-',
     ].join('|');
   }
+}
+
+/**
+ * For CPU-played swap_actives cards: pick a random alive player with at least
+ * 2 active skills as the target, then pick 2 distinct skills to swap. Returns
+ * undefined if no valid target exists.
+ */
+function cpuPickSwapTarget(
+  state: GameState,
+  selfId: string,
+): { targetPlayerId: string; skillIdA: string; skillIdB: string } | undefined {
+  const candidates = state.players.filter(
+    (p) => p.monster && p.monster.actives.length >= 2,
+  );
+  if (candidates.length === 0) return undefined;
+  // Prefer self if eligible (predictable, no griefing); otherwise first candidate.
+  const target = candidates.find((p) => p.id === selfId) ?? candidates[0]!;
+  const actives = target.monster!.actives;
+  return {
+    targetPlayerId: target.id,
+    skillIdA: actives[0]!.id,
+    skillIdB: actives[1]!.id,
+  };
 }

@@ -27,28 +27,62 @@ export function ActionPhaseView({
   // Local tentative selection before pressing 決定.
   const [tentative, setTentative] = useState<string | null>(null);
   const [tentativeStat, setTentativeStat] = useState<StatKey | null>(null);
+  const [swapTarget, setSwapTarget] = useState<string | null>(null);
+  const [swapSkills, setSwapSkills] = useState<string[]>([]);
   useEffect(() => {
     setTentative(null);
     setTentativeStat(null);
+    setSwapTarget(null);
+    setSwapSkills([]);
   }, [!!myCommitted, iAmPending, !!phase]);
-  // Reset stat choice whenever the picked card changes.
+  // Reset all extras whenever the picked card changes.
   useEffect(() => {
     setTentativeStat(null);
+    setSwapTarget(null);
+    setSwapSkills([]);
   }, [tentative]);
+  // Reset skill picks if target changes.
+  useEffect(() => {
+    setSwapSkills([]);
+  }, [swapTarget]);
 
   const tentativeCard = tentative ? myHand.find((c) => c.id === tentative) : undefined;
   const isChoiceCard = tentativeCard?.effect.kind === 'stat_mod_choice';
-  const canConfirm = !!tentative && (!isChoiceCard || !!tentativeStat);
+  const isSwapCard = tentativeCard?.effect.kind === 'swap_actives';
+  const swapTargetPlayer = swapTarget
+    ? state.players.find((p) => p.id === swapTarget)
+    : null;
+  const canConfirm =
+    !!tentative &&
+    (!isChoiceCard || !!tentativeStat) &&
+    (!isSwapCard || (!!swapTarget && swapSkills.length === 2));
+
+  const toggleSwapSkill = (skillId: string): void => {
+    setSwapSkills((prev) => {
+      if (prev.includes(skillId)) return prev.filter((s) => s !== skillId);
+      if (prev.length >= 2) return [prev[1]!, skillId];
+      return [...prev, skillId];
+    });
+  };
 
   // Selection mode: action phase is active and accepting plays.
   if (phase) {
     const confirm = (): void => {
       if (!tentative) return;
       if (isChoiceCard && !tentativeStat) return;
+      if (isSwapCard && (!swapTarget || swapSkills.length !== 2)) return;
       socket.send({
         type: 'play_action_card',
         cardId: tentative,
         chosenStat: isChoiceCard ? tentativeStat ?? undefined : undefined,
+        swap:
+          isSwapCard && swapTarget && swapSkills.length === 2
+            ? {
+                targetPlayerId: swapTarget,
+                skillIdA: swapSkills[0]!,
+                skillIdB: swapSkills[1]!,
+              }
+            : undefined,
       });
     };
 
@@ -109,6 +143,78 @@ export function ActionPhaseView({
                     {s.toUpperCase()}
                   </button>
                 ))}
+              </div>
+            )}
+            {isSwapCard && (
+              <div
+                style={{
+                  padding: 8,
+                  background: '#fff8e1',
+                  border: '1px solid #d4a000',
+                  borderRadius: 6,
+                  display: 'grid',
+                  gap: 8,
+                }}
+              >
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>誰のスキルを入れ替える？</span>
+                  {state.players
+                    .filter((p) => p.monster && p.monster.actives.length >= 2)
+                    .map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSwapTarget(p.id)}
+                        style={{
+                          padding: '4px 10px',
+                          border: `2px solid ${swapTarget === p.id ? '#0066cc' : '#aaa'}`,
+                          borderRadius: 4,
+                          background: swapTarget === p.id ? '#eef5ff' : '#fff',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                        }}
+                      >
+                        <span style={pieceStyle(p.color, { size: 12 })} />
+                        {p.name}
+                        {p.id === selfId ? ' (自分)' : ''}
+                      </button>
+                    ))}
+                </div>
+                {swapTargetPlayer?.monster && (
+                  <div>
+                    <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 4 }}>
+                      入れ替えるアクティブスキルを2つ選ぶ ({swapSkills.length}/2)
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {swapTargetPlayer.monster.actives
+                        .slice()
+                        .sort((a, b) => a.order - b.order)
+                        .map((a) => {
+                          const picked = swapSkills.includes(a.id);
+                          return (
+                            <button
+                              key={a.id}
+                              type="button"
+                              onClick={() => toggleSwapSkill(a.id)}
+                              style={{
+                                padding: '4px 8px',
+                                border: `2px solid ${picked ? '#0066cc' : '#aaa'}`,
+                                borderRadius: 4,
+                                background: picked ? '#eef5ff' : '#fff',
+                                cursor: 'pointer',
+                                fontSize: 12,
+                              }}
+                            >
+                              {a.order}. {a.name}
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             <div

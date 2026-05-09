@@ -2,6 +2,7 @@ import type {
   ActionCard,
   ActionPhaseSummary,
   ActionPhaseState,
+  ActionPlay,
   GameState,
   Player,
   StatKey,
@@ -73,6 +74,17 @@ function applyActionEffect(
   saveRng(state, rng);
 }
 
+function applySwapActives(state: GameState, swap: NonNullable<ActionPlay['swap']>): void {
+  const target = state.players.find((p) => p.id === swap.targetPlayerId);
+  if (!target?.monster) return;
+  const a = target.monster.actives.find((s) => s.id === swap.skillIdA);
+  const b = target.monster.actives.find((s) => s.id === swap.skillIdB);
+  if (!a || !b || a.id === b.id) return;
+  const tmp = a.order;
+  a.order = b.order;
+  b.order = tmp;
+}
+
 /**
  * Begin the action phase: every player with a monster draws one action card
  * into their personal hand and is added to the pending list. Players then
@@ -100,14 +112,15 @@ export function startActionPhase(state: GameState): void {
 }
 
 /**
- * Submit a player's chosen card (must be present in their hand). For cards
- * whose effect is `stat_mod_choice`, `chosenStat` must also be supplied.
+ * Submit a player's chosen card (must be present in their hand). Card-specific
+ * extras: stat_mod_choice needs `chosenStat`; swap_actives needs `swap` with
+ * a target player and the two distinct active-skill IDs to exchange.
  */
 export function submitActionPlay(
   state: GameState,
   playerId: string,
   cardId: string,
-  chosenStat?: StatKey,
+  extras?: { chosenStat?: StatKey; swap?: ActionPlay['swap'] },
 ): void {
   if (state.phase !== 'action' || !state.actionPhase) {
     throw new Error('not in action phase');
@@ -120,12 +133,25 @@ export function submitActionPlay(
   if (!player) throw new Error(`player not found: ${playerId}`);
   const card = player.actionHand.find((c) => c.id === cardId);
   if (!card) throw new Error(`card ${cardId} not in player's hand`);
+  const chosenStat = extras?.chosenStat;
+  const swap = extras?.swap;
   if (card.effect.kind === 'stat_mod_choice') {
     if (!chosenStat || !VALID_STATS.includes(chosenStat)) {
       throw new Error('chosenStat is required for this card');
     }
   }
-  phase.submittedPlays[playerId] = { cardId, chosenStat };
+  if (card.effect.kind === 'swap_actives') {
+    if (!swap) throw new Error('swap target/skill ids are required for this card');
+    if (swap.skillIdA === swap.skillIdB) {
+      throw new Error('swap requires two different skills');
+    }
+    const target = state.players.find((p) => p.id === swap.targetPlayerId);
+    if (!target?.monster) throw new Error('swap target has no monster');
+    const hasA = target.monster.actives.some((s) => s.id === swap.skillIdA);
+    const hasB = target.monster.actives.some((s) => s.id === swap.skillIdB);
+    if (!hasA || !hasB) throw new Error('swap skills not found on target');
+  }
+  phase.submittedPlays[playerId] = { cardId, chosenStat, swap };
 }
 
 export function allActionPlaysIn(state: GameState): boolean {
@@ -151,13 +177,27 @@ export function resolveActionPhase(state: GameState): void {
     if (idx < 0) continue;
     const card = player.actionHand.splice(idx, 1)[0]!;
     state.log.push({ kind: 'action_played', playerId: player.id, cardId: card.id });
-    applyActionEffect(state, player, card, play.chosenStat);
+    if (card.effect.kind === 'swap_actives' && play.swap) {
+      applySwapActives(state, play.swap);
+    } else {
+      applyActionEffect(state, player, card, play.chosenStat);
+    }
     state.decks.actionGrave.push(card);
+    // Build a summary string with the swap-target info if applicable.
+    let effectDesc: string;
+    if (card.effect.kind === 'swap_actives' && play.swap) {
+      const target = state.players.find((p) => p.id === play.swap!.targetPlayerId);
+      const aSkill = target?.monster?.actives.find((s) => s.id === play.swap!.skillIdA);
+      const bSkill = target?.monster?.actives.find((s) => s.id === play.swap!.skillIdB);
+      effectDesc = `${target?.name ?? '?'}: ${aSkill?.name ?? '?'} ↔ ${bSkill?.name ?? '?'} の順序入れ替え`;
+    } else {
+      effectDesc = describeActionEffect(card, play.chosenStat);
+    }
     summary.plays.push({
       playerId: player.id,
       cardId: card.id,
       cardName: card.name,
-      effectDesc: describeActionEffect(card, play.chosenStat),
+      effectDesc,
     });
   }
   state.actionPhase = null;

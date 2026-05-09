@@ -134,6 +134,8 @@ export type ClientMessage =
       cardId: string;
       /** Required when the card's effect is `stat_mod_choice`. */
       chosenStat?: StatKey;
+      /** Required when the card's effect is `swap_actives`. */
+      swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string };
     }
   | { type: 'submit_reward'; choice: RewardChoice }
   | { type: 'rename_monster'; name: string }

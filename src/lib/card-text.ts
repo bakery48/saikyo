@@ -65,5 +65,7 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       return 'アクティブスキル1枚をランダムに破棄';
     case 'gain_passive':
       return `パッシブ獲得: ${e.passive.name}`;
+    case 'swap_actives':
+      return '誰かのアクティブスキル2つの順序を入れ替え';
   }
 }

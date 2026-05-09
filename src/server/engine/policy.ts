@@ -105,6 +105,9 @@ function scoreActionCard(card: ActionCard): number {
       return 6;
     case 'discard_random_active':
       return -1;
+    case 'swap_actives':
+      // Niche effect — keep it as a low-priority "play if nothing else useful".
+      return 1;
   }
 }
 

@@ -126,7 +126,10 @@ export class GameWsServer {
       }
       case 'play_action_card': {
         this.runGameAction(playerId, (game) =>
-          game.submitAction(playerId, msg.cardId, msg.chosenStat),
+          game.submitAction(playerId, msg.cardId, {
+            chosenStat: msg.chosenStat,
+            swap: msg.swap,
+          }),
         );
         return;
       }

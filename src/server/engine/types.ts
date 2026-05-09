@@ -138,7 +138,9 @@ export type ActionEffect =
   | { kind: 'recover_skill_from_grave' }
   | { kind: 'draw_skill_top' }
   | { kind: 'discard_random_active' }
-  | { kind: 'gain_passive'; passive: PassiveSkill };
+  | { kind: 'gain_passive'; passive: PassiveSkill }
+  /** Swap the order of two active skills on any player's monster (target chosen at play time). */
+  | { kind: 'swap_actives' };
 
 export type ActionCard = {
   id: string;
@@ -256,6 +258,12 @@ export type ActionPlay = {
   cardId: string;
   /** Required for stat_mod_choice cards; ignored otherwise. */
   chosenStat?: StatKey;
+  /** Required for swap_actives cards; ignored otherwise. */
+  swap?: {
+    targetPlayerId: string;
+    skillIdA: string;
+    skillIdB: string;
+  };
 };
 
 export type BattleMatch = {
