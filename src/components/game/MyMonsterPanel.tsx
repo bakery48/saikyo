@@ -4,6 +4,7 @@ import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import { getAvailableTags, NAME_SEPARATOR, validateMonsterName } from '../../server/engine/naming';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
+import { activeTooltip, passiveTooltip } from '../../lib/skill-text';
 
 const RARITY_COLOR: Record<string, string> = {
   N: '#888',
@@ -81,8 +82,11 @@ export function MyMonsterPanel({
                 key={a.id}
                 style={{ fontSize: 12, display: 'flex', justifyContent: 'space-between' }}
               >
-                <span>
-                  {a.order}. {a.name}
+                <span title={activeTooltip(a)} style={{ cursor: 'help' }}>
+                  {a.order}.{' '}
+                  <span style={{ textDecoration: 'underline dotted', textUnderlineOffset: 2 }}>
+                    {a.name}
+                  </span>
                   {a.rarity && (
                     <span style={{ color: RARITY_COLOR[a.rarity] ?? '#888', marginLeft: 4 }}>
                       [{a.rarity}]
@@ -106,7 +110,16 @@ export function MyMonsterPanel({
                 key={p.id}
                 style={{ fontSize: 12, display: 'flex', justifyContent: 'space-between' }}
               >
-                <span>{p.name}</span>
+                <span title={passiveTooltip(p)} style={{ cursor: 'help' }}>
+                  <span style={{ textDecoration: 'underline dotted', textUnderlineOffset: 2 }}>
+                    {p.name}
+                  </span>
+                  {p.rarity && (
+                    <span style={{ color: RARITY_COLOR[p.rarity] ?? '#888', marginLeft: 4 }}>
+                      [{p.rarity}]
+                    </span>
+                  )}
+                </span>
                 {p.nameTag && <em style={{ opacity: 0.65 }}>→ {p.nameTag}</em>}
               </li>
             ))}

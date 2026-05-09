@@ -238,6 +238,7 @@ export function addSkillCardToMonster(
       name: card.name,
       trigger: card.passive.trigger,
       effect: card.passive.effect,
+      rarity: card.rarity,
       nameTag: card.nameTag,
     };
     player.monster.passives.push(passive);

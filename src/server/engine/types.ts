@@ -84,6 +84,8 @@ export type PassiveSkill = {
   name: string;
   trigger: PassiveTrigger;
   effect: PassiveEffect;
+  /** Rarity, when the passive came from a SkillCard (base-monster passives have none). */
+  rarity?: Rarity;
   /** Short noun (e.g. "ガード") used to compose monster display names. */
   nameTag?: string;
 };
