@@ -2,12 +2,12 @@ import type { GameState, Player, RewardChoice, StatKey } from '../types';
 import { drawTop } from '../deck';
 import { addSkillCardToMonster, getPlayer, makeRng, saveRng } from '../state';
 
-/** Magnitude of each stat-up reward. HP gets a larger bump because its scale is bigger. */
+/** Magnitude of each stat-up reward. Uniform +2 across all stats. */
 export const STAT_UP_AMOUNT: Record<StatKey, number> = {
-  hp: 5,
-  atk: 1,
-  def: 1,
-  spd: 1,
+  hp: 2,
+  atk: 2,
+  def: 2,
+  spd: 2,
 };
 
 /** Submit one player's reward choice. */

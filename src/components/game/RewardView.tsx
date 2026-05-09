@@ -6,10 +6,10 @@ import type { StatKey } from '../../server/engine/types';
 import { BattleLogView } from './BattleLogView';
 
 const STAT_LABEL: Record<StatKey, string> = {
-  hp: 'HP +5',
-  atk: 'ATK +1',
-  def: 'DEF +1',
-  spd: 'SPD +1',
+  hp: 'HP +2',
+  atk: 'ATK +2',
+  def: 'DEF +2',
+  spd: 'SPD +2',
 };
 
 export function RewardView({

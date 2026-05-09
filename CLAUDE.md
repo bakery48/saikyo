@@ -111,7 +111,7 @@
 
 - **対象：** バトルで負けたプレイヤー（勝者・bye・引き分けは対象外）
 - **選択肢：**
-  - `stat_up` (stat: StatKey) → HP+5 / ATK|DEF|SPD+1
+  - `stat_up` (stat: StatKey) → HP/ATK/DEF/SPD いずれか +2
   - `skill_top` → スキルデッキ先頭を獲得
 - CPU は greedy ポリシーで自動選択
 - 全員確定後 `state.battle = null`、`state.reward = null`
