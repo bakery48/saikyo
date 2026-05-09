@@ -10,6 +10,7 @@ import { RewardView } from './game/RewardView';
 import { ChampionView } from './game/ChampionView';
 import { PlayerPanel } from './game/PlayerPanel';
 import { MyMonsterPanel } from './game/MyMonsterPanel';
+import { ActionHandPanel } from './game/ActionHandPanel';
 import { DeckInspector } from './game/DeckInspector';
 
 const PHASE_LABEL: Record<string, string> = {
@@ -51,6 +52,8 @@ export function Game({ socket }: { socket: GameSocket }) {
 
       <MyMonsterPanel state={state} socket={socket} />
 
+      <ActionHandPanel state={state} />
+
       {renderPhase(state.phase, state, socket)}
 
       <div>
@@ -91,7 +94,7 @@ function renderPhase(
     case 'event':
       return <EventPhaseView state={state} />;
     case 'action':
-      return <ActionPhaseView state={state} selfId={socket.playerId} />;
+      return <ActionPhaseView state={state} socket={socket} />;
     case 'draft':
       return <DraftView state={state} socket={socket} />;
     case 'battle':

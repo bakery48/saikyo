@@ -10,7 +10,11 @@ import {
   submitMonsterPick,
 } from './state';
 import { resolveEventPhase } from './phases/event';
-import { resolveActionPhase } from './phases/action';
+import {
+  startActionPhase,
+  submitActionPlay,
+  resolveActionPhase,
+} from './phases/action';
 import {
   startDraft,
   submitDraftPick,
@@ -44,6 +48,12 @@ export function runMiniRound(state: GameState, policy: Policy): void {
   expectPhase(state, 'event');
   resolveEventPhase(state);
   expectPhase(state, 'action');
+  startActionPhase(state);
+  for (const player of state.players) {
+    if (!player.monster || player.actionHand.length === 0) continue;
+    const card = policy.pickActionCard(state, player.id, player.actionHand);
+    submitActionPlay(state, player.id, card.id);
+  }
   resolveActionPhase(state);
   expectPhase(state, 'draft');
   runDraftPhase(state, policy);

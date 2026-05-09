@@ -65,7 +65,13 @@
 
 ### 3. アクションフェーズ (action)
 
-- 各プレイヤーがアクションデッキ先頭から1枚引いて自分のモンスターに適用（同時・自動）
+- **手札制：** 各プレイヤーは個人の手札（`Player.actionHand`）を持つ
+  - モンスター選択完了時に共通山札から **4枚** ドロー
+  - 各アクションフェーズ開始時に **1枚** ドロー → 手札から1枚選んで使用 → 墓地へ
+  - つまり手札サイズは 4↔5 を行き来する
+- 山札が枯渇したら墓地をシャッフルして再利用（共通プール）
+- 手札の中身はオーナーのみ表示（`ClientGameState.myActionHand` に自分の分だけ入る）
+- 全員が選択を提出するまで待機（`state.actionPhase = { pendingPlayerIds, submittedPlays }`）
 - **効果：**
   - `stat_mod` (duration: `permanent`) — ステータス永続変化
   - `stat_mod` (duration: `next_battle`) — 次バトルのみ適用されるバフ（消費後削除）
@@ -73,7 +79,7 @@
   - `recover_skill_from_grave` — スキル墓地からランダムに1枚追加
   - `discard_random_active` — アクティブスキルをランダムに1枚廃棄
   - `gain_passive` — パッシブスキルを直接追加
-- 完了後 `phase = 'draft'`、`state.actionPhaseSummary` に結果格納
+- 完了後 `state.actionPhase = null`、`phase = 'draft'`、`state.actionPhaseSummary` に結果格納
 
 ### 4. ドラフトフェーズ (draft)
 

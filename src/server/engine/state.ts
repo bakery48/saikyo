@@ -11,7 +11,7 @@ import type {
 } from './types';
 import { PLAYER_COLORS } from './types';
 import { RNG } from './rng';
-import { shuffle } from './deck';
+import { shuffle, drawTop } from './deck';
 import { MONSTERS } from './cards/monsters';
 import { EVENTS } from './cards/events';
 import { ACTIONS } from './cards/actions';
@@ -38,6 +38,7 @@ export function createInitialState(opts: {
     isCPU: p.isCPU,
     monster: null,
     pendingBuffs: [],
+    actionHand: [],
   }));
   let cpuIdx = 1;
   while (seats.length < 8) {
@@ -47,6 +48,7 @@ export function createInitialState(opts: {
       isCPU: true,
       monster: null,
       pendingBuffs: [],
+      actionHand: [],
     });
     cpuIdx++;
   }
@@ -80,6 +82,7 @@ export function createInitialState(opts: {
       skillGrave: [],
     },
     draft: null,
+    actionPhase: null,
     battle: null,
     reward: null,
     tournament: null,
@@ -206,6 +209,17 @@ function fallbackMonsterDistribute(state: GameState): void {
 
 function finalizeMonsterPick(state: GameState): void {
   state.monsterPick = null;
+  // Deal initial action hand of 4 cards to every player who has a monster.
+  const rng = makeRng(state);
+  for (const player of state.players) {
+    if (!player.monster) continue;
+    for (let i = 0; i < INITIAL_ACTION_HAND_SIZE; i++) {
+      const card = drawTop(state.decks.action, state.decks.actionGrave, rng);
+      if (!card) break;
+      player.actionHand.push(card);
+    }
+  }
+  saveRng(state, rng);
   state.phase = 'event';
   state.log.push({
     kind: 'phase_change',
@@ -214,6 +228,8 @@ function finalizeMonsterPick(state: GameState): void {
     miniRound: state.miniRound,
   });
 }
+
+export const INITIAL_ACTION_HAND_SIZE = 4;
 
 export function monsterFromBase(base: MonsterBase, ownerId: string): Monster {
   return {

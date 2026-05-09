@@ -1,4 +1,4 @@
-import type { ActionCard, ActionPhaseSummary, GameState, Player } from '../types';
+import type { ActionCard, ActionPhaseSummary, ActionPhaseState, GameState, Player } from '../types';
 import { drawTop } from '../deck';
 import { addSkillCardToMonster, makeRng, saveRng } from '../state';
 import { describeActionEffect } from '../../../lib/card-text';
@@ -11,7 +11,6 @@ function applyActionEffect(state: GameState, player: Player, card: ActionCard): 
       if (card.effect.duration === 'permanent') {
         player.monster.stats[card.effect.stat] += card.effect.amount;
       } else {
-        // next_battle: queue as pending buff
         player.pendingBuffs.push({
           stat: card.effect.stat,
           amount: card.effect.amount,
@@ -36,7 +35,6 @@ function applyActionEffect(state: GameState, player: Player, card: ActionCard): 
       if (player.monster.actives.length === 0) break;
       const idx = rng.int(0, player.monster.actives.length - 1);
       player.monster.actives.splice(idx, 1);
-      // Re-number orders after removal.
       player.monster.actives.forEach((s, i) => (s.order = i + 1));
       break;
     }
@@ -49,18 +47,70 @@ function applyActionEffect(state: GameState, player: Player, card: ActionCard): 
 }
 
 /**
- * Resolve action phase for all players in seat order.
- * Each player draws 1 card from the common action deck and plays it.
+ * Begin the action phase: every player with a monster draws one action card
+ * into their personal hand and is added to the pending list. Players then
+ * pick one card from their hand to play.
+ */
+export function startActionPhase(state: GameState): void {
+  if (state.phase !== 'action') throw new Error('not in action phase');
+  if (state.actionPhase) return; // already started
+
+  const rng = makeRng(state);
+  const pending: string[] = [];
+  for (const player of state.players) {
+    if (!player.monster) continue;
+    const card = drawTop(state.decks.action, state.decks.actionGrave, rng);
+    if (card) player.actionHand.push(card);
+    pending.push(player.id);
+  }
+  saveRng(state, rng);
+
+  const phaseState: ActionPhaseState = {
+    pendingPlayerIds: pending,
+    submittedPlays: {},
+  };
+  state.actionPhase = phaseState;
+}
+
+/** Submit a player's chosen card (must be present in their hand). */
+export function submitActionPlay(state: GameState, playerId: string, cardId: string): void {
+  if (state.phase !== 'action' || !state.actionPhase) {
+    throw new Error('not in action phase');
+  }
+  const phase = state.actionPhase;
+  if (!phase.pendingPlayerIds.includes(playerId)) {
+    throw new Error(`player ${playerId} is not pending`);
+  }
+  const player = state.players.find((p) => p.id === playerId);
+  if (!player) throw new Error(`player not found: ${playerId}`);
+  if (!player.actionHand.some((c) => c.id === cardId)) {
+    throw new Error(`card ${cardId} not in player's hand`);
+  }
+  phase.submittedPlays[playerId] = cardId;
+}
+
+export function allActionPlaysIn(state: GameState): boolean {
+  const phase = state.actionPhase;
+  if (!phase) return false;
+  return phase.pendingPlayerIds.every((id) => !!phase.submittedPlays[id]);
+}
+
+/**
+ * Apply every submitted play, move used cards to the graveyard, fill the
+ * action-phase summary, and advance to the draft phase.
  */
 export function resolveActionPhase(state: GameState): void {
   if (state.phase !== 'action') throw new Error('not in action phase');
+  if (!state.actionPhase) throw new Error('action phase not started');
+  if (!allActionPlaysIn(state)) throw new Error('not all plays submitted');
+
   const summary: ActionPhaseSummary = { plays: [] };
   for (const player of state.players) {
-    if (!player.monster) continue;
-    const rng = makeRng(state);
-    const card = drawTop(state.decks.action, state.decks.actionGrave, rng);
-    saveRng(state, rng);
-    if (!card) continue;
+    const cardId = state.actionPhase.submittedPlays[player.id];
+    if (!cardId) continue;
+    const idx = player.actionHand.findIndex((c) => c.id === cardId);
+    if (idx < 0) continue;
+    const card = player.actionHand.splice(idx, 1)[0]!;
     state.log.push({ kind: 'action_played', playerId: player.id, cardId: card.id });
     applyActionEffect(state, player, card);
     state.decks.actionGrave.push(card);
@@ -71,6 +121,7 @@ export function resolveActionPhase(state: GameState): void {
       effectDesc: describeActionEffect(card),
     });
   }
+  state.actionPhase = null;
   state.actionPhaseSummary = summary.plays.length > 0 ? summary : null;
   state.phase = 'draft';
   state.log.push({

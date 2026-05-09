@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createInitialState } from '../src/server/engine/state';
-import { resolveActionPhase } from '../src/server/engine/phases/action';
-import type { GameState } from '../src/server/engine/types';
+import {
+  startActionPhase,
+  submitActionPlay,
+  resolveActionPhase,
+} from '../src/server/engine/phases/action';
+import type { ActionCard, GameState, Player } from '../src/server/engine/types';
+import { ACTIONS } from '../src/server/engine/cards/actions';
 import { completeMonsterPicks } from './helpers';
 
 function setupAtAction(seed = 2): GameState {
@@ -11,9 +16,29 @@ function setupAtAction(seed = 2): GameState {
     players: [{ id: 'p1', name: 'A', isCPU: false }],
   });
   completeMonsterPicks(state);
-  // Skip event by switching directly.
   state.phase = 'action';
   return state;
+}
+
+/** Force a specific card into a player's hand (replaces hand[0]). */
+function forceCardInHand(state: GameState, player: Player, cardId: string): ActionCard {
+  const card = ACTIONS.find((c) => c.id === cardId);
+  if (!card) throw new Error(`unknown card ${cardId}`);
+  const replacement = { ...card };
+  if (player.actionHand.length === 0) player.actionHand.push(replacement);
+  else player.actionHand[0] = replacement;
+  return replacement;
+}
+
+/** Submit player[0]'s chosen card and submit the rest's first hand card. */
+function playAll(state: GameState, targetPlayerId: string, targetCardId: string): void {
+  submitActionPlay(state, targetPlayerId, targetCardId);
+  for (const p of state.players) {
+    if (p.id === targetPlayerId) continue;
+    if (p.actionHand.length === 0) continue;
+    submitActionPlay(state, p.id, p.actionHand[0]!.id);
+  }
+  resolveActionPhase(state);
 }
 
 describe('Action phase', () => {
@@ -22,56 +47,62 @@ describe('Action phase', () => {
     state = setupAtAction();
   });
 
-  it('every player draws and plays one card, then advances to draft', () => {
-    const beforeDeck = state.decks.action.length;
+  it('every player draws one and then plays one card, advancing to draft', () => {
+    const beforeDeckPlusGrave = state.decks.action.length + state.decks.actionGrave.length;
+    startActionPhase(state);
+    for (const p of state.players) {
+      if (p.actionHand.length === 0) continue;
+      submitActionPlay(state, p.id, p.actionHand[0]!.id);
+    }
     resolveActionPhase(state);
     expect(state.phase).toBe('draft');
-    // 8 players draw 1 each.
-    expect(beforeDeck - state.decks.action.length).toBe(8);
-    expect(state.decks.actionGrave.length).toBe(8);
+    // Action card pool size (deck + grave + hands) is conserved.
+    const handsAfter = state.players.reduce((n, p) => n + p.actionHand.length, 0);
+    expect(state.decks.action.length + state.decks.actionGrave.length + handsAfter).toBe(
+      beforeDeckPlusGrave + handsAfter,
+    );
     const playedCount = state.log.filter((e) => e.kind === 'action_played').length;
     expect(playedCount).toBe(8);
   });
 
   it('permanent stat_mod modifies the monster base stats immediately', () => {
     const target = state.players[0]!;
-    // Force ac-005 (permanent ATK +1) to top of action deck.
-    const card = state.decks.action.find((c) => c.id === 'ac-005');
-    if (card) {
-      state.decks.action = [card, ...state.decks.action.filter((c) => c.id !== 'ac-005')];
-    }
-    // Make our target the first to act by reshuffling pickOrder.
-    state.players = [target, ...state.players.filter((p) => p.id !== target.id)];
+    startActionPhase(state);
+    forceCardInHand(state, target, 'ac-005'); // permanent ATK +1
     const beforeAtk = target.monster!.stats.atk;
-    resolveActionPhase(state);
+    playAll(state, target.id, 'ac-005');
     expect(target.monster!.stats.atk).toBe(beforeAtk + 1);
   });
 
   it('next_battle stat_mod queues a pending buff', () => {
     const target = state.players[0]!;
-    const card = state.decks.action.find((c) => c.id === 'ac-001'); // ATK +2 next_battle
-    if (card) {
-      state.decks.action = [card, ...state.decks.action.filter((c) => c.id !== 'ac-001')];
-    }
-    state.players = [target, ...state.players.filter((p) => p.id !== target.id)];
-    resolveActionPhase(state);
+    startActionPhase(state);
+    forceCardInHand(state, target, 'ac-001'); // ATK +2 next_battle
+    playAll(state, target.id, 'ac-001');
     expect(target.pendingBuffs.length).toBeGreaterThan(0);
-    const buff = target.pendingBuffs[0]!;
-    expect(buff.stat).toBe('atk');
-    expect(buff.amount).toBe(2);
-    expect(buff.duration).toBe('next_battle');
+    const buff = target.pendingBuffs.find((b) => b.stat === 'atk' && b.amount === 2);
+    expect(buff?.duration).toBe('next_battle');
   });
 
   it('draw_skill_top adds a skill to the player monster', () => {
     const target = state.players[0]!;
-    const card = state.decks.action.find((c) => c.id === 'ac-010'); // 探索 = draw skill top
-    if (card) {
-      state.decks.action = [card, ...state.decks.action.filter((c) => c.id !== 'ac-010')];
-    }
-    state.players = [target, ...state.players.filter((p) => p.id !== target.id)];
+    startActionPhase(state);
+    forceCardInHand(state, target, 'ac-010'); // 探索 = draw skill top
     const before = target.monster!.actives.length + target.monster!.passives.length;
-    resolveActionPhase(state);
+    playAll(state, target.id, 'ac-010');
     const after = target.monster!.actives.length + target.monster!.passives.length;
     expect(after).toBe(before + 1);
+  });
+
+  it('initial action hand is dealt right after monster pick (4 cards each)', () => {
+    const fresh = createInitialState({
+      roomId: 'r',
+      seed: 7,
+      players: [{ id: 'p1', name: 'A', isCPU: false }],
+    });
+    completeMonsterPicks(fresh);
+    for (const p of fresh.players) {
+      expect(p.actionHand.length).toBe(4);
+    }
   });
 });

@@ -67,7 +67,7 @@ export class GameWsServer {
         this.broadcastRoomsList();
         // If a game is already running in this room (rejoiner), send state.
         const game = this.games.get(room.id);
-        if (game) this.send(ws, { type: 'game_state', state: game.toClientState() });
+        if (game) this.send(ws, { type: 'game_state', state: game.toClientState(playerId) });
         return;
       }
       case 'leave_room':
@@ -108,6 +108,10 @@ export class GameWsServer {
       }
       case 'submit_draft': {
         this.runGameAction(playerId, (game) => game.submitDraft(playerId, msg.skillId));
+        return;
+      }
+      case 'play_action_card': {
+        this.runGameAction(playerId, (game) => game.submitAction(playerId, msg.cardId));
         return;
       }
       case 'submit_reward': {
@@ -309,11 +313,11 @@ export class GameWsServer {
   private broadcastGameStateWithPhase(room: Room, phase: Phase): void {
     const game = this.games.get(room.id);
     if (!game) return;
-    const cs = game.toClientState();
-    const overridden = { ...cs, phase };
     for (const p of room.players) {
       const ws = this.connections.get(p.id);
-      if (ws) this.send(ws, { type: 'game_state', state: overridden });
+      if (!ws) continue;
+      const cs = game.toClientState(p.id);
+      this.send(ws, { type: 'game_state', state: { ...cs, phase } });
     }
   }
 
@@ -352,10 +356,10 @@ export class GameWsServer {
   private broadcastGameState(room: Room): void {
     const game = this.games.get(room.id);
     if (!game) return;
-    const state = game.toClientState();
     for (const p of room.players) {
       const ws = this.connections.get(p.id);
-      if (ws) this.send(ws, { type: 'game_state', state });
+      if (!ws) continue;
+      this.send(ws, { type: 'game_state', state: game.toClientState(p.id) });
     }
   }
 

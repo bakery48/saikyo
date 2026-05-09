@@ -185,6 +185,12 @@ export type Player = {
   pendingBuffs: PendingStatBuff[];
   /** The player's seat color used for draft pieces. */
   color: Color;
+  /**
+   * Personal hand of action cards. Filled to 4 right after monster pick,
+   * grows by 1 each action phase, shrinks by 1 each time the player plays.
+   * Visible only to the owner over the wire.
+   */
+  actionHand: ActionCard[];
 };
 
 export type Phase =
@@ -227,6 +233,13 @@ export type MonsterPickState = {
   attempt: number;
   /** True for ~2s after all picks are submitted so clients can show everyone's choices. */
   revealing?: boolean;
+};
+
+/** Selection state during an action phase: each pending player must play one card from their hand. */
+export type ActionPhaseState = {
+  pendingPlayerIds: string[];
+  /** playerId → cardId chosen this phase (must be in the player's hand). */
+  submittedPlays: Record<string, string>;
 };
 
 export type BattleMatch = {
@@ -333,6 +346,8 @@ export type GameState = {
     skillGrave: SkillCard[];
   };
   draft: DraftState | null;
+  /** Active during action phase while waiting for plays. Null otherwise. */
+  actionPhase: ActionPhaseState | null;
   battle: BattlePhaseState | null;
   reward: RewardState | null;
   tournament: TournamentState | null;

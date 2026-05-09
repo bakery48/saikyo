@@ -7,7 +7,12 @@ import {
   submitMonsterPick,
 } from './engine/state';
 import { resolveEventPhase } from './engine/phases/event';
-import { resolveActionPhase } from './engine/phases/action';
+import {
+  startActionPhase,
+  submitActionPlay,
+  resolveActionPhase,
+  allActionPlaysIn,
+} from './engine/phases/action';
 import {
   startDraft,
   submitDraftPick,
@@ -141,8 +146,7 @@ export class GameRunner {
         resolveEventPhase(this.state);
         return false;
       case 'action':
-        resolveActionPhase(this.state);
-        return false;
+        return this.stepAction();
       case 'draft':
         return this.stepDraft();
       case 'battle':
@@ -210,6 +214,34 @@ export class GameRunner {
     return false;
   }
 
+  private stepAction(): boolean {
+    if (!this.state.actionPhase) {
+      startActionPhase(this.state);
+      return false;
+    }
+    const phase = this.state.actionPhase;
+    let waiting = false;
+    for (const pid of phase.pendingPlayerIds) {
+      if (phase.submittedPlays[pid]) continue;
+      if (this.isHuman(pid)) {
+        waiting = true;
+      } else {
+        const player = this.state.players.find((p) => p.id === pid);
+        if (!player || player.actionHand.length === 0) {
+          // No card to play (shouldn't happen) — skip the player.
+          phase.pendingPlayerIds = phase.pendingPlayerIds.filter((x) => x !== pid);
+          continue;
+        }
+        const card = greedyPolicy.pickActionCard(this.state, pid, player.actionHand);
+        submitActionPlay(this.state, pid, card.id);
+      }
+    }
+    if (waiting) return true;
+    if (!allActionPlaysIn(this.state)) return false;
+    resolveActionPhase(this.state);
+    return false;
+  }
+
   private stepReward(): boolean {
     if (!this.state.reward) return false;
     const reward = this.state.reward;
@@ -259,6 +291,13 @@ export class GameRunner {
     submitDraftPick(this.state, playerId, skillId);
   }
 
+  submitAction(playerId: string, cardId: string): void {
+    if (this.state.phase !== 'action' || !this.state.actionPhase) {
+      throw new Error('not in action phase');
+    }
+    submitActionPlay(this.state, playerId, cardId);
+  }
+
   submitReward(playerId: string, choice: RewardChoice): void {
     if (this.state.phase !== 'reward' || !this.state.reward) {
       throw new Error('not in reward phase');
@@ -285,7 +324,7 @@ export class GameRunner {
 
   // ─── Serialization ─────────────────────────────────────────────────────────
 
-  toClientState(): ClientGameState {
+  toClientState(viewerId?: string): ClientGameState {
     const s = this.state;
     const players: ClientPlayer[] = s.players.map((p) => ({
       id: p.id,
@@ -294,7 +333,9 @@ export class GameRunner {
       color: p.color,
       monster: p.monster,
       pendingBuffsCount: p.pendingBuffs.length,
+      actionHandCount: p.actionHand.length,
     }));
+    const me = viewerId ? s.players.find((p) => p.id === viewerId) : null;
     return {
       roomId: s.roomId,
       players,
@@ -303,12 +344,14 @@ export class GameRunner {
       miniRound: s.miniRound,
       phase: s.phase,
       draft: s.draft,
+      actionPhase: s.actionPhase,
       battle: s.battle ? { matches: s.battle.matches } : null,
       reward: s.reward,
       tournament: s.tournament,
       champion: s.champion,
       eventPhaseSummary: s.eventPhaseSummary,
       actionPhaseSummary: s.actionPhaseSummary,
+      myActionHand: me ? me.actionHand : null,
       recentLog: s.log.slice(-80),
       deckCounts: {
         event: s.decks.event.length,

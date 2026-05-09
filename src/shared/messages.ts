@@ -1,5 +1,6 @@
 import type {
   ActionCard,
+  ActionPhaseState,
   ActionPhaseSummary,
   BattleMatch,
   Champion,
@@ -48,6 +49,8 @@ export type ClientPlayer = {
   color: Color;
   monster: Monster | null;
   pendingBuffsCount: number;
+  /** Number of action cards in hand (contents only visible to the owner via myActionHand). */
+  actionHandCount: number;
 };
 
 /** Sanitized game state — deck contents are hidden, only counts shown. */
@@ -59,6 +62,10 @@ export type ClientGameState = {
   miniRound: number;
   phase: Phase;
   draft: DraftState | null;
+  /** Action phase selection state — set while waiting for plays. */
+  actionPhase: ActionPhaseState | null;
+  /** This viewer's hand of action cards (always visible to its owner). Null for non-player viewers. */
+  myActionHand: ActionCard[] | null;
   battle: { matches: BattleMatch[] } | null;
   reward: RewardState | null;
   tournament: TournamentState | null;
@@ -99,6 +106,7 @@ export type ClientMessage =
   | { type: 'start_game' }
   | { type: 'submit_pick'; baseId: string }
   | { type: 'submit_draft'; skillId: string }
+  | { type: 'play_action_card'; cardId: string }
   | { type: 'submit_reward'; choice: RewardChoice }
   | { type: 'rename_monster'; name: string }
   | { type: 'leave_game' };

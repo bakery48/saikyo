@@ -1,4 +1,4 @@
-import type { GameState, MonsterBase, RewardChoice, SkillCard, StatKey } from './types';
+import type { ActionCard, GameState, MonsterBase, RewardChoice, SkillCard, StatKey } from './types';
 
 /**
  * A pluggable policy decides what a player does when input is required.
@@ -7,6 +7,7 @@ import type { GameState, MonsterBase, RewardChoice, SkillCard, StatKey } from '.
 export type Policy = {
   pickMonster(state: GameState, playerId: string, available: MonsterBase[]): MonsterBase;
   pickDraftCard(state: GameState, playerId: string, pool: SkillCard[]): SkillCard;
+  pickActionCard(state: GameState, playerId: string, hand: ActionCard[]): ActionCard;
   chooseReward(state: GameState, playerId: string): RewardChoice;
 };
 
@@ -48,6 +49,18 @@ export const greedyPolicy: Policy = {
     }
     return best;
   },
+  pickActionCard(_state, _playerId, hand) {
+    let best = hand[0]!;
+    let bestScore = scoreActionCard(best);
+    for (const c of hand) {
+      const s = scoreActionCard(c);
+      if (s > bestScore) {
+        best = c;
+        bestScore = s;
+      }
+    }
+    return best;
+  },
   chooseReward(state, playerId) {
     const player = state.players.find((p) => p.id === playerId)!;
     const monster = player.monster!;
@@ -56,6 +69,22 @@ export const greedyPolicy: Policy = {
     return { kind: 'stat_up', stat: weakestStat(monster.stats) };
   },
 };
+
+function scoreActionCard(card: ActionCard): number {
+  switch (card.effect.kind) {
+    case 'stat_mod':
+      // Permanent buffs are worth more than next-battle ones.
+      return card.effect.amount * (card.effect.duration === 'permanent' ? 4 : 2);
+    case 'draw_skill_top':
+      return 5;
+    case 'recover_skill_from_grave':
+      return 4;
+    case 'gain_passive':
+      return 6;
+    case 'discard_random_active':
+      return -1;
+  }
+}
 
 function weakestStat(stats: { hp: number; atk: number; def: number; spd: number }): StatKey {
   // Compare HP at /5 scale since its bumps are larger.
@@ -76,5 +105,6 @@ function weakestStat(stats: { hp: number; atk: number; def: number; spd: number 
 export const firstOptionPolicy: Policy = {
   pickMonster: (_s, _p, avail) => avail[0]!,
   pickDraftCard: (_s, _p, pool) => pool[0]!,
+  pickActionCard: (_s, _p, hand) => hand[0]!,
   chooseReward: () => ({ kind: 'skill_top' }),
 };
