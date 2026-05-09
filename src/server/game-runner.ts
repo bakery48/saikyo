@@ -318,6 +318,12 @@ export class GameRunner {
         actionGrave: s.decks.actionGrave.length,
         skillGrave: s.decks.skillGrave.length,
       },
+      publicDecks: {
+        event: s.decks.event,
+        eventGrave: s.decks.eventGrave,
+        action: s.decks.action,
+        actionGrave: s.decks.actionGrave,
+      },
     };
   }
 

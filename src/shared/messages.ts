@@ -1,9 +1,11 @@
 import type {
+  ActionCard,
   ActionPhaseSummary,
   BattleMatch,
   Champion,
   Color,
   DraftState,
+  EventCard,
   EventPhaseSummary,
   GameEvent,
   Monster,
@@ -74,6 +76,16 @@ export type ClientGameState = {
     eventGrave: number;
     actionGrave: number;
     skillGrave: number;
+  };
+  /**
+   * Full event/action deck + grave contents (debug-friendly inspection).
+   * Skill deck is intentionally NOT exposed to keep drafting fair.
+   */
+  publicDecks: {
+    event: EventCard[];
+    eventGrave: EventCard[];
+    action: ActionCard[];
+    actionGrave: ActionCard[];
   };
 };
 

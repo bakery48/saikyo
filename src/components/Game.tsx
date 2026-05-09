@@ -10,6 +10,7 @@ import { RewardView } from './game/RewardView';
 import { ChampionView } from './game/ChampionView';
 import { PlayerPanel } from './game/PlayerPanel';
 import { MyMonsterPanel } from './game/MyMonsterPanel';
+import { DeckInspector } from './game/DeckInspector';
 
 const PHASE_LABEL: Record<string, string> = {
   setup: 'セットアップ',
@@ -56,6 +57,8 @@ export function Game({ socket }: { socket: GameSocket }) {
         <h4 style={{ marginBottom: 6 }}>プレイヤー</h4>
         <PlayerPanel players={state.players} selfId={socket.playerId} />
       </div>
+
+      <DeckInspector state={state} />
 
       {state.recentLog.length > 0 && state.phase !== 'finished' && (
         <details>
