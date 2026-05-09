@@ -94,7 +94,7 @@ describe('Action phase', () => {
     expect(after).toBe(before + 1);
   });
 
-  it('initial action hand of 4 is dealt at game start (before monster pick)', () => {
+  it('initial action hand of 3 is dealt at game start (before monster pick)', () => {
     const fresh = createInitialState({
       roomId: 'r',
       seed: 7,
@@ -103,11 +103,11 @@ describe('Action phase', () => {
     // Hands are filled before monster pick is resolved.
     expect(fresh.phase).toBe('pick_monster');
     for (const p of fresh.players) {
-      expect(p.actionHand.length).toBe(4);
+      expect(p.actionHand.length).toBe(3);
     }
   });
 
-  it('startActionPhase grows every player hand by exactly 1 (4 → 5)', () => {
+  it('startActionPhase grows every player hand by exactly 1 (3 → 4)', () => {
     const fresh = createInitialState({
       roomId: 'r',
       seed: 9,
@@ -115,11 +115,11 @@ describe('Action phase', () => {
     });
     completeMonsterPicks(fresh);
     fresh.phase = 'action';
-    for (const p of fresh.players) expect(p.actionHand.length).toBe(4);
+    for (const p of fresh.players) expect(p.actionHand.length).toBe(3);
     startActionPhase(fresh);
     for (const p of fresh.players) {
       if (!p.monster) continue;
-      expect(p.actionHand.length).toBe(5);
+      expect(p.actionHand.length).toBe(4);
     }
   });
 });

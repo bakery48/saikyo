@@ -19,7 +19,7 @@ import { SKILLS } from './cards/skills';
 
 export type PlayerSeed = { id: string; name: string; isCPU: boolean };
 
-export const INITIAL_ACTION_HAND_SIZE = 4;
+export const INITIAL_ACTION_HAND_SIZE = 3;
 
 /** Clamp a configured 1-3 setting to its valid range. */
 function clampRoundCount(n: number): number {
