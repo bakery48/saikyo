@@ -4,6 +4,8 @@ import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 import { MONSTERS } from '../../server/engine/cards/monsters';
+import { passiveTooltip } from '../../lib/skill-text';
+import { SkillNameHover } from './SkillNameHover';
 
 const PIECE_SIZE_CARD = 22;
 const PIECE_SIZE_LEGEND = 16;
@@ -232,8 +234,25 @@ export function MonsterPickView({
               <div style={{ fontSize: 12, opacity: 0.85 }}>
                 HP{m.stats.hp} ATK{m.stats.atk} DEF{m.stats.def} SPD{m.stats.spd}
               </div>
-              <div style={{ fontSize: 11, opacity: 0.7 }}>
-                {m.passives.map((p) => p.name).join(', ')}
+              <div
+                style={{
+                  fontSize: 11,
+                  opacity: 0.85,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 4,
+                }}
+              >
+                {m.passives.length === 0 ? (
+                  <em style={{ opacity: 0.5 }}>(なし)</em>
+                ) : (
+                  m.passives.map((p, i) => (
+                    <span key={p.id ?? `${m.baseId}-${i}`}>
+                      <SkillNameHover label={p.name} tooltip={passiveTooltip(p)} />
+                      {i < m.passives.length - 1 ? '、' : ''}
+                    </span>
+                  ))
+                )}
               </div>
               {claimed && (
                 <div style={{ fontSize: 11, fontWeight: 600 }}>→ {claimed.name} の獲得</div>

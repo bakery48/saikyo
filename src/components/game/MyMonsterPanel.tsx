@@ -5,6 +5,7 @@ import type { GameSocket } from '../../lib/useGameSocket';
 import { getAvailableTags, NAME_SEPARATOR, validateMonsterName } from '../../server/engine/naming';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 import { activeTooltip, passiveTooltip } from '../../lib/skill-text';
+import { SkillNameHover } from './SkillNameHover';
 
 const RARITY_COLOR: Record<string, string> = {
   N: '#888',
@@ -212,66 +213,4 @@ function tagMultiset(tags: string[]): Record<string, number> {
   const out: Record<string, number> = {};
   for (const t of tags) out[t] = (out[t] ?? 0) + 1;
   return out;
-}
-
-/**
- * Skill name with an instant custom tooltip on hover. Uses dotted-underline
- * to signal interactivity. Children render inline next to the name (rarity
- * badge, etc.).
- */
-function SkillNameHover({
-  label,
-  tooltip,
-  children,
-}: {
-  label: string;
-  tooltip: string;
-  children?: React.ReactNode;
-}) {
-  const [show, setShow] = useState(false);
-  return (
-    <span
-      onMouseEnter={() => setShow(true)}
-      onMouseLeave={() => setShow(false)}
-      style={{
-        position: 'relative',
-        display: 'inline-block',
-        cursor: 'help',
-      }}
-    >
-      <span
-        style={{
-          textDecoration: 'underline',
-          textDecorationStyle: 'dotted',
-          textUnderlineOffset: 2,
-        }}
-      >
-        {label}
-      </span>
-      {children}
-      {show && (
-        <span
-          role="tooltip"
-          style={{
-            position: 'absolute',
-            bottom: 'calc(100% + 6px)',
-            left: 0,
-            zIndex: 50,
-            background: '#222',
-            color: '#fff',
-            padding: '6px 10px',
-            borderRadius: 4,
-            fontSize: 12,
-            lineHeight: 1.4,
-            whiteSpace: 'pre-line',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
-            pointerEvents: 'none',
-            minWidth: 140,
-          }}
-        >
-          {tooltip}
-        </span>
-      )}
-    </span>
-  );
 }
