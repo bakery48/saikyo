@@ -22,7 +22,7 @@ const PHASE_LABEL: Record<string, string> = {
   action: 'アクションフェーズ',
   draft: 'ドラフトフェーズ',
   battle: '戦闘フェーズ',
-  reward: '報酬選択',
+  reward: '鍛え直し',
   tournament: '最終トーナメント',
   finished: '終了',
 };

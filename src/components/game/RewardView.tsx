@@ -33,10 +33,10 @@ export function RewardView({
 
   return (
     <section style={{ display: 'grid', gap: 12 }}>
-      <h2 style={{ margin: 0 }}>戦闘報酬</h2>
+      <h2 style={{ margin: 0 }}>鍛え直し</h2>
       {iAmPending ? (
         <>
-          <p style={{ margin: 0 }}>{lostMessage} 報酬を選んでください:</p>
+          <p style={{ margin: 0 }}>{lostMessage} 鍛え直す内容を選んでください:</p>
           {myChoice ? (
             <p style={{ opacity: 0.7 }}>選択済み — 他のプレイヤーを待っています…</p>
           ) : (
@@ -66,7 +66,7 @@ export function RewardView({
         </>
       ) : (
         <p style={{ margin: 0, opacity: 0.7 }}>
-          このラウンドは勝利／引き分けでした。他プレイヤーの報酬選択を待っています…
+          このラウンドは勝利／引き分けでした。他プレイヤーの鍛え直しを待っています…
         </p>
       )}
 
