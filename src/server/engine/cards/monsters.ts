@@ -67,12 +67,12 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'umbrafox',
-    name: 'ウンブラ',
+    baseId: 'wyvern',
+    name: 'ワイバーン',
     stats: { hp: 12, atk: 6, def: 4, spd: 5 },
     passives: [
       {
-        id: 'umbrafox-p1',
+        id: 'wyvern-p1',
         name: '影討ち',
         trigger: { kind: 'first_attack' },
         effect: { kind: 'first_attack_true' },

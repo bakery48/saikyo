@@ -52,7 +52,7 @@ export function describePassiveEffect(e: PassiveEffect): string {
     case 'first_attack_amp':
       return `初撃ダメージ×${e.amount}`;
     case 'first_attack_true':
-      return `初撃がDEF無視`;
+      return `バトルでの最初の自分の攻撃はDEF無視`;
     case 'spd_roll_bonus':
       return `先攻後攻判定のダイス出目に+${e.amount}`;
     case 'damage_reduction':
@@ -78,6 +78,11 @@ export function describePassiveEffect(e: PassiveEffect): string {
 
 /** Combined "<trigger> <effect>" for a passive. */
 export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEffect }): string {
+  // Some effect descriptions already encode their own timing — skip the
+  // trigger prefix so the tooltip doesn't read "初撃時 バトルでの最初の…".
+  if (p.effect.kind === 'first_attack_true' || p.effect.kind === 'first_attack_amp') {
+    return describePassiveEffect(p.effect);
+  }
   return `${describePassiveTrigger(p.trigger)} ${describePassiveEffect(p.effect)}`;
 }
 
