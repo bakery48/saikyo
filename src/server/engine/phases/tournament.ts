@@ -63,6 +63,8 @@ export function runTournament(state: GameState): void {
     state.champion = champ;
     state.log.push({ kind: 'champion', playerId: championId });
   }
+  // Consume any leftover per-battle flags now that the tournament is over.
+  state.nextBattleReverseActives = false;
   state.phase = 'finished';
   state.log.push({
     kind: 'phase_change',
@@ -93,6 +95,10 @@ function runMatch(
   while (attempt < 4) {
     const monA = snapshotMonsterForBattle(a);
     const monB = snapshotMonsterForBattle(b);
+    if (state.nextBattleReverseActives) {
+      for (const x of monA.actives) x.order = monA.actives.length + 1 - x.order;
+      for (const x of monB.actives) x.order = monB.actives.length + 1 - x.order;
+    }
     const rng = makeRng(state);
     const matchSeed = rng.int(1, 0x7fffffff) + attempt;
     saveRng(state, rng);

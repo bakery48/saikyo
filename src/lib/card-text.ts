@@ -28,6 +28,12 @@ export function describeEventEffect(card: EventCard): string {
       return `HP-${e.amount}`;
     case 'add_skill_top':
       return `スキル山札から1枚追加`;
+    case 'reverse_actives_next_battle':
+      return '次戦は全員のアクティブスキル順序を逆転';
+    case 'skip_action_phase':
+      return 'このアクションフェーズをスキップ';
+    case 'extra_battle':
+      return '今すぐ追加バトル → アクションフェーズへ';
   }
 }
 

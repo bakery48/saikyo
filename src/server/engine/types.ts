@@ -114,7 +114,13 @@ export type EventEffect =
   | { kind: 'swap_stat'; stat: StatKey }
   | { kind: 'heal'; amount: number }
   | { kind: 'damage'; amount: number }
-  | { kind: 'add_skill_top' };
+  | { kind: 'add_skill_top' }
+  /** Reverse every monster's active-skill order for the next battle. */
+  | { kind: 'reverse_actives_next_battle' }
+  /** Skip the upcoming action phase of this mini-round. */
+  | { kind: 'skip_action_phase' }
+  /** Run a one-off battle now, then resume with action → draft of this mini-round. */
+  | { kind: 'extra_battle' };
 
 export type EventCard = {
   id: string;
@@ -374,4 +380,12 @@ export type GameState = {
   eventPhaseSummary: EventPhaseSummary | null;
   /** Snapshot of the most recently resolved action phase. */
   actionPhaseSummary: ActionPhaseSummary | null;
+  /** When true, the next battle reverses every monster's active-skill order. Cleared after the battle phase resolves. */
+  nextBattleReverseActives: boolean;
+  /** When true, the upcoming `advanceFromEvent` skips action and goes straight to draft. Cleared on use. */
+  skipNextActionPhase: boolean;
+  /** When true, the upcoming `advanceFromEvent` transitions to battle (extra battle). Cleared on use. */
+  extraBattlePending: boolean;
+  /** Set when an extra battle starts so the following reward returns to action instead of advancing the round. */
+  returnToActionAfterReward: boolean;
 };

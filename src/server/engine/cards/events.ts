@@ -25,4 +25,7 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-022', name: '休息の宿屋', target: 'all', effect: { kind: 'heal', amount: 2 } },
   { id: 'ev-023', name: '謎の商人', target: 'random', effect: { kind: 'add_skill_top' } },
   { id: 'ev-024', name: '世界樹の恵み', target: 'all', effect: { kind: 'stat_mod', stat: 'hp', amount: 3 } },
+  { id: 'ev-025', name: '時逆の風', target: 'all', effect: { kind: 'reverse_actives_next_battle' } },
+  { id: 'ev-026', name: '休戦命令', target: 'all', effect: { kind: 'skip_action_phase' } },
+  { id: 'ev-027', name: '飛び入り決闘', target: 'all', effect: { kind: 'extra_battle' } },
 ];

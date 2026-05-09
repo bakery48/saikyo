@@ -52,6 +52,19 @@ function applyReward(state: GameState, player: Player, choice: RewardChoice): vo
 }
 
 function advanceFromReward(state: GameState): void {
+  // After an extra-battle (triggered by an event card), return to the action
+  // phase of the same mini-round instead of advancing the round.
+  if (state.returnToActionAfterReward) {
+    state.returnToActionAfterReward = false;
+    state.phase = 'action';
+    state.log.push({
+      kind: 'phase_change',
+      phase: 'action',
+      round: state.round,
+      miniRound: state.miniRound,
+    });
+    return;
+  }
   state.round += 1;
   state.miniRound = 1;
   if (state.round > state.totalRounds) {

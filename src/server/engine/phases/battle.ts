@@ -33,6 +33,12 @@ export function snapshotMonsterForBattle(player: Player): Monster {
   return m;
 }
 
+/** Flip every active skill's `order` so the highest-ordered skill goes first this battle. */
+function reverseActiveOrder(m: import('../types').Monster): void {
+  const max = m.actives.length;
+  for (const a of m.actives) a.order = max + 1 - a.order;
+}
+
 /** Random pairing of all players with monsters into pairs. Odd one gets a bye. */
 function makePairs(state: GameState): [string, string | null][] {
   const rng = makeRng(state);
@@ -77,6 +83,10 @@ export function runBattlePhase(state: GameState): void {
     const b = state.players.find((p) => p.id === bId)!;
     const monA = snapshotMonsterForBattle(a);
     const monB = snapshotMonsterForBattle(b);
+    if (state.nextBattleReverseActives) {
+      reverseActiveOrder(monA);
+      reverseActiveOrder(monB);
+    }
     const rng = makeRng(state);
     const matchSeed = rng.int(1, 0x7fffffff);
     saveRng(state, rng);
@@ -96,6 +106,9 @@ export function runBattlePhase(state: GameState): void {
     else if (result.winner === 'b') losers.push(aId);
     // draw -> nobody gets a reward
   }
+
+  // Per-battle effect flags are consumed once the entire battle phase resolves.
+  state.nextBattleReverseActives = false;
 
   const battleState: BattlePhaseState = { matches };
   state.battle = battleState;
