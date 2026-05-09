@@ -19,6 +19,8 @@ import { SKILLS } from './cards/skills';
 
 export type PlayerSeed = { id: string; name: string; isCPU: boolean };
 
+export const INITIAL_ACTION_HAND_SIZE = 4;
+
 /** Build a fresh GameState with shuffled decks and a draft-style monster pick. */
 export function createInitialState(opts: {
   roomId: string;
@@ -92,6 +94,15 @@ export function createInitialState(opts: {
     eventPhaseSummary: null,
     actionPhaseSummary: null,
   };
+  // Deal the initial action card hand (4 cards each) right at game start so
+  // players can see their hand from the very beginning, even during monster pick.
+  for (const player of fullPlayers) {
+    for (let i = 0; i < INITIAL_ACTION_HAND_SIZE; i++) {
+      const card = drawTop(state.decks.action, state.decks.actionGrave, rng);
+      if (!card) break;
+      player.actionHand.push(card);
+    }
+  }
   state.rngState = rng.snapshot();
   state.log.push({ kind: 'monster_pick_revealed', baseIds: monsterPool.map((m) => m.baseId) });
   return state;
@@ -209,17 +220,6 @@ function fallbackMonsterDistribute(state: GameState): void {
 
 function finalizeMonsterPick(state: GameState): void {
   state.monsterPick = null;
-  // Deal initial action hand of 4 cards to every player who has a monster.
-  const rng = makeRng(state);
-  for (const player of state.players) {
-    if (!player.monster) continue;
-    for (let i = 0; i < INITIAL_ACTION_HAND_SIZE; i++) {
-      const card = drawTop(state.decks.action, state.decks.actionGrave, rng);
-      if (!card) break;
-      player.actionHand.push(card);
-    }
-  }
-  saveRng(state, rng);
   state.phase = 'event';
   state.log.push({
     kind: 'phase_change',
@@ -228,8 +228,6 @@ function finalizeMonsterPick(state: GameState): void {
     miniRound: state.miniRound,
   });
 }
-
-export const INITIAL_ACTION_HAND_SIZE = 4;
 
 export function monsterFromBase(base: MonsterBase, ownerId: string): Monster {
   return {
