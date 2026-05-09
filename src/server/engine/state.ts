@@ -234,6 +234,7 @@ export function addSkillCardToMonster(
 ): ActiveSkill | PassiveSkill {
   if (!player.monster) throw new Error('player has no monster');
   const seq = state.nextSkillInstanceSeq++;
+  const tag = card.rarity === 'N' ? undefined : card.nameTag;
   if (card.isPassive && card.passive) {
     const passive: PassiveSkill = {
       id: `${card.id}#${seq}`,
@@ -241,7 +242,7 @@ export function addSkillCardToMonster(
       trigger: card.passive.trigger,
       effect: card.passive.effect,
       rarity: card.rarity,
-      nameTag: card.nameTag,
+      nameTag: tag,
     };
     player.monster.passives.push(passive);
     state.log.push({ kind: 'skill_acquired', playerId: player.id, skillId: passive.id, rarity: card.rarity });
@@ -254,7 +255,7 @@ export function addSkillCardToMonster(
     name: card.name,
     order,
     rarity: card.rarity,
-    nameTag: card.nameTag,
+    nameTag: tag,
     effect: card.active.effect,
   };
   player.monster.actives.push(active);
