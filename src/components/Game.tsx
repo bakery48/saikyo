@@ -13,6 +13,7 @@ import { PlayerPanel } from './game/PlayerPanel';
 import { MyMonsterPanel } from './game/MyMonsterPanel';
 import { ActionHandPanel } from './game/ActionHandPanel';
 import { DeckInspector } from './game/DeckInspector';
+import { DevTools } from './game/DevTools';
 import { PhaseProgress } from './game/PhaseProgress';
 
 const PHASE_LABEL: Record<string, string> = {
@@ -83,6 +84,8 @@ export function Game({ socket }: { socket: GameSocket }) {
       </div>
 
       <DeckInspector state={state} />
+
+      <DevTools state={state} socket={socket} />
 
       {state.recentLog.length > 0 && state.phase !== 'finished' && (
         <details>

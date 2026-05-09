@@ -4,6 +4,8 @@ import type { Phase } from './engine/types';
 import { type Room, RoomManager } from './rooms';
 import { GameRunner } from './game-runner';
 import { getStore } from './db';
+import { EVENTS } from './engine/cards/events';
+import { ACTIONS } from './engine/cards/actions';
 import { randomUUID } from 'node:crypto';
 
 export class GameWsServer {
@@ -139,6 +141,26 @@ export class GameWsServer {
       }
       case 'rename_monster': {
         this.handleRename(playerId, msg.name);
+        return;
+      }
+      case 'dev_inject_event': {
+        this.runGameAction(playerId, (game) => {
+          const card = EVENTS.find((c) => c.id === msg.cardId);
+          if (!card) throw new Error('unknown event card');
+          game.state.decks.event.unshift({ ...card });
+        });
+        return;
+      }
+      case 'dev_replace_hand': {
+        this.runGameAction(playerId, (game) => {
+          const card = ACTIONS.find((c) => c.id === msg.newCardId);
+          if (!card) throw new Error('unknown action card');
+          const player = game.state.players.find((p) => p.id === playerId);
+          if (!player) throw new Error('not in game');
+          const idx = player.actionHand.findIndex((c) => c.id === msg.oldCardId);
+          if (idx < 0) throw new Error('card not in hand');
+          player.actionHand[idx] = { ...card };
+        });
         return;
       }
     }

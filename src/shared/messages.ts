@@ -139,7 +139,11 @@ export type ClientMessage =
     }
   | { type: 'submit_reward'; choice: RewardChoice }
   | { type: 'rename_monster'; name: string }
-  | { type: 'leave_game' };
+  | { type: 'leave_game' }
+  /** Dev/test only: prepend a specific event card to the top of the event deck. */
+  | { type: 'dev_inject_event'; cardId: string }
+  /** Dev/test only: replace a card in the caller's action hand with a fresh copy of a chosen one. */
+  | { type: 'dev_replace_hand'; oldCardId: string; newCardId: string };
 
 /** Messages the server sends to the client. */
 export type ServerMessage =
