@@ -10,6 +10,7 @@ import type {
 import { COLOR_HEX, COLOR_LABEL, pieceStyle } from '../../lib/colors';
 
 const STEP_MS = 2000;
+const PREROLL_MS = 3000;
 
 /**
  * Animated battle view: shows the player's match with two monsters facing
@@ -56,16 +57,22 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
 
   // Index into stepLogIndices. Each tick advances one skill_use.
   const [stepIdx, setStepIdx] = useState(0);
+  // Whether we're still showing the pre-battle dice roll display.
+  const [preroll, setPreroll] = useState(true);
 
   useEffect(() => {
     setStepIdx(0);
+    setPreroll(true);
+    const t = setTimeout(() => setPreroll(false), PREROLL_MS);
+    return () => clearTimeout(t);
   }, [match.a, match.b]);
 
   useEffect(() => {
+    if (preroll) return;
     if (stepIdx >= stepLogIndices.length) return;
     const t = setTimeout(() => setStepIdx((s) => s + 1), STEP_MS);
     return () => clearTimeout(t);
-  }, [stepIdx, stepLogIndices.length]);
+  }, [preroll, stepIdx, stepLogIndices.length]);
 
   const aPlayer = state.players.find((p) => p.id === match.a);
   const bPlayer = state.players.find((p) => p.id === match.b);
@@ -74,10 +81,12 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
 
   const isBye = match.a === match.b;
 
-  // Range of log events that have been "applied" up to and including the
-  // current skill's effects (everything until the NEXT skill_use, exclusive).
-  const upToLogIdx =
-    stepIdx + 1 < stepLogIndices.length
+  // Range of log events that have been "applied". During preroll, nothing has
+  // happened yet (HP at base). Otherwise everything up to (but not including)
+  // the NEXT skill_use.
+  const upToLogIdx = preroll
+    ? 0
+    : stepIdx + 1 < stepLogIndices.length
       ? stepLogIndices[stepIdx + 1]!
       : match.log.length;
   const appliedEvents = match.log.slice(0, upToLogIdx);
@@ -88,18 +97,24 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
   const bHp = computeHp(appliedEvents, 'b', bHpBase);
 
   const currentEvent =
-    stepIdx < stepLogIndices.length ? match.log[stepLogIndices[stepIdx]!] : null;
+    !preroll && stepIdx < stepLogIndices.length
+      ? match.log[stepLogIndices[stepIdx]!]
+      : null;
   const currentSide =
     currentEvent && currentEvent.kind === 'skill_use' ? currentEvent.player : null;
   const currentSkillId =
     currentEvent && currentEvent.kind === 'skill_use' ? currentEvent.skillId : null;
 
-  const usedSkillIdsA = collectUsedSkillIds(match.log, stepLogIndices, stepIdx, 'a');
-  const usedSkillIdsB = collectUsedSkillIds(match.log, stepLogIndices, stepIdx, 'b');
+  const usedSkillIdsA = preroll
+    ? new Set<string>()
+    : collectUsedSkillIds(match.log, stepLogIndices, stepIdx, 'a');
+  const usedSkillIdsB = preroll
+    ? new Set<string>()
+    : collectUsedSkillIds(match.log, stepLogIndices, stepIdx, 'b');
 
   // Was the side hit by a damage event during the current skill_use?
   const currentSkillEventRange =
-    stepIdx < stepLogIndices.length
+    !preroll && stepIdx < stepLogIndices.length
       ? match.log.slice(stepLogIndices[stepIdx]!, upToLogIdx)
       : [];
   const damageToA = currentSkillEventRange.some(
@@ -109,7 +124,17 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
     (e) => e.kind === 'damage' && e.to === 'b' && e.amount > 0,
   );
 
-  const battleDone = stepIdx >= stepLogIndices.length;
+  // Pre-battle dice information (the LAST pair of rolls is the deciding one).
+  const rolls = match.log.filter(
+    (e): e is Extract<BattleEvent, { kind: 'roll' }> => e.kind === 'roll',
+  );
+  const lastARoll = [...rolls].reverse().find((r) => r.player === 'a') ?? null;
+  const lastBRoll = [...rolls].reverse().find((r) => r.player === 'b') ?? null;
+  const firstEvent = match.log.find((e) => e.kind === 'first');
+  const firstSide =
+    firstEvent && firstEvent.kind === 'first' ? firstEvent.player : null;
+
+  const battleDone = !preroll && stepIdx >= stepLogIndices.length;
   const finalEvent = match.log.find((e) => e.kind === 'end');
   const verdict =
     !battleDone || !finalEvent
@@ -126,12 +151,25 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
     <section style={{ display: 'grid', gap: 16 }}>
       <h2 style={{ margin: 0 }}>戦闘</h2>
       <p style={{ margin: 0, opacity: 0.8 }}>
-        {battleDone
-          ? verdict
-            ? `決着: ${verdict}`
-            : '決着'
-          : `行動 ${stepIdx + 1} / ${stepLogIndices.length}`}
+        {preroll
+          ? '🎲 ダイスロール…'
+          : battleDone
+            ? verdict
+              ? `決着: ${verdict}`
+              : '決着'
+            : `行動 ${stepIdx + 1} / ${stepLogIndices.length}`}
       </p>
+
+      {preroll && !isBye && (
+        <DiceRollBanner
+          aPlayer={aPlayer}
+          bPlayer={bPlayer}
+          aRoll={lastARoll}
+          bRoll={lastBRoll}
+          firstSide={firstSide}
+          rerolls={rolls.length / 2 - 1}
+        />
+      )}
 
       <div
         style={{
@@ -387,6 +425,101 @@ function MonsterColumn({
             <span style={{ fontSize: 12, opacity: 0.5 }}>(なし)</span>
           )}
         </ol>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Pre-battle banner showing the dice roll for initiative — both sides' SPD
+ * + die = total, with the winning side flagged as "先攻". Held on screen for
+ * PREROLL_MS before the skill animation kicks in.
+ */
+function DiceRollBanner({
+  aPlayer,
+  bPlayer,
+  aRoll,
+  bRoll,
+  firstSide,
+  rerolls,
+}: {
+  aPlayer: ClientPlayer | undefined;
+  bPlayer: ClientPlayer | undefined;
+  aRoll: Extract<BattleEvent, { kind: 'roll' }> | null;
+  bRoll: Extract<BattleEvent, { kind: 'roll' }> | null;
+  firstSide: 'a' | 'b' | null;
+  rerolls: number;
+}) {
+  if (!aRoll || !bRoll) return null;
+  const winnerName =
+    firstSide === 'a' ? aPlayer?.name ?? 'A' : firstSide === 'b' ? bPlayer?.name ?? 'B' : '?';
+  return (
+    <div
+      style={{
+        background: '#fff8d6',
+        border: '2px solid #d4a000',
+        borderRadius: 8,
+        padding: '10px 14px',
+        display: 'grid',
+        gap: 6,
+      }}
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          gap: 12,
+          alignItems: 'center',
+        }}
+      >
+        <RollSide
+          label={aPlayer?.name ?? 'A'}
+          roll={aRoll}
+          isFirst={firstSide === 'a'}
+        />
+        <span style={{ fontSize: 20, fontWeight: 700, color: '#aaa' }}>VS</span>
+        <RollSide
+          label={bPlayer?.name ?? 'B'}
+          roll={bRoll}
+          isFirst={firstSide === 'b'}
+          align="right"
+        />
+      </div>
+      <div style={{ textAlign: 'center', fontSize: 13 }}>
+        先攻 → <strong>{winnerName}</strong>
+        {rerolls > 0 && (
+          <span style={{ marginLeft: 8, opacity: 0.65 }}>(同値で {rerolls} 回振り直し)</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RollSide({
+  label,
+  roll,
+  isFirst,
+  align,
+}: {
+  label: string;
+  roll: Extract<BattleEvent, { kind: 'roll' }>;
+  isFirst: boolean;
+  align?: 'right';
+}) {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gap: 2,
+        textAlign: align === 'right' ? 'right' : 'left',
+      }}
+    >
+      <div style={{ fontWeight: 600, fontSize: 14 }}>
+        {label}
+        {isFirst && <span style={{ color: '#d4a000', marginLeft: 4 }}>（先攻）</span>}
+      </div>
+      <div style={{ fontSize: 13 }}>
+        SPD {roll.spd} + 🎲{roll.die} = <strong>{roll.total}</strong>
       </div>
     </div>
   );

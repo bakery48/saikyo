@@ -147,6 +147,8 @@ export class GameWsServer {
   private static readonly DRAFT_REVEAL_MS = 3000;
   /** Per-skill animation step the client uses for the battle view. */
   private static readonly BATTLE_STEP_MS = 2000;
+  /** Pre-battle dice-roll banner duration — must match BattleAnimationView. */
+  private static readonly BATTLE_PREROLL_MS = 3000;
   /** Buffer added to the battle animation duration so the result is briefly visible. */
   private static readonly BATTLE_TAIL_MS = 1500;
   /** How long the event-phase card+effect stays on screen before advancing. */
@@ -265,7 +267,9 @@ export class GameWsServer {
     }
     if (maxSkillUses === 0) return false; // nothing to animate (e.g. all byes)
     const durationMs =
-      maxSkillUses * GameWsServer.BATTLE_STEP_MS + GameWsServer.BATTLE_TAIL_MS;
+      GameWsServer.BATTLE_PREROLL_MS +
+      maxSkillUses * GameWsServer.BATTLE_STEP_MS +
+      GameWsServer.BATTLE_TAIL_MS;
     this.broadcastGameStateWithPhase(room, 'battle');
     setTimeout(() => {
       this.broadcastGameState(room);
