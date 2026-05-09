@@ -1,15 +1,23 @@
 'use client';
 import type { ClientGameState } from '../../shared/messages';
-import type { ActionCard, EventCard } from '../../server/engine/types';
+import type { ActionCard, EventCard, SkillCard } from '../../server/engine/types';
 import { describeActionEffect, describeEventEffect, describeEventTarget } from '../../lib/card-text';
+import { activeTooltip, passiveTooltip } from '../../lib/skill-text';
+
+const RARITY_COLOR: Record<string, string> = {
+  N: '#888',
+  R: '#3a78ff',
+  SR: '#a050ff',
+  SSR: '#ffa033',
+};
 
 /**
- * Debug panel that lists every card still in the event/action decks and
- * their graveyards. Skill deck contents are intentionally hidden so drafts
- * remain fair.
+ * Debug panel that lists every card still in each shared deck and graveyard.
+ * Includes the skill deck — this leaks draft information, so only enable
+ * during testing.
  */
 export function DeckInspector({ state }: { state: ClientGameState }) {
-  const { event, eventGrave, action, actionGrave } = state.publicDecks;
+  const { event, eventGrave, action, actionGrave, skill, skillGrave } = state.publicDecks;
 
   return (
     <details
@@ -58,6 +66,20 @@ export function DeckInspector({ state }: { state: ClientGameState }) {
             <Empty />
           ) : (
             actionGrave.map((c, i) => <ActionRow key={`${c.id}-g-${i}`} card={c} index={i} />)
+          )}
+        </DeckColumn>
+        <DeckColumn title={`スキル山札 (${skill.length})`}>
+          {skill.length === 0 ? (
+            <Empty />
+          ) : (
+            skill.map((c, i) => <SkillRow key={`${c.id}-${i}`} card={c} index={i} />)
+          )}
+        </DeckColumn>
+        <DeckColumn title={`スキル墓地 (${skillGrave.length})`} dim>
+          {skillGrave.length === 0 ? (
+            <Empty />
+          ) : (
+            skillGrave.map((c, i) => <SkillRow key={`${c.id}-g-${i}`} card={c} index={i} />)
           )}
         </DeckColumn>
       </div>
@@ -124,6 +146,42 @@ function ActionRow({ card, index }: { card: ActionCard; index: number }) {
       <span style={{ opacity: 0.5, marginRight: 4 }}>{index + 1}.</span>
       <strong>{card.name}</strong>{' '}
       <span style={{ opacity: 0.7 }}>({describeActionEffect(card)})</span>
+    </li>
+  );
+}
+
+function SkillRow({ card, index }: { card: SkillCard; index: number }) {
+  const kindLabel = card.isPassive ? 'P' : 'A';
+  const tooltip = card.isPassive
+    ? passiveTooltip({
+        id: card.id,
+        name: card.name,
+        trigger: card.passive!.trigger,
+        effect: card.passive!.effect,
+        rarity: card.rarity,
+        nameTag: card.nameTag,
+      })
+    : activeTooltip({
+        id: card.id,
+        order: 0,
+        name: card.name,
+        rarity: card.rarity,
+        nameTag: card.nameTag,
+        effect: card.active!.effect,
+      });
+  return (
+    <li
+      style={{ padding: '2px 4px', borderBottom: '1px dotted #eee' }}
+      title={tooltip}
+    >
+      <span style={{ opacity: 0.5, marginRight: 4 }}>{index + 1}.</span>
+      <span style={{ color: RARITY_COLOR[card.rarity] ?? '#888', marginRight: 4 }}>
+        [{card.rarity}{kindLabel}]
+      </span>
+      <strong>{card.name}</strong>
+      {card.nameTag && (
+        <em style={{ opacity: 0.65, marginLeft: 4 }}>→ {card.nameTag}</em>
+      )}
     </li>
   );
 }

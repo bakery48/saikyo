@@ -14,6 +14,7 @@ import type {
   Phase,
   RewardChoice,
   RewardState,
+  SkillCard,
   TournamentState,
 } from '../server/engine/types';
 
@@ -85,14 +86,17 @@ export type ClientGameState = {
     skillGrave: number;
   };
   /**
-   * Full event/action deck + grave contents (debug-friendly inspection).
-   * Skill deck is intentionally NOT exposed to keep drafting fair.
+   * Full deck + grave contents for every shared deck (debug-friendly
+   * inspection). Note that exposing the skill deck breaks draft secrecy —
+   * keep the inspector hidden behind a clearly-labelled debug UI.
    */
   publicDecks: {
     event: EventCard[];
     eventGrave: EventCard[];
     action: ActionCard[];
     actionGrave: ActionCard[];
+    skill: SkillCard[];
+    skillGrave: SkillCard[];
   };
 };
 

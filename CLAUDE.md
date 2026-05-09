@@ -256,4 +256,4 @@ src/
 - `GameRunner` の `pauseOnReveal: boolean`（デフォルト false）：ドラフト被り解消時に `revealing=true` でブロードキャストを挟む。ws-server が 3s 後に `resolveDraftSubRoundNow()` を呼ぶ。テストでは false のまま同期解決。
 - `battleResolvedSinceConsume` / `eventResolvedSinceConsume` / `actionResolvedSinceConsume`：フェーズ完了をws-serverに通知するフラグ（`advance()` 内でセット）。
 - バトルアニメーション：ws-server が `maybeBattleAnimationPause()` で `broadcastGameStateWithPhase(room, 'battle')` を使い、バトルが終わっても一定時間 battle フェーズをクライアントに表示。
-- `publicDecks`：テスト用にイベント・アクションデッキの中身をクライアントに公開。スキルデッキは公平性のため非公開。
+- `publicDecks`：テスト用にイベント・アクション・スキル全デッキ＋墓地の中身をクライアントに公開（DeckInspector で確認）。スキルデッキ公開はドラフトのフェアネスを破壊するためデバッグ用途専用。
