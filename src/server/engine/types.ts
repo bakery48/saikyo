@@ -67,7 +67,8 @@ export type PassiveTrigger =
   | { kind: 'battle_start' }
   | { kind: 'on_own_turn_start' }
   | { kind: 'on_take_damage' }
-  | { kind: 'on_deal_damage' };
+  | { kind: 'on_deal_damage' }
+  | { kind: 'on_own_active_used' };
 
 export type PassiveEffect =
   | { kind: 'stat_mod'; stat: StatKey; amount: number }
@@ -107,7 +108,13 @@ export type PassiveEffect =
    * floor(maxHp / reviveDenominator) (clamped to ≥1). When `reviveDenominator`
    * is omitted the survivor is left at exactly 1 HP.
    */
-  | { kind: 'endure_fatal'; reviveDenominator?: number };
+  | { kind: 'endure_fatal'; reviveDenominator?: number }
+  /**
+   * Self-inflicted decay applied each time this side resolves an active
+   * skill: lose `hp` HP (true loss, ignores DEF / shields), and apply
+   * battle-long −`atk` / −`def` / −`spd` stat modifiers.
+   */
+  | { kind: 'self_decay'; hp: number; atk: number; def: number; spd: number };
 
 export type PassiveSkill = {
   id: string;

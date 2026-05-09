@@ -41,6 +41,8 @@ export function describePassiveTrigger(t: PassiveTrigger): string {
       return '被ダメ時';
     case 'on_deal_damage':
       return '与ダメ時';
+    case 'on_own_active_used':
+      return '自分がアクティブスキルを発動した後';
   }
 }
 
@@ -89,6 +91,14 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return e.reviveDenominator
         ? `1度だけ最大HPの1/${e.reviveDenominator}（切り捨て）で耐える`
         : `1度だけHP1で耐える`;
+    case 'self_decay': {
+      const parts: string[] = [];
+      if (e.hp > 0) parts.push(`HP-${e.hp}`);
+      if (e.atk > 0) parts.push(`ATK-${e.atk}`);
+      if (e.def > 0) parts.push(`DEF-${e.def}`);
+      if (e.spd > 0) parts.push(`SPD-${e.spd}`);
+      return parts.join('・');
+    }
   }
 }
 

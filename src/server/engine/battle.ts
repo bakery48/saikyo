@@ -349,6 +349,37 @@ function resolveAttack(args: {
   );
 }
 
+/** バグ self_decay: applied after each own active skill resolves. */
+function applySelfDecay(
+  user: CombatStats,
+  userPassives: PassiveSkill[],
+  userSide: Side,
+  log: BattleEvent[],
+): void {
+  for (const p of userPassives) {
+    if (p.effect.kind !== 'self_decay') continue;
+    if (p.trigger.kind !== 'on_own_active_used') continue;
+    const e = p.effect;
+    if (e.hp > 0) {
+      user.hp -= e.hp;
+      log.push({ kind: 'damage', from: userSide, to: userSide, amount: e.hp, hpAfter: user.hp });
+    }
+    if (e.atk > 0) {
+      user.atkMod -= e.atk;
+      log.push({ kind: 'debuff', player: userSide, stat: 'atk', amount: e.atk, duration: 'battle' });
+    }
+    if (e.def > 0) {
+      user.defMod -= e.def;
+      log.push({ kind: 'debuff', player: userSide, stat: 'def', amount: e.def, duration: 'battle' });
+    }
+    if (e.spd > 0) {
+      user.spdMod -= e.spd;
+      log.push({ kind: 'debuff', player: userSide, stat: 'spd', amount: e.spd, duration: 'battle' });
+    }
+    log.push({ kind: 'passive', player: userSide, passiveId: p.id });
+  }
+}
+
 /** ケルベロス extra_attack_chance: returns true if any proc fires (only one per skill use). */
 function rollExtraAttack(
   user: CombatStats,
@@ -595,6 +626,7 @@ function applySkill(args: {
       log.push({ kind: 'amp_set', player: userSide, mult: e.mult });
       // next_amp itself does NOT consume the once buffs / nextAmp value (it sets it).
       user.activesUsedCount += 1;
+      applySelfDecay(user, userPassives, userSide, log);
       return;
     }
     case 'nullify_next': {
@@ -607,6 +639,7 @@ function applySkill(args: {
   consumeOnceBuffs(user);
   user.nextAmp = 1;
   user.activesUsedCount += 1;
+  applySelfDecay(user, userPassives, userSide, log);
 }
 
 function rollFirst(

@@ -184,6 +184,19 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
+    baseId: 'bug',
+    name: 'バグ',
+    stats: { hp: 20, atk: 7, def: 7, spd: 8 },
+    passives: [
+      {
+        id: 'bug-p1',
+        name: '崩壊する身体',
+        trigger: { kind: 'on_own_active_used' },
+        effect: { kind: 'self_decay', hp: 3, atk: 2, def: 2, spd: 2 },
+      },
+    ],
+  },
+  {
     baseId: 'knight',
     name: 'ナイト',
     stats: { hp: 14, atk: 5, def: 5, spd: 3 },
