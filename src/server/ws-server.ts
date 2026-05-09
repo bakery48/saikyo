@@ -162,6 +162,7 @@ export class GameWsServer {
       seed: Date.now() & 0x7fffffff,
       humans: room.players.map((p) => ({ id: p.id, name: p.name })),
       pauseOnReveal: true,
+      yieldForAnimation: true,
       totalRounds: room.totalRounds,
       miniRoundsPerRound: room.miniRoundsPerRound,
     });
@@ -196,10 +197,13 @@ export class GameWsServer {
     if (!game) return;
     const phaseBefore = game.state.phase;
     game.advance();
+    // Battle animation comes first — state.battle is cleared once the
+    // following reward phase resolves, so we have to render it before the
+    // engine progresses any further.
+    if (this.maybeBattleAnimationPause(room)) return;
     if (this.maybeEventPhasePause(room)) return;
     if (this.maybeActionPhasePause(room)) return;
     if (this.maybeAutoReveal(room)) return;
-    if (this.maybeBattleAnimationPause(room)) return;
     if (this.maybePostPickPause(room, phaseBefore)) return;
     this.broadcastGameState(room);
     if (game.state.phase === 'finished') {

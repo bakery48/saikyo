@@ -48,6 +48,14 @@ export class GameRunner {
    */
   private pauseOnReveal: boolean;
   /**
+   * When true, `advance()` returns early as soon as it transitions out of the
+   * 'event', 'action' or 'battle' phase. The ws layer relies on this so the
+   * matching animation/summary can play before the engine continues into the
+   * next phase (which would otherwise clear shared state like `state.battle`).
+   * Defaults to false so unit tests still get a single-call run-to-completion.
+   */
+  private yieldForAnimation: boolean;
+  /**
    * Set inside `advance()` whenever a step transitions out of the 'battle'
    * phase. Read and cleared by the ws layer (`consumeBattleResolved`) so it
    * can play the per-skill battle animation on the client.
@@ -63,6 +71,7 @@ export class GameRunner {
     seed: number;
     humans: { id: string; name: string }[];
     pauseOnReveal?: boolean;
+    yieldForAnimation?: boolean;
     totalRounds?: number;
     miniRoundsPerRound?: number;
   }) {
@@ -76,6 +85,7 @@ export class GameRunner {
     });
     this.humanIds = new Set(opts.humans.map((h) => h.id));
     this.pauseOnReveal = opts.pauseOnReveal ?? false;
+    this.yieldForAnimation = opts.yieldForAnimation ?? false;
   }
 
   isHuman(playerId: string): boolean {
@@ -102,16 +112,19 @@ export class GameRunner {
       const before = this.snapshotKey();
       const phaseBefore = this.state.phase;
       const waiting = this.step();
-      if (phaseBefore === 'battle' && this.state.phase !== 'battle') {
-        this.battleResolvedSinceConsume = true;
-      }
-      if (phaseBefore === 'event' && this.state.phase !== 'event') {
-        this.eventResolvedSinceConsume = true;
-      }
-      if (phaseBefore === 'action' && this.state.phase !== 'action') {
-        this.actionResolvedSinceConsume = true;
-      }
+      const battleResolvedNow = phaseBefore === 'battle' && this.state.phase !== 'battle';
+      const eventResolvedNow = phaseBefore === 'event' && this.state.phase !== 'event';
+      const actionResolvedNow = phaseBefore === 'action' && this.state.phase !== 'action';
+      if (battleResolvedNow) this.battleResolvedSinceConsume = true;
+      if (eventResolvedNow) this.eventResolvedSinceConsume = true;
+      if (actionResolvedNow) this.actionResolvedSinceConsume = true;
       if (waiting || this.state.phase === 'finished') return;
+      // Yield to the ws layer right after a phase that needs an animation —
+      // otherwise the next step (e.g. resolveRewardPhase) clears state.battle
+      // before the client gets a chance to render the battle log.
+      if (this.yieldForAnimation && (battleResolvedNow || eventResolvedNow || actionResolvedNow)) {
+        return;
+      }
       if (this.snapshotKey() === before) {
         // No progress made; bail to avoid infinite loop.
         return;
