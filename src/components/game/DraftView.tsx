@@ -264,17 +264,38 @@ type PassiveSkillPartial = Omit<import('../../server/engine/types').PassiveSkill
 
 function describePassive(p: PassiveSkillPartial): string {
   const e = p.effect;
-  let effect: string;
   switch (e.kind) {
-    case 'stat_mod':        effect = `${e.stat.toUpperCase()}+${e.amount}`; break;
-    case 'first_attack_amp': effect = `初撃ダメージ×${e.amount}`; break;
-    case 'first_attack_true': effect = `初撃がDEF無視`; break;
-    case 'spd_roll_bonus':  effect = `SPDロール+${e.amount}`; break;
-    case 'damage_reduction': effect = `被ダメ−${e.amount}`; break;
-    case 'turn_start_heal': effect = `ターン開始時 HP+${e.amount}`; break;
-    case 'damage_negate_chance': effect = `${e.oneIn}分の1で被ダメ無効`; break;
-    case 'pick_higher_buff': effect = `バフを高い方+${e.amount}`; break;
-    case 'amp_each_active': effect = `アクティブごとに威力×${e.amount}`; break;
+    case 'stat_mod':        return `${e.stat.toUpperCase()}+${e.amount}`;
+    case 'first_attack_amp': return `初撃ダメージ×${e.amount}`;
+    case 'first_attack_true': return `初撃がDEF無視`;
+    case 'first_attack_def_div': return `初撃で相手DEF÷${e.denominator}`;
+    case 'first_attack_damage_mult': return `初撃ダメージ×${e.mult}`;
+    case 'spd_roll_bonus':  return `SPDロール+${e.amount}`;
+    case 'damage_reduction': return `被ダメ−${e.amount}`;
+    case 'turn_start_heal': return `ターン開始時 HP+${e.amount}`;
+    case 'damage_negate_chance': return `${e.oneIn}分の1で被ダメ無効`;
+    case 'dodge_bonus': return `回避率+${e.percent}%`;
+    case 'pick_higher_buff': return `ATK/DEFの高い方+${e.amount}`;
+    case 'atk_per_active': return e.every && e.every > 1 ? `${e.every}回攻撃ごとにATK+${e.amount}` : `攻撃ごとにATK+${e.amount}`;
+    case 'lifesteal': return `与ダメ1/${e.denominator}を回復`;
+    case 'rage_atk': return `被ダメ時ATK+${e.amount}`;
+    case 'hex_def': return `与ダメ時相手DEF-${e.amount}`;
+    case 'extra_attack_chance': return `攻撃時${e.percent}%で2回発動`;
+    case 'counter_damage': return `被ダメ1/${e.denominator}を反射`;
+    case 'low_hp_atk_bonus': return `HP半分以下でATK+${e.amount}`;
+    case 'endure_fatal': return e.reviveDenominator ? `最大HP1/${e.reviveDenominator}で耐える` : `HP1で耐える`;
+    case 'self_decay': {
+      const parts: string[] = [];
+      if (e.hp > 0) parts.push(`HP-${e.hp}`);
+      if (e.atk > 0) parts.push(`ATK-${e.atk}`);
+      if (e.def > 0) parts.push(`DEF-${e.def}`);
+      if (e.spd > 0) parts.push(`SPD-${e.spd}`);
+      return `アクティブ発動後 ${parts.join('/')}`;
+    }
+    case 'reverse_actives_both': return `両者のアクティブ順を逆転`;
+    case 'low_hp_damage_reduction': return `HP半分以下で被ダメ-${e.amount}`;
+    case 'crit_chance': return `攻撃時${e.percent}%でダメージ×${e.mult}`;
+    case 'absorb_first_hit': return `1度だけ被ダメ無効`;
+    case 'equalize_spd': return `バトル開始時に両者SPDを平均値に`;
   }
-  return effect;
 }
