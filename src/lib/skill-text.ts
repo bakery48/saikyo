@@ -68,7 +68,9 @@ export function describePassiveEffect(e: PassiveEffect): string {
     case 'lifesteal':
       return `与えたダメージの1/${e.denominator}を回復`;
     case 'endure_fatal':
-      return `1度だけHP1で耐える`;
+      return e.reviveDenominator
+        ? `1度だけ最大HPの1/${e.reviveDenominator}（切り捨て）で耐える`
+        : `1度だけHP1で耐える`;
   }
 }
 

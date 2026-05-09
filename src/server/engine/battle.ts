@@ -268,7 +268,12 @@ function resolveAttack(args: {
   applyLifesteal(attacker, attackerPassives, actual, attackerSide, log);
 }
 
-/** If would drop ≤ 0 HP and endure_fatal is available, leave 1 HP and consume the passive. */
+/**
+ * If the incoming damage would drop hp to ≤ 0 and the side still has an
+ * unused endure_fatal passive, clamp the damage so the defender survives.
+ * Revival HP defaults to 1; if `reviveDenominator` is set on the passive,
+ * leave floor(maxHp / N) (clamped to ≥1) instead.
+ */
 function clampWithEndure(
   defender: CombatStats,
   damage: number,
@@ -282,8 +287,11 @@ function clampWithEndure(
   defender.endureFatalAvailable = false;
   const passive = passives.find((p) => p.effect.kind === 'endure_fatal');
   if (passive) log.push({ kind: 'passive', player: side, passiveId: passive.id });
-  // Leave 1 HP exactly.
-  return Math.max(0, defender.hp - 1);
+  let reviveHp = 1;
+  if (passive && passive.effect.kind === 'endure_fatal' && passive.effect.reviveDenominator) {
+    reviveHp = Math.max(1, Math.floor(defender.maxHp / passive.effect.reviveDenominator));
+  }
+  return Math.max(0, defender.hp - reviveHp);
 }
 
 /** Heal the attacker by floor(damage / denominator) per the lifesteal passive, if present. */

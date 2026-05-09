@@ -82,8 +82,12 @@ export type PassiveEffect =
   | { kind: 'atk_per_active'; amount: number }
   /** Heal floor(damage / denominator) for every hit landed by this monster. */
   | { kind: 'lifesteal'; denominator: number }
-  /** Once per battle, an attack that would drop hp to 0 instead leaves it at 1. */
-  | { kind: 'endure_fatal' };
+  /**
+   * Once per battle, an attack that would drop hp to 0 instead leaves
+   * floor(maxHp / reviveDenominator) (clamped to ≥1). When `reviveDenominator`
+   * is omitted the survivor is left at exactly 1 HP.
+   */
+  | { kind: 'endure_fatal'; reviveDenominator?: number };
 
 export type PassiveSkill = {
   id: string;

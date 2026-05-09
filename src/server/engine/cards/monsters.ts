@@ -125,9 +125,9 @@ export const MONSTERS: MonsterBase[] = [
     passives: [
       {
         id: 'phoenix-p1',
-        name: '食いしばり',
+        name: '不死鳥の加護',
         trigger: { kind: 'on_take_damage' },
-        effect: { kind: 'endure_fatal' },
+        effect: { kind: 'endure_fatal', reviveDenominator: 4 },
       },
     ],
   },
