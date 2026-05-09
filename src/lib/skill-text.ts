@@ -36,7 +36,7 @@ export function describePassiveTrigger(t: PassiveTrigger): string {
     case 'battle_start':
       return 'バトル開始時';
     case 'on_own_turn_start':
-      return 'ターン開始時';
+      return '自分がアクティブスキルを使う直前';
     case 'on_take_damage':
       return '被ダメ時';
     case 'on_deal_damage':
