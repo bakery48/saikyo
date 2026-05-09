@@ -125,7 +125,10 @@ export const SKILLS: SkillCard[] = [
     rarity: 'SSR',
     nameTag: 'アサシン',
     isPassive: true,
-    passive: { trigger: { kind: 'first_attack' }, effect: { kind: 'first_attack_true' } },
+    passive: {
+      trigger: { kind: 'first_attack' },
+      effect: { kind: 'first_attack_def_div', denominator: 2 },
+    },
   },
   {
     id: 'sk-ssrp-002',

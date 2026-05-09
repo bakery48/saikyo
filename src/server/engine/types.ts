@@ -73,6 +73,8 @@ export type PassiveEffect =
   | { kind: 'stat_mod'; stat: StatKey; amount: number }
   | { kind: 'first_attack_amp'; amount: number }
   | { kind: 'first_attack_true'; }
+  /** First attack treats target's DEF as floor(DEF / denominator). */
+  | { kind: 'first_attack_def_div'; denominator: number }
   | { kind: 'spd_roll_bonus'; amount: number }
   | { kind: 'damage_reduction'; amount: number }
   | { kind: 'turn_start_heal'; amount: number }

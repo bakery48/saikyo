@@ -59,6 +59,8 @@ type CombatStats = Stats & {
   firstAttackAmp: number;
   /** First attack treats as true damage / ignores DEF. */
   firstAttackTrue: boolean;
+  /** First attack divides target's DEF by this value (1 = no effect). */
+  firstAttackDefDiv: number;
   /** True if this side has an unused endure_fatal passive (≤0 hp clamped to 1 once). */
   endureFatalAvailable: boolean;
   passiveIds: string[];
@@ -87,6 +89,7 @@ function initCombat(m: Monster): CombatStats {
     dodgeBonusPercent: 0,
     firstAttackAmp: 0,
     firstAttackTrue: false,
+    firstAttackDefDiv: 1,
     endureFatalAvailable: m.passives.some((p) => p.effect.kind === 'endure_fatal'),
     passiveIds: [],
   };
@@ -165,6 +168,10 @@ function applyBattleStartPassives(
         break;
       case 'first_attack_true':
         self.firstAttackTrue = true;
+        break;
+      case 'first_attack_def_div':
+        // Larger divisors override smaller ones if multiple stack.
+        self.firstAttackDefDiv = Math.max(self.firstAttackDefDiv, p.effect.denominator);
         break;
       case 'atk_per_active':
         self.perActiveAtk += p.effect.amount;
@@ -277,7 +284,10 @@ function resolveAttack(args: {
   if (isFirstAttack && attacker.firstAttackAmp > 0) {
     baseDamage += attacker.firstAttackAmp * stat;
   }
-  const def = ignoreDef ? 0 : effStat(defender, 'def');
+  let def = ignoreDef ? 0 : effStat(defender, 'def');
+  if (!ignoreDef && isFirstAttack && attacker.firstAttackDefDiv > 1) {
+    def = Math.floor(def / attacker.firstAttackDefDiv);
+  }
   const raw = Math.max(1, Math.floor(baseDamage - def));
   let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef);
   actual = clampWithEndure(defender, actual, defenderPassives, defenderSide, log);
