@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ClientGameState, ClientPlayer } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import type {
@@ -97,6 +97,18 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
   const usedSkillIdsA = collectUsedSkillIds(match.log, stepLogIndices, stepIdx, 'a');
   const usedSkillIdsB = collectUsedSkillIds(match.log, stepLogIndices, stepIdx, 'b');
 
+  // Was the side hit by a damage event during the current skill_use?
+  const currentSkillEventRange =
+    stepIdx < stepLogIndices.length
+      ? match.log.slice(stepLogIndices[stepIdx]!, upToLogIdx)
+      : [];
+  const damageToA = currentSkillEventRange.some(
+    (e) => e.kind === 'damage' && e.to === 'a' && e.amount > 0,
+  );
+  const damageToB = currentSkillEventRange.some(
+    (e) => e.kind === 'damage' && e.to === 'b' && e.amount > 0,
+  );
+
   const battleDone = stepIdx >= stepLogIndices.length;
   const finalEvent = match.log.find((e) => e.kind === 'end');
   const verdict =
@@ -136,6 +148,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
           isCurrent={currentSide === 'a'}
           currentSkillId={currentSide === 'a' ? currentSkillId : null}
           usedSkillIds={usedSkillIdsA}
+          slashKey={damageToA ? `a-${stepIdx}` : null}
         />
         <div
           style={{
@@ -171,6 +184,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
             isCurrent={currentSide === 'b'}
             currentSkillId={currentSide === 'b' ? currentSkillId : null}
             usedSkillIds={usedSkillIdsB}
+            slashKey={damageToB ? `b-${stepIdx}` : null}
           />
         )}
       </div>
@@ -185,6 +199,7 @@ function MonsterColumn({
   isCurrent,
   currentSkillId,
   usedSkillIds,
+  slashKey,
 }: {
   player: ClientPlayer | undefined;
   mon: Monster | null;
@@ -192,6 +207,8 @@ function MonsterColumn({
   isCurrent: boolean;
   currentSkillId: string | null;
   usedSkillIds: Set<string>;
+  /** Non-null + unique key when this side just got hit; triggers a fresh slash animation. */
+  slashKey: string | null;
 }) {
   if (!player || !mon) {
     return (
@@ -215,9 +232,19 @@ function MonsterColumn({
         transition: 'border-color 200ms',
       }}
     >
-      {/* Avatar */}
-      <div style={{ display: 'grid', justifyItems: 'center', gap: 4 }}>
-        <span style={pieceStyle(player.color, { size: 80 })} />
+      {/* Avatar (slash effect overlays here when hit) */}
+      <div
+        style={{
+          display: 'grid',
+          justifyItems: 'center',
+          gap: 4,
+          position: 'relative',
+        }}
+      >
+        <div style={{ position: 'relative', width: 80, height: 80 }}>
+          <span style={{ ...pieceStyle(player.color, { size: 80 }), position: 'absolute', inset: 0 }} />
+          {slashKey && <ClawSlash key={slashKey} />}
+        </div>
         <div style={{ fontSize: 14, fontWeight: 600 }}>
           {player.name}（{COLOR_LABEL[player.color]}）
         </div>
@@ -339,6 +366,77 @@ function MonsterColumn({
         </ol>
       </div>
     </div>
+  );
+}
+
+/**
+ * Three diagonal claw streaks that draw across the target then fade — used
+ * when the current skill_use deals damage. Each instance animates once on
+ * mount; remount via a new `key` to replay.
+ */
+function ClawSlash() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [
+        { opacity: 0, transform: 'scale(0.7) rotate(-6deg)' },
+        { opacity: 1, transform: 'scale(1.05) rotate(0deg)', offset: 0.25 },
+        { opacity: 1, transform: 'scale(1.1) rotate(2deg)', offset: 0.6 },
+        { opacity: 0, transform: 'scale(1.25) rotate(6deg)' },
+      ],
+      { duration: 900, fill: 'forwards', easing: 'ease-out' },
+    );
+    const lines = svg.querySelectorAll('line');
+    lines.forEach((line, i) => {
+      const length = (line as SVGLineElement).getTotalLength?.() ?? 120;
+      (line as SVGLineElement).style.strokeDasharray = String(length);
+      (line as SVGLineElement).style.strokeDashoffset = String(length);
+      line.animate(
+        [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
+        { duration: 220, delay: i * 70, fill: 'forwards', easing: 'ease-out' },
+      );
+    });
+  }, []);
+  return (
+    <svg
+      ref={ref}
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      style={{
+        position: 'absolute',
+        inset: -8,
+        pointerEvents: 'none',
+        opacity: 0,
+        filter: 'drop-shadow(0 0 4px rgba(255,80,80,0.7))',
+      }}
+    >
+      <line
+        x1="10" y1="20" x2="92" y2="78"
+        stroke="#ffeaea" strokeWidth="6" strokeLinecap="round"
+      />
+      <line
+        x1="22" y1="8" x2="100" y2="68"
+        stroke="#ffeaea" strokeWidth="6" strokeLinecap="round"
+      />
+      <line
+        x1="0" y1="34" x2="80" y2="96"
+        stroke="#ffeaea" strokeWidth="6" strokeLinecap="round"
+      />
+      <line
+        x1="10" y1="20" x2="92" y2="78"
+        stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round"
+      />
+      <line
+        x1="22" y1="8" x2="100" y2="68"
+        stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round"
+      />
+      <line
+        x1="0" y1="34" x2="80" y2="96"
+        stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
