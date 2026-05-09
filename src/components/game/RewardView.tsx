@@ -105,7 +105,7 @@ function BattleResultsSection({ state }: { state: ClientGameState }) {
                   cursor: 'pointer',
                 }}
               >
-                {ap} vs {bp} → {verdict} (HP {m.finalHpB} / {m.finalHpA}) {isOpen ? '▾' : '▸'}
+                {ap} (HP {m.finalHpA}) vs {bp} (HP {m.finalHpB}) → {verdict} {isOpen ? '▾' : '▸'}
               </button>
               {isOpen && <BattleLogView match={m} players={state.players} />}
             </li>

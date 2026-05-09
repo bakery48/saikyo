@@ -40,32 +40,49 @@ export function BattleLogView({
   );
 }
 
+function durLabel(d: 'once' | 'battle'): string {
+  return d === 'battle' ? 'バトル中' : '次の1回';
+}
+
+function reasonLabel(r: 'hp_zero' | 'tiebreak_hp' | 'tiebreak_spd' | 'draw'): string {
+  switch (r) {
+    case 'hp_zero': return 'HP0';
+    case 'tiebreak_hp': return 'HP差で決着';
+    case 'tiebreak_spd': return 'SPD差で決着';
+    case 'draw': return '引き分け';
+  }
+}
+
 function formatBattleEvent(e: BattleEvent, aName: string, bName: string): string {
   const who = (s: 'a' | 'b') => (s === 'a' ? aName : bName);
   switch (e.kind) {
     case 'roll':
-      return `${who(e.player)} rolls SPD${e.spd}+d${e.die}=${e.total}`;
+      return `${who(e.player)} SPD${e.spd}+ダイス${e.die}=${e.total}`;
     case 'first':
-      return `→ ${who(e.player)} goes first`;
+      return `→ ${who(e.player)} が先攻`;
     case 'skill_use':
-      return `${who(e.player)} uses ${e.name}`;
+      return `${who(e.player)} が「${e.name}」を使用`;
     case 'damage':
-      return `  ${who(e.from)} → ${who(e.to)} dmg ${e.amount} (HP ${e.hpAfter})`;
+      return `  ${who(e.from)} → ${who(e.to)} に ${e.amount} ダメージ（HP ${e.hpAfter}）`;
+    case 'miss':
+      return `  ${who(e.from)} の攻撃をかわした（MISS）`;
     case 'heal':
-      return `  ${who(e.player)} +HP ${e.amount} → ${e.hpAfter}`;
+      return `  ${who(e.player)} HP+${e.amount} → ${e.hpAfter}`;
     case 'shield':
-      return `  ${who(e.player)} shield +${e.amount}`;
+      return `  ${who(e.player)} シールド+${e.amount}`;
     case 'buff':
-      return `  ${who(e.player)} ${e.stat}+${e.amount} (${e.duration})`;
+      return `  ${who(e.player)} ${e.stat.toUpperCase()}+${e.amount}（${durLabel(e.duration)}）`;
     case 'debuff':
-      return `  ${who(e.player)} ${e.stat}-${e.amount} (${e.duration})`;
+      return `  ${who(e.player)} ${e.stat.toUpperCase()}-${e.amount}（${durLabel(e.duration)}）`;
     case 'nullified':
-      return `  ${who(e.player)} skill nullified`;
+      return `  ${who(e.player)} のスキルが無効化`;
     case 'amp_set':
-      return `  ${who(e.player)} amp x${e.mult}`;
+      return `  ${who(e.player)} 次ダメージ×${e.mult}`;
     case 'passive':
-      return `  ${who(e.player)} passive ${e.passiveId}`;
+      return `  ${who(e.player)} パッシブ発動（${e.passiveId}）`;
     case 'end':
-      return `=== ${e.winner} (${e.reason})`;
+      return e.reason === 'draw'
+        ? `=== 引き分け`
+        : `=== ${who(e.winner as 'a' | 'b')} 勝利（${reasonLabel(e.reason)}）`;
   }
 }
