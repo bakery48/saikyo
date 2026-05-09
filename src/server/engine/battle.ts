@@ -32,10 +32,10 @@ type CombatStats = Stats & {
   skillIdx: number;
   /** Have we made our first attack yet? */
   firstAttackMade: boolean;
-  /** Number of own active skills resolved so far (used by chronoa-style passives). */
+  /** Number of own active skills resolved so far (referenced by atk_per_active passive). */
   activesUsedCount: number;
-  /** Stacked amp accumulated each active (chronoa). */
-  perActiveAmp: number;
+  /** Per atk_per_active passive: this much ATK is added for each active already used. */
+  perActiveAtk: number;
   /** Permanent damage reduction from passives. */
   damageReduction: number;
   /** Random damage negation chance (1 in N). 0 = none. */
@@ -66,7 +66,7 @@ function initCombat(m: Monster): CombatStats {
     skillIdx: 0,
     firstAttackMade: false,
     activesUsedCount: 0,
-    perActiveAmp: 0,
+    perActiveAtk: 0,
     damageReduction: 0,
     negateOneIn: 0,
     firstAttackAmp: 0,
@@ -147,8 +147,8 @@ function applyBattleStartPassives(
       case 'first_attack_true':
         self.firstAttackTrue = true;
         break;
-      case 'amp_each_active':
-        self.perActiveAmp += p.effect.amount;
+      case 'atk_per_active':
+        self.perActiveAtk += p.effect.amount;
         break;
       case 'turn_start_heal':
         // handled per-turn
@@ -239,12 +239,13 @@ function resolveAttack(args: {
     rng,
     log,
   } = args;
-  const stat = effect.useStat === 'atk' ? effStat(attacker, 'atk') : effStat(attacker, 'spd');
-  let mult = effect.mult * attacker.nextAmp;
-  // Per-active stacking amp (e.g., chronoa).
-  if (attacker.perActiveAmp > 0) {
-    mult += attacker.perActiveAmp * attacker.activesUsedCount;
-  }
+  // ATK is bumped linearly per active already used (atk_per_active passive).
+  const atkBoost = attacker.perActiveAtk * attacker.activesUsedCount;
+  const stat =
+    effect.useStat === 'atk'
+      ? effStat(attacker, 'atk') + atkBoost
+      : effStat(attacker, 'spd');
+  const mult = effect.mult * attacker.nextAmp;
   let baseDamage = stat * mult;
   const isFirstAttack = !attacker.firstAttackMade;
   const ignoreDef = isFirstAttack && attacker.firstAttackTrue;

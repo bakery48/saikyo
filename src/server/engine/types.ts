@@ -78,7 +78,8 @@ export type PassiveEffect =
   | { kind: 'turn_start_heal'; amount: number }
   | { kind: 'damage_negate_chance'; oneIn: number }
   | { kind: 'pick_higher_buff'; amount: number }
-  | { kind: 'amp_each_active'; amount: number }
+  /** Each active skill used in this battle adds `amount` to ATK on subsequent attacks. */
+  | { kind: 'atk_per_active'; amount: number }
   /** Heal floor(damage / denominator) for every hit landed by this monster. */
   | { kind: 'lifesteal'; denominator: number }
   /** Once per battle, an attack that would drop hp to 0 instead leaves it at 1. */

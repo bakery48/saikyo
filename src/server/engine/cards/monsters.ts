@@ -93,15 +93,15 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'chronoa',
-    name: 'クロノア',
-    stats: { hp: 10, atk: 4, def: 4, spd: 6 },
+    baseId: 'ouroboros',
+    name: 'ウロボロス',
+    stats: { hp: 10, atk: 3, def: 4, spd: 6 },
     passives: [
       {
-        id: 'chronoa-p1',
+        id: 'ouroboros-p1',
         name: '時の積層',
-        trigger: { kind: 'first_attack' },
-        effect: { kind: 'amp_each_active', amount: 1 },
+        trigger: { kind: 'battle_start' },
+        effect: { kind: 'atk_per_active', amount: 1 },
       },
     ],
   },

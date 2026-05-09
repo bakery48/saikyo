@@ -63,8 +63,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `${e.oneIn}分の1で被ダメ無効`;
     case 'pick_higher_buff':
       return `バフを高い方+${e.amount}`;
-    case 'amp_each_active':
-      return `アクティブごとに威力×${e.amount}`;
+    case 'atk_per_active':
+      return `攻撃ごとにATK+${e.amount}`;
     case 'lifesteal':
       return `与えたダメージの1/${e.denominator}を回復`;
     case 'endure_fatal':
