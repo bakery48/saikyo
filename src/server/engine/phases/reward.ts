@@ -54,8 +54,8 @@ function applyReward(state: GameState, player: Player, choice: RewardChoice): vo
 function advanceFromReward(state: GameState): void {
   state.round += 1;
   state.miniRound = 1;
-  if (state.round > 3) {
-    // Should not happen — round 3 ends with tournament, not reward.
+  if (state.round > state.totalRounds) {
+    // Should not happen — the last round ends with tournament, not reward.
     state.phase = 'finished';
     return;
   }

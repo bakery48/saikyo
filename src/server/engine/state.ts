@@ -21,15 +21,27 @@ export type PlayerSeed = { id: string; name: string; isCPU: boolean };
 
 export const INITIAL_ACTION_HAND_SIZE = 4;
 
+/** Clamp a configured 1-3 setting to its valid range. */
+function clampRoundCount(n: number): number {
+  if (!Number.isFinite(n)) return 3;
+  return Math.max(1, Math.min(3, Math.floor(n)));
+}
+
 /** Build a fresh GameState with shuffled decks and a draft-style monster pick. */
 export function createInitialState(opts: {
   roomId: string;
   seed: number;
   players: PlayerSeed[]; // 0..8 humans (CPUs fill remaining slots)
+  /** How many big rounds the game runs for (1-3, default 3). */
+  totalRounds?: number;
+  /** How many event/action/draft cycles each round contains (1-3, default 3). */
+  miniRoundsPerRound?: number;
 }): GameState {
   if (opts.players.length < 0 || opts.players.length > 8) {
     throw new Error('players must be 0..8 (CPUs fill remaining slots)');
   }
+  const totalRounds = clampRoundCount(opts.totalRounds ?? 3);
+  const miniRoundsPerRound = clampRoundCount(opts.miniRoundsPerRound ?? 3);
   const rng = new RNG(opts.seed);
 
   // Pad with CPUs up to 8 first; colors are assigned after shuffling so that
@@ -74,6 +86,8 @@ export function createInitialState(opts: {
     monsterPick,
     round: 1,
     miniRound: 1,
+    totalRounds,
+    miniRoundsPerRound,
     phase: 'pick_monster',
     decks: {
       event: shuffle(EVENTS, rng),

@@ -2,6 +2,11 @@ import type { RoomPlayerView, RoomSummary, RoomView } from '../shared/messages';
 
 const MAX_PLAYERS = 8;
 
+function clampSetting(n: number): number {
+  if (!Number.isFinite(n)) return 3;
+  return Math.max(1, Math.min(3, Math.floor(n)));
+}
+
 export type RoomPlayer = {
   id: string; // session/player id
   name: string;
@@ -14,13 +19,20 @@ export type Room = {
   players: RoomPlayer[];
   createdAt: number;
   inGame: boolean;
+  /** How many big rounds the game runs for (1-3). */
+  totalRounds: number;
+  /** How many event/action/draft cycles per round (1-3). */
+  miniRoundsPerRound: number;
 };
 
 export class RoomManager {
   private rooms = new Map<string, Room>();
   private playerToRoom = new Map<string, string>();
 
-  createRoom(player: RoomPlayer): Room {
+  createRoom(
+    player: RoomPlayer,
+    settings?: { totalRounds?: number; miniRoundsPerRound?: number },
+  ): Room {
     if (this.playerToRoom.has(player.id)) {
       throw new Error('player already in a room');
     }
@@ -31,6 +43,8 @@ export class RoomManager {
       players: [{ ...player }],
       createdAt: Date.now(),
       inGame: false,
+      totalRounds: clampSetting(settings?.totalRounds ?? 3),
+      miniRoundsPerRound: clampSetting(settings?.miniRoundsPerRound ?? 3),
     };
     this.rooms.set(id, room);
     this.playerToRoom.set(player.id, id);
@@ -108,7 +122,35 @@ export class RoomManager {
       isReady: p.isReady,
       isHost: p.id === room.hostId,
     }));
-    return { id: room.id, hostId: room.hostId, players, inGame: room.inGame };
+    return {
+      id: room.id,
+      hostId: room.hostId,
+      players,
+      inGame: room.inGame,
+      totalRounds: room.totalRounds,
+      miniRoundsPerRound: room.miniRoundsPerRound,
+    };
+  }
+
+  /**
+   * Host-only: update the round-count settings before the game starts.
+   * Throws if the caller isn't the host or the room is already in-game.
+   */
+  setSettings(
+    hostId: string,
+    settings: { totalRounds?: number; miniRoundsPerRound?: number },
+  ): Room {
+    const room = this.getRoomByPlayer(hostId);
+    if (!room) throw new Error('not in a room');
+    if (room.hostId !== hostId) throw new Error('only the host can change settings');
+    if (room.inGame) throw new Error('game already started');
+    if (settings.totalRounds !== undefined) {
+      room.totalRounds = clampSetting(settings.totalRounds);
+    }
+    if (settings.miniRoundsPerRound !== undefined) {
+      room.miniRoundsPerRound = clampSetting(settings.miniRoundsPerRound);
+    }
+    return room;
   }
 
   private generateRoomId(): string {

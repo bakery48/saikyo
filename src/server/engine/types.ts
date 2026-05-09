@@ -334,8 +334,12 @@ export type GameState = {
   players: Player[];
   /** Monster pick draft state (null outside of pick_monster phase). */
   monsterPick: MonsterPickState | null;
-  round: number; // 1..3 (big rounds)
-  miniRound: number; // 1..3 (event/action/draft cycles within a round)
+  round: number; // 1..totalRounds
+  miniRound: number; // 1..miniRoundsPerRound (event/action/draft cycles within a round)
+  /** Configurable: how many big rounds the game runs for (default 3). */
+  totalRounds: number;
+  /** Configurable: how many event/action/draft cycles each round contains (default 3). */
+  miniRoundsPerRound: number;
   phase: Phase;
   decks: {
     event: EventCard[];

@@ -63,12 +63,16 @@ export class GameRunner {
     seed: number;
     humans: { id: string; name: string }[];
     pauseOnReveal?: boolean;
+    totalRounds?: number;
+    miniRoundsPerRound?: number;
   }) {
     this.seed = opts.seed;
     this.state = createInitialState({
       roomId: opts.roomId,
       seed: opts.seed,
       players: opts.humans.map((h) => ({ id: h.id, name: h.name, isCPU: false })),
+      totalRounds: opts.totalRounds,
+      miniRoundsPerRound: opts.miniRoundsPerRound,
     });
     this.humanIds = new Set(opts.humans.map((h) => h.id));
     this.pauseOnReveal = opts.pauseOnReveal ?? false;
@@ -342,6 +346,8 @@ export class GameRunner {
       monsterPick: s.monsterPick,
       round: s.round,
       miniRound: s.miniRound,
+      totalRounds: s.totalRounds,
+      miniRoundsPerRound: s.miniRoundsPerRound,
       phase: s.phase,
       draft: s.draft,
       actionPhase: s.actionPhase,

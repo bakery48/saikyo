@@ -23,29 +23,27 @@ const PHASE_TO_KEY: Record<string, (round: number, miniRound: number) => string 
   finished: () => 'tournament',
 };
 
-function buildSteps(): Step[] {
+function buildSteps(totalRounds: number, miniRoundsPerRound: number): Step[] {
   const steps: Step[] = [{ key: 'pick', label: 'M', endsRound: true }];
-  for (let r = 1; r <= 3; r++) {
-    for (let m = 1; m <= 3; m++) {
+  for (let r = 1; r <= totalRounds; r++) {
+    for (let m = 1; m <= miniRoundsPerRound; m++) {
       steps.push({ key: `r${r}m${m}-event`, label: 'I' });
       steps.push({ key: `r${r}m${m}-action`, label: 'A' });
       steps.push({
         key: `r${r}m${m}-draft`,
         label: 'D',
-        endsMini: m < 3,
+        endsMini: m < miniRoundsPerRound,
       });
     }
-    if (r < 3) {
-      // Rounds 1-2 end with a battle (which includes the reward phase).
+    if (r < totalRounds) {
+      // Non-final rounds end with a battle (which includes the reward phase).
       steps.push({ key: `r${r}-battle`, label: 'B', endsRound: true });
     }
   }
-  // Round 3 transitions directly into the tournament — no per-round battle.
+  // Final round transitions directly into the tournament — no per-round battle.
   steps.push({ key: 'tournament', label: 'T' });
   return steps;
 }
-
-const STEPS = buildSteps();
 
 const LABELS: Record<string, string> = {
   M: 'モンスター選択',
@@ -57,9 +55,10 @@ const LABELS: Record<string, string> = {
 };
 
 export function PhaseProgress({ state }: { state: ClientGameState }) {
+  const steps = buildSteps(state.totalRounds, state.miniRoundsPerRound);
   const keyer = PHASE_TO_KEY[state.phase];
   const currentKey = keyer ? keyer(state.round, state.miniRound) : null;
-  const currentIdx = currentKey ? STEPS.findIndex((s) => s.key === currentKey) : -1;
+  const currentIdx = currentKey ? steps.findIndex((s) => s.key === currentKey) : -1;
 
   return (
     <div
@@ -72,7 +71,7 @@ export function PhaseProgress({ state }: { state: ClientGameState }) {
         marginTop: 4,
       }}
     >
-      {STEPS.map((step, i) => {
+      {steps.map((step, i) => {
         const done = currentIdx >= 0 && i < currentIdx;
         const current = i === currentIdx;
         const bg = current ? '#0066cc' : done ? '#bbb' : '#eee';

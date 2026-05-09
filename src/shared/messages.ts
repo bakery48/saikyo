@@ -32,6 +32,10 @@ export type RoomView = {
   hostId: string;
   players: RoomPlayerView[];
   inGame: boolean;
+  /** Number of big rounds the game will run for (1-3). */
+  totalRounds: number;
+  /** Number of event/action/draft cycles per round (1-3). */
+  miniRoundsPerRound: number;
 };
 
 /** Compact view used in the lobby's room list. */
@@ -61,6 +65,10 @@ export type ClientGameState = {
   monsterPick: MonsterPickState | null;
   round: number;
   miniRound: number;
+  /** Number of big rounds for this game (1-3). */
+  totalRounds: number;
+  /** Mini-round cycles per round for this game (1-3). */
+  miniRoundsPerRound: number;
   phase: Phase;
   draft: DraftState | null;
   /** Action phase selection state — set while waiting for plays. */
@@ -102,12 +110,22 @@ export type ClientGameState = {
 
 /** Messages the client sends to the server. */
 export type ClientMessage =
-  | { type: 'create_room'; playerName: string }
+  | {
+      type: 'create_room';
+      playerName: string;
+      totalRounds?: number;
+      miniRoundsPerRound?: number;
+    }
   | { type: 'join_room'; roomId: string; playerName: string }
   | { type: 'leave_room' }
   | { type: 'set_ready'; isReady: boolean }
   | { type: 'list_rooms' }
   | { type: 'start_game' }
+  | {
+      type: 'set_room_settings';
+      totalRounds?: number;
+      miniRoundsPerRound?: number;
+    }
   | { type: 'submit_pick'; baseId: string }
   | { type: 'submit_draft'; skillId: string }
   | { type: 'play_action_card'; cardId: string }

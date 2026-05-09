@@ -6,6 +6,8 @@ import type { GameSocket } from '../lib/useGameSocket';
 export function Lobby({ socket }: { socket: GameSocket }) {
   const [name, setName] = useState('Player');
   const [joinId, setJoinId] = useState('');
+  const [totalRounds, setTotalRounds] = useState(3);
+  const [miniRoundsPerRound, setMiniRoundsPerRound] = useState(3);
   const trimmed = name.trim();
 
   return (
@@ -23,9 +25,40 @@ export function Lobby({ socket }: { socket: GameSocket }) {
         <Link href="/hall-of-fame" style={{ fontSize: 14 }}>🏆 殿堂</Link>
       </div>
 
+      <fieldset
+        style={{
+          border: '1px solid #ccc',
+          borderRadius: 6,
+          padding: '8px 12px',
+          display: 'grid',
+          gap: 6,
+        }}
+      >
+        <legend style={{ padding: '0 4px', fontSize: 13, fontWeight: 600 }}>
+          ゲーム設定（ルーム作成時のみ）
+        </legend>
+        <SliderRow
+          label="ラウンド数"
+          value={totalRounds}
+          onChange={setTotalRounds}
+        />
+        <SliderRow
+          label="ミニラウンド数 (I・A・D / round)"
+          value={miniRoundsPerRound}
+          onChange={setMiniRoundsPerRound}
+        />
+      </fieldset>
+
       <div style={{ display: 'flex', gap: 8 }}>
         <button
-          onClick={() => socket.send({ type: 'create_room', playerName: trimmed || 'Player' })}
+          onClick={() =>
+            socket.send({
+              type: 'create_room',
+              playerName: trimmed || 'Player',
+              totalRounds,
+              miniRoundsPerRound,
+            })
+          }
           disabled={!socket.connected}
         >
           ルームを作成
@@ -91,5 +124,38 @@ export function Lobby({ socket }: { socket: GameSocket }) {
         )}
       </div>
     </section>
+  );
+}
+
+function SliderRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <label
+      style={{
+        display: 'flex',
+        gap: 12,
+        alignItems: 'center',
+        fontSize: 13,
+      }}
+    >
+      <span style={{ minWidth: 220 }}>{label}</span>
+      <input
+        type="range"
+        min={1}
+        max={3}
+        step={1}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        style={{ flex: 1 }}
+      />
+      <span style={{ minWidth: 16, textAlign: 'right', fontWeight: 600 }}>{value}</span>
+    </label>
   );
 }

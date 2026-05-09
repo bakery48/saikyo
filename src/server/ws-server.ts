@@ -47,13 +47,27 @@ export class GameWsServer {
     switch (msg.type) {
       case 'create_room': {
         this.playerNames.set(playerId, msg.playerName);
-        const room = this.roomManager.createRoom({
-          id: playerId,
-          name: msg.playerName,
-          isReady: false,
-        });
+        const room = this.roomManager.createRoom(
+          {
+            id: playerId,
+            name: msg.playerName,
+            isReady: false,
+          },
+          {
+            totalRounds: msg.totalRounds,
+            miniRoundsPerRound: msg.miniRoundsPerRound,
+          },
+        );
         this.send(ws, { type: 'room_state', room: this.roomManager.toRoomView(room) });
         this.broadcastRoomsList();
+        return;
+      }
+      case 'set_room_settings': {
+        const room = this.roomManager.setSettings(playerId, {
+          totalRounds: msg.totalRounds,
+          miniRoundsPerRound: msg.miniRoundsPerRound,
+        });
+        this.broadcastRoomState(room.id);
         return;
       }
       case 'join_room': {
@@ -148,6 +162,8 @@ export class GameWsServer {
       seed: Date.now() & 0x7fffffff,
       humans: room.players.map((p) => ({ id: p.id, name: p.name })),
       pauseOnReveal: true,
+      totalRounds: room.totalRounds,
+      miniRoundsPerRound: room.miniRoundsPerRound,
     });
     this.games.set(room.id, game);
     room.inGame = true;
