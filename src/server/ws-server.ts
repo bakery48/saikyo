@@ -272,10 +272,11 @@ export class GameWsServer {
       GameWsServer.BATTLE_TAIL_MS;
     this.broadcastGameStateWithPhase(room, 'battle');
     setTimeout(() => {
-      this.broadcastGameState(room);
-      if (game.state.phase === 'finished') {
-        this.handleFinished(room, game);
-      }
+      // Continue driving the game so the (auto-resolving) reward phase and
+      // anything past it actually advance for everyone — without this the
+      // engine sits at phase=reward and human winners just see the round-
+      // results screen forever waiting on CPU rewards that never submit.
+      this.driveGame(room);
     }, durationMs);
     return true;
   }
