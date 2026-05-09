@@ -91,10 +91,12 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
       : match.log.length;
   const appliedEvents = match.log.slice(0, upToLogIdx);
 
-  const aHpBase = aMon?.stats.hp ?? 0;
-  const bHpBase = bMon?.stats.hp ?? 0;
-  const aHp = computeHp(appliedEvents, 'a', aHpBase);
-  const bHp = computeHp(appliedEvents, 'b', bHpBase);
+  // Battle-start HP includes any next_battle buffs that were applied — use it
+  // as the HP bar's max so "current / max" never shows current > max.
+  const aHpStart = match.startHpA || aMon?.stats.hp || 0;
+  const bHpStart = match.startHpB || bMon?.stats.hp || 0;
+  const aHp = computeHp(appliedEvents, 'a', aHpStart);
+  const bHp = computeHp(appliedEvents, 'b', bHpStart);
 
   const currentEvent =
     !preroll && stepIdx < stepLogIndices.length
@@ -183,6 +185,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
           player={aPlayer}
           mon={aMon}
           hp={aHp}
+          maxHp={aHpStart}
           isCurrent={currentSide === 'a'}
           currentSkillId={currentSide === 'a' ? currentSkillId : null}
           usedSkillIds={usedSkillIdsA}
@@ -219,6 +222,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
             player={bPlayer}
             mon={bMon}
             hp={bHp}
+            maxHp={bHpStart}
             isCurrent={currentSide === 'b'}
             currentSkillId={currentSide === 'b' ? currentSkillId : null}
             usedSkillIds={usedSkillIdsB}
@@ -234,6 +238,7 @@ function MonsterColumn({
   player,
   mon,
   hp,
+  maxHp,
   isCurrent,
   currentSkillId,
   usedSkillIds,
@@ -242,6 +247,7 @@ function MonsterColumn({
   player: ClientPlayer | undefined;
   mon: Monster | null;
   hp: number;
+  maxHp: number;
   isCurrent: boolean;
   currentSkillId: string | null;
   usedSkillIds: Set<string>;
@@ -255,8 +261,7 @@ function MonsterColumn({
       </div>
     );
   }
-  const baseHp = mon.stats.hp;
-  const hpPct = Math.max(0, Math.min(100, Math.round((hp / Math.max(1, baseHp)) * 100)));
+  const hpPct = Math.max(0, Math.min(100, Math.round((hp / Math.max(1, maxHp)) * 100)));
   const colorHex = COLOR_HEX[player.color] ?? '#888';
 
   // Shake on hit. Re-runs whenever slashKey changes (i.e. a new damage event
@@ -315,7 +320,7 @@ function MonsterColumn({
       {/* HP bar */}
       <div>
         <div style={{ fontSize: 12, marginBottom: 2 }}>
-          HP {hp} / {baseHp}
+          HP {hp} / {maxHp}
         </div>
         <div
           style={{

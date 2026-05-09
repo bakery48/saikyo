@@ -61,7 +61,16 @@ export function runBattlePhase(state: GameState): void {
   for (const [aId, bId] of pairs) {
     if (!bId) {
       // Player has a bye -- treat as automatic win, no opponent.
-      matches.push({ a: aId, b: aId, winner: 'a', finalHpA: 0, finalHpB: 0, log: [] });
+      matches.push({
+        a: aId,
+        b: aId,
+        winner: 'a',
+        startHpA: 0,
+        startHpB: 0,
+        finalHpA: 0,
+        finalHpB: 0,
+        log: [],
+      });
       continue;
     }
     const a = state.players.find((p) => p.id === aId)!;
@@ -76,6 +85,8 @@ export function runBattlePhase(state: GameState): void {
       a: aId,
       b: bId,
       winner: result.winner,
+      startHpA: monA.stats.hp,
+      startHpB: monB.stats.hp,
       finalHpA: result.finalHp.a,
       finalHpB: result.finalHp.b,
       log: result.log,

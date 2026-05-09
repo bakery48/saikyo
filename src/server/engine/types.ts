@@ -254,6 +254,9 @@ export type BattleMatch = {
   a: string; // playerId
   b: string;
   winner: 'a' | 'b' | 'draw' | null;
+  /** HP at the start of battle, after applying next_battle buffs. Used as the bar's max. */
+  startHpA: number;
+  startHpB: number;
   finalHpA: number;
   finalHpB: number;
   log: BattleEvent[];
