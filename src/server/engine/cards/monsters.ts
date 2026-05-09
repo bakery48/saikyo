@@ -80,13 +80,13 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'lumibell',
-    name: 'ルミベル',
+    baseId: 'slime',
+    name: 'スライム',
     stats: { hp: 14, atk: 5, def: 5, spd: 5 },
     passives: [
       {
-        id: 'lumibell-p1',
-        name: '光の選択',
+        id: 'slime-p1',
+        name: '形なき適応',
         trigger: { kind: 'battle_start' },
         effect: { kind: 'pick_higher_buff', amount: 2 },
       },
