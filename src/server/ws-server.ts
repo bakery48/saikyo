@@ -136,7 +136,7 @@ export class GameWsServer {
   /** How long the event-phase card+effect stays on screen before advancing. */
   private static readonly EVENT_PHASE_MS = 3000;
   /** How long the action-phase summary stays on screen before advancing. */
-  private static readonly ACTION_PHASE_MS = 4500;
+  private static readonly ACTION_PHASE_MS = 6000;
 
   private startGame(hostId: string): void {
     const room = this.roomManager.getRoomByPlayer(hostId);
