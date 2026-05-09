@@ -47,8 +47,6 @@ type CombatStats = Stats & {
   firstAttackMade: boolean;
   /** Number of own active skills resolved so far (referenced by atk_per_active passive). */
   activesUsedCount: number;
-  /** Per atk_per_active passive: this much ATK is added for each active already used. */
-  perActiveAtk: number;
   /** Permanent damage reduction from passives. */
   damageReduction: number;
   /** Random damage negation chance (1 in N). 0 = none. */
@@ -83,7 +81,6 @@ function initCombat(m: Monster): CombatStats {
     skillIdx: 0,
     firstAttackMade: false,
     activesUsedCount: 0,
-    perActiveAtk: 0,
     damageReduction: 0,
     negateOneIn: 0,
     dodgeBonusPercent: 0,
@@ -172,9 +169,6 @@ function applyBattleStartPassives(
       case 'first_attack_def_div':
         // Larger divisors override smaller ones if multiple stack.
         self.firstAttackDefDiv = Math.max(self.firstAttackDefDiv, p.effect.denominator);
-        break;
-      case 'atk_per_active':
-        self.perActiveAtk += p.effect.amount;
         break;
       case 'turn_start_heal':
         // handled per-turn
@@ -270,8 +264,15 @@ function resolveAttack(args: {
     log.push({ kind: 'miss', from: attackerSide, to: defenderSide });
     return;
   }
-  // ATK is bumped linearly per active already used (atk_per_active passive).
-  const atkBoost = attacker.perActiveAtk * attacker.activesUsedCount;
+  // atk_per_active passives (potentially multiple, each with its own
+  // amount/every) contribute to ATK based on how many actives are used so far.
+  let atkBoost = 0;
+  for (const p of attackerPassives) {
+    if (p.effect.kind === 'atk_per_active') {
+      const every = p.effect.every ?? 1;
+      atkBoost += p.effect.amount * Math.floor(attacker.activesUsedCount / every);
+    }
+  }
   const stat =
     effect.useStat === 'atk'
       ? effStat(attacker, 'atk') + atkBoost

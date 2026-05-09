@@ -82,8 +82,12 @@ export type PassiveEffect =
   /** Flat % added to the SPD dodge roll on incoming attacks. */
   | { kind: 'dodge_bonus'; percent: number }
   | { kind: 'pick_higher_buff'; amount: number }
-  /** Each active skill used in this battle adds `amount` to ATK on subsequent attacks. */
-  | { kind: 'atk_per_active'; amount: number }
+  /**
+   * Adds `amount` ATK for each `every` (default 1) actives this side has
+   * already used in the battle. So `{ amount: 1, every: 1 }` is +1 ATK per
+   * attack; `{ amount: 2, every: 2 }` is +2 every 2 attacks.
+   */
+  | { kind: 'atk_per_active'; amount: number; every?: number }
   /** Heal floor(damage / denominator) for every hit landed by this monster. */
   | { kind: 'lifesteal'; denominator: number }
   /**

@@ -68,7 +68,9 @@ export function describePassiveEffect(e: PassiveEffect): string {
     case 'pick_higher_buff':
       return `ATKとDEFの高い方に+${e.amount}`;
     case 'atk_per_active':
-      return `攻撃ごとにATK+${e.amount}`;
+      return e.every && e.every > 1
+        ? `${e.every}回攻撃ごとにATK+${e.amount}`
+        : `攻撃ごとにATK+${e.amount}`;
     case 'lifesteal':
       return `与えたダメージの1/${e.denominator}を回復`;
     case 'endure_fatal':

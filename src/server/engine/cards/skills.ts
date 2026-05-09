@@ -136,6 +136,9 @@ export const SKILLS: SkillCard[] = [
     rarity: 'SSR',
     nameTag: 'タイムロード',
     isPassive: true,
-    passive: { trigger: { kind: 'battle_start' }, effect: { kind: 'atk_per_active', amount: 1 } },
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'atk_per_active', amount: 2, every: 2 },
+    },
   },
 ];
