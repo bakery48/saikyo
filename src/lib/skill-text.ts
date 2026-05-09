@@ -62,7 +62,7 @@ export function describePassiveEffect(e: PassiveEffect): string {
     case 'damage_negate_chance':
       return `${e.oneIn}分の1で被ダメ無効`;
     case 'pick_higher_buff':
-      return `バフを高い方+${e.amount}`;
+      return `ATKとDEFの高い方に+${e.amount}`;
     case 'atk_per_active':
       return `攻撃ごとにATK+${e.amount}`;
     case 'lifesteal':

@@ -88,7 +88,7 @@ export const MONSTERS: MonsterBase[] = [
         id: 'lumibell-p1',
         name: '光の選択',
         trigger: { kind: 'battle_start' },
-        effect: { kind: 'pick_higher_buff', amount: 1 },
+        effect: { kind: 'pick_higher_buff', amount: 2 },
       },
     ],
   },
