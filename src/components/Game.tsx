@@ -12,6 +12,7 @@ import { PlayerPanel } from './game/PlayerPanel';
 import { MyMonsterPanel } from './game/MyMonsterPanel';
 import { ActionHandPanel } from './game/ActionHandPanel';
 import { DeckInspector } from './game/DeckInspector';
+import { PhaseProgress } from './game/PhaseProgress';
 
 const PHASE_LABEL: Record<string, string> = {
   setup: 'セットアップ',
@@ -33,21 +34,21 @@ export function Game({ socket }: { socket: GameSocket }) {
     <section style={{ display: 'grid', gap: 16 }}>
       <header
         style={{
-          display: 'flex',
-          gap: 12,
-          alignItems: 'baseline',
           borderBottom: '1px solid #ddd',
           paddingBottom: 8,
         }}
       >
-        <strong>{PHASE_LABEL[state.phase] ?? state.phase}</strong>
-        <span style={{ opacity: 0.7, fontSize: 13 }}>
-          R{state.round} / mini {state.miniRound}
-        </span>
-        <span style={{ marginLeft: 'auto', fontSize: 12, opacity: 0.6 }}>
-          deck: event {state.deckCounts.event} · action {state.deckCounts.action} · skill{' '}
-          {state.deckCounts.skill}
-        </span>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
+          <strong>{PHASE_LABEL[state.phase] ?? state.phase}</strong>
+          <span style={{ opacity: 0.7, fontSize: 13 }}>
+            R{state.round} / mini {state.miniRound}
+          </span>
+          <span style={{ marginLeft: 'auto', fontSize: 12, opacity: 0.6 }}>
+            deck: event {state.deckCounts.event} · action {state.deckCounts.action} · skill{' '}
+            {state.deckCounts.skill}
+          </span>
+        </div>
+        <PhaseProgress state={state} />
       </header>
 
       <MyMonsterPanel state={state} socket={socket} />
