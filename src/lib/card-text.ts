@@ -44,7 +44,7 @@ export function describeActionEffect(card: ActionCard): string {
     case 'draw_skill_top':
       return 'スキル山札から1枚追加';
     case 'discard_random_active':
-      return 'アクティブ1枚ランダム破棄';
+      return 'アクティブスキル1枚をランダムに破棄';
     case 'gain_passive':
       return `パッシブ獲得: ${e.passive.name}`;
   }
