@@ -244,7 +244,7 @@ export const MONSTERS: MonsterBase[] = [
     name: 'バグ',
     attackKind: 'magic',
     hidden: true,
-    stats: { hp: 20, atk: 7, def: 7, spd: 8 },
+    stats: { hp: 10, atk: 5, def: 5, spd: 5 },
     passives: [
       {
         id: 'bug-p1',
