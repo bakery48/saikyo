@@ -184,8 +184,22 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
+    baseId: 'goblin',
+    name: 'ゴブリン',
+    stats: { hp: 12, atk: 4, def: 3, spd: 6 },
+    passives: [
+      {
+        id: 'goblin-p1',
+        name: 'チクチク攻撃',
+        trigger: { kind: 'on_deal_damage' },
+        effect: { kind: 'low_damage_bonus', threshold: 2, bonus: 3 },
+      },
+    ],
+  },
+  {
     baseId: 'bug',
     name: 'バグ',
+    hidden: true,
     stats: { hp: 20, atk: 7, def: 7, spd: 8 },
     passives: [
       {

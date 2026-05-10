@@ -384,6 +384,16 @@ function resolveAttack(args: {
     amount: actual,
     hpAfter: defender.hp,
   });
+  // low_damage_bonus: if the hit dealt ≤ threshold, add bonus true damage.
+  for (const p of attackerPassives) {
+    if (p.effect.kind === 'low_damage_bonus' && actual <= p.effect.threshold) {
+      const bonus = p.effect.bonus;
+      defender.hp -= bonus;
+      log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+      log.push({ kind: 'damage', from: attackerSide, to: defenderSide, amount: bonus, hpAfter: defender.hp });
+      break;
+    }
+  }
   applyLifesteal(attacker, attackerPassives, actual, attackerSide, log);
   applyHexDef(attacker, attackerPassives, defender, attackerSide, defenderSide, actual, log);
   applyCounterDamage(

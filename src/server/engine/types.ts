@@ -163,7 +163,12 @@ export type PassiveEffect =
   /** First time this side would take damage, fully absorb it. */
   | { kind: 'absorb_first_hit' }
   /** At battle start, set both sides' SPD to the average of their two SPDs. */
-  | { kind: 'equalize_spd' };
+  | { kind: 'equalize_spd' }
+  /**
+   * When this side deals ≤ `threshold` damage in a single hit, deal `bonus`
+   * additional true damage (ignores DEF/shield) to the defender.
+   */
+  | { kind: 'low_damage_bonus'; threshold: number; bonus: number };
 
 export type PassiveSkill = {
   id: string;
@@ -181,6 +186,8 @@ export type MonsterBase = {
   name: string;
   stats: Stats;
   passives: PassiveSkill[];
+  /** If true, excluded from the initial monster pick pool. */
+  hidden?: boolean;
 };
 
 export type Monster = {

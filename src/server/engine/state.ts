@@ -68,7 +68,7 @@ export function createInitialState(opts: {
   const shuffledColors = shuffle(PLAYER_COLORS, rng);
   const fullPlayers: Player[] = seats.map((p, i) => ({ ...p, color: shuffledColors[i]! }));
 
-  const monsterPool = shuffle(MONSTERS, rng);
+  const monsterPool = shuffle(MONSTERS.filter((m) => !m.hidden), rng);
 
   const monsterPick: MonsterPickState = {
     pool: monsterPool,
