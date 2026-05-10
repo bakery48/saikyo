@@ -254,6 +254,7 @@ export function monsterFromBase(base: MonsterBase, ownerId: string): Monster {
     stats: { ...base.stats },
     passives: base.passives.map((p) => ({ ...p })),
     actives: [],
+    attackKind: base.attackKind,
   };
 }
 

@@ -32,6 +32,7 @@ function mkMonster(opts: {
     },
     passives: opts.passives ?? [],
     actives: opts.actives ?? [],
+    attackKind: 'strike',
   };
 }
 

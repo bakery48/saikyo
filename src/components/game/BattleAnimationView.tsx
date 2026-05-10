@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ClientGameState, ClientPlayer } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import type {
+  AttackKind,
   BattleEvent,
   BattleMatch,
   Monster,
@@ -113,6 +114,24 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
     ? new Set<string>()
     : collectUsedSkillIds(match.log, stepLogIndices, stepIdx, 'b');
 
+  // Resolve the visual attack kind for the current attacker's skill.
+  // 'passthrough' or missing → use the attacker monster's own attackKind.
+  const currentAttackKind = ((): Exclude<AttackKind, 'passthrough'> => {
+    const attackerMon = currentSide === 'a' ? aMon : currentSide === 'b' ? bMon : null;
+    const monKind = attackerMon?.attackKind ?? 'strike';
+    if (!currentSkillId || !attackerMon) return monKind;
+    const skill = attackerMon.actives.find((a) => a.id === currentSkillId);
+    if (!skill) return monKind;
+    const e = skill.effect;
+    const raw =
+      e.kind === 'attack' ? e.attackKind
+      : e.kind === 'multi_hit_attack' ? e.attackKind
+      : e.kind === 'deja_vu_attack' ? e.attackKind
+      : undefined;
+    if (!raw || raw === 'passthrough') return monKind;
+    return raw;
+  })();
+
   // Was the side hit by a damage event during the current skill_use?
   const currentSkillEventRange =
     !preroll && stepIdx < stepLogIndices.length
@@ -196,6 +215,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
           usedSkillIds={usedSkillIdsA}
           slashKey={damageToA ? `a-${stepIdx}` : null}
           missKey={missByA ? `miss-a-${stepIdx}` : null}
+          hitKind={currentAttackKind}
         />
         <div
           style={{
@@ -234,6 +254,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
             usedSkillIds={usedSkillIdsB}
             slashKey={damageToB ? `b-${stepIdx}` : null}
             missKey={missByB ? `miss-b-${stepIdx}` : null}
+            hitKind={currentAttackKind}
           />
         )}
       </div>
@@ -251,6 +272,7 @@ function MonsterColumn({
   usedSkillIds,
   slashKey,
   missKey,
+  hitKind,
 }: {
   player: ClientPlayer | undefined;
   mon: Monster | null;
@@ -263,6 +285,8 @@ function MonsterColumn({
   slashKey: string | null;
   /** Non-null + unique key when this side just dodged; pops a "MISS!" overlay. */
   missKey: string | null;
+  /** Visual category of the incoming attack. */
+  hitKind: Exclude<AttackKind, 'passthrough'>;
 }) {
   if (!player || !mon) {
     return (
@@ -319,7 +343,7 @@ function MonsterColumn({
       >
         <div style={{ position: 'relative', width: 80, height: 80 }}>
           <span style={{ ...pieceStyle(player.color, { size: 80 }), position: 'absolute', inset: 0 }} />
-          {slashKey && <ClawSlash key={slashKey} />}
+          {slashKey && <HitEffect key={slashKey} kind={hitKind} />}
           {missKey && <MissBadge key={missKey} />}
         </div>
         <div style={{ fontSize: 14, fontWeight: 600 }}>
@@ -580,11 +604,100 @@ function MissBadge() {
 }
 
 /**
- * Three diagonal claw streaks that draw across the target then fade — used
- * when the current skill_use deals damage. Each instance animates once on
- * mount; remount via a new `key` to replay.
+ * Dispatches to the right hit-effect component based on `kind`.
+ * Remount via a new `key` to replay.
  */
-function ClawSlash() {
+function HitEffect({ kind }: { kind: Exclude<AttackKind, 'passthrough'> }) {
+  switch (kind) {
+    case 'strike':  return <StrikeEffect />;
+    case 'sword':   return <SwordEffect />;
+    case 'claw':    return <ClawEffect />;
+    case 'magic':   return <MagicEffect />;
+  }
+}
+
+/** 打撃: orange/yellow impact burst — concentric rings + starburst lines. */
+function StrikeEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [
+        { opacity: 0, transform: 'scale(0.5)' },
+        { opacity: 1, transform: 'scale(1.1)', offset: 0.2 },
+        { opacity: 1, transform: 'scale(1.15)', offset: 0.55 },
+        { opacity: 0, transform: 'scale(1.4)' },
+      ],
+      { duration: 750, fill: 'forwards', easing: 'ease-out' },
+    );
+  }, []);
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 6px rgba(255,160,0,0.9))' }}>
+      {/* Starburst lines */}
+      {[0,45,90,135].map((deg) => (
+        <line key={deg}
+          x1={50 + 10 * Math.cos(deg * Math.PI / 180)} y1={50 + 10 * Math.sin(deg * Math.PI / 180)}
+          x2={50 + 46 * Math.cos(deg * Math.PI / 180)} y2={50 + 46 * Math.sin(deg * Math.PI / 180)}
+          stroke="#ffcc00" strokeWidth="5" strokeLinecap="round" />
+      ))}
+      {[22.5,67.5,112.5,157.5].map((deg) => (
+        <line key={deg}
+          x1={50 + 10 * Math.cos(deg * Math.PI / 180)} y1={50 + 10 * Math.sin(deg * Math.PI / 180)}
+          x2={50 + 36 * Math.cos(deg * Math.PI / 180)} y2={50 + 36 * Math.sin(deg * Math.PI / 180)}
+          stroke="#ff9900" strokeWidth="3.5" strokeLinecap="round" />
+      ))}
+      {/* Core */}
+      <circle cx="50" cy="50" r="12" fill="#fff7aa" stroke="#ffcc00" strokeWidth="3" />
+      {/* Outer ring */}
+      <circle cx="50" cy="50" r="30" fill="none" stroke="#ff9900" strokeWidth="2.5" strokeDasharray="6 4" />
+    </svg>
+  );
+}
+
+/** 剣攻撃: bright diagonal sword slash — two crossing cuts in blue-white. */
+function SwordEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [
+        { opacity: 0, transform: 'scale(0.8) rotate(-4deg)' },
+        { opacity: 1, transform: 'scale(1.05) rotate(0deg)', offset: 0.2 },
+        { opacity: 1, transform: 'scale(1.08) rotate(1deg)', offset: 0.6 },
+        { opacity: 0, transform: 'scale(1.2) rotate(3deg)' },
+      ],
+      { duration: 700, fill: 'forwards', easing: 'ease-out' },
+    );
+    svg.querySelectorAll('line').forEach((line, i) => {
+      const length = 140;
+      (line as SVGLineElement).style.strokeDasharray = String(length);
+      (line as SVGLineElement).style.strokeDashoffset = String(length);
+      line.animate(
+        [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
+        { duration: 180, delay: i * 50, fill: 'forwards', easing: 'ease-out' },
+      );
+    });
+  }, []);
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="none"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 5px rgba(100,200,255,0.9))' }}>
+      {/* White glow core */}
+      <line x1="5" y1="10" x2="95" y2="90" stroke="#ffffff" strokeWidth="8" strokeLinecap="round" />
+      <line x1="5" y1="10" x2="95" y2="90" stroke="#88ddff" strokeWidth="3" strokeLinecap="round" />
+      {/* Second slash */}
+      <line x1="20" y1="2"  x2="100" y2="80" stroke="#ffffff" strokeWidth="5" strokeLinecap="round" />
+      <line x1="20" y1="2"  x2="100" y2="80" stroke="#aaeeff" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** 爪: three diagonal red claw streaks — the original ClawSlash. */
+function ClawEffect() {
   const ref = useRef<SVGSVGElement>(null);
   useEffect(() => {
     const svg = ref.current;
@@ -598,8 +711,7 @@ function ClawSlash() {
       ],
       { duration: 900, fill: 'forwards', easing: 'ease-out' },
     );
-    const lines = svg.querySelectorAll('line');
-    lines.forEach((line, i) => {
+    svg.querySelectorAll('line').forEach((line, i) => {
       const length = (line as SVGLineElement).getTotalLength?.() ?? 120;
       (line as SVGLineElement).style.strokeDasharray = String(length);
       (line as SVGLineElement).style.strokeDashoffset = String(length);
@@ -610,42 +722,56 @@ function ClawSlash() {
     });
   }, []);
   return (
-    <svg
-      ref={ref}
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-      style={{
-        position: 'absolute',
-        inset: -8,
-        pointerEvents: 'none',
-        opacity: 0,
-        filter: 'drop-shadow(0 0 4px rgba(255,80,80,0.7))',
-      }}
-    >
-      <line
-        x1="10" y1="20" x2="92" y2="78"
-        stroke="#ffeaea" strokeWidth="6" strokeLinecap="round"
-      />
-      <line
-        x1="22" y1="8" x2="100" y2="68"
-        stroke="#ffeaea" strokeWidth="6" strokeLinecap="round"
-      />
-      <line
-        x1="0" y1="34" x2="80" y2="96"
-        stroke="#ffeaea" strokeWidth="6" strokeLinecap="round"
-      />
-      <line
-        x1="10" y1="20" x2="92" y2="78"
-        stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round"
-      />
-      <line
-        x1="22" y1="8" x2="100" y2="68"
-        stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round"
-      />
-      <line
-        x1="0" y1="34" x2="80" y2="96"
-        stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round"
-      />
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="none"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 4px rgba(255,80,80,0.7))' }}>
+      <line x1="10" y1="20" x2="92" y2="78" stroke="#ffeaea" strokeWidth="6" strokeLinecap="round" />
+      <line x1="22" y1="8"  x2="100" y2="68" stroke="#ffeaea" strokeWidth="6" strokeLinecap="round" />
+      <line x1="0"  y1="34" x2="80"  y2="96" stroke="#ffeaea" strokeWidth="6" strokeLinecap="round" />
+      <line x1="10" y1="20" x2="92"  y2="78" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="22" y1="8"  x2="100" y2="68" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="0"  y1="34" x2="80"  y2="96" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** 魔法: purple/blue sparkles — glowing orbs that burst outward. */
+function MagicEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [
+        { opacity: 0, transform: 'scale(0.6)' },
+        { opacity: 1, transform: 'scale(1.1)', offset: 0.25 },
+        { opacity: 1, transform: 'scale(1.15)', offset: 0.6 },
+        { opacity: 0, transform: 'scale(1.5)' },
+      ],
+      { duration: 900, fill: 'forwards', easing: 'ease-out' },
+    );
+  }, []);
+  const orbs: [number, number, number, string][] = [
+    [50, 18, 9,  '#cc88ff'],
+    [78, 38, 7,  '#aa55ee'],
+    [68, 72, 8,  '#bb66ff'],
+    [30, 68, 7,  '#9944dd'],
+    [22, 36, 6,  '#cc99ff'],
+    [50, 50, 13, '#ffffff'],
+  ];
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 8px rgba(160,80,255,0.9))' }}>
+      {orbs.map(([cx, cy, r, fill], i) => (
+        <circle key={i} cx={cx} cy={cy} r={r} fill={fill} opacity={i === 5 ? 0.9 : 0.85} />
+      ))}
+      {/* Connecting sparkle lines */}
+      <line x1="50" y1="18" x2="50" y2="50" stroke="#cc88ff" strokeWidth="1.5" strokeDasharray="3 3" />
+      <line x1="78" y1="38" x2="50" y2="50" stroke="#aa55ee" strokeWidth="1.5" strokeDasharray="3 3" />
+      <line x1="68" y1="72" x2="50" y2="50" stroke="#bb66ff" strokeWidth="1.5" strokeDasharray="3 3" />
+      <line x1="30" y1="68" x2="50" y2="50" stroke="#9944dd" strokeWidth="1.5" strokeDasharray="3 3" />
+      <line x1="22" y1="36" x2="50" y2="50" stroke="#cc99ff" strokeWidth="1.5" strokeDasharray="3 3" />
     </svg>
   );
 }

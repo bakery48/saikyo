@@ -31,10 +31,16 @@ export type Stats = {
 
 export type StatKey = keyof Stats;
 
+/**
+ * Visual category of an attack — determines the hit animation in the battle view.
+ * 'passthrough' means: use the attacking monster's own attackKind.
+ */
+export type AttackKind = 'strike' | 'sword' | 'claw' | 'magic' | 'passthrough';
+
 /** Effects produced by active skills resolved during a battle. */
 export type SkillEffect =
   /** Deal physical damage = max(1, floor(useStat * mult) - target.def). */
-  | { kind: 'attack'; mult: number; useStat: 'atk' | 'spd' }
+  | { kind: 'attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind }
   /** Deal damage that ignores DEF. */
   | { kind: 'true_damage'; amount: number }
   /** Buff self stat. duration 'once' = next own active only, 'battle' = rest of battle. */
@@ -68,7 +74,7 @@ export type SkillEffect =
   /** Buff own ATK/DEF/SPD all by `amount` for `duration`. */
   | { kind: 'buff_self_all'; amount: number; duration: 'once' | 'battle' }
   /** Attack `hitCount` times in a single skill use, each hit at `mult` × `useStat`. */
-  | { kind: 'multi_hit_attack'; mult: number; useStat: 'atk' | 'spd'; hitCount: number }
+  | { kind: 'multi_hit_attack'; mult: number; useStat: 'atk' | 'spd'; hitCount: number; attackKind?: AttackKind }
   /** Restore floor(maxHp / denominator) HP. */
   | { kind: 'heal_max_fraction'; denominator: number }
   /**
@@ -83,7 +89,7 @@ export type SkillEffect =
    * the current battle (counting the current use). Damage formula otherwise
    * matches `attack` with `mult` × `useStat`.
    */
-  | { kind: 'deja_vu_attack'; mult: number; useStat: 'atk' | 'spd' };
+  | { kind: 'deja_vu_attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind };
 
 export type ActiveSkill = {
   id: string;
@@ -186,6 +192,8 @@ export type MonsterBase = {
   name: string;
   stats: Stats;
   passives: PassiveSkill[];
+  /** Visual attack category used when the monster's own attack kind is referenced. */
+  attackKind: Exclude<AttackKind, 'passthrough'>;
   /** If true, excluded from the initial monster pick pool. */
   hidden?: boolean;
 };
@@ -197,6 +205,7 @@ export type Monster = {
   stats: Stats;
   passives: PassiveSkill[];
   actives: ActiveSkill[];
+  attackKind: Exclude<AttackKind, 'passthrough'>;
 };
 
 /** Event card target selectors. */
