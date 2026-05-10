@@ -282,6 +282,13 @@ function takeDamage(
       }
     }
   }
+  // mid_damage_immune: nullify if final dmg falls in [min, max].
+  for (const p of passives) {
+    if (p.effect.kind === 'mid_damage_immune' && dmg >= p.effect.min && dmg <= p.effect.max) {
+      log.push({ kind: 'passive', player: side, passiveId: p.id });
+      return 0;
+    }
+  }
   // rage_atk: gain ATK every time this side actually takes damage.
   if (dmg > 0) {
     for (const p of passives) {

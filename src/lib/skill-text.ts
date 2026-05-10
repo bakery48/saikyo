@@ -135,6 +135,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `戦闘開始時に両者のSPDを平均値に揃える`;
     case 'low_damage_bonus':
       return `攻撃で${e.threshold}以下のダメージを与えたとき追加${e.bonus}ダメージ`;
+    case 'mid_damage_immune':
+      return `${e.min}〜${e.max}のダメージを無効化`;
   }
 }
 

@@ -298,5 +298,6 @@ function describePassive(p: PassiveSkillPartial): string {
     case 'absorb_first_hit': return `1度だけ被ダメ無効`;
     case 'equalize_spd': return `バトル開始時に両者SPDを平均値に`;
     case 'low_damage_bonus': return `${e.threshold}以下の攻撃ダメージ時+${e.bonus}真ダメ`;
+    case 'mid_damage_immune': return `${e.min}〜${e.max}ダメ無効`;
   }
 }

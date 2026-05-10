@@ -174,7 +174,13 @@ export type PassiveEffect =
    * When this side deals ≤ `threshold` damage in a single hit, deal `bonus`
    * additional true damage (ignores DEF/shield) to the defender.
    */
-  | { kind: 'low_damage_bonus'; threshold: number; bonus: number };
+  | { kind: 'low_damage_bonus'; threshold: number; bonus: number }
+  /**
+   * Nullify incoming damage if the final amount (after shield/reduction) falls
+   * in the closed interval [min, max]. Damage below `min` or above `max` passes
+   * through normally — high-burst attacks can still break through.
+   */
+  | { kind: 'mid_damage_immune'; min: number; max: number };
 
 export type PassiveSkill = {
   id: string;

@@ -198,6 +198,34 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
+    baseId: 'scarab',
+    name: 'スカラベ',
+    attackKind: 'magic',
+    stats: { hp: 14, atk: 4, def: 5, spd: 4 },
+    passives: [
+      {
+        id: 'scarab-p1',
+        name: '聖甲虫の加護',
+        trigger: { kind: 'on_take_damage' },
+        effect: { kind: 'absorb_first_hit' },
+      },
+    ],
+  },
+  {
+    baseId: 'prism',
+    name: 'プリズム',
+    attackKind: 'magic',
+    stats: { hp: 9, atk: 5, def: 2, spd: 6 },
+    passives: [
+      {
+        id: 'prism-p1',
+        name: 'プリズムシールド',
+        trigger: { kind: 'on_take_damage' },
+        effect: { kind: 'mid_damage_immune', min: 4, max: 9 },
+      },
+    ],
+  },
+  {
     baseId: 'goblin',
     name: 'ゴブリン',
     attackKind: 'strike',
