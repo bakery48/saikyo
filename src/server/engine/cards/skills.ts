@@ -786,4 +786,19 @@ export const SKILLS: SkillCard[] = [
     nameTag: 'クリアマインド',
     active: { effect: { kind: 'attack_then_cleanse', mult: 1.0, useStat: 'atk', flat: -2, attackKind: 'sword' } },
   },
+  // ── batch 6: append-struggle pair ───────────────────────────────────────
+  {
+    id: 'sk-sr-042',
+    name: '最後の抵抗',
+    rarity: 'SR',
+    nameTag: 'ラストスタンド',
+    active: { effect: { kind: 'append_struggle', target: 'self', count: 3 } },
+  },
+  {
+    id: 'sk-sr-043',
+    name: '君臨',
+    rarity: 'SR',
+    nameTag: 'ドミネーター',
+    active: { effect: { kind: 'append_struggle', target: 'opponent', count: 3 } },
+  },
 ];

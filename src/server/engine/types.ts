@@ -150,7 +150,15 @@ export type SkillEffect =
   /** Attack at useStat × mult + flat, then strip every positive battle-long stat mod from the target. */
   | { kind: 'attack_then_dispel'; mult: number; useStat: 'atk' | 'spd'; flat: number; attackKind?: AttackKind }
   /** Attack at useStat × mult + flat, then clear the user's negative battle-long stat mods. */
-  | { kind: 'attack_then_cleanse'; mult: number; useStat: 'atk' | 'spd'; flat: number; attackKind?: AttackKind };
+  | { kind: 'attack_then_cleanse'; mult: number; useStat: 'atk' | 'spd'; flat: number; attackKind?: AttackKind }
+  /** Fixed-base attack: damage = max(1, amount − DEF). Subject to dodge / lifesteal / etc. */
+  | { kind: 'fixed_damage_attack'; amount: number; attackKind?: AttackKind }
+  /**
+   * Append `count` 悪あがき (fixed_damage_attack 1) actives to the tail of
+   * either the user's or the opponent's monster. The new slots play at the
+   * end of the active queue.
+   */
+  | { kind: 'append_struggle'; target: 'self' | 'opponent'; count: number };
 
 export type ActiveSkill = {
   id: string;

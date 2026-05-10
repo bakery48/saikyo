@@ -1244,6 +1244,36 @@ function applySkill(args: {
       user.firstAttackMade = true;
       break;
     }
+    case 'fixed_damage_attack': {
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+      } else {
+        const def = effStat(target, 'def');
+        const raw = Math.max(1, e.amount - def);
+        let actual = takeDamage(target, raw, rng, targetPassives, targetSide, log, false);
+        actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+        target.hp -= actual;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+        applyLifesteal(user, userPassives, actual, userSide, log);
+        applyHexDef(user, userPassives, target, userSide, targetSide, actual, log);
+        applyCounterDamage(target, targetPassives, user, userPassives, userSide, targetSide, actual, log);
+      }
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'append_struggle': {
+      const targetMonRef = e.target === 'self' ? userMon : targetMon;
+      const baseMaxOrder = targetMonRef.actives.reduce((m, a) => Math.max(m, a.order), 0);
+      for (let i = 0; i < e.count; i++) {
+        targetMonRef.actives.push({
+          id: `struggle-${e.target}-${rng.int(0, 999999999)}-${i}`,
+          order: baseMaxOrder + i + 1,
+          name: '悪あがき',
+          effect: { kind: 'fixed_damage_attack', amount: 1, attackKind: 'passthrough' },
+        });
+      }
+      break;
+    }
     case 'swat_attack': {
       // Manual attack flow so we can react on dodge.
       const dodged = rollDodge(user, target, rng);

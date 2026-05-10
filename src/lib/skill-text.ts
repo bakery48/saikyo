@@ -103,6 +103,12 @@ export function describeActiveEffect(e: SkillEffect): string {
       const flatStr = e.flat === 0 ? '' : e.flat > 0 ? `+${e.flat}` : `${e.flat}`;
       return `${e.useStat.toUpperCase()}×${e.mult}${flatStr} 攻撃 → 自分の能力低下を全解除`;
     }
+    case 'fixed_damage_attack':
+      return `${e.amount}で攻撃`;
+    case 'append_struggle':
+      return e.target === 'self'
+        ? `自分の末尾のスロットに「悪あがき（1で攻撃）」を${e.count}スロット追加`
+        : `相手の末尾のスロットに「悪あがき（1で攻撃）」を${e.count}スロット追加`;
   }
 }
 
