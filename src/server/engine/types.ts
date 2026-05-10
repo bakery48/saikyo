@@ -257,7 +257,70 @@ export type PassiveEffect =
   /** When this side deals damage, with `percent` chance the target loses their next turn. */
   | { kind: 'paralyze_chance'; percent: number }
   /** The first time this side takes damage in a battle, divide the incoming amount by `denominator` (floor). */
-  | { kind: 'first_received_damage_div'; denominator: number };
+  | { kind: 'first_received_damage_div'; denominator: number }
+  /** Each time this side resolves an active skill, lose `amount` ATK (battle-long, accumulating). */
+  | { kind: 'decay_atk_per_active'; amount: number }
+  /** Each time this side resolves an active skill, gain `amount` shield. */
+  | { kind: 'shield_on_active'; amount: number }
+  /** Each time this side resolves an active skill, heal `amount` HP. */
+  | { kind: 'heal_on_active'; amount: number }
+  /** Dynamic attack-time boost: while this side has ≤ `threshold` active slots remaining, add `amount` to attack damage. */
+  | { kind: 'tail_fury'; amount: number; threshold: number }
+  /** At the start of each own turn, deal `amount` true damage to the opponent. */
+  | { kind: 'slow_burn'; amount: number }
+  /** First time this side drops to or below half HP, deal `amount` true damage to the opponent. */
+  | { kind: 'revenge_burst'; amount: number }
+  /** When this side dodges an attack, deal `amount` true damage to the attacker. */
+  | { kind: 'dodge_counter'; amount: number }
+  /** While shield is active and this side takes damage, the attacker takes `amount` true damage. */
+  | { kind: 'shield_thorns'; amount: number }
+  /** When attacking, deal `amount` extra true damage if the defender has any negative battle-long stat mod. */
+  | { kind: 'opportunist'; amount: number }
+  /** At battle start, copy the opponent's current battle-long stat modifiers (atk/def/spd) onto self. */
+  | { kind: 'mirror_stats' }
+  /** At battle start, swap own ATK and DEF for the entire battle. */
+  | { kind: 'stat_swap_battle_start' }
+  /** At the start of each own turn, set shield to at least `amount`. */
+  | { kind: 'regen_shield'; amount: number }
+  /** When taking damage, convert `percent`% of the raw amount into shield gain (rounded down). */
+  | { kind: 'damage_to_shield'; percent: number }
+  /** After this side's first attack lands, heal `amount` HP. */
+  | { kind: 'second_wind'; amount: number }
+  /** After this side's first attack, swap own ATK and DEF for the rest of the battle. */
+  | { kind: 'swap_atk_def_after_first_attack' }
+  /** First attack steals `amount` ATK from the opponent (battle-long). */
+  | { kind: 'first_strike_steal_atk'; amount: number }
+  /** Dynamic: every odd-numbered own attack (1st, 3rd, 5th, …) gains `amount` damage. */
+  | { kind: 'odd_turn_atk_bonus'; amount: number }
+  /** Dynamic: each successive own attack adds `amount` × actives-used-so-far to damage. */
+  | { kind: 'chain_damage_bonus'; amount: number }
+  /** At each own turn start, heal `amount` × actives-used-so-far HP. */
+  | { kind: 'growth_heal'; amount: number }
+  /** Dynamic: while opponent's HP < own HP, gain `amount` to attack damage. */
+  | { kind: 'predator_buff'; amount: number }
+  /** Defender flag: enemy `crit_chance` procs are nullified against this side. */
+  | { kind: 'opp_crit_block' }
+  /**
+   * First `breakpoint` own attacks suffer `-malus` damage; subsequent attacks
+   * gain `+bonus` damage instead.
+   */
+  | { kind: 'slow_starter'; breakpoint: number; malus: number; bonus: number }
+  /** Any shield gained by this side is multiplied (e.g., 2 = double). */
+  | { kind: 'double_shield' }
+  /** Defender flag: incoming attacks of `attackKind` are fully nullified. */
+  | { kind: 'selective_immune'; attackKind: Exclude<AttackKind, 'passthrough'> }
+  /** Defender flag: incoming attacks of `attackKind` lose `amount` damage. */
+  | { kind: 'attack_kind_resist'; attackKind: Exclude<AttackKind, 'passthrough'>; amount: number }
+  /** When this side would drop to 0 HP for the first time, deal `amount` true damage to the opponent (the user still dies if not also revived). */
+  | { kind: 'last_breath'; amount: number }
+  /** While `activesUsedCount < until`, this side takes 0 damage. Wears off after the threshold. */
+  | { kind: 'immortal_first_phase'; until: number }
+  /** Once per battle, when reduced to ≤0 HP, restore to full instead. */
+  | { kind: 'rebirth' }
+  /** At battle start, gain `+allBonus` ATK/DEF/SPD; at each own turn start, lose `hpDrain` HP. */
+  | { kind: 'chronos'; allBonus: number; hpDrain: number }
+  /** Dynamic: when only one own active remains, gain `amount` to ATK/DEF/SPD attack-side calculations. */
+  | { kind: 'final_form'; amount: number };
 
 export type PassiveSkill = {
   id: string;

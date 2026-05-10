@@ -88,6 +88,16 @@ type CombatStats = Stats & {
   lastDamageTaken: number;
   /** Once true (set by `pin_attack`), this side can no longer dodge incoming attacks. */
   cannotDodge: boolean;
+  /** Total active slots (kept in sync with append_struggle). */
+  totalActives: number;
+  /** Multiplier applied to every shield gain (1 = normal, 2 = double_shield). */
+  shieldMultiplier: number;
+  /** False once revenge_burst has fired this battle. */
+  revengeBurstAvailable: boolean;
+  /** False once last_breath has fired this battle. */
+  lastBreathAvailable: boolean;
+  /** False once rebirth has fired this battle. */
+  rebirthAvailable: boolean;
   passiveIds: string[];
 };
 
@@ -127,6 +137,11 @@ function initCombat(m: Monster): CombatStats {
     lastUsedEffect: null,
     lastDamageTaken: 0,
     cannotDodge: false,
+    totalActives: m.actives.length,
+    shieldMultiplier: m.passives.some((p) => p.effect.kind === 'double_shield') ? 2 : 1,
+    revengeBurstAvailable: m.passives.some((p) => p.effect.kind === 'revenge_burst'),
+    lastBreathAvailable: m.passives.some((p) => p.effect.kind === 'last_breath'),
+    rebirthAvailable: m.passives.some((p) => p.effect.kind === 'rebirth'),
     passiveIds: [],
   };
   return c;
@@ -175,6 +190,7 @@ function consumeOnceBuffs(c: CombatStats): void {
 function applyBattleStartPassives(
   passives: PassiveSkill[],
   self: CombatStats,
+  opponent: CombatStats,
   side: Side,
   rng: RNG,
   log: BattleEvent[],
@@ -225,6 +241,33 @@ function applyBattleStartPassives(
       case 'stat_mod':
         applyStatMod(self, p.effect.stat, p.effect.amount, 'battle');
         break;
+      case 'mirror_stats':
+        if (p.trigger.kind === 'battle_start') {
+          self.atkMod += opponent.atkMod;
+          self.defMod += opponent.defMod;
+          self.spdMod += opponent.spdMod;
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      case 'stat_swap_battle_start':
+        if (p.trigger.kind === 'battle_start') {
+          const tmp = self.atk;
+          self.atk = self.def;
+          self.def = tmp;
+          const tmpMod = self.atkMod;
+          self.atkMod = self.defMod;
+          self.defMod = tmpMod;
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      case 'chronos':
+        if (p.trigger.kind === 'battle_start') {
+          self.atkMod += p.effect.allBonus;
+          self.defMod += p.effect.allBonus;
+          self.spdMod += p.effect.allBonus;
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
     }
   }
   return { spdRollBonus };
@@ -233,16 +276,56 @@ function applyBattleStartPassives(
 function applyTurnStartPassives(
   passives: PassiveSkill[],
   self: CombatStats,
+  opponent: CombatStats,
   side: Side,
+  oppSide: Side,
   log: BattleEvent[],
 ): void {
   for (const p of passives) {
     if (p.trigger.kind !== 'on_own_turn_start') continue;
-    if (p.effect.kind === 'turn_start_heal') {
-      const applied = healCapped(self, p.effect.amount);
-      if (applied > 0) {
-        log.push({ kind: 'heal', player: side, amount: applied, hpAfter: self.hp });
+    switch (p.effect.kind) {
+      case 'turn_start_heal': {
+        const applied = healCapped(self, p.effect.amount);
+        if (applied > 0) {
+          log.push({ kind: 'heal', player: side, amount: applied, hpAfter: self.hp });
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      }
+      case 'regen_shield': {
+        const goal = p.effect.amount * self.shieldMultiplier;
+        if (self.shield < goal) {
+          const delta = goal - self.shield;
+          self.shield = goal;
+          log.push({ kind: 'shield', player: side, amount: delta });
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      }
+      case 'growth_heal': {
+        const heal = p.effect.amount * self.activesUsedCount;
+        if (heal > 0) {
+          const applied = healCapped(self, heal);
+          if (applied > 0) {
+            log.push({ kind: 'heal', player: side, amount: applied, hpAfter: self.hp });
+            log.push({ kind: 'passive', player: side, passiveId: p.id });
+          }
+        }
+        break;
+      }
+      case 'slow_burn': {
+        opponent.hp -= p.effect.amount;
+        log.push({ kind: 'damage', from: side, to: oppSide, amount: p.effect.amount, hpAfter: opponent.hp });
         log.push({ kind: 'passive', player: side, passiveId: p.id });
+        break;
+      }
+      case 'chronos': {
+        if (p.effect.hpDrain > 0) {
+          self.hp -= p.effect.hpDrain;
+          log.push({ kind: 'damage', from: side, to: side, amount: p.effect.hpDrain, hpAfter: self.hp });
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
       }
     }
   }
@@ -262,6 +345,13 @@ function takeDamage(
   ignoreShield = false,
 ): number {
   if (rawDamage <= 0) return 0;
+  // immortal_first_phase: full immunity while activesUsedCount < until.
+  for (const p of passives) {
+    if (p.effect.kind === 'immortal_first_phase' && target.activesUsedCount < p.effect.until) {
+      log.push({ kind: 'passive', player: side, passiveId: p.id });
+      return 0;
+    }
+  }
   // 影武者 absorb_first_hit: fully eat the first incoming damage instance.
   if (target.absorbHitsRemaining > 0) {
     target.absorbHitsRemaining -= 1;
@@ -278,6 +368,19 @@ function takeDamage(
     return 0;
   }
   let dmg = rawDamage;
+  // damage_to_shield: convert percent% of incoming dmg into shield gain (rounded).
+  for (const p of passives) {
+    if (p.effect.kind === 'damage_to_shield' && dmg > 0) {
+      const converted = Math.floor((dmg * p.effect.percent) / 100);
+      if (converted > 0) {
+        const gain = converted * target.shieldMultiplier;
+        target.shield += gain;
+        dmg = Math.max(0, dmg - converted);
+        log.push({ kind: 'shield', player: side, amount: gain });
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+      }
+    }
+  }
   // 慎重派 first_received_damage_div: first damage instance per battle is divided.
   if (!target.firstDamageReceived) {
     for (const p of passives) {
@@ -367,9 +470,34 @@ function resolveAttack(args: {
     rng,
     log,
   } = args;
+  const wasFirstAttack = !attacker.firstAttackMade;
+  // first_strike_steal_atk: on the user's first attack, swing ATK from defender to attacker.
+  if (wasFirstAttack) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'first_strike_steal_atk') {
+        const amt = p.effect.amount;
+        defender.atkMod -= amt;
+        attacker.atkMod += amt;
+        log.push({ kind: 'debuff', player: defenderSide, stat: 'atk', amount: amt, duration: 'battle' });
+        log.push({ kind: 'buff', player: attackerSide, stat: 'atk', amount: amt, duration: 'battle' });
+        log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+      }
+    }
+  }
   // Dodge: SPD-diff + passive bonuses can fully evade the attack.
   if (rollDodge(attacker, defender, rng)) {
     log.push({ kind: 'miss', from: attackerSide, to: defenderSide });
+    // dodge_counter: defender hits back with true damage on a successful dodge.
+    for (const p of defenderPassives) {
+      if (p.effect.kind === 'dodge_counter') {
+        const amt = p.effect.amount;
+        let r = takeDamage(attacker, amt, rng, attackerPassives, attackerSide, log, true);
+        r = clampWithEndure(attacker, r, attackerPassives, attackerSide, log);
+        attacker.hp -= r;
+        log.push({ kind: 'passive', player: defenderSide, passiveId: p.id });
+        log.push({ kind: 'damage', from: defenderSide, to: attackerSide, amount: r, hpAfter: attacker.hp });
+      }
+    }
     return;
   }
   // atk_per_active passives (potentially multiple, each with its own
@@ -388,6 +516,44 @@ function resolveAttack(args: {
       if (p.effect.kind === 'low_hp_atk_bonus') {
         atkBoost += p.effect.amount;
       }
+    }
+  }
+  // tail_fury: bonus while remaining own slots <= threshold.
+  const remainingSlots = Math.max(0, attacker.totalActives - attacker.activesUsedCount - 1);
+  for (const p of attackerPassives) {
+    if (p.effect.kind === 'tail_fury' && remainingSlots <= p.effect.threshold) {
+      atkBoost += p.effect.amount;
+    }
+  }
+  // odd_turn_atk_bonus: bonus on every odd-numbered own attack (1st, 3rd, ...).
+  if (attacker.activesUsedCount % 2 === 0) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'odd_turn_atk_bonus') atkBoost += p.effect.amount;
+    }
+  }
+  // chain_damage_bonus: each subsequent own attack scales linearly.
+  for (const p of attackerPassives) {
+    if (p.effect.kind === 'chain_damage_bonus') {
+      atkBoost += p.effect.amount * attacker.activesUsedCount;
+    }
+  }
+  // predator_buff: while opponent HP < own HP.
+  if (defender.hp < attacker.hp) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'predator_buff') atkBoost += p.effect.amount;
+    }
+  }
+  // slow_starter: malus before breakpoint, bonus after.
+  for (const p of attackerPassives) {
+    if (p.effect.kind === 'slow_starter') {
+      if (attacker.activesUsedCount < p.effect.breakpoint) atkBoost -= p.effect.malus;
+      else atkBoost += p.effect.bonus;
+    }
+  }
+  // final_form: only one own slot remaining (this attack is the last).
+  if (remainingSlots === 0) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'final_form') atkBoost += p.effect.amount;
     }
   }
   const stat =
@@ -411,13 +577,38 @@ function resolveAttack(args: {
     raw = Math.max(1, Math.floor(raw * attacker.firstAttackDamageMult));
   }
   // クリティカル crit_chance: roll once per attack; on proc, multiply post-DEF damage.
-  for (const p of attackerPassives) {
-    if (p.effect.kind === 'crit_chance' && rng.next() < p.effect.percent / 100) {
-      raw = Math.max(1, Math.floor(raw * p.effect.mult));
-      log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
-      break;
+  // opp_crit_block on the defender nullifies the crit roll entirely.
+  const critBlocked = defenderPassives.some((p) => p.effect.kind === 'opp_crit_block');
+  if (!critBlocked) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'crit_chance' && rng.next() < p.effect.percent / 100) {
+        raw = Math.max(1, Math.floor(raw * p.effect.mult));
+        log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+        break;
+      }
     }
   }
+  // selective_immune / attack_kind_resist: defender reactions tied to the attack's kind.
+  const incomingKind = effect.attackKind;
+  if (incomingKind && incomingKind !== 'passthrough') {
+    for (const p of defenderPassives) {
+      if (p.effect.kind === 'selective_immune' && p.effect.attackKind === incomingKind) {
+        raw = 0;
+        log.push({ kind: 'passive', player: defenderSide, passiveId: p.id });
+        break;
+      }
+    }
+    if (raw > 0) {
+      for (const p of defenderPassives) {
+        if (p.effect.kind === 'attack_kind_resist' && p.effect.attackKind === incomingKind) {
+          raw = Math.max(0, raw - p.effect.amount);
+          log.push({ kind: 'passive', player: defenderSide, passiveId: p.id });
+        }
+      }
+    }
+  }
+  // Capture state needed for post-damage triggers.
+  const defenderHadShield = defender.shield > 0;
   let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef);
   actual = clampWithEndure(defender, actual, defenderPassives, defenderSide, log);
   defender.hp -= actual;
@@ -436,6 +627,85 @@ function resolveAttack(args: {
       log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
       log.push({ kind: 'damage', from: attackerSide, to: defenderSide, amount: bonus, hpAfter: defender.hp });
       break;
+    }
+  }
+  // opportunist: extra true damage when defender has any negative battle-long stat mod.
+  if (actual > 0 && (defender.atkMod < 0 || defender.defMod < 0 || defender.spdMod < 0)) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'opportunist') {
+        const bonus = p.effect.amount;
+        defender.hp -= bonus;
+        log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+        log.push({ kind: 'damage', from: attackerSide, to: defenderSide, amount: bonus, hpAfter: defender.hp });
+      }
+    }
+  }
+  // shield_thorns: defender retaliates while shield was up at hit time.
+  if (actual > 0 && defenderHadShield) {
+    for (const p of defenderPassives) {
+      if (p.effect.kind === 'shield_thorns') {
+        const amt = p.effect.amount;
+        let r = takeDamage(attacker, amt, rng, attackerPassives, attackerSide, log, true);
+        r = clampWithEndure(attacker, r, attackerPassives, attackerSide, log);
+        attacker.hp -= r;
+        log.push({ kind: 'passive', player: defenderSide, passiveId: p.id });
+        log.push({ kind: 'damage', from: defenderSide, to: attackerSide, amount: r, hpAfter: attacker.hp });
+      }
+    }
+  }
+  // revenge_burst: first time the defender drops to or below half HP, hit attacker.
+  if (
+    defender.revengeBurstAvailable &&
+    defender.maxHp > 0 &&
+    defender.hp * 2 <= defender.maxHp
+  ) {
+    defender.revengeBurstAvailable = false;
+    const passive = defenderPassives.find((p) => p.effect.kind === 'revenge_burst');
+    if (passive && passive.effect.kind === 'revenge_burst') {
+      const amt = passive.effect.amount;
+      let r = takeDamage(attacker, amt, rng, attackerPassives, attackerSide, log, true);
+      r = clampWithEndure(attacker, r, attackerPassives, attackerSide, log);
+      attacker.hp -= r;
+      log.push({ kind: 'passive', player: defenderSide, passiveId: passive.id });
+      log.push({ kind: 'damage', from: defenderSide, to: attackerSide, amount: r, hpAfter: attacker.hp });
+    }
+  }
+  // last_breath: when defender drops to <= 0 (post-clamp), retaliate once.
+  if (defender.hp <= 0 && defender.lastBreathAvailable) {
+    defender.lastBreathAvailable = false;
+    const passive = defenderPassives.find((p) => p.effect.kind === 'last_breath');
+    if (passive && passive.effect.kind === 'last_breath') {
+      const amt = passive.effect.amount;
+      let r = takeDamage(attacker, amt, rng, attackerPassives, attackerSide, log, true);
+      r = clampWithEndure(attacker, r, attackerPassives, attackerSide, log);
+      attacker.hp -= r;
+      log.push({ kind: 'passive', player: defenderSide, passiveId: passive.id });
+      log.push({ kind: 'damage', from: defenderSide, to: attackerSide, amount: r, hpAfter: attacker.hp });
+    }
+  }
+  // First-attack post-effects.
+  if (wasFirstAttack && actual > 0) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'second_wind') {
+        const applied = healCapped(attacker, p.effect.amount);
+        if (applied > 0) {
+          log.push({ kind: 'heal', player: attackerSide, amount: applied, hpAfter: attacker.hp });
+          log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+        }
+      }
+    }
+  }
+  if (wasFirstAttack) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'swap_atk_def_after_first_attack') {
+        const tmp = attacker.atk;
+        attacker.atk = attacker.def;
+        attacker.def = tmp;
+        const tmpMod = attacker.atkMod;
+        attacker.atkMod = attacker.defMod;
+        attacker.defMod = tmpMod;
+        log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+      }
     }
   }
   // bonus_vs_low_hp: extra true damage when the defender is below half HP.
@@ -625,8 +895,20 @@ function clampWithEndure(
   log: BattleEvent[],
 ): number {
   if (damage <= 0) return damage;
-  if (!defender.endureFatalAvailable) return damage;
   if (defender.hp - damage > 0) return damage;
+  // rebirth: when reduced to ≤0 HP, fully restore once.
+  if (defender.rebirthAvailable) {
+    defender.rebirthAvailable = false;
+    const passive = passives.find((p) => p.effect.kind === 'rebirth');
+    if (passive) log.push({ kind: 'passive', player: side, passiveId: passive.id });
+    const heal = defender.maxHp - defender.hp;
+    if (heal > 0) {
+      defender.hp = defender.maxHp;
+      log.push({ kind: 'heal', player: side, amount: heal, hpAfter: defender.hp });
+    }
+    return 0;
+  }
+  if (!defender.endureFatalAvailable) return damage;
   defender.endureFatalAvailable = false;
   const passive = passives.find((p) => p.effect.kind === 'endure_fatal');
   if (passive) log.push({ kind: 'passive', player: side, passiveId: passive.id });
@@ -767,8 +1049,9 @@ function applySkill(args: {
       break;
     }
     case 'shield': {
-      user.shield += e.amount;
-      log.push({ kind: 'shield', player: userSide, amount: e.amount });
+      const gain = e.amount * user.shieldMultiplier;
+      user.shield += gain;
+      log.push({ kind: 'shield', player: userSide, amount: gain });
       break;
     }
     case 'buff_self': {
@@ -828,8 +1111,9 @@ function applySkill(args: {
     case 'pay_hp_shield': {
       user.hp -= e.hpCost;
       log.push({ kind: 'damage', from: userSide, to: userSide, amount: e.hpCost, hpAfter: user.hp });
-      user.shield += e.shieldAmount;
-      log.push({ kind: 'shield', player: userSide, amount: e.shieldAmount });
+      const gain = e.shieldAmount * user.shieldMultiplier;
+      user.shield += gain;
+      log.push({ kind: 'shield', player: userSide, amount: gain });
       break;
     }
     case 'pay_hp_debuff_all': {
@@ -1263,6 +1547,7 @@ function applySkill(args: {
     }
     case 'append_struggle': {
       const targetMonRef = e.target === 'self' ? userMon : targetMon;
+      const targetState = e.target === 'self' ? user : target;
       const baseMaxOrder = targetMonRef.actives.reduce((m, a) => Math.max(m, a.order), 0);
       for (let i = 0; i < e.count; i++) {
         targetMonRef.actives.push({
@@ -1272,6 +1557,7 @@ function applySkill(args: {
           effect: { kind: 'fixed_damage_attack', amount: 1, attackKind: 'passthrough' },
         });
       }
+      targetState.totalActives += e.count;
       break;
     }
     case 'swat_attack': {
@@ -1342,6 +1628,40 @@ function applySkill(args: {
   // mimic_last itself doesn't update the slot — we shouldn't mimic a mimic.
   if (e.kind !== 'mimic_last') user.lastUsedEffect = e;
   applySelfDecay(user, userPassives, userSide, log);
+  applyOnActiveUsedPassives(user, userPassives, userSide, log);
+}
+
+function applyOnActiveUsedPassives(
+  user: CombatStats,
+  passives: PassiveSkill[],
+  side: Side,
+  log: BattleEvent[],
+): void {
+  for (const p of passives) {
+    if (p.trigger.kind !== 'on_own_active_used') continue;
+    switch (p.effect.kind) {
+      case 'decay_atk_per_active':
+        user.atkMod -= p.effect.amount;
+        log.push({ kind: 'debuff', player: side, stat: 'atk', amount: p.effect.amount, duration: 'battle' });
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+        break;
+      case 'shield_on_active': {
+        const gain = p.effect.amount * user.shieldMultiplier;
+        user.shield += gain;
+        log.push({ kind: 'shield', player: side, amount: gain });
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+        break;
+      }
+      case 'heal_on_active': {
+        const applied = healCapped(user, p.effect.amount);
+        if (applied > 0) {
+          log.push({ kind: 'heal', player: side, amount: applied, hpAfter: user.hp });
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      }
+    }
+  }
 }
 
 function rollFirst(
@@ -1412,8 +1732,8 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
     }
   }
 
-  const { spdRollBonus: aBonus } = applyBattleStartPassives(a.passives, sa, 'a', rng, log);
-  const { spdRollBonus: bBonus } = applyBattleStartPassives(b.passives, sb, 'b', rng, log);
+  const { spdRollBonus: aBonus } = applyBattleStartPassives(a.passives, sa, sb, 'a', rng, log);
+  const { spdRollBonus: bBonus } = applyBattleStartPassives(b.passives, sb, sa, 'b', rng, log);
 
   const first = rollFirst(sa, sb, aBonus, bBonus, rng, log);
   log.push({ kind: 'first', player: first });
@@ -1451,7 +1771,7 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
     } else {
       advancePastConsumed(current);
       if (cur.state.skillIdx < cur.mon.actives.length) {
-        applyTurnStartPassives(cur.mon.passives, cur.state, current, log);
+        applyTurnStartPassives(cur.mon.passives, cur.state, opp.state, current, other(current), log);
         const skill = cur.mon.actives
           .slice()
           .sort((x, y) => x.order - y.order)[cur.state.skillIdx]!;

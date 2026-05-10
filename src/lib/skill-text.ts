@@ -207,7 +207,71 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return e.denominator === 2
         ? `バトル最初の被ダメージを1/2（切り捨て）にする`
         : `バトル最初の被ダメージを1/${e.denominator}（切り捨て）にする`;
+    case 'decay_atk_per_active':
+      return `スロット発動後にATK-${e.amount}（バトル中累積）`;
+    case 'shield_on_active':
+      return `スロット発動後にシールド+${e.amount}`;
+    case 'heal_on_active':
+      return `スロット発動後にHP+${e.amount}回復`;
+    case 'tail_fury':
+      return `残りスロット${e.threshold}以下のとき与ダメ+${e.amount}`;
+    case 'slow_burn':
+      return `自分のターン開始時に相手HP-${e.amount}（DEF無視）`;
+    case 'revenge_burst':
+      return `初めてHP半分以下になったとき相手に${e.amount}DEF無視ダメージ`;
+    case 'dodge_counter':
+      return `攻撃を回避したとき相手に${e.amount}DEF無視ダメージ`;
+    case 'shield_thorns':
+      return `シールドのある状態で被ダメ時、相手に${e.amount}DEF無視ダメージ`;
+    case 'opportunist':
+      return `相手に能力低下があるとき与ダメ+${e.amount}（DEF無視）`;
+    case 'mirror_stats':
+      return `バトル開始時に相手のATK/DEF/SPDの増減を自分にコピー`;
+    case 'stat_swap_battle_start':
+      return `バトル開始時に自分のATKとDEFを入れ替え`;
+    case 'regen_shield':
+      return `自分のターン開始時にシールドを${e.amount}まで補充`;
+    case 'damage_to_shield':
+      return `被ダメ時、ダメージの${e.percent}%をシールドに変換`;
+    case 'second_wind':
+      return `初撃が当たった後にHP+${e.amount}回復`;
+    case 'swap_atk_def_after_first_attack':
+      return `初撃後にATKとDEFを入れ替え（バトル中）`;
+    case 'first_strike_steal_atk':
+      return `初撃時に相手のATKを${e.amount}奪取（バトル中）`;
+    case 'odd_turn_atk_bonus':
+      return `奇数回目の自分の攻撃で与ダメ+${e.amount}`;
+    case 'chain_damage_bonus':
+      return `攻撃するたびに与ダメ+${e.amount}（累積）`;
+    case 'growth_heal':
+      return `自分のターン開始時に発動回数×${e.amount}HP回復`;
+    case 'predator_buff':
+      return `相手HPが自分より低いとき与ダメ+${e.amount}`;
+    case 'opp_crit_block':
+      return `相手のクリティカルを無効化`;
+    case 'slow_starter':
+      return `${e.breakpoint}回目までは与ダメ-${e.malus}、それ以降は与ダメ+${e.bonus}`;
+    case 'double_shield':
+      return `シールドの獲得量が2倍`;
+    case 'selective_immune':
+      return `${attackKindLabel(e.attackKind)}属性の被ダメを完全無効化`;
+    case 'attack_kind_resist':
+      return `${attackKindLabel(e.attackKind)}属性の被ダメ-${e.amount}`;
+    case 'last_breath':
+      return `戦闘不能になる際に相手に${e.amount}DEF無視ダメージ`;
+    case 'immortal_first_phase':
+      return `自分のスロット使用回数${e.until}回未満まで被ダメ無効`;
+    case 'rebirth':
+      return `1度だけ戦闘不能時にHP全回復`;
+    case 'chronos':
+      return `バトル開始時にATK/DEF/SPD+${e.allBonus}、自分のターン開始時にHP-${e.hpDrain}`;
+    case 'final_form':
+      return `最後の自分の攻撃で与ダメ+${e.amount}`;
   }
+}
+
+function attackKindLabel(k: 'strike' | 'sword' | 'claw' | 'magic'): string {
+  return k === 'strike' ? '打撃' : k === 'sword' ? '剣' : k === 'claw' ? '爪' : '魔法';
 }
 
 /** Combined "<trigger> <effect>" for a passive. */
@@ -223,7 +287,34 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'low_hp_damage_reduction' ||
     p.effect.kind === 'crit_chance' ||
     p.effect.kind === 'equalize_spd' ||
-    p.effect.kind === 'first_received_damage_div'
+    p.effect.kind === 'first_received_damage_div' ||
+    p.effect.kind === 'mirror_stats' ||
+    p.effect.kind === 'stat_swap_battle_start' ||
+    p.effect.kind === 'damage_to_shield' ||
+    p.effect.kind === 'shield_thorns' ||
+    p.effect.kind === 'dodge_counter' ||
+    p.effect.kind === 'revenge_burst' ||
+    p.effect.kind === 'last_breath' ||
+    p.effect.kind === 'rebirth' ||
+    p.effect.kind === 'immortal_first_phase' ||
+    p.effect.kind === 'chronos' ||
+    p.effect.kind === 'final_form' ||
+    p.effect.kind === 'tail_fury' ||
+    p.effect.kind === 'slow_burn' ||
+    p.effect.kind === 'mid_damage_immune' ||
+    p.effect.kind === 'predator_buff' ||
+    p.effect.kind === 'opp_crit_block' ||
+    p.effect.kind === 'slow_starter' ||
+    p.effect.kind === 'double_shield' ||
+    p.effect.kind === 'selective_immune' ||
+    p.effect.kind === 'attack_kind_resist' ||
+    p.effect.kind === 'odd_turn_atk_bonus' ||
+    p.effect.kind === 'chain_damage_bonus' ||
+    p.effect.kind === 'second_wind' ||
+    p.effect.kind === 'swap_atk_def_after_first_attack' ||
+    p.effect.kind === 'first_strike_steal_atk' ||
+    p.effect.kind === 'regen_shield' ||
+    p.effect.kind === 'growth_heal'
   ) {
     return describePassiveEffect(p.effect);
   }
