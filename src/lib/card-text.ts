@@ -64,5 +64,7 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       return `パッシブ獲得: ${e.passive.name}`;
     case 'swap_actives':
       return '誰かのスロット2つの順序を入れ替え';
+    case 'become_bug':
+      return '自分のモンスターに変化が起こる';
   }
 }

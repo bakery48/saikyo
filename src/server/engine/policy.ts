@@ -106,6 +106,10 @@ function scoreActionCard(card: ActionCard): number {
     case 'swap_actives':
       // Niche effect — keep it as a low-priority "play if nothing else useful".
       return 1;
+    case 'become_bug':
+      // Strong stat boost but adds the self-decay drawback. CPUs treat it as
+      // moderately appealing.
+      return 6;
   }
 }
 

@@ -317,7 +317,13 @@ export type ActionEffect =
   | { kind: 'discard_random_active' }
   | { kind: 'gain_passive'; passive: PassiveSkill }
   /** Swap the order of two active skills on any player's monster (target chosen at play time). */
-  | { kind: 'swap_actives' };
+  | { kind: 'swap_actives' }
+  /**
+   * Transform the user's monster into バグ. Stats become バグ's base + the
+   * monster's current stats (sum). Base passives are replaced with バグ's;
+   * passives gained from skill cards are preserved.
+   */
+  | { kind: 'become_bug' };
 
 export type ActionCard = {
   id: string;

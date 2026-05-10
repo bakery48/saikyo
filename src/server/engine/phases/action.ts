@@ -10,6 +10,7 @@ import type {
 import { drawTop } from '../deck';
 import { addSkillCardToMonster, makeRng, saveRng } from '../state';
 import { describeActionEffect } from '../../../lib/card-text';
+import { MONSTERS } from '../cards/monsters';
 
 const VALID_STATS: StatKey[] = ['hp', 'atk', 'def', 'spd'];
 
@@ -52,6 +53,25 @@ function applyActionEffect(
     }
     case 'gain_passive': {
       player.monster.passives.push({ ...card.effect.passive });
+      break;
+    }
+    case 'become_bug': {
+      const bug = MONSTERS.find((m) => m.baseId === 'bug');
+      if (!bug) break;
+      const cur = player.monster.stats;
+      player.monster.stats = {
+        hp: bug.stats.hp + cur.hp,
+        atk: bug.stats.atk + cur.atk,
+        def: bug.stats.def + cur.def,
+        spd: bug.stats.spd + cur.spd,
+      };
+      // Replace base passives (those without a `rarity` — skill-card passives
+      // always carry rarity) with バグ's base passives. Keep acquired ones.
+      const acquiredPassives = player.monster.passives.filter((p) => p.rarity !== undefined);
+      player.monster.passives = [...bug.passives.map((p) => ({ ...p })), ...acquiredPassives];
+      player.monster.baseId = bug.baseId;
+      player.monster.name = bug.name;
+      player.monster.attackKind = bug.attackKind;
       break;
     }
   }
