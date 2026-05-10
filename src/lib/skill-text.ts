@@ -18,9 +18,9 @@ export function describeActiveEffect(e: SkillEffect): string {
     case 'shield':
       return `次の被ダメ−${e.amount}`;
     case 'buff_self':
-      return `自身${e.stat.toUpperCase()}+${e.amount}(${e.duration})`;
+      return `自身${e.stat.toUpperCase()}+${e.amount}（${e.duration === 'battle' ? 'バトル中' : '次の1回'}）`;
     case 'debuff_target':
-      return `相手${e.stat.toUpperCase()}−${e.amount}(${e.duration})`;
+      return `相手${e.stat.toUpperCase()}−${e.amount}（${e.duration === 'battle' ? 'バトル中' : '次の1回'}）`;
     case 'next_amp':
       return `次の自分の攻撃×${e.mult}`;
     case 'nullify_next':
