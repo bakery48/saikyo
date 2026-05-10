@@ -732,4 +732,58 @@ export const SKILLS: SkillCard[] = [
     nameTag: 'スワッター',
     active: { effect: { kind: 'swat_attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' } },
   },
+  // ── batch 5: late-game / control / counter ──────────────────────────────
+  {
+    id: 'sk-sr-037',
+    name: 'とどめの一撃',
+    rarity: 'SR',
+    nameTag: 'フィニッシャー',
+    active: { effect: { kind: 'coup_de_grace', threshold: 10, amount: 99, attackKind: 'passthrough' } },
+  },
+  {
+    id: 'sk-rp-011',
+    name: 'ダンスステップ (passive)',
+    rarity: 'R',
+    nameTag: 'ダンサー',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'dodge_bonus', percent: 10 },
+    },
+  },
+  {
+    id: 'sk-sr-038',
+    name: '影縫い',
+    rarity: 'SR',
+    nameTag: 'シャドウバインド',
+    active: { effect: { kind: 'pin_attack', mult: 1.0, useStat: 'atk', flat: -1, attackKind: 'sword' } },
+  },
+  {
+    id: 'sk-r-052',
+    name: '魔神斬り',
+    rarity: 'R',
+    nameTag: 'デモンスラッシュ',
+    active: { effect: { kind: 'risky_attack', mult: 2.0, useStat: 'atk', missPercent: 65, attackKind: 'sword' } },
+  },
+  {
+    id: 'sk-sr-039',
+    name: 'カウンター',
+    rarity: 'SR',
+    nameTag: 'カウンター',
+    active: { effect: { kind: 'counter_strike', mult: 2.0, attackKind: 'passthrough' } },
+  },
+  {
+    id: 'sk-sr-040',
+    name: '諸行無常の刃',
+    rarity: 'SR',
+    nameTag: 'ヴァニッシュ',
+    active: { effect: { kind: 'attack_then_dispel', mult: 1.0, useStat: 'atk', flat: -2, attackKind: 'sword' } },
+  },
+  {
+    id: 'sk-sr-041',
+    name: '明鏡止水の刃',
+    rarity: 'SR',
+    nameTag: 'クリアマインド',
+    active: { effect: { kind: 'attack_then_cleanse', mult: 1.0, useStat: 'atk', flat: -2, attackKind: 'sword' } },
+  },
 ];

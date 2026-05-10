@@ -84,6 +84,10 @@ type CombatStats = Stats & {
   firstDamageReceived: boolean;
   /** Stored copy of this side's most recently used skill effect, for `mimic_last`. */
   lastUsedEffect: SkillEffect | null;
+  /** Most recent damage actually taken by this side. Used by `counter_strike`. */
+  lastDamageTaken: number;
+  /** Once true (set by `pin_attack`), this side can no longer dodge incoming attacks. */
+  cannotDodge: boolean;
   passiveIds: string[];
 };
 
@@ -121,6 +125,8 @@ function initCombat(m: Monster): CombatStats {
     shareDamageNextPercent: 0,
     firstDamageReceived: false,
     lastUsedEffect: null,
+    lastDamageTaken: 0,
+    cannotDodge: false,
     passiveIds: [],
   };
   return c;
@@ -335,6 +341,7 @@ function takeDamage(
       }
     }
   }
+  if (dmg > 0) target.lastDamageTaken = dmg;
   return dmg;
 }
 
@@ -589,6 +596,7 @@ function applyCounterDamage(
  * any dodge_bonus passive on the defender. Returns true if the attack misses.
  */
 function rollDodge(attacker: CombatStats, defender: CombatStats, rng: RNG): boolean {
+  if (defender.cannotDodge) return false;
   let pct = 0;
   if (SPD_DODGE_ENABLED) {
     const diff = effStat(defender, 'spd') - effStat(attacker, 'spd');
@@ -1100,6 +1108,139 @@ function applySkill(args: {
         rng,
         log,
       });
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'coup_de_grace': {
+      // activesUsedCount is incremented at the end of applySkill; the
+      // current call is the (activesUsedCount + 1)-th active.
+      const slot = user.activesUsedCount + 1;
+      if (slot >= e.threshold) {
+        let dmg = takeDamage(target, e.amount, rng, targetPassives, targetSide, log, true);
+        dmg = clampWithEndure(target, dmg, targetPassives, targetSide, log);
+        target.hp -= dmg;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: dmg, hpAfter: target.hp });
+      } else {
+        log.push({ kind: 'skill_fizzle', player: userSide, skillId: skill.id, selfDamage: 0 });
+      }
+      break;
+    }
+    case 'pin_attack': {
+      const stat = effStat(user, e.useStat);
+      const baseDamage = stat * e.mult + e.flat;
+      const def = effStat(target, 'def');
+      const raw = Math.max(1, Math.floor(baseDamage - def));
+      let actual = takeDamage(target, raw, rng, targetPassives, targetSide, log, false);
+      actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+      target.hp -= actual;
+      log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+      target.cannotDodge = true;
+      applyLifesteal(user, userPassives, actual, userSide, log);
+      applyHexDef(user, userPassives, target, userSide, targetSide, actual, log);
+      applyCounterDamage(target, targetPassives, user, userPassives, userSide, targetSide, actual, log);
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'risky_attack': {
+      if (rng.next() < e.missPercent / 100) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+      } else {
+        resolveAttack({
+          attacker: user,
+          defender: target,
+          attackerPassives: userPassives,
+          defenderPassives: targetPassives,
+          effect: { kind: 'attack', mult: e.mult, useStat: e.useStat },
+          attackerSide: userSide,
+          defenderSide: targetSide,
+          rng,
+          log,
+        });
+      }
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'counter_strike': {
+      if (user.lastDamageTaken <= 0) {
+        log.push({ kind: 'skill_fizzle', player: userSide, skillId: skill.id, selfDamage: 0 });
+        break;
+      }
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+      } else {
+        const baseDamage = user.lastDamageTaken * e.mult;
+        const def = effStat(target, 'def');
+        const raw = Math.max(1, Math.floor(baseDamage - def));
+        let actual = takeDamage(target, raw, rng, targetPassives, targetSide, log, false);
+        actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+        target.hp -= actual;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+        applyLifesteal(user, userPassives, actual, userSide, log);
+        applyHexDef(user, userPassives, target, userSide, targetSide, actual, log);
+        applyCounterDamage(target, targetPassives, user, userPassives, userSide, targetSide, actual, log);
+      }
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'attack_then_dispel': {
+      const stat = effStat(user, e.useStat);
+      const baseDamage = stat * e.mult + e.flat;
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+      } else {
+        const def = effStat(target, 'def');
+        const raw = Math.max(1, Math.floor(baseDamage - def));
+        let actual = takeDamage(target, raw, rng, targetPassives, targetSide, log, false);
+        actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+        target.hp -= actual;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+        applyLifesteal(user, userPassives, actual, userSide, log);
+        applyHexDef(user, userPassives, target, userSide, targetSide, actual, log);
+        applyCounterDamage(target, targetPassives, user, userPassives, userSide, targetSide, actual, log);
+      }
+      if (target.atkMod > 0) {
+        log.push({ kind: 'debuff', player: targetSide, stat: 'atk', amount: target.atkMod, duration: 'battle' });
+        target.atkMod = 0;
+      }
+      if (target.defMod > 0) {
+        log.push({ kind: 'debuff', player: targetSide, stat: 'def', amount: target.defMod, duration: 'battle' });
+        target.defMod = 0;
+      }
+      if (target.spdMod > 0) {
+        log.push({ kind: 'debuff', player: targetSide, stat: 'spd', amount: target.spdMod, duration: 'battle' });
+        target.spdMod = 0;
+      }
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'attack_then_cleanse': {
+      const stat = effStat(user, e.useStat);
+      const baseDamage = stat * e.mult + e.flat;
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+      } else {
+        const def = effStat(target, 'def');
+        const raw = Math.max(1, Math.floor(baseDamage - def));
+        let actual = takeDamage(target, raw, rng, targetPassives, targetSide, log, false);
+        actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+        target.hp -= actual;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+        applyLifesteal(user, userPassives, actual, userSide, log);
+        applyHexDef(user, userPassives, target, userSide, targetSide, actual, log);
+        applyCounterDamage(target, targetPassives, user, userPassives, userSide, targetSide, actual, log);
+      }
+      if (user.atkMod < 0) {
+        log.push({ kind: 'buff', player: userSide, stat: 'atk', amount: -user.atkMod, duration: 'battle' });
+        user.atkMod = 0;
+      }
+      if (user.defMod < 0) {
+        log.push({ kind: 'buff', player: userSide, stat: 'def', amount: -user.defMod, duration: 'battle' });
+        user.defMod = 0;
+      }
+      if (user.spdMod < 0) {
+        log.push({ kind: 'buff', player: userSide, stat: 'spd', amount: -user.spdMod, duration: 'battle' });
+        user.spdMod = 0;
+      }
       user.firstAttackMade = true;
       break;
     }

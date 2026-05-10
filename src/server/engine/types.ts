@@ -131,7 +131,26 @@ export type SkillEffect =
    * `mult` × useStat attack that, when the defender dodges, instead deals
    * defender.SPD as true damage (cannot itself be dodged).
    */
-  | { kind: 'swat_attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind };
+  | { kind: 'swat_attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind }
+  /** When this skill is the `threshold`-th or later active used in the battle, deal `amount` true damage. Otherwise no effect. */
+  | { kind: 'coup_de_grace'; threshold: number; amount: number; attackKind?: AttackKind }
+  /**
+   * Guaranteed-hit attack: damage = max(1, floor(useStat × mult + flat) − DEF).
+   * Cannot be dodged. After the attack lands, the target is permanently
+   * marked unable to dodge for the rest of the battle.
+   */
+  | { kind: 'pin_attack'; mult: number; useStat: 'atk' | 'spd'; flat: number; attackKind?: AttackKind }
+  /**
+   * Attack with a forced miss probability of `missPercent`% (independent of
+   * SPD-based dodge). On hit, resolves like a normal `attack`.
+   */
+  | { kind: 'risky_attack'; mult: number; useStat: 'atk' | 'spd'; missPercent: number; attackKind?: AttackKind }
+  /** Damage = max(1, floor(lastDamageTaken × mult) − DEF). Fizzles if user has not taken damage yet. */
+  | { kind: 'counter_strike'; mult: number; attackKind?: AttackKind }
+  /** Attack at useStat × mult + flat, then strip every positive battle-long stat mod from the target. */
+  | { kind: 'attack_then_dispel'; mult: number; useStat: 'atk' | 'spd'; flat: number; attackKind?: AttackKind }
+  /** Attack at useStat × mult + flat, then clear the user's negative battle-long stat mods. */
+  | { kind: 'attack_then_cleanse'; mult: number; useStat: 'atk' | 'spd'; flat: number; attackKind?: AttackKind };
 
 export type ActiveSkill = {
   id: string;

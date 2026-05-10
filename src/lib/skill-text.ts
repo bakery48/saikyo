@@ -85,6 +85,24 @@ export function describeActiveEffect(e: SkillEffect): string {
       return e.flat > 0 ? `DEF+${e.flat} で攻撃` : `DEF で攻撃`;
     case 'swat_attack':
       return `${e.useStat.toUpperCase()}×${e.mult} 攻撃（回避時は相手SPD分のDEF無視ダメージ）`;
+    case 'coup_de_grace':
+      return `${e.threshold}スロット目以降の発動で${e.amount}ダメージ`;
+    case 'pin_attack': {
+      const flatStr = e.flat === 0 ? '' : e.flat > 0 ? `+${e.flat}` : `${e.flat}`;
+      return `${e.useStat.toUpperCase()}×${e.mult}${flatStr} 攻撃（必中・以降相手は回避不可）`;
+    }
+    case 'risky_attack':
+      return `${e.useStat.toUpperCase()}×${e.mult} 攻撃（${e.missPercent}%で回避される）`;
+    case 'counter_strike':
+      return `直前に受けたダメージ×${e.mult}で攻撃`;
+    case 'attack_then_dispel': {
+      const flatStr = e.flat === 0 ? '' : e.flat > 0 ? `+${e.flat}` : `${e.flat}`;
+      return `${e.useStat.toUpperCase()}×${e.mult}${flatStr} 攻撃 → 相手の能力上昇を全解除`;
+    }
+    case 'attack_then_cleanse': {
+      const flatStr = e.flat === 0 ? '' : e.flat > 0 ? `+${e.flat}` : `${e.flat}`;
+      return `${e.useStat.toUpperCase()}×${e.mult}${flatStr} 攻撃 → 自分の能力低下を全解除`;
+    }
   }
 }
 
