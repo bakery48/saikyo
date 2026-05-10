@@ -75,6 +75,11 @@ type CombatStats = Stats & {
   consumedSkillIds: Set<string>;
   /** Per-skill use counts for this battle (used by `deja_vu_attack`). */
   skillUseCounts: Record<string, number>;
+  /**
+   * Set up by `share_damage_next`: the next time this side takes attack damage,
+   * reflect this percent of it back to the attacker as true damage. Then reset to 0.
+   */
+  shareDamageNextPercent: number;
   passiveIds: string[];
 };
 
@@ -109,6 +114,7 @@ function initCombat(m: Monster): CombatStats {
     absorbHitsRemaining: m.passives.filter((p) => p.effect.kind === 'absorb_first_hit').length,
     consumedSkillIds: new Set(),
     skillUseCounts: {},
+    shareDamageNextPercent: 0,
     passiveIds: [],
   };
   return c;
@@ -282,6 +288,13 @@ function takeDamage(
       }
     }
   }
+  // damage_cap: clamp final damage per hit.
+  for (const p of passives) {
+    if (p.effect.kind === 'damage_cap' && dmg > p.effect.maxPerHit) {
+      dmg = p.effect.maxPerHit;
+      log.push({ kind: 'passive', player: side, passiveId: p.id });
+    }
+  }
   // mid_damage_immune: nullify if final dmg falls in [min, max].
   for (const p of passives) {
     if (p.effect.kind === 'mid_damage_immune' && dmg >= p.effect.min && dmg <= p.effect.max) {
@@ -399,6 +412,36 @@ function resolveAttack(args: {
       log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
       log.push({ kind: 'damage', from: attackerSide, to: defenderSide, amount: bonus, hpAfter: defender.hp });
       break;
+    }
+  }
+  // bonus_vs_low_hp: extra true damage when the defender is below half HP.
+  if (actual > 0 && defender.maxHp > 0 && defender.hp * 2 <= defender.maxHp) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'bonus_vs_low_hp') {
+        const bonus = p.effect.amount;
+        defender.hp -= bonus;
+        log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+        log.push({ kind: 'damage', from: attackerSide, to: defenderSide, amount: bonus, hpAfter: defender.hp });
+      }
+    }
+  }
+  // share_damage_next: reflect a portion of the dealt damage back to the attacker.
+  if (actual > 0 && defender.shareDamageNextPercent > 0) {
+    const reflectPct = defender.shareDamageNextPercent;
+    defender.shareDamageNextPercent = 0;
+    const reflect = Math.max(1, Math.floor((actual * reflectPct) / 100));
+    let r = takeDamage(attacker, reflect, rng, attackerPassives, attackerSide, log, true);
+    r = clampWithEndure(attacker, r, attackerPassives, attackerSide, log);
+    attacker.hp -= r;
+    log.push({ kind: 'damage', from: defenderSide, to: attackerSide, amount: r, hpAfter: attacker.hp });
+  }
+  // paralyze_chance: roll on every successful hit; on proc the defender skips a turn.
+  if (actual > 0) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'paralyze_chance' && rng.next() < p.effect.percent / 100) {
+        defender.skipTurnsRemaining += 1;
+        log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
+      }
     }
   }
   applyLifesteal(attacker, attackerPassives, actual, attackerSide, log);
@@ -913,6 +956,66 @@ function applySkill(args: {
         target.hp -= dmg;
         log.push({ kind: 'damage', from: userSide, to: targetSide, amount: dmg, hpAfter: target.hp });
       }
+      break;
+    }
+    case 'execute': {
+      if (target.hp > 0 && target.hp <= e.threshold) {
+        const lethal = target.hp;
+        // endure_fatal can still save them once.
+        let dmg = takeDamage(target, lethal, rng, targetPassives, targetSide, log, true);
+        dmg = clampWithEndure(target, dmg, targetPassives, targetSide, log);
+        target.hp -= dmg;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: dmg, hpAfter: target.hp });
+      }
+      break;
+    }
+    case 'percent_max_hp_true': {
+      const dmgRaw = Math.max(1, Math.floor((target.maxHp * e.percent) / 100));
+      let dmg = takeDamage(target, dmgRaw, rng, targetPassives, targetSide, log, true);
+      dmg = clampWithEndure(target, dmg, targetPassives, targetSide, log);
+      target.hp -= dmg;
+      log.push({ kind: 'damage', from: userSide, to: targetSide, amount: dmg, hpAfter: target.hp });
+      break;
+    }
+    case 'cleanse_self': {
+      if (user.atkMod < 0) {
+        log.push({ kind: 'buff', player: userSide, stat: 'atk', amount: -user.atkMod, duration: 'battle' });
+        user.atkMod = 0;
+      }
+      if (user.defMod < 0) {
+        log.push({ kind: 'buff', player: userSide, stat: 'def', amount: -user.defMod, duration: 'battle' });
+        user.defMod = 0;
+      }
+      if (user.spdMod < 0) {
+        log.push({ kind: 'buff', player: userSide, stat: 'spd', amount: -user.spdMod, duration: 'battle' });
+        user.spdMod = 0;
+      }
+      break;
+    }
+    case 'swap_atk_def': {
+      const tmpBase = user.atk;
+      user.atk = user.def;
+      user.def = tmpBase;
+      const tmpMod = user.atkMod;
+      user.atkMod = user.defMod;
+      user.defMod = tmpMod;
+      break;
+    }
+    case 'hp_to_atk': {
+      const missing = Math.max(0, user.maxHp - user.hp);
+      const bonus = Math.floor(missing / e.divisor);
+      if (bonus > 0) {
+        user.atkMod += bonus;
+        log.push({ kind: 'buff', player: userSide, stat: 'atk', amount: bonus, duration: 'battle' });
+      }
+      break;
+    }
+    case 'share_damage_next': {
+      user.shareDamageNextPercent = e.percent;
+      break;
+    }
+    case 'break_shield': {
+      target.shield = 0;
       break;
     }
     case 'deja_vu_attack': {

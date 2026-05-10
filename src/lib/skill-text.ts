@@ -63,6 +63,20 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `相手とHPを交換`;
     case 'sacrifice_attack':
       return `現在HPの${Math.round(e.hpRatio * 100)}%を消費して同値の真ダメージ`;
+    case 'execute':
+      return `相手のHPが${e.threshold}以下なら即死`;
+    case 'percent_max_hp_true':
+      return `相手の最大HPの${e.percent}%をDEF無視ダメージ`;
+    case 'cleanse_self':
+      return `自分にかかっている能力低下を全て解除`;
+    case 'swap_atk_def':
+      return `自身のATKとDEFを入れ替え（バトル中）`;
+    case 'hp_to_atk':
+      return `失ったHPの1/${e.divisor}だけATK上昇（バトル中）`;
+    case 'share_damage_next':
+      return `次に攻撃で受けたダメージの${e.percent}%を相手に反射`;
+    case 'break_shield':
+      return `相手のシールドを除去`;
   }
 }
 
@@ -151,6 +165,12 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `攻撃で${e.threshold}以下のダメージを与えたとき追加${e.bonus}ダメージ`;
     case 'mid_damage_immune':
       return `${e.min}〜${e.max}のダメージを無効化`;
+    case 'damage_cap':
+      return `1回に受けるダメージは最大${e.maxPerHit}まで`;
+    case 'bonus_vs_low_hp':
+      return `相手がHP半分以下のとき与ダメ+${e.amount}（DEF無視）`;
+    case 'paralyze_chance':
+      return `攻撃時${e.percent}%で相手の次のターンをスキップ`;
   }
 }
 

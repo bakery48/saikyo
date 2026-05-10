@@ -103,7 +103,21 @@ export type SkillEffect =
   /** Swap current HP values with the opponent. */
   | { kind: 'swap_hp' }
   /** Spend floor(hp × hpRatio) HP (minimum 1, self cannot die), deal that as true damage to opponent. */
-  | { kind: 'sacrifice_attack'; hpRatio: number };
+  | { kind: 'sacrifice_attack'; hpRatio: number }
+  /** If the opponent's current HP is ≤ `threshold`, instantly drop them to 0 HP. Otherwise no effect. */
+  | { kind: 'execute'; threshold: number }
+  /** Deal floor(maxHp × percent / 100) true damage to the opponent based on their max HP. */
+  | { kind: 'percent_max_hp_true'; percent: number }
+  /** Remove all negative battle-long stat modifiers from self. */
+  | { kind: 'cleanse_self' }
+  /** Swap the user's ATK and DEF (both base stats and battle-long modifiers) for the rest of the battle. */
+  | { kind: 'swap_atk_def' }
+  /** Buff own ATK by floor((maxHp - currentHp) / divisor) for the rest of the battle. */
+  | { kind: 'hp_to_atk'; divisor: number }
+  /** Set up: the next time this side takes attack damage, reflect `percent`% of it back to the attacker as true damage. */
+  | { kind: 'share_damage_next'; percent: number }
+  /** Remove the opponent's current shield (set to 0). */
+  | { kind: 'break_shield' };
 
 export type ActiveSkill = {
   id: string;
@@ -194,7 +208,13 @@ export type PassiveEffect =
    * in the closed interval [min, max]. Damage below `min` or above `max` passes
    * through normally — high-burst attacks can still break through.
    */
-  | { kind: 'mid_damage_immune'; min: number; max: number };
+  | { kind: 'mid_damage_immune'; min: number; max: number }
+  /** Cap incoming damage per hit at `maxPerHit` (after reductions). */
+  | { kind: 'damage_cap'; maxPerHit: number }
+  /** When attacking and the target is at or below half HP, deal `amount` extra true damage. */
+  | { kind: 'bonus_vs_low_hp'; amount: number }
+  /** When this side deals damage, with `percent` chance the target loses their next turn. */
+  | { kind: 'paralyze_chance'; percent: number };
 
 export type PassiveSkill = {
   id: string;
