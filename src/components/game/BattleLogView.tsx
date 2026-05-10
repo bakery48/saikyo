@@ -88,6 +88,8 @@ function formatBattleEvent(e: BattleEvent, aName: string, bName: string): string
       return e.selfDamage > 0
         ? `  ${who(e.player)} のスキルが不発（自分に ${e.selfDamage} ダメージ）`
         : `  ${who(e.player)} のスキルが不発`;
+    case 'hp_swap':
+      return `  ${who(e.playerA)} と ${who(e.playerB)} がHPを交換（${e.hpA} ↔ ${e.hpB}）`;
     case 'end':
       return e.reason === 'draw'
         ? `=== 引き分け`

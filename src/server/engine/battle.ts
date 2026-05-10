@@ -840,6 +840,81 @@ function applySkill(args: {
       user.skillIdx = targetIdx;
       break;
     }
+    case 'drain_hp': {
+      const amount = Math.min(e.amount, Math.max(0, target.hp));
+      if (amount > 0) {
+        target.hp -= amount;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount, hpAfter: target.hp });
+        const healed = healCapped(user, amount);
+        if (healed > 0) log.push({ kind: 'heal', player: userSide, amount: healed, hpAfter: user.hp });
+      }
+      break;
+    }
+    case 'steal_stat': {
+      const amt = e.amount;
+      const statKey = e.stat;
+      // Debuff target
+      applyStatMod(target, statKey, -amt, 'battle');
+      log.push({ kind: 'debuff', player: targetSide, stat: statKey, amount: amt, duration: 'battle' });
+      // Buff user
+      applyStatMod(user, statKey, amt, 'battle');
+      log.push({ kind: 'buff', player: userSide, stat: statKey, amount: amt, duration: 'battle' });
+      break;
+    }
+    case 'debuff_all': {
+      for (const stat of ['atk', 'def', 'spd'] as const) {
+        applyStatMod(target, stat, -e.amount, 'battle');
+        log.push({ kind: 'debuff', player: targetSide, stat, amount: e.amount, duration: 'battle' });
+      }
+      break;
+    }
+    case 'dispel': {
+      // Remove positive battle-long modifiers from the opponent.
+      const mods = { atk: target.atkMod, def: target.defMod, spd: target.spdMod };
+      for (const [stat, mod] of Object.entries(mods) as [('atk'|'def'|'spd'), number][]) {
+        if (mod > 0) {
+          const removed = mod;
+          applyStatMod(target, stat, -removed, 'battle');
+          log.push({ kind: 'debuff', player: targetSide, stat, amount: removed, duration: 'battle' });
+        }
+      }
+      break;
+    }
+    case 'shield_bash': {
+      const shieldVal = user.shield;
+      if (shieldVal > 0) {
+        user.shield = 0;
+        let actual = takeDamage(target, shieldVal, rng, targetPassives, targetSide, log, true);
+        actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+        target.hp -= actual;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+      }
+      break;
+    }
+    case 'swap_hp': {
+      const tmpA = user.hp;
+      const tmpB = target.hp;
+      user.hp = tmpB;
+      target.hp = tmpA;
+      log.push({ kind: 'hp_swap', playerA: userSide, playerB: targetSide, hpA: user.hp, hpB: target.hp });
+      break;
+    }
+    case 'sacrifice_attack': {
+      const cost = Math.max(1, Math.floor(user.hp * e.hpRatio));
+      const actualCost = Math.min(cost, user.hp - 1); // can't die from sacrifice
+      user.hp -= actualCost;
+      if (actualCost > 0) {
+        log.push({ kind: 'damage', from: userSide, to: userSide, amount: actualCost, hpAfter: user.hp });
+      }
+      if (actualCost > 0) {
+        let dmg = actualCost;
+        dmg = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
+        dmg = clampWithEndure(target, dmg, targetPassives, targetSide, log);
+        target.hp -= dmg;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: dmg, hpAfter: target.hp });
+      }
+      break;
+    }
     case 'deja_vu_attack': {
       const count = (user.skillUseCounts[skill.id] ?? 0) + 1;
       user.skillUseCounts[skill.id] = count;

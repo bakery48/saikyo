@@ -49,6 +49,20 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `スロットを${e.rewindBy}つ戻す（廃棄・自分に${e.selfDamage}ダメージ）`;
     case 'deja_vu_attack':
       return `${e.useStat.toUpperCase()}+N で攻撃（N=このカードのバトル中の使用回数、mult ${e.mult}）`;
+    case 'drain_hp':
+      return `相手から${e.amount}HPを奪って回復`;
+    case 'steal_stat':
+      return `相手の${e.stat.toUpperCase()}を${e.amount}奪取（自分に加算）`;
+    case 'debuff_all':
+      return `相手のATK/DEF/SPD各−${e.amount}（バトル中）`;
+    case 'dispel':
+      return `相手の能力上昇を全て除去`;
+    case 'shield_bash':
+      return `現在のシールド値をDEF無視ダメージとして放出`;
+    case 'swap_hp':
+      return `相手とHPを交換`;
+    case 'sacrifice_attack':
+      return `現在HPの${Math.round(e.hpRatio * 100)}%を消費して同値の真ダメージ`;
   }
 }
 

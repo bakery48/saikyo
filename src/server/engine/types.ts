@@ -89,7 +89,21 @@ export type SkillEffect =
    * the current battle (counting the current use). Damage formula otherwise
    * matches `attack` with `mult` × `useStat`.
    */
-  | { kind: 'deja_vu_attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind };
+  | { kind: 'deja_vu_attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind }
+  /** Steal `amount` HP from the opponent: they lose it (true damage), you heal by the same amount. */
+  | { kind: 'drain_hp'; amount: number }
+  /** Steal `amount` of `stat` from the opponent (battle-long): they lose it, you gain it. */
+  | { kind: 'steal_stat'; stat: StatKey; amount: number }
+  /** Debuff opponent's ATK, DEF, and SPD each by `amount` (battle-long). */
+  | { kind: 'debuff_all'; amount: number }
+  /** Remove all positive battle-long stat modifiers from the opponent. */
+  | { kind: 'dispel' }
+  /** Deal true damage equal to your current shield value, then consume the shield. No-op if shield is 0. */
+  | { kind: 'shield_bash' }
+  /** Swap current HP values with the opponent. */
+  | { kind: 'swap_hp' }
+  /** Spend floor(hp × hpRatio) HP (minimum 1, self cannot die), deal that as true damage to opponent. */
+  | { kind: 'sacrifice_attack'; hpRatio: number };
 
 export type ActiveSkill = {
   id: string;
@@ -287,6 +301,7 @@ export type BattleEvent =
   | { kind: 'actives_shuffled'; player: 'a' | 'b' }
   /** A skill fizzled (e.g. multi-attack pending but the next skill wasn't an attack). */
   | { kind: 'skill_fizzle'; player: 'a' | 'b'; skillId: string; selfDamage: number }
+  | { kind: 'hp_swap'; playerA: 'a' | 'b'; playerB: 'a' | 'b'; hpA: number; hpB: number }
   | { kind: 'end'; winner: 'a' | 'b' | 'draw'; reason: 'hp_zero' | 'tiebreak_hp' | 'tiebreak_spd' | 'draw' };
 
 export type BattleResult = {

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
+import { describeActiveEffect, describePassive as _describePassiveFull } from '../../lib/skill-text';
 
 const RARITY_COLOR: Record<string, string> = {
   N: '#888',
@@ -235,69 +236,7 @@ function PendingStrip({ state }: { state: ClientGameState }) {
 }
 
 function describeSkill(c: import('../../server/engine/types').SkillCard): string {
-  if (c.active) {
-    const e = c.active.effect;
-    switch (e.kind) {
-      case 'attack':
-        return `${e.useStat.toUpperCase()}×${e.mult} 攻撃`;
-      case 'true_damage':
-        return `DEF無視 ${e.amount} ダメージ`;
-      case 'heal':
-        return `HP+${e.amount} 回復`;
-      case 'shield':
-        return `次の被ダメ−${e.amount}`;
-      case 'buff_self':
-        return `自身${e.stat.toUpperCase()}+${e.amount}(${e.duration})`;
-      case 'debuff_target':
-        return `相手${e.stat.toUpperCase()}−${e.amount}(${e.duration})`;
-      case 'next_amp':
-        return `次の自分の攻撃×${e.mult}`;
-      case 'nullify_next':
-        return `相手の次のスキルを無効`;
-    }
-  }
-  if (c.passive) return `パッシブ：${describePassive(c.passive)}`;
+  if (c.active) return describeActiveEffect(c.active.effect);
+  if (c.passive) return `パッシブ：${_describePassiveFull(c.passive)}`;
   return '';
-}
-
-type PassiveSkillPartial = Omit<import('../../server/engine/types').PassiveSkill, 'id' | 'name' | 'nameTag'>;
-
-function describePassive(p: PassiveSkillPartial): string {
-  const e = p.effect;
-  switch (e.kind) {
-    case 'stat_mod':        return `${e.stat.toUpperCase()}+${e.amount}`;
-    case 'first_attack_amp': return `初撃ダメージ×${e.amount}`;
-    case 'first_attack_true': return `初撃がDEF無視`;
-    case 'first_attack_def_div': return `初撃で相手DEF÷${e.denominator}`;
-    case 'first_attack_damage_mult': return `初撃ダメージ×${e.mult}`;
-    case 'spd_roll_bonus':  return `SPDロール+${e.amount}`;
-    case 'damage_reduction': return `被ダメ−${e.amount}`;
-    case 'turn_start_heal': return `ターン開始時 HP+${e.amount}`;
-    case 'damage_negate_chance': return `${e.oneIn}分の1で被ダメ無効`;
-    case 'dodge_bonus': return `回避率+${e.percent}%`;
-    case 'pick_higher_buff': return `ATK/DEFの高い方+${e.amount}`;
-    case 'atk_per_active': return e.every && e.every > 1 ? `${e.every}回攻撃ごとにATK+${e.amount}` : `攻撃ごとにATK+${e.amount}`;
-    case 'lifesteal': return `与ダメ1/${e.denominator}を回復`;
-    case 'rage_atk': return `被ダメ時ATK+${e.amount}`;
-    case 'hex_def': return `与ダメ時相手DEF-${e.amount}`;
-    case 'extra_attack_chance': return `攻撃時${e.percent}%で2回発動`;
-    case 'counter_damage': return `被ダメ1/${e.denominator}を反射`;
-    case 'low_hp_atk_bonus': return `HP半分以下でATK+${e.amount}`;
-    case 'endure_fatal': return e.reviveDenominator ? `最大HP1/${e.reviveDenominator}で耐える` : `HP1で耐える`;
-    case 'self_decay': {
-      const parts: string[] = [];
-      if (e.hp > 0) parts.push(`HP-${e.hp}`);
-      if (e.atk > 0) parts.push(`ATK-${e.atk}`);
-      if (e.def > 0) parts.push(`DEF-${e.def}`);
-      if (e.spd > 0) parts.push(`SPD-${e.spd}`);
-      return `スロット発動後 ${parts.join('/')}`;
-    }
-    case 'reverse_actives_both': return `両者のスロット順を逆転`;
-    case 'low_hp_damage_reduction': return `HP半分以下で被ダメ-${e.amount}`;
-    case 'crit_chance': return `攻撃時${e.percent}%でダメージ×${e.mult}`;
-    case 'absorb_first_hit': return `1度だけ被ダメ無効`;
-    case 'equalize_spd': return `バトル開始時に両者SPDを平均値に`;
-    case 'low_damage_bonus': return `${e.threshold}以下の攻撃ダメージ時+${e.bonus}真ダメ`;
-    case 'mid_damage_immune': return `${e.min}〜${e.max}ダメ無効`;
-  }
 }
