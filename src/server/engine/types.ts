@@ -117,7 +117,21 @@ export type SkillEffect =
   /** Set up: the next time this side takes attack damage, reflect `percent`% of it back to the attacker as true damage. */
   | { kind: 'share_damage_next'; percent: number }
   /** Remove the opponent's current shield (set to 0). */
-  | { kind: 'break_shield' };
+  | { kind: 'break_shield' }
+  /**
+   * Attack at `mult` × useStat (打撃 etc), then skip the user's next active slot.
+   * The skipped slot is counted as consumed.
+   */
+  | { kind: 'reckless_attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind }
+  /** Replay the opponent's most recent skill effect as if the user had cast it. Fizzles if the opponent hasn't acted yet. */
+  | { kind: 'mimic_last' }
+  /** DEF-based attack: damage = max(1, floor(DEF + flat - opponent DEF)). */
+  | { kind: 'def_attack'; flat: number; attackKind?: AttackKind }
+  /**
+   * `mult` × useStat attack that, when the defender dodges, instead deals
+   * defender.SPD as true damage (cannot itself be dodged).
+   */
+  | { kind: 'swat_attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind };
 
 export type ActiveSkill = {
   id: string;
@@ -214,7 +228,9 @@ export type PassiveEffect =
   /** When attacking and the target is at or below half HP, deal `amount` extra true damage. */
   | { kind: 'bonus_vs_low_hp'; amount: number }
   /** When this side deals damage, with `percent` chance the target loses their next turn. */
-  | { kind: 'paralyze_chance'; percent: number };
+  | { kind: 'paralyze_chance'; percent: number }
+  /** The first time this side takes damage in a battle, divide the incoming amount by `denominator` (floor). */
+  | { kind: 'first_received_damage_div'; denominator: number };
 
 export type PassiveSkill = {
   id: string;

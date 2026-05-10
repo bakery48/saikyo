@@ -80,6 +80,10 @@ type CombatStats = Stats & {
    * reflect this percent of it back to the attacker as true damage. Then reset to 0.
    */
   shareDamageNextPercent: number;
+  /** Has this side taken at least one damage instance? Used by first_received_damage_div. */
+  firstDamageReceived: boolean;
+  /** Stored copy of this side's most recently used skill effect, for `mimic_last`. */
+  lastUsedEffect: SkillEffect | null;
   passiveIds: string[];
 };
 
@@ -115,6 +119,8 @@ function initCombat(m: Monster): CombatStats {
     consumedSkillIds: new Set(),
     skillUseCounts: {},
     shareDamageNextPercent: 0,
+    firstDamageReceived: false,
+    lastUsedEffect: null,
     passiveIds: [],
   };
   return c;
@@ -266,6 +272,17 @@ function takeDamage(
     return 0;
   }
   let dmg = rawDamage;
+  // 慎重派 first_received_damage_div: first damage instance per battle is divided.
+  if (!target.firstDamageReceived) {
+    for (const p of passives) {
+      if (p.effect.kind === 'first_received_damage_div') {
+        const denom = Math.max(1, p.effect.denominator);
+        dmg = Math.floor(dmg / denom);
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+      }
+    }
+    target.firstDamageReceived = true;
+  }
   if (!ignoreShield && target.shield > 0) {
     const absorbed = Math.min(target.shield, dmg);
     target.shield -= absorbed;
@@ -1018,6 +1035,100 @@ function applySkill(args: {
       target.shield = 0;
       break;
     }
+    case 'reckless_attack': {
+      resolveAttack({
+        attacker: user,
+        defender: target,
+        attackerPassives: userPassives,
+        defenderPassives: targetPassives,
+        effect: { kind: 'attack', mult: e.mult, useStat: e.useStat },
+        attackerSide: userSide,
+        defenderSide: targetSide,
+        rng,
+        log,
+      });
+      user.firstAttackMade = true;
+      // Skip the next own slot: advance skillIdx past it. The main loop
+      // already advances by one when consuming a card, so we add one more.
+      // We log it as a self turn_skipped so the user can see the cost.
+      user.skillIdx += 1;
+      log.push({ kind: 'turn_skipped', player: userSide });
+      break;
+    }
+    case 'mimic_last': {
+      const last = target.lastUsedEffect;
+      if (!last || last.kind === 'mimic_last') {
+        log.push({ kind: 'skill_fizzle', player: userSide, skillId: skill.id, selfDamage: 0 });
+        break;
+      }
+      applySkill({
+        user,
+        target,
+        userPassives,
+        targetPassives,
+        userMon,
+        targetMon,
+        skill: { ...skill, effect: last },
+        userSide,
+        targetSide,
+        rng,
+        log,
+      });
+      // The recursive applySkill already handles consumeOnceBuffs/nextAmp/
+      // activesUsedCount/self_decay for this active. Skip the trailing
+      // bookkeeping at the end of the outer call.
+      return;
+    }
+    case 'def_attack': {
+      // DEF-based strike. We borrow resolveAttack's flow by stuffing the
+      // current DEF stat into a once-buff for ATK and running an attack
+      // with mult=1; then the once-buff clears as usual.
+      const defStat = effStat(user, 'def') + e.flat;
+      const oldOnceAtk = user.onceBuffs.atk ?? 0;
+      // Substitute attacker's effective ATK with defStat by using a once buff
+      // equal to (defStat - baseAtk). Computing post-mod stat:
+      const baseAtk = user.atk + user.atkMod;
+      user.onceBuffs.atk = oldOnceAtk + (defStat - baseAtk);
+      resolveAttack({
+        attacker: user,
+        defender: target,
+        attackerPassives: userPassives,
+        defenderPassives: targetPassives,
+        effect: { kind: 'attack', mult: 1, useStat: 'atk', attackKind: e.attackKind },
+        attackerSide: userSide,
+        defenderSide: targetSide,
+        rng,
+        log,
+      });
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'swat_attack': {
+      // Manual attack flow so we can react on dodge.
+      const dodged = rollDodge(user, target, rng);
+      if (dodged) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        const swatDmg = Math.max(1, effStat(target, 'spd'));
+        let actual = takeDamage(target, swatDmg, rng, targetPassives, targetSide, log, true);
+        actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+        target.hp -= actual;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+      } else {
+        resolveAttack({
+          attacker: user,
+          defender: target,
+          attackerPassives: userPassives,
+          defenderPassives: targetPassives,
+          effect: { kind: 'attack', mult: e.mult, useStat: e.useStat },
+          attackerSide: userSide,
+          defenderSide: targetSide,
+          rng,
+          log,
+        });
+      }
+      user.firstAttackMade = true;
+      break;
+    }
     case 'deja_vu_attack': {
       const count = (user.skillUseCounts[skill.id] ?? 0) + 1;
       user.skillUseCounts[skill.id] = count;
@@ -1056,6 +1167,9 @@ function applySkill(args: {
   consumeOnceBuffs(user);
   user.nextAmp = 1;
   user.activesUsedCount += 1;
+  // Remember this effect so the opponent's `mimic_last` can replay it.
+  // mimic_last itself doesn't update the slot — we shouldn't mimic a mimic.
+  if (e.kind !== 'mimic_last') user.lastUsedEffect = e;
   applySelfDecay(user, userPassives, userSide, log);
 }
 

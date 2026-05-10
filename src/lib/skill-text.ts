@@ -77,6 +77,14 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `次に攻撃で受けたダメージの${e.percent}%を相手に反射`;
     case 'break_shield':
       return `相手のシールドを除去`;
+    case 'reckless_attack':
+      return `${e.useStat.toUpperCase()}×${e.mult} 攻撃 → 次のスロットをスキップ`;
+    case 'mimic_last':
+      return `直前の相手の行動と同じ効果（未行動なら不発）`;
+    case 'def_attack':
+      return e.flat > 0 ? `DEF+${e.flat} で攻撃` : `DEF で攻撃`;
+    case 'swat_attack':
+      return `${e.useStat.toUpperCase()}×${e.mult} 攻撃（回避時は相手SPD分のDEF無視ダメージ）`;
   }
 }
 
@@ -171,6 +179,10 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `相手がHP半分以下のとき与ダメ+${e.amount}（DEF無視）`;
     case 'paralyze_chance':
       return `攻撃時${e.percent}%で相手の次のターンをスキップ`;
+    case 'first_received_damage_div':
+      return e.denominator === 2
+        ? `バトル最初の被ダメージを1/2（切り捨て）にする`
+        : `バトル最初の被ダメージを1/${e.denominator}（切り捨て）にする`;
   }
 }
 
@@ -186,7 +198,8 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'reverse_actives_both' ||
     p.effect.kind === 'low_hp_damage_reduction' ||
     p.effect.kind === 'crit_chance' ||
-    p.effect.kind === 'equalize_spd'
+    p.effect.kind === 'equalize_spd' ||
+    p.effect.kind === 'first_received_damage_div'
   ) {
     return describePassiveEffect(p.effect);
   }

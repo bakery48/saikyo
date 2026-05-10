@@ -692,4 +692,44 @@ export const SKILLS: SkillCard[] = [
       effect: { kind: 'damage_cap', maxPerHit: 3 },
     },
   },
+  // ── batch 4: misc thematic cards ────────────────────────────────────────
+  {
+    id: 'sk-r-049',
+    name: '捨て身攻撃',
+    rarity: 'R',
+    nameTag: 'リックレス',
+    active: { effect: { kind: 'reckless_attack', mult: 2.0, useStat: 'atk', attackKind: 'strike' } },
+  },
+  {
+    id: 'sk-rp-010',
+    name: '慎重派 (passive)',
+    rarity: 'R',
+    nameTag: 'プルーデント',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'first_received_damage_div', denominator: 2 },
+    },
+  },
+  {
+    id: 'sk-sr-036',
+    name: 'ものまね',
+    rarity: 'SR',
+    nameTag: 'コピーキャット',
+    active: { effect: { kind: 'mimic_last' } },
+  },
+  {
+    id: 'sk-r-050',
+    name: 'シールドバッシュ',
+    rarity: 'R',
+    nameTag: 'バッシュ',
+    active: { effect: { kind: 'def_attack', flat: 2, attackKind: 'strike' } },
+  },
+  {
+    id: 'sk-r-051',
+    name: 'ハエたたき',
+    rarity: 'R',
+    nameTag: 'スワッター',
+    active: { effect: { kind: 'swat_attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' } },
+  },
 ];
