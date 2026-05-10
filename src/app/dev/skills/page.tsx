@@ -5,16 +5,42 @@ import {
   describeActiveEffect,
   describePassive,
 } from '../../../lib/skill-text';
-import type { Rarity, SkillCard } from '../../../server/engine/types';
+import type { AttackKind, Rarity, SkillCard, SkillEffect } from '../../../server/engine/types';
 
 const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
+const ATTACK_KINDS: AttackKind[] = ['strike', 'sword', 'claw', 'magic', 'passthrough'];
+const ATTACK_KIND_LABEL: Record<AttackKind, string> = {
+  strike: '打撃',
+  sword: '剣',
+  claw: '爪',
+  magic: '魔法',
+  passthrough: 'スルー',
+};
 
-type Edits = Record<string, { name?: string; rarity?: Rarity; nameTag?: string }>;
+type Edits = Record<
+  string,
+  { name?: string; rarity?: Rarity; nameTag?: string; attackKind?: AttackKind }
+>;
 
 function describeCard(c: SkillCard): string {
   if (c.active) return describeActiveEffect(c.active.effect);
   if (c.passive) return `パッシブ：${describePassive(c.passive)}`;
   return '';
+}
+
+function effectAttackKind(e: SkillEffect | undefined): AttackKind | null {
+  if (!e) return null;
+  if (e.kind === 'attack' || e.kind === 'multi_hit_attack' || e.kind === 'deja_vu_attack') {
+    return e.attackKind ?? null;
+  }
+  return null;
+}
+
+function hasAttackKindSlot(c: SkillCard): boolean {
+  const e = c.active?.effect;
+  return (
+    !!e && (e.kind === 'attack' || e.kind === 'multi_hit_attack' || e.kind === 'deja_vu_attack')
+  );
 }
 
 export default function DevSkillsPage() {
@@ -30,7 +56,11 @@ export default function DevSkillsPage() {
     });
   }, [filter]);
 
-  const setField = (id: string, key: 'name' | 'rarity' | 'nameTag', value: string): void => {
+  const setField = <K extends keyof Edits[string]>(
+    id: string,
+    key: K,
+    value: Edits[string][K],
+  ): void => {
     setEdits((prev) => ({
       ...prev,
       [id]: { ...prev[id], [key]: value },
@@ -38,24 +68,35 @@ export default function DevSkillsPage() {
   };
 
   const changedEntries = useMemo(() => {
-    const out: Array<{ id: string; name: string; rarity: Rarity; nameTag: string | null }> = [];
+    const out: Array<{
+      id: string;
+      name: string;
+      rarity: Rarity;
+      nameTag: string | null;
+      attackKind?: AttackKind | null;
+    }> = [];
     for (const c of SKILLS) {
       const e = edits[c.id];
       if (!e) continue;
       const newName = e.name ?? c.name;
       const newRarity = (e.rarity ?? c.rarity) as Rarity;
       const newTag = e.nameTag !== undefined ? e.nameTag : c.nameTag ?? '';
-      if (
+      const origAtk = effectAttackKind(c.active?.effect);
+      const newAtk = e.attackKind ?? origAtk;
+      const changed =
         newName !== c.name ||
         newRarity !== c.rarity ||
-        (newTag || '') !== (c.nameTag ?? '')
-      ) {
-        out.push({
+        (newTag || '') !== (c.nameTag ?? '') ||
+        (hasAttackKindSlot(c) && newAtk !== origAtk);
+      if (changed) {
+        const entry: (typeof out)[number] = {
           id: c.id,
           name: newName,
           rarity: newRarity,
           nameTag: newTag === '' ? null : newTag,
-        });
+        };
+        if (hasAttackKindSlot(c)) entry.attackKind = newAtk;
+        out.push(entry);
       }
     }
     return out;
@@ -80,7 +121,7 @@ export default function DevSkillsPage() {
     <main style={{ padding: 16, fontFamily: 'sans-serif' }}>
       <h1 style={{ margin: '0 0 8px' }}>スキルカード編集（開発用）</h1>
       <p style={{ fontSize: 12, opacity: 0.7, margin: '0 0 12px' }}>
-        テキスト・レアリティ・タグのみ編集可能。説明文は effect から自動生成されます。
+        テキスト・レアリティ・タグ・攻撃属性のみ編集可能。説明文は effect から自動生成されます。
         編集はメモリ内のみ。コピーボタンで変更分のJSONを取得し、手動で <code>skills.ts</code> に反映してください。
       </p>
 
@@ -113,15 +154,19 @@ export default function DevSkillsPage() {
               <Th>タグ</Th>
               <Th>説明（自動）</Th>
               <Th>種別</Th>
+              <Th>攻撃属性</Th>
             </tr>
           </thead>
           <tbody>
             {rows.map((c) => {
               const e = edits[c.id] ?? {};
+              const origAtk = effectAttackKind(c.active?.effect);
+              const curAtk = e.attackKind ?? origAtk;
               const dirty =
                 (e.name !== undefined && e.name !== c.name) ||
                 (e.rarity !== undefined && e.rarity !== c.rarity) ||
-                (e.nameTag !== undefined && (e.nameTag || '') !== (c.nameTag ?? ''));
+                (e.nameTag !== undefined && (e.nameTag || '') !== (c.nameTag ?? '')) ||
+                (hasAttackKindSlot(c) && e.attackKind !== undefined && e.attackKind !== origAtk);
               return (
                 <tr
                   key={c.id}
@@ -136,7 +181,7 @@ export default function DevSkillsPage() {
                   <Td>
                     <select
                       value={(e.rarity ?? c.rarity) as string}
-                      onChange={(ev) => setField(c.id, 'rarity', ev.target.value)}
+                      onChange={(ev) => setField(c.id, 'rarity', ev.target.value as Rarity)}
                       style={cellInputStyle}
                     >
                       {RARITIES.map((r) => (
@@ -170,6 +215,26 @@ export default function DevSkillsPage() {
                     <span style={{ fontSize: 11, opacity: 0.6 }}>
                       {c.active ? 'active' : c.passive ? 'passive' : '-'}
                     </span>
+                  </Td>
+                  <Td>
+                    {hasAttackKindSlot(c) ? (
+                      <select
+                        value={curAtk ?? ''}
+                        onChange={(ev) =>
+                          setField(c.id, 'attackKind', (ev.target.value || undefined) as AttackKind | undefined)
+                        }
+                        style={cellInputStyle}
+                      >
+                        <option value="">(未設定)</option>
+                        {ATTACK_KINDS.map((k) => (
+                          <option key={k} value={k}>
+                            {ATTACK_KIND_LABEL[k]}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span style={{ fontSize: 11, opacity: 0.4 }}>—</span>
+                    )}
                   </Td>
                 </tr>
               );
