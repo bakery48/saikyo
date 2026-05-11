@@ -60,7 +60,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 5 } } },
   { id: 'sk-sr-045', name: '不動の盾', rarity: 'SR', nameTag: 'ストーンウォール', active: { effect: { kind: 'threshold_shield', threshold: 7 } } },
   { id: 'sk-sr-046', name: 'ハイ・オーラ', rarity: 'SR', nameTag: 'ハイオーラ', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.25, threshold: 5 } } },
-  { id: 'sk-sr-047', name: '鎧砕き', rarity: 'SR', nameTag: 'アーマークラッシャー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.2, multShield: 2.8, attackKind: 'strike' } } },
+  { id: 'sk-sr-047', name: '鎧砕き', rarity: 'SR', nameTag: 'アーマークラッシャー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.2, multShield: 3.0, attackKind: 'strike' } } },
   { id: 'sk-sr-006', name: '剛力の解放', rarity: 'SR', nameTag: 'タイタン', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-007', name: '鋼鉄の肉体', rarity: 'SR', nameTag: 'スチール', active: { effect: { kind: 'buff_self', stat: 'def', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-008', name: '神速の波動', rarity: 'SR', nameTag: 'ゴッドスピード', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 6, duration: 'battle' } } },
