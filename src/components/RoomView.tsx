@@ -13,7 +13,7 @@ const RARITY_COLORS: Record<Rarity, string> = {
 const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
 
 function defaultSkillCount(rarity: Rarity): number {
-  if (rarity === 'N') return 3;
+  if (rarity === 'N') return 4;
   if (rarity === 'R') return 2;
   return 1; // SR, SSR
 }
@@ -111,7 +111,7 @@ export function RoomView({ socket }: { socket: GameSocket }) {
           {RARITIES.map((rarity) => (
             <span key={rarity} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ color: RARITY_COLORS[rarity], fontWeight: 700 }}>{rarity}:</span>
-              {[0, 1, 2, 3].map((n) => (
+              {[0, 1, 2, 3, 4].map((n) => (
                 <button
                   key={n}
                   disabled={!canEdit}
@@ -159,7 +159,7 @@ export function RoomView({ socket }: { socket: GameSocket }) {
                     <span style={{ minWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {card.name}
                     </span>
-                    {[0, 1, 2, 3].map((n) => (
+                    {[0, 1, 2, 3, 4].map((n) => (
                       <button
                         key={n}
                         disabled={!canEdit}

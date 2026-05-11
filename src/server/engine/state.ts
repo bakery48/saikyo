@@ -29,7 +29,7 @@ function clampRoundCount(n: number): number {
 
 /** Default number of copies per rarity for the skill deck. */
 function defaultSkillCount(rarity: import('./types').Rarity): number {
-  if (rarity === 'N') return 3;
+  if (rarity === 'N') return 4;
   if (rarity === 'R') return 1;
   return 1; // SR, SSR
 }
