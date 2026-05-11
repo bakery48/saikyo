@@ -8,14 +8,7 @@ import rawOverrides from './skills.overrides.json';
  */
 export const SKILLS: SkillCard[] = [
   // ─── N (Normal) ────────────────────────────────────────────────────────────
-  { id: 'sk-n-001', name: '体当たり', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' } } },
-  { id: 'sk-n-002', name: '殴打', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' } } },
-  { id: 'sk-n-003', name: '猛打', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'atk', attackKind: 'strike' } } },
-  { id: 'sk-n-004', name: '蹴り', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' } } },
-  { id: 'sk-n-005', name: 'ひっかき', rarity: 'N', active: { effect: { kind: 'attack', mult: 0.9, useStat: 'atk', attackKind: 'claw' } } },
-  { id: 'sk-n-006', name: '噛みつき', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.1, useStat: 'atk', attackKind: 'claw' } } },
-  { id: 'sk-n-007', name: '突進', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'spd', attackKind: 'strike' } } },
-  { id: 'sk-n-008', name: '速攻', rarity: 'N', active: { effect: { kind: 'attack', mult: 0.9, useStat: 'spd', attackKind: 'strike' } } },
+  { id: 'sk-n-001', name: '攻撃', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-n-009', name: '回復', rarity: 'N', active: { effect: { kind: 'heal', amount: 3 } } },
   { id: 'sk-n-010', name: '小盾', rarity: 'N', active: { effect: { kind: 'shield', amount: 2 } } },
   { id: 'sk-n-011', name: '気合溜め', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 3, duration: 'once' } } },
@@ -24,20 +17,16 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-n-014', name: '砂かけ', rarity: 'N', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 1, duration: 'battle' } } },
   { id: 'sk-n-015', name: '叫び', rarity: 'N', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 1, duration: 'battle' } } },
   { id: 'sk-n-016', name: '小傷', rarity: 'N', active: { effect: { kind: 'true_damage', amount: 2 } } },
-  { id: 'sk-n-017', name: '足払い', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'spd', attackKind: 'strike' } } },
-  { id: 'sk-n-018', name: '低空タックル', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' } } },
-  { id: 'sk-n-019', name: '雑な一撃', rarity: 'N', active: { effect: { kind: 'attack', mult: 0.8, useStat: 'atk', attackKind: 'strike' } } },
   { id: 'sk-n-020', name: '硬化', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'def', amount: 1, duration: 'battle' } } },
   { id: 'sk-n-021', name: '集中', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 1, duration: 'battle' } } },
   { id: 'sk-n-022', name: '加速', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 1, duration: 'battle' } } },
   { id: 'sk-n-024', name: '盾構え', rarity: 'N', active: { effect: { kind: 'shield', amount: 3 } } },
   { id: 'sk-n-025', name: '反撃の構え', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 2, duration: 'once' } } },
   { id: 'sk-n-026', name: '小細工', rarity: 'N', active: { effect: { kind: 'true_damage', amount: 1 } } },
-  { id: 'sk-n-027', name: '岩投げ', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.1, useStat: 'atk', attackKind: 'strike' } } },
   { id: 'sk-n-028', name: '影刺し', rarity: 'N', active: { effect: { kind: 'true_damage', amount: 2 } } },
 
   // ─── R (Rare) ──────────────────────────────────────────────────────────────
-  { id: 'sk-r-001', name: '強打', rarity: 'R', nameTag: 'パワー', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk', attackKind: 'strike' } } },
+  { id: 'sk-r-001', name: '強攻撃', rarity: 'R', nameTag: 'パワー', active: { effect: { kind: 'attack', mult: 1.3, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-r-002', name: '貫通刺突', rarity: 'R', nameTag: 'ピアサー', active: { effect: { kind: 'true_damage', amount: 4 } } },
   { id: 'sk-r-004', name: '大盾', rarity: 'R', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 5 } } },
   { id: 'sk-r-005', name: '気力解放', rarity: 'R', nameTag: 'レイジ', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 5, duration: 'once' } } },
@@ -48,13 +37,11 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-010', name: '鈍化', rarity: 'R', nameTag: 'フリーザー', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 2, duration: 'battle' } } },
   { id: 'sk-r-011', name: '次撃倍化', rarity: 'R', nameTag: 'アンプ', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
   { id: 'sk-r-012', name: '見切り', rarity: 'R', nameTag: 'ウィザード', active: { effect: { kind: 'nullify_next' } } },
-  { id: 'sk-r-013', name: '疾風斬り', rarity: 'R', nameTag: 'ウィンド', active: { effect: { kind: 'attack', mult: 1.3, useStat: 'spd', attackKind: 'sword' } } },
-  { id: 'sk-r-014', name: '溜め攻撃', rarity: 'R', nameTag: 'チャージャー', active: { effect: { kind: 'attack', mult: 1.4, useStat: 'atk', attackKind: 'strike' } } },
   { id: 'sk-r-015', name: '癒しの風', rarity: 'R', nameTag: 'ヒーリング', active: { effect: { kind: 'heal', amount: 5 } } },
   { id: 'sk-r-016', name: '中盾', rarity: 'R', nameTag: 'シルバー', active: { effect: { kind: 'shield', amount: 4 } } },
   { id: 'sk-r-017', name: '攻防一体', rarity: 'R', nameTag: 'バランス', active: { effect: { kind: 'buff_self', stat: 'def', amount: 1, duration: 'battle' } } },
-  { id: 'sk-r-018', name: '雷光', rarity: 'R', nameTag: 'ライトニング', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'spd', attackKind: 'magic' } } },
-  { id: 'sk-r-019', name: '裂破', rarity: 'R', nameTag: 'デストロイヤー', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk', attackKind: 'sword' } } },
+  { id: 'sk-r-018', name: '速攻', rarity: 'R', nameTag: 'ラピッド', active: { effect: { kind: 'attack', mult: 1.1, useStat: 'spd', attackKind: 'passthrough' } } },
+  { id: 'sk-r-019', name: 'シールドバッシュ', rarity: 'R', nameTag: 'バッシュ', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'def', attackKind: 'strike' } } },
   { id: 'sk-r-020', name: '反射シールド', rarity: 'R', nameTag: 'リフレクター', active: { effect: { kind: 'shield', amount: 6 } } },
   { id: 'sk-r-021', name: '生命変換', rarity: 'R', nameTag: 'コンバート', active: { effect: { kind: 'pay_hp_shield', hpCost: 3, shieldAmount: 5 } } },
   { id: 'sk-r-022', name: '取引', rarity: 'R', nameTag: 'トレーダー', active: { effect: { kind: 'pay_hp_debuff_all', hpCost: 4, amount: 1 } } },
@@ -64,8 +51,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-026', name: 'デジャヴ・アタック', rarity: 'R', nameTag: 'デジャヴ', active: { effect: { kind: 'deja_vu_attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
-  { id: 'sk-sr-001', name: '必殺斬り', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 2.0, useStat: 'atk', attackKind: 'sword' } } },
-  { id: 'sk-sr-002', name: '光速突き', rarity: 'SR', nameTag: 'フラッシュ', active: { effect: { kind: 'attack', mult: 1.8, useStat: 'spd', attackKind: 'sword' } } },
+  { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-003', name: '貫通の理', rarity: 'SR', nameTag: 'バニッシャー', active: { effect: { kind: 'true_damage', amount: 7 } } },
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
   { id: 'sk-sr-005', name: '聖盾', rarity: 'SR', nameTag: 'ホーリー', active: { effect: { kind: 'shield', amount: 8 } } },
@@ -222,13 +208,6 @@ export const SKILLS: SkillCard[] = [
   },
   // ── R actives (new) ─────────────────────────────────────────────────────
   {
-    id: 'sk-r-027',
-    name: '炎撃',
-    rarity: 'R',
-    nameTag: 'フレイム',
-    active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk', attackKind: 'magic' } },
-  },
-  {
     id: 'sk-r-028',
     name: '氷縛り',
     rarity: 'R',
@@ -300,13 +279,6 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'dispel' } },
   },
   {
-    id: 'sk-sr-020',
-    name: '業火',
-    rarity: 'SR',
-    nameTag: 'インフェルノ',
-    active: { effect: { kind: 'attack', mult: 2.5, useStat: 'atk', attackKind: 'magic' } },
-  },
-  {
     id: 'sk-sr-021',
     name: '吸命波',
     rarity: 'SR',
@@ -339,7 +311,7 @@ export const SKILLS: SkillCard[] = [
     name: '神速斬',
     rarity: 'SR',
     nameTag: 'ソニック',
-    active: { effect: { kind: 'attack', mult: 2.0, useStat: 'spd', attackKind: 'sword' } },
+    active: { effect: { kind: 'attack', mult: 1.3, useStat: 'spd', attackKind: 'sword' } },
   },
   {
     id: 'sk-sr-026',
@@ -451,20 +423,6 @@ export const SKILLS: SkillCard[] = [
   },
   // ── R actives (batch 3) ─────────────────────────────────────────────────
   {
-    id: 'sk-r-037',
-    name: '鋭爪',
-    rarity: 'R',
-    nameTag: 'シャープクロー',
-    active: { effect: { kind: 'attack', mult: 1.4, useStat: 'atk', attackKind: 'claw' } },
-  },
-  {
-    id: 'sk-r-038',
-    name: '大鎌',
-    rarity: 'R',
-    nameTag: 'リーパー',
-    active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk', attackKind: 'sword' } },
-  },
-  {
     id: 'sk-r-039',
     name: '削り魔法',
     rarity: 'R',
@@ -558,10 +516,10 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-sr-031',
-    name: '神聖斬',
+    name: 'ガードバースト',
     rarity: 'SR',
-    nameTag: 'ホーリーソード',
-    active: { effect: { kind: 'attack', mult: 2.2, useStat: 'atk', attackKind: 'sword' } },
+    nameTag: 'バースト',
+    active: { effect: { kind: 'attack', mult: 1.4, useStat: 'def', attackKind: 'strike' } },
   },
   {
     id: 'sk-sr-032',
@@ -583,13 +541,6 @@ export const SKILLS: SkillCard[] = [
     rarity: 'SR',
     nameTag: 'バーサーク',
     active: { effect: { kind: 'hp_to_atk', divisor: 2 } },
-  },
-  {
-    id: 'sk-sr-035',
-    name: '雷鳴',
-    rarity: 'SR',
-    nameTag: 'サンダー',
-    active: { effect: { kind: 'attack', mult: 2.0, useStat: 'spd', attackKind: 'magic' } },
   },
   // ── SSR actives (batch 3) ───────────────────────────────────────────────
   {

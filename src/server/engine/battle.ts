@@ -594,7 +594,9 @@ function resolveAttack(args: {
   const stat =
     effect.useStat === 'atk'
       ? effStat(attacker, 'atk') + atkBoost
-      : effStat(attacker, 'spd');
+      : effect.useStat === 'def'
+        ? effStat(attacker, 'def')
+        : effStat(attacker, 'spd');
   const mult = effect.mult * attacker.nextAmp;
   let baseDamage = stat * mult;
   const isFirstAttack = !attacker.firstAttackMade;

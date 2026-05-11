@@ -49,7 +49,7 @@ export type AttackKind =
 /** Effects produced by active skills resolved during a battle. */
 export type SkillEffect =
   /** Deal physical damage = max(1, floor(useStat * mult) - target.def). */
-  | { kind: 'attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind }
+  | { kind: 'attack'; mult: number; useStat: 'atk' | 'def' | 'spd'; attackKind?: AttackKind }
   /** Deal damage that ignores DEF. */
   | { kind: 'true_damage'; amount: number }
   /** Buff self stat. duration 'once' = next own active only, 'battle' = rest of battle. */
