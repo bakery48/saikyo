@@ -306,16 +306,23 @@ function applyBattleStartPassives(
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
-      case 'sin_amplify':
-        if (p.trigger.kind === 'battle_start' && sinCount > 0) {
-          if (p.effect.perSin.atk) self.atkMod += p.effect.perSin.atk * sinCount;
-          if (p.effect.perSin.def) self.defMod += p.effect.perSin.def * sinCount;
-          if (p.effect.perSin.spd) self.spdMod += p.effect.perSin.spd * sinCount;
-          log.push({ kind: 'passive', player: side, passiveId: p.id });
-        }
-        break;
     }
   }
+
+  // Automatic sin bonus — no passive card required; scales with tier.
+  if (sinCount > 0) {
+    const atkPerSin = sinCount >= 7 ? 4 : sinCount >= 3 ? 3 : 2;
+    const defPerSin = sinCount >= 7 ? 3 : sinCount >= 5 ? 2 : sinCount >= 3 ? 1 : 0;
+    const spdPerSin = sinCount >= 7 ? 2 : sinCount >= 5 ? 1 : 0;
+    const atkBonus = atkPerSin * sinCount;
+    const defBonus = defPerSin * sinCount;
+    const spdBonus = spdPerSin * sinCount;
+    self.atkMod += atkBonus;
+    if (defBonus > 0) self.defMod += defBonus;
+    if (spdBonus > 0) self.spdMod += spdBonus;
+    log.push({ kind: 'sin_bonus', player: side, sinCount, atk: atkBonus, def: defBonus, spd: spdBonus });
+  }
+
   return { spdRollBonus };
 }
 

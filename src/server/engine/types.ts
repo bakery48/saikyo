@@ -327,8 +327,6 @@ export type PassiveEffect =
   | { kind: 'mirror_stats' }
   /** At battle start, swap own ATK and DEF for the entire battle. */
   | { kind: 'stat_swap_battle_start' }
-  /** At battle start, count this monster's skills tagged 'sin' and grant `perSin` stat boost per sin (battle-long). */
-  | { kind: 'sin_amplify'; perSin: { atk?: number; def?: number; spd?: number } }
   /** At the start of each own turn, set shield to at least `amount`. */
   | { kind: 'regen_shield'; amount: number }
   /** When taking damage, convert `percent`% of the raw amount into shield gain (rounded down). */
@@ -496,6 +494,7 @@ export type BattleEvent =
   /** A skill fizzled (e.g. multi-attack pending but the next skill wasn't an attack). */
   | { kind: 'skill_fizzle'; player: 'a' | 'b'; skillId: string; selfDamage: number }
   | { kind: 'hp_swap'; playerA: 'a' | 'b'; playerB: 'a' | 'b'; hpA: number; hpB: number }
+  | { kind: 'sin_bonus'; player: 'a' | 'b'; sinCount: number; atk: number; def: number; spd: number }
   | { kind: 'end'; winner: 'a' | 'b' | 'draw'; reason: 'hp_zero' | 'tiebreak_hp' | 'tiebreak_spd' | 'draw' };
 
 export type BattleResult = {

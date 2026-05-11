@@ -254,13 +254,6 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `バトル開始時に相手のATK/DEF/SPDの増減を自分にコピー`;
     case 'stat_swap_battle_start':
       return `バトル開始時に自分のATKとDEFを入れ替え`;
-    case 'sin_amplify': {
-      const parts: string[] = [];
-      if (e.perSin.atk) parts.push(`ATK+${e.perSin.atk}`);
-      if (e.perSin.def) parts.push(`DEF+${e.perSin.def}`);
-      if (e.perSin.spd) parts.push(`SPD+${e.perSin.spd}`);
-      return `バトル開始時、所持する罪1個につき自分の${parts.join('/')}（バトル中）`;
-    }
     case 'regen_shield':
       return `自分のターン開始時にシールドを${e.amount}まで補充`;
     case 'damage_to_shield':
@@ -332,7 +325,6 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'equalize_spd' ||
     p.effect.kind === 'first_received_damage_div' ||
     p.effect.kind === 'mirror_stats' ||
-    p.effect.kind === 'sin_amplify' ||
     p.effect.kind === 'stat_swap_battle_start' ||
     p.effect.kind === 'damage_to_shield' ||
     p.effect.kind === 'shield_thorns' ||
@@ -369,9 +361,13 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
  * Return the description text for a SkillCard.
  * Uses `card.description` if manually set; otherwise auto-generates from the effect.
  */
-export function describeSkillCard(c: { active?: { effect: SkillEffect }; passive?: { trigger: PassiveTrigger; effect: PassiveEffect }; description?: string }): string {
+export function describeSkillCard(c: { active?: { effect: SkillEffect }; passive?: { trigger: PassiveTrigger; effect: PassiveEffect }; description?: string; tag?: string }): string {
   if (c.description) return c.description;
-  if (c.active) return describeActiveEffect(c.active.effect);
+  if (c.active) {
+    const base = describeActiveEffect(c.active.effect);
+    if (c.tag === 'sin') return `${base} ／ 【罪】罪の数でバトル開始時にATK自動強化`;
+    return base;
+  }
   if (c.passive) return `パッシブ：${describePassive(c.passive)}`;
   return '';
 }

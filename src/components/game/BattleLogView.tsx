@@ -90,6 +90,12 @@ function formatBattleEvent(e: BattleEvent, aName: string, bName: string): string
         : `  ${who(e.player)} のスキルが不発`;
     case 'hp_swap':
       return `  ${who(e.playerA)} と ${who(e.playerB)} がHPを交換（${e.hpA} ↔ ${e.hpB}）`;
+    case 'sin_bonus': {
+      const parts: string[] = [`ATK+${e.atk}`];
+      if (e.def > 0) parts.push(`DEF+${e.def}`);
+      if (e.spd > 0) parts.push(`SPD+${e.spd}`);
+      return `  ${who(e.player)} 罪の力が覚醒（罪${e.sinCount}個 → ${parts.join('/')}）`;
+    }
     case 'end':
       return e.reason === 'draw'
         ? `=== 引き分け`

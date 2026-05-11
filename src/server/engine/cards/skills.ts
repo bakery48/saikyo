@@ -898,17 +898,6 @@ export const SKILLS: SkillCard[] = [
       effect: { kind: 'regen_shield', amount: 2 },
     },
   },
-  {
-    id: 'sk-rp-024',
-    name: '贖罪 (passive)',
-    rarity: 'R',
-    nameTag: 'ペナンス',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'battle_start' },
-      effect: { kind: 'sin_amplify', perSin: { atk: 2 } },
-    },
-  },
   // SR passives
   {
     id: 'sk-srp-013',
@@ -1042,17 +1031,6 @@ export const SKILLS: SkillCard[] = [
       effect: { kind: 'selective_immune', attackKind: 'magic' },
     },
   },
-  {
-    id: 'sk-srp-025',
-    name: '罪の支配者 (passive)',
-    rarity: 'SR',
-    nameTag: 'シンマスター',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'battle_start' },
-      effect: { kind: 'sin_amplify', perSin: { atk: 2, def: 2 } },
-    },
-  },
   // SSR passives
   {
     id: 'sk-ssrp-004',
@@ -1130,17 +1108,6 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'battle_start' },
       effect: { kind: 'absolute_zero' },
-    },
-  },
-  {
-    id: 'sk-ssrp-011',
-    name: '七つの大罪 (passive)',
-    rarity: 'SSR',
-    nameTag: 'セブンシンズ',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'battle_start' },
-      effect: { kind: 'sin_amplify', perSin: { atk: 3, def: 3, spd: 3 } },
     },
   },
   {
