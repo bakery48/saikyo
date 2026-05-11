@@ -424,7 +424,7 @@ export const SKILLS: SkillCard[] = [
   // ── R actives (batch 3) ─────────────────────────────────────────────────
   {
     id: 'sk-r-039',
-    name: '削り魔法',
+    name: '奈落の呪い',
     rarity: 'R',
     nameTag: 'グラインダー',
     active: { effect: { kind: 'percent_max_hp_true', percent: 15 } },
@@ -502,7 +502,7 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-sr-029',
-    name: '削滅波',
+    name: '命削りの呪縛',
     rarity: 'SR',
     nameTag: 'エロード',
     active: { effect: { kind: 'percent_max_hp_true', percent: 25 } },
@@ -559,7 +559,7 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-ssr-015',
-    name: '神罰',
+    name: '魂喰い',
     rarity: 'SSR',
     nameTag: 'ジャッジメント',
     active: { effect: { kind: 'percent_max_hp_true', percent: 40 } },
