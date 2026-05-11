@@ -28,6 +28,14 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `相手のHPを最大HP×${Math.round(e.fraction * 100)}%回復（罪）`;
     case 'true_damage':
       return `DEF無視 ${e.amount} ダメージ`;
+    case 'target_stat_damage':
+      return `相手${e.stat.toUpperCase()}×${e.mult} のDEF無視ダメージ`;
+    case 'stat_diff_damage':
+      return `(相手${e.stat.toUpperCase()}−自分${e.stat.toUpperCase()})×${e.mult} のDEF無視ダメージ`;
+    case 'target_higher_stat_attack':
+      return `相手のATK/DEFの高い方×${e.mult} のDEF無視ダメージ`;
+    case 'conditional_attack_if_target_higher':
+      return `相手${e.stat.toUpperCase()}が自分より高ければ${e.useStat.toUpperCase()}×${e.multIf}、そうでなければ${e.useStat.toUpperCase()}×${e.multElse} 攻撃`;
     case 'heal':
       return `HP+${e.amount} 回復`;
     case 'shield':
@@ -384,6 +392,10 @@ export function effectCategory(e: SkillEffect): EffectCategory {
     case 'attack':
     case 'shield_break_attack':
     case 'true_damage':
+    case 'target_stat_damage':
+    case 'stat_diff_damage':
+    case 'target_higher_stat_attack':
+    case 'conditional_attack_if_target_higher':
     case 'multi_hit_attack':
     case 'deja_vu_attack':
     case 'fixed_damage_attack':

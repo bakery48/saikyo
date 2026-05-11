@@ -55,6 +55,14 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-024', name: 'エネルギーチャージ', rarity: 'R', nameTag: 'バッテリー', active: { effect: { kind: 'buff_self_all', amount: 1, duration: 'battle' } } },
   { id: 'sk-r-025', name: 'リフレイン', rarity: 'R', nameTag: 'リフレイン', active: { effect: { kind: 'rewind_skill', rewindBy: 1, selfDamage: 2 } } },
   { id: 'sk-r-026', name: 'デジャヴ・アタック', rarity: 'R', nameTag: 'デジャヴ', active: { effect: { kind: 'deja_vu_attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  // ─── 相手ステータス参照（カウンターメタ） ──────────────────────────────────
+  { id: 'sk-r-063', name: '逆鱗', rarity: 'R', nameTag: 'リバース', active: { effect: { kind: 'target_stat_damage', stat: 'atk', mult: 0.8 } } },
+  { id: 'sk-r-064', name: '鎧貫き', rarity: 'R', nameTag: 'アーマーピアサー', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 0.8 } } },
+  { id: 'sk-r-065', name: '格上狩り', rarity: 'R', nameTag: 'ジャイアントキラー', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'atk', multIf: 2.0, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-sr-048', name: '怒りの代償', rarity: 'SR', nameTag: 'リトリビューション', active: { effect: { kind: 'stat_diff_damage', stat: 'atk', mult: 2.0 } } },
+  { id: 'sk-sr-049', name: '防壁崩し', rarity: 'SR', nameTag: 'ウォールブレイク', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'def', multIf: 2.5, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-sr-050', name: '反転の刃', rarity: 'SR', nameTag: 'ミラーブレイド', active: { effect: { kind: 'target_higher_stat_attack', mult: 1.0, attackKind: 'sword' } } },
+  { id: 'sk-ssr-021', name: '要塞砲', rarity: 'SSR', nameTag: 'フォートレス', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 1.0 } } },
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
   { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk', attackKind: 'passthrough' } } },

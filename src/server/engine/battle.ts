@@ -1209,6 +1209,73 @@ function applySkill(args: {
       }
       break;
     }
+    case 'target_stat_damage': {
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        break;
+      }
+      const stat = effStat(target, e.stat);
+      const dmg = Math.max(1, Math.floor(stat * e.mult * user.nextAmp));
+      let actual = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
+      actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+      target.hp -= actual;
+      log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+      applyLifesteal(user, userPassives, actual, userSide, log);
+      applyHexDef(user, userPassives, target, userSide, targetSide, actual, log);
+      applyCounterDamage(target, targetPassives, user, userPassives, userSide, targetSide, actual, log);
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'stat_diff_damage': {
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        break;
+      }
+      const diff = Math.max(0, effStat(target, e.stat) - effStat(user, e.stat));
+      const dmg = Math.max(1, Math.floor(diff * e.mult * user.nextAmp));
+      let actual = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
+      actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+      target.hp -= actual;
+      log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+      applyLifesteal(user, userPassives, actual, userSide, log);
+      applyHexDef(user, userPassives, target, userSide, targetSide, actual, log);
+      applyCounterDamage(target, targetPassives, user, userPassives, userSide, targetSide, actual, log);
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'target_higher_stat_attack': {
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        break;
+      }
+      const stat = Math.max(effStat(target, 'atk'), effStat(target, 'def'));
+      const dmg = Math.max(1, Math.floor(stat * e.mult * user.nextAmp));
+      let actual = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
+      actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+      target.hp -= actual;
+      log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+      applyLifesteal(user, userPassives, actual, userSide, log);
+      applyHexDef(user, userPassives, target, userSide, targetSide, actual, log);
+      applyCounterDamage(target, targetPassives, user, userPassives, userSide, targetSide, actual, log);
+      user.firstAttackMade = true;
+      break;
+    }
+    case 'conditional_attack_if_target_higher': {
+      const mult = effStat(target, e.stat) > effStat(user, e.stat) ? e.multIf : e.multElse;
+      resolveAttack({
+        attacker: user,
+        defender: target,
+        attackerPassives: userPassives,
+        defenderPassives: targetPassives,
+        attackerSide: userSide,
+        defenderSide: targetSide,
+        effect: { kind: 'attack', mult, useStat: e.useStat, attackKind: e.attackKind },
+        log,
+        rng,
+      });
+      user.firstAttackMade = true;
+      break;
+    }
     case 'heal': {
       const applied = healCapped(user, e.amount);
       log.push({ kind: 'heal', player: userSide, amount: applied, hpAfter: user.hp });
