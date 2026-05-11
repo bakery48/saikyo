@@ -108,6 +108,23 @@ export default function DevSkillsPage() {
     }
   };
 
+  const apply = async (): Promise<void> => {
+    if (changedEntries.length === 0) return;
+    try {
+      const res = await fetch('/api/dev/apply-skill-edits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changedEntries),
+      });
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      const data = await res.json() as { count: number };
+      alert(`${data.count} 件を skills.overrides.json に反映しました。Next.js がホットリロードします。`);
+      setEdits({});
+    } catch (err) {
+      alert(`反映に失敗しました: ${String(err)}`);
+    }
+  };
+
   const reset = (): void => {
     if (confirm('すべての編集を破棄しますか？')) setEdits({});
   };
@@ -132,6 +149,10 @@ export default function DevSkillsPage() {
         <span style={{ fontSize: 12, opacity: 0.7 }}>
           {rows.length} / {SKILLS.length} 件 — 変更 {changedEntries.length} 件
         </span>
+        <button type="button" onClick={apply} disabled={changedEntries.length === 0}
+          style={{ background: '#2a6', color: '#fff', border: 'none', borderRadius: 3, padding: '4px 10px', cursor: 'pointer' }}>
+          反映（overrides.json に書き込み）
+        </button>
         <button type="button" onClick={copy} disabled={changedEntries.length === 0}>
           変更分をJSONコピー
         </button>

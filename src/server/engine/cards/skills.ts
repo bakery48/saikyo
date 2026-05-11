@@ -1,4 +1,5 @@
 import type { SkillCard } from '../types';
+import rawOverrides from './skills.overrides.json';
 
 /**
  * Skill deck. Distribution roughly N:28 / R:20 / SR:12 / SSR:4 + 6 passive
@@ -1162,3 +1163,17 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'spd_diff_multi_attack', flatAtkMod: -1, useStat: 'atk', attackKind: 'sword' } },
   },
 ];
+
+type SkillOverride = Partial<Pick<SkillCard, 'name' | 'rarity' | 'nameTag' | 'description'>>;
+const overrides = rawOverrides as Record<string, SkillOverride>;
+
+if (Object.keys(overrides).length > 0) {
+  for (const card of SKILLS) {
+    const ov = overrides[card.id];
+    if (!ov) continue;
+    if (ov.name !== undefined) card.name = ov.name;
+    if (ov.rarity !== undefined) card.rarity = ov.rarity;
+    if (ov.nameTag !== undefined) card.nameTag = ov.nameTag;
+    if (ov.description !== undefined) card.description = ov.description;
+  }
+}
