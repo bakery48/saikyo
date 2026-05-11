@@ -35,7 +35,16 @@ export type StatKey = keyof Stats;
  * Visual category of an attack — determines the hit animation in the battle view.
  * 'passthrough' means: use the attacking monster's own attackKind.
  */
-export type AttackKind = 'strike' | 'sword' | 'claw' | 'magic' | 'passthrough';
+export type AttackKind =
+  | 'strike'
+  | 'sword'
+  | 'claw'
+  | 'magic'      // 無属性魔法
+  | 'fire'       // 炎魔法
+  | 'water'      // 水魔法
+  | 'ice'        // 氷魔法
+  | 'wind'       // 風魔法
+  | 'passthrough';
 
 /** Effects produced by active skills resolved during a battle. */
 export type SkillEffect =

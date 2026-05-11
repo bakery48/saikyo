@@ -613,6 +613,10 @@ function HitEffect({ kind }: { kind: Exclude<AttackKind, 'passthrough'> }) {
     case 'sword':   return <SwordEffect />;
     case 'claw':    return <ClawEffect />;
     case 'magic':   return <MagicEffect />;
+    case 'fire':    return <ElementalMagicEffect colors={['#ff6600','#ff3300','#ffaa00','#ff8800','#ffcc00']} glow="rgba(255,80,0,0.9)" />;
+    case 'water':   return <ElementalMagicEffect colors={['#0099ff','#0066cc','#66ccff','#3388ee','#88ddff']} glow="rgba(0,120,255,0.9)" />;
+    case 'ice':     return <ElementalMagicEffect colors={['#aaeeff','#66ddff','#ccffff','#88eeff','#ddfaff']} glow="rgba(100,220,255,0.9)" />;
+    case 'wind':    return <ElementalMagicEffect colors={['#88dd44','#55aa22','#aaee66','#77cc33','#ccee88']} glow="rgba(100,220,60,0.9)" />;
   }
 }
 
@@ -736,6 +740,42 @@ function ClawEffect() {
 }
 
 /** 魔法: purple/blue sparkles — glowing orbs that burst outward. */
+/** 属性魔法：色だけ差し替えた汎用エフェクト。 */
+function ElementalMagicEffect({ colors, glow }: { colors: string[]; glow: string }) {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [
+        { opacity: 0, transform: 'scale(0.6)' },
+        { opacity: 1, transform: 'scale(1.1)', offset: 0.25 },
+        { opacity: 1, transform: 'scale(1.15)', offset: 0.6 },
+        { opacity: 0, transform: 'scale(1.5)' },
+      ],
+      { duration: 900, fill: 'forwards', easing: 'ease-out' },
+    );
+  }, []);
+  const positions: [number, number, number][] = [
+    [50, 18, 9], [78, 38, 7], [68, 72, 8], [30, 68, 7], [22, 36, 6],
+  ];
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: `drop-shadow(0 0 8px ${glow})` }}>
+      {positions.map(([cx, cy, r], i) => (
+        <circle key={i} cx={cx} cy={cy} r={r} fill={colors[i]!} opacity={0.85} />
+      ))}
+      <circle cx={50} cy={50} r={13} fill="#ffffff" opacity={0.9} />
+      <line x1="50" y1="18" x2="50" y2="50" stroke={colors[0]!} strokeWidth="1.5" strokeDasharray="3 3" />
+      <line x1="78" y1="38" x2="50" y2="50" stroke={colors[1]!} strokeWidth="1.5" strokeDasharray="3 3" />
+      <line x1="68" y1="72" x2="50" y2="50" stroke={colors[2]!} strokeWidth="1.5" strokeDasharray="3 3" />
+      <line x1="30" y1="68" x2="50" y2="50" stroke={colors[3]!} strokeWidth="1.5" strokeDasharray="3 3" />
+      <line x1="22" y1="36" x2="50" y2="50" stroke={colors[4]!} strokeWidth="1.5" strokeDasharray="3 3" />
+    </svg>
+  );
+}
+
 function MagicEffect() {
   const ref = useRef<SVGSVGElement>(null);
   useEffect(() => {

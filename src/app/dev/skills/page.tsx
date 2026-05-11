@@ -5,12 +5,16 @@ import { describeSkillCard } from '../../../lib/skill-text';
 import type { AttackKind, Rarity, SkillCard, SkillEffect } from '../../../server/engine/types';
 
 const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
-const ATTACK_KINDS: AttackKind[] = ['strike', 'sword', 'claw', 'magic', 'passthrough'];
+const ATTACK_KINDS: AttackKind[] = ['strike', 'sword', 'claw', 'magic', 'fire', 'water', 'ice', 'wind', 'passthrough'];
 const ATTACK_KIND_LABEL: Record<AttackKind, string> = {
   strike: '打撃',
   sword: '剣',
   claw: '爪',
-  magic: '魔法',
+  magic: '無属性魔法',
+  fire: '炎魔法',
+  water: '水魔法',
+  ice: '氷魔法',
+  wind: '風魔法',
   passthrough: 'スルー',
 };
 

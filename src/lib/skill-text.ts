@@ -1,5 +1,6 @@
 import type {
   ActiveSkill,
+  AttackKind,
   PassiveEffect,
   PassiveSkill,
   PassiveTrigger,
@@ -278,8 +279,17 @@ export function describePassiveEffect(e: PassiveEffect): string {
   }
 }
 
-function attackKindLabel(k: 'strike' | 'sword' | 'claw' | 'magic'): string {
-  return k === 'strike' ? '打撃' : k === 'sword' ? '剣' : k === 'claw' ? '爪' : '魔法';
+function attackKindLabel(k: Exclude<AttackKind, 'passthrough'>): string {
+  switch (k) {
+    case 'strike': return '打撃';
+    case 'sword':  return '剣';
+    case 'claw':   return '爪';
+    case 'magic':  return '無属性魔法';
+    case 'fire':   return '炎魔法';
+    case 'water':  return '水魔法';
+    case 'ice':    return '氷魔法';
+    case 'wind':   return '風魔法';
+  }
 }
 
 /** Combined "<trigger> <effect>" for a passive. */
