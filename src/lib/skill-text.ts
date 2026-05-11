@@ -329,6 +329,17 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
   return `${describePassiveTrigger(p.trigger)} ${describePassiveEffect(p.effect)}`;
 }
 
+/**
+ * Return the description text for a SkillCard.
+ * Uses `card.description` if manually set; otherwise auto-generates from the effect.
+ */
+export function describeSkillCard(c: { active?: { effect: SkillEffect }; passive?: { trigger: PassiveTrigger; effect: PassiveEffect }; description?: string }): string {
+  if (c.description) return c.description;
+  if (c.active) return describeActiveEffect(c.active.effect);
+  if (c.passive) return `パッシブ：${describePassive(c.passive)}`;
+  return '';
+}
+
 /** Tooltip body for an active skill (effect + tag, newline-separated). */
 export function activeTooltip(a: ActiveSkill): string {
   const lines = [describeActiveEffect(a.effect)];

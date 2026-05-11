@@ -1,10 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { SKILLS } from '../../../server/engine/cards/skills';
-import {
-  describeActiveEffect,
-  describePassive,
-} from '../../../lib/skill-text';
+import { describeSkillCard } from '../../../lib/skill-text';
 import type { AttackKind, Rarity, SkillCard, SkillEffect } from '../../../server/engine/types';
 
 const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
@@ -19,14 +16,8 @@ const ATTACK_KIND_LABEL: Record<AttackKind, string> = {
 
 type Edits = Record<
   string,
-  { name?: string; rarity?: Rarity; nameTag?: string; attackKind?: AttackKind }
+  { name?: string; rarity?: Rarity; nameTag?: string; attackKind?: AttackKind; description?: string }
 >;
-
-function describeCard(c: SkillCard): string {
-  if (c.active) return describeActiveEffect(c.active.effect);
-  if (c.passive) return `パッシブ：${describePassive(c.passive)}`;
-  return '';
-}
 
 function effectAttackKind(e: SkillEffect | undefined): AttackKind | null {
   if (!e) return null;
@@ -51,7 +42,7 @@ export default function DevSkillsPage() {
     const f = filter.trim().toLowerCase();
     return SKILLS.filter((c) => {
       if (!f) return true;
-      const blob = `${c.id} ${c.name} ${c.nameTag ?? ''} ${describeCard(c)}`.toLowerCase();
+      const blob = `${c.id} ${c.name} ${c.nameTag ?? ''} ${describeSkillCard(c)}`.toLowerCase();
       return blob.includes(f);
     });
   }, [filter]);
@@ -74,6 +65,7 @@ export default function DevSkillsPage() {
       rarity: Rarity;
       nameTag: string | null;
       attackKind?: AttackKind | null;
+      description?: string;
     }> = [];
     for (const c of SKILLS) {
       const e = edits[c.id];
@@ -83,11 +75,13 @@ export default function DevSkillsPage() {
       const newTag = e.nameTag !== undefined ? e.nameTag : c.nameTag ?? '';
       const origAtk = effectAttackKind(c.active?.effect);
       const newAtk = e.attackKind ?? origAtk;
+      const newDesc = e.description !== undefined ? e.description : c.description ?? '';
       const changed =
         newName !== c.name ||
         newRarity !== c.rarity ||
         (newTag || '') !== (c.nameTag ?? '') ||
-        (hasAttackKindSlot(c) && newAtk !== origAtk);
+        (hasAttackKindSlot(c) && newAtk !== origAtk) ||
+        newDesc !== (c.description ?? '');
       if (changed) {
         const entry: (typeof out)[number] = {
           id: c.id,
@@ -96,6 +90,7 @@ export default function DevSkillsPage() {
           nameTag: newTag === '' ? null : newTag,
         };
         if (hasAttackKindSlot(c)) entry.attackKind = newAtk;
+        if (newDesc) entry.description = newDesc;
         out.push(entry);
       }
     }
@@ -121,8 +116,9 @@ export default function DevSkillsPage() {
     <main style={{ padding: 16, fontFamily: 'sans-serif' }}>
       <h1 style={{ margin: '0 0 8px' }}>スキルカード編集（開発用）</h1>
       <p style={{ fontSize: 12, opacity: 0.7, margin: '0 0 12px' }}>
-        テキスト・レアリティ・タグ・攻撃属性のみ編集可能。説明文は effect から自動生成されます。
-        編集はメモリ内のみ。コピーボタンで変更分のJSONを取得し、手動で <code>skills.ts</code> に反映してください。
+        テキスト・レアリティ・タグ・攻撃属性・説明文を編集可能。編集はメモリ内のみ。
+        コピーボタンで変更分のJSONを取得し、手動で <code>skills.ts</code> に反映してください。
+        説明文を空にすると effect から自動生成に戻ります。
       </p>
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
@@ -152,7 +148,7 @@ export default function DevSkillsPage() {
               <Th>レアリティ</Th>
               <Th>カード名</Th>
               <Th>タグ</Th>
-              <Th>説明（自動）</Th>
+              <Th>説明文（空=自動生成）</Th>
               <Th>種別</Th>
               <Th>攻撃属性</Th>
             </tr>
@@ -162,11 +158,14 @@ export default function DevSkillsPage() {
               const e = edits[c.id] ?? {};
               const origAtk = effectAttackKind(c.active?.effect);
               const curAtk = e.attackKind ?? origAtk;
+              const currentDesc = e.description !== undefined ? e.description : c.description ?? '';
+              const autoDesc = describeSkillCard({ ...c, description: undefined });
               const dirty =
                 (e.name !== undefined && e.name !== c.name) ||
                 (e.rarity !== undefined && e.rarity !== c.rarity) ||
                 (e.nameTag !== undefined && (e.nameTag || '') !== (c.nameTag ?? '')) ||
-                (hasAttackKindSlot(c) && e.attackKind !== undefined && e.attackKind !== origAtk);
+                (hasAttackKindSlot(c) && e.attackKind !== undefined && e.attackKind !== origAtk) ||
+                (e.description !== undefined && e.description !== (c.description ?? ''));
               return (
                 <tr
                   key={c.id}
@@ -208,8 +207,14 @@ export default function DevSkillsPage() {
                       placeholder="(なし)"
                     />
                   </Td>
-                  <Td>
-                    <span style={{ fontSize: 12, opacity: 0.85 }}>{describeCard(c)}</span>
+                  <Td style={{ minWidth: 280 }}>
+                    <input
+                      type="text"
+                      value={currentDesc}
+                      onChange={(ev) => setField(c.id, 'description', ev.target.value)}
+                      style={{ ...cellInputStyle, color: currentDesc ? '#000' : '#999' }}
+                      placeholder={autoDesc}
+                    />
                   </Td>
                   <Td>
                     <span style={{ fontSize: 11, opacity: 0.6 }}>
@@ -288,6 +293,6 @@ function Th({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Td({ children }: { children: React.ReactNode }) {
-  return <td style={{ padding: '4px 8px', verticalAlign: 'top' }}>{children}</td>;
+function Td({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return <td style={{ padding: '4px 8px', verticalAlign: 'top', ...style }}>{children}</td>;
 }

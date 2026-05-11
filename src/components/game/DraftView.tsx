@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
-import { describeActiveEffect, describePassive as _describePassiveFull } from '../../lib/skill-text';
+import { describeSkillCard } from '../../lib/skill-text';
 
 const RARITY_COLOR: Record<string, string> = {
   N: '#888',
@@ -236,7 +236,5 @@ function PendingStrip({ state }: { state: ClientGameState }) {
 }
 
 function describeSkill(c: import('../../server/engine/types').SkillCard): string {
-  if (c.active) return describeActiveEffect(c.active.effect);
-  if (c.passive) return `パッシブ：${_describePassiveFull(c.passive)}`;
-  return '';
+  return describeSkillCard(c);
 }

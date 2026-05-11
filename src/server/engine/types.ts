@@ -431,6 +431,8 @@ export type SkillCard = {
   isPassive?: boolean;
   active?: Omit<ActiveSkill, 'id' | 'order' | 'name' | 'nameTag'>;
   passive?: Omit<PassiveSkill, 'id' | 'name' | 'nameTag'>;
+  /** Manual override for the card's description text shown to players. Falls back to auto-generated text if absent. */
+  description?: string;
 };
 
 export type BattleEvent =
