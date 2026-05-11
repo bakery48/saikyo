@@ -68,7 +68,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-007', name: '鋼鉄の肉体', rarity: 'SR', nameTag: 'スチール', active: { effect: { kind: 'buff_self', stat: 'def', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-008', name: '神速の波動', rarity: 'SR', nameTag: 'ゴッドスピード', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-009', name: '威圧の咆哮', rarity: 'SR', nameTag: 'デモン', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 6, duration: 'battle' } } },
-  { id: 'sk-sr-010', name: '次撃3倍', rarity: 'SR', nameTag: 'オーバードライブ', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
+  { id: 'sk-sr-010', name: '一挙集中', rarity: 'SR', nameTag: 'オーバードライブ', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
   { id: 'sk-sr-012', name: '装甲の粉砕', rarity: 'SR', nameTag: 'クラッシャー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-018', name: '時空の束縛', rarity: 'SR', nameTag: 'タイムストップ', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-020', name: '豪鬼咆哮', rarity: 'SR', nameTag: 'オーバーロード', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 9, duration: 'once' } } },
@@ -76,7 +76,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-013', name: '一時停止', rarity: 'SR', nameTag: 'ポーズ', active: { effect: { kind: 'pause_opponent' } } },
   { id: 'sk-sr-014', name: 'ハリケーン', rarity: 'SR', nameTag: 'ストーム', active: { effect: { kind: 'shuffle_opponent_actives' } } },
   { id: 'sk-sr-015', name: '二重起動', rarity: 'SR', nameTag: 'ダブル', active: { effect: { kind: 'next_multi_attack', extraCount: 1, failurePenalty: 2 } } },
-  { id: 'sk-sr-016', name: '集中砲火', rarity: 'SR', nameTag: 'バリスタ', active: { effect: { kind: 'multi_hit_attack', mult: 0.8, useStat: 'atk', hitCount: 3, attackKind: 'passthrough' } } },
+  { id: 'sk-sr-016', name: '百花繚乱', rarity: 'SR', nameTag: 'バリスタ', active: { effect: { kind: 'multi_hit_attack', mult: 0.8, useStat: 'atk', hitCount: 3, attackKind: 'passthrough' } } },
   { id: 'sk-sr-017', name: 'フラッシュバック', rarity: 'SR', nameTag: 'フラッシュバック', active: { effect: { kind: 'rewind_skill', rewindBy: 2, selfDamage: 4 } } },
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
@@ -85,7 +85,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッドソーン', active: { effect: { kind: 'reflect_shield', amount: 10 } } },
   { id: 'sk-ssr-019', name: 'マキシム・オーラ', rarity: 'SSR', nameTag: 'マキシム', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.5, threshold: 7 } } },
   { id: 'sk-ssr-020', name: '絶壁砕き', rarity: 'SSR', nameTag: 'ウォールブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.5, multShield: 4.0, attackKind: 'strike' } } },
-  { id: 'sk-ssr-004', name: '時止め', rarity: 'SSR', nameTag: 'クロノス', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
+  { id: 'sk-ssr-004', name: '集中砲火', rarity: 'SSR', nameTag: 'クロノス', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
   { id: 'sk-ssr-005', name: '三重起動', rarity: 'SSR', nameTag: 'トリプル', active: { effect: { kind: 'next_multi_attack', extraCount: 2, failurePenalty: 6 } } },
   { id: 'sk-ssr-006', name: '時を巻き戻す', rarity: 'SSR', nameTag: 'リワインド', active: { effect: { kind: 'heal_max_fraction', denominator: 2 } } },
   { id: 'sk-ssr-007', name: 'エターナル', rarity: 'SSR', nameTag: 'エターナル', active: { effect: { kind: 'rewind_skill', rewindBy: 3, selfDamage: 7 } } },
