@@ -497,13 +497,6 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'buff_self_all', amount: 2, duration: 'once' } },
   },
   {
-    id: 'sk-r-047',
-    name: '処刑予告',
-    rarity: 'R',
-    nameTag: 'エグゼ',
-    active: { effect: { kind: 'execute', threshold: 3 } },
-  },
-  {
     id: 'sk-r-048',
     name: '盾割り',
     rarity: 'R',
