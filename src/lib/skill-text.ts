@@ -350,6 +350,62 @@ export function describeSkillCard(c: { active?: { effect: SkillEffect }; passive
   return '';
 }
 
+export type EffectCategory = '攻撃' | 'バフ' | 'デバフ' | '回復/防御' | 'その他';
+
+/** Derive the broad visual category of an active skill effect. */
+export function effectCategory(e: SkillEffect): EffectCategory {
+  switch (e.kind) {
+    case 'attack':
+    case 'true_damage':
+    case 'multi_hit_attack':
+    case 'deja_vu_attack':
+    case 'fixed_damage_attack':
+    case 'gamble_true_damage':
+    case 'drain_hp':
+    case 'sacrifice_attack':
+    case 'execute':
+    case 'percent_max_hp_true':
+    case 'coup_de_grace':
+    case 'shield_bash':
+    case 'counter_strike':
+    case 'risky_attack':
+    case 'swat_attack':
+    case 'def_attack':
+    case 'pin_attack':
+    case 'reckless_attack':
+    case 'spd_diff_multi_attack':
+      return '攻撃';
+    case 'buff_self':
+    case 'buff_self_all':
+    case 'hp_to_atk':
+    case 'swap_atk_def':
+    case 'cleanse_self':
+    case 'next_amp':
+    case 'force_amp':
+    case 'next_multi_attack':
+    case 'append_struggle':
+    case 'attack_then_cleanse':
+      return 'バフ';
+    case 'debuff_target':
+    case 'debuff_all':
+    case 'dispel':
+    case 'steal_stat':
+    case 'pay_hp_debuff_all':
+    case 'share_damage_next':
+    case 'nullify_next':
+    case 'attack_then_dispel':
+      return 'デバフ';
+    case 'heal':
+    case 'heal_max_fraction':
+    case 'shield':
+    case 'pay_hp_shield':
+    case 'break_shield':
+      return '回復/防御';
+    default:
+      return 'その他';
+  }
+}
+
 /** Tooltip body for an active skill (effect + tag, newline-separated). */
 export function activeTooltip(a: ActiveSkill): string {
   const lines = [describeActiveEffect(a.effect)];

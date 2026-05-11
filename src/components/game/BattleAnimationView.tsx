@@ -149,6 +149,18 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
   const missByB = currentSkillEventRange.some(
     (e) => e.kind === 'miss' && e.to === 'b',
   );
+  const buffToA = currentSkillEventRange.some(
+    (e) => e.kind === 'buff' && e.player === 'a',
+  );
+  const buffToB = currentSkillEventRange.some(
+    (e) => e.kind === 'buff' && e.player === 'b',
+  );
+  const debuffToA = currentSkillEventRange.some(
+    (e) => e.kind === 'debuff' && e.player === 'a',
+  );
+  const debuffToB = currentSkillEventRange.some(
+    (e) => e.kind === 'debuff' && e.player === 'b',
+  );
 
   // Pre-battle dice information (the LAST pair of rolls is the deciding one).
   const rolls = match.log.filter(
@@ -215,6 +227,8 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
           usedSkillIds={usedSkillIdsA}
           slashKey={damageToA ? `a-${stepIdx}` : null}
           missKey={missByA ? `miss-a-${stepIdx}` : null}
+          buffKey={buffToA ? `buff-a-${stepIdx}` : null}
+          debuffKey={debuffToA ? `debuff-a-${stepIdx}` : null}
           hitKind={currentAttackKind}
         />
         <div
@@ -254,6 +268,8 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
             usedSkillIds={usedSkillIdsB}
             slashKey={damageToB ? `b-${stepIdx}` : null}
             missKey={missByB ? `miss-b-${stepIdx}` : null}
+            buffKey={buffToB ? `buff-b-${stepIdx}` : null}
+            debuffKey={debuffToB ? `debuff-b-${stepIdx}` : null}
             hitKind={currentAttackKind}
           />
         )}
@@ -272,6 +288,8 @@ function MonsterColumn({
   usedSkillIds,
   slashKey,
   missKey,
+  buffKey,
+  debuffKey,
   hitKind,
 }: {
   player: ClientPlayer | undefined;
@@ -285,6 +303,10 @@ function MonsterColumn({
   slashKey: string | null;
   /** Non-null + unique key when this side just dodged; pops a "MISS!" overlay. */
   missKey: string | null;
+  /** Non-null + unique key when this side received a buff this step. */
+  buffKey: string | null;
+  /** Non-null + unique key when this side received a debuff this step. */
+  debuffKey: string | null;
   /** Visual category of the incoming attack. */
   hitKind: Exclude<AttackKind, 'passthrough'>;
 }) {
@@ -344,6 +366,8 @@ function MonsterColumn({
         <div style={{ position: 'relative', width: 80, height: 80 }}>
           <span style={{ ...pieceStyle(player.color, { size: 80 }), position: 'absolute', inset: 0 }} />
           {slashKey && <HitEffect key={slashKey} kind={hitKind} />}
+          {buffKey && <BuffEffect key={buffKey} />}
+          {debuffKey && <DebuffEffect key={debuffKey} />}
           {missKey && <MissBadge key={missKey} />}
         </div>
         <div style={{ fontSize: 14, fontWeight: 600 }}>
@@ -935,6 +959,87 @@ function WindEffect() {
       <path className="arc" d="M50,50 Q22,22 10,50" fill="none" stroke="#ccee88" strokeWidth="2" strokeLinecap="round" />
       <path className="arc" d="M50,50 Q58,80 34,92" fill="none" stroke="#ccee88" strokeWidth="2" strokeLinecap="round" />
       <circle cx="50" cy="50" r="6" fill="#eeffcc" opacity={0.95} />
+    </svg>
+  );
+}
+
+/** バフ：金色の星とスパークが下から上へ上昇する。 */
+function BuffEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.75 }, { opacity: 0 }],
+      { duration: 900, fill: 'forwards' },
+    );
+    svg.querySelectorAll<SVGElement>('.spark').forEach((el, i) => {
+      const startX = 30 + (i % 5) * 10;
+      const rise = 25 + (i % 3) * 8;
+      el.animate(
+        [
+          { transform: `translate(${startX - 50}px, 20px) scale(0.5)`, opacity: 0 },
+          { transform: `translate(${startX - 50 + (i % 2 === 0 ? 5 : -5)}px, ${-rise}px) scale(1)`, opacity: 1, offset: 0.5 },
+          { transform: `translate(${startX - 50 + (i % 2 === 0 ? 8 : -8)}px, ${-rise - 10}px) scale(0.3)`, opacity: 0 },
+        ],
+        { duration: 600 + i * 50, delay: i * 60, fill: 'forwards', easing: 'ease-out' },
+      );
+    });
+  }, []);
+  const stars = [
+    [50, 60], [38, 70], [62, 68], [45, 80], [55, 75], [42, 58], [58, 62], [50, 85],
+  ];
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 6px rgba(255,210,0,0.95))' }}>
+      {stars.map(([cx, cy], i) => (
+        <polygon key={i} className="spark"
+          points={`${cx},${cy! - 6} ${cx! + 2},${cy! - 2} ${cx! + 6},${cy! - 2} ${cx! + 3},${cy! + 1} ${cx! + 4},${cy! + 6} ${cx},${cy! + 3} ${cx! - 4},${cy! + 6} ${cx! - 3},${cy! + 1} ${cx! - 6},${cy! - 2} ${cx! - 2},${cy! - 2}`}
+          fill={i % 2 === 0 ? '#ffd700' : '#fffaaa'}
+          style={{ transformOrigin: '50px 70px' }} />
+      ))}
+    </svg>
+  );
+}
+
+/** デバフ：紫の暗いもやが上から降りてくる。 */
+function DebuffEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.7 }, { opacity: 0 }],
+      { duration: 850, fill: 'forwards' },
+    );
+    svg.querySelectorAll<SVGElement>('.wisp').forEach((el, i) => {
+      const startX = 28 + (i % 5) * 11;
+      const drop = 22 + (i % 3) * 7;
+      el.animate(
+        [
+          { transform: `translate(${startX - 50}px, -30px) scale(0.4)`, opacity: 0 },
+          { transform: `translate(${startX - 50 + (i % 2 === 0 ? 4 : -4)}px, ${drop - 30}px) scale(1)`, opacity: 0.85, offset: 0.5 },
+          { transform: `translate(${startX - 50 + (i % 2 === 0 ? 7 : -7)}px, ${drop}px) scale(0.2)`, opacity: 0 },
+        ],
+        { duration: 650 + i * 40, delay: i * 55, fill: 'forwards', easing: 'ease-in' },
+      );
+    });
+  }, []);
+  const wisps = [
+    [50, 25], [38, 20], [62, 22], [44, 30], [56, 18], [48, 35], [52, 12], [40, 28],
+  ];
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 8px rgba(120,0,180,0.9))' }}>
+      {wisps.map(([cx, cy], i) => (
+        <ellipse key={i} className="wisp"
+          cx={cx} cy={cy} rx={5 + (i % 3)} ry={8 + (i % 2) * 3}
+          fill={i % 3 === 0 ? '#8800cc' : i % 3 === 1 ? '#aa44dd' : '#660099'}
+          opacity={0.8}
+          style={{ transformOrigin: '50px 25px' }} />
+      ))}
     </svg>
   );
 }

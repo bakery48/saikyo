@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { SKILLS } from '../../../server/engine/cards/skills';
-import { describeSkillCard } from '../../../lib/skill-text';
+import { describeSkillCard, effectCategory, type EffectCategory } from '../../../lib/skill-text';
 import type { AttackKind, Rarity, SkillCard, SkillEffect } from '../../../server/engine/types';
 
 const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
@@ -174,7 +174,7 @@ export default function DevSkillsPage() {
               <Th>カード名</Th>
               <Th>タグ</Th>
               <Th>説明文（空=自動生成）</Th>
-              <Th>種別</Th>
+              <Th>カテゴリ</Th>
               <Th>攻撃属性</Th>
             </tr>
           </thead>
@@ -242,9 +242,13 @@ export default function DevSkillsPage() {
                     />
                   </Td>
                   <Td>
-                    <span style={{ fontSize: 11, opacity: 0.6 }}>
-                      {c.active ? 'active' : c.passive ? 'passive' : '-'}
-                    </span>
+                    {c.passive ? (
+                      <span style={{ fontSize: 11, opacity: 0.6 }}>passive</span>
+                    ) : c.active ? (
+                      <CategoryBadge cat={effectCategory(c.active.effect)} />
+                    ) : (
+                      <span style={{ fontSize: 11, opacity: 0.4 }}>—</span>
+                    )}
                   </Td>
                   <Td>
                     {hasAttackKindSlot(c) ? (
@@ -320,4 +324,29 @@ function Th({ children }: { children: React.ReactNode }) {
 
 function Td({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return <td style={{ padding: '4px 8px', verticalAlign: 'top', ...style }}>{children}</td>;
+}
+
+const CATEGORY_COLOR: Record<EffectCategory, string> = {
+  '攻撃': '#e74c3c',
+  'バフ': '#d4a017',
+  'デバフ': '#8e44ad',
+  '回復/防御': '#27ae60',
+  'その他': '#888',
+};
+
+function CategoryBadge({ cat }: { cat: EffectCategory }) {
+  return (
+    <span style={{
+      display: 'inline-block',
+      padding: '1px 6px',
+      borderRadius: 10,
+      fontSize: 11,
+      fontWeight: 600,
+      background: CATEGORY_COLOR[cat] + '22',
+      color: CATEGORY_COLOR[cat],
+      border: `1px solid ${CATEGORY_COLOR[cat]}55`,
+    }}>
+      {cat}
+    </span>
+  );
 }
