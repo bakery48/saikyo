@@ -1126,6 +1126,10 @@ function applySkill(args: {
       break;
     }
     case 'gamble_true_damage': {
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        break;
+      }
       const win = rng.next() < e.percent / 100;
       if (win) {
         let actual = takeDamage(target, e.amount, rng, targetPassives, targetSide, log, true);
@@ -1193,13 +1197,16 @@ function applySkill(args: {
       break;
     }
     case 'drain_hp': {
-      const amount = Math.min(e.amount, Math.max(0, target.hp));
-      if (amount > 0) {
-        target.hp -= amount;
-        log.push({ kind: 'damage', from: userSide, to: targetSide, amount, hpAfter: target.hp });
-        const healed = healCapped(user, amount);
-        if (healed > 0) log.push({ kind: 'heal', player: userSide, amount: healed, hpAfter: user.hp });
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        break;
       }
+      let actual = takeDamage(target, e.amount, rng, targetPassives, targetSide, log, true);
+      actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+      target.hp -= actual;
+      log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+      const healed = healCapped(user, actual);
+      if (healed > 0) log.push({ kind: 'heal', player: userSide, amount: healed, hpAfter: user.hp });
       break;
     }
     case 'steal_stat': {
@@ -1233,6 +1240,10 @@ function applySkill(args: {
       break;
     }
     case 'shield_bash': {
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        break;
+      }
       const shieldVal = user.shield;
       if (shieldVal > 0) {
         user.shield = 0;
@@ -1252,6 +1263,10 @@ function applySkill(args: {
       break;
     }
     case 'sacrifice_attack': {
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        break;
+      }
       const cost = Math.max(1, Math.floor(user.hp * e.hpRatio));
       const actualCost = Math.min(cost, user.hp - 1); // can't die from sacrifice
       user.hp -= actualCost;
@@ -1268,6 +1283,10 @@ function applySkill(args: {
       break;
     }
     case 'execute': {
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        break;
+      }
       if (target.hp > 0 && target.hp <= e.threshold) {
         const lethal = target.hp;
         // endure_fatal can still save them once.
@@ -1279,6 +1298,10 @@ function applySkill(args: {
       break;
     }
     case 'percent_max_hp_true': {
+      if (rollDodge(user, target, rng)) {
+        log.push({ kind: 'miss', from: userSide, to: targetSide });
+        break;
+      }
       const dmgRaw = Math.max(1, Math.floor((target.maxHp * e.percent) / 100));
       let dmg = takeDamage(target, dmgRaw, rng, targetPassives, targetSide, log, true);
       dmg = clampWithEndure(target, dmg, targetPassives, targetSide, log);
