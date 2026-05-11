@@ -68,6 +68,8 @@ export type SkillEffect =
   | { kind: 'reflect_shield'; amount: number }
   /** Set up a threshold shield; blocks ALL damage from any single hit below `threshold`. Only a hit of `threshold` or more breaks the shield (damage goes through). Blocks indefinitely until broken. */
   | { kind: 'threshold_shield'; threshold: number }
+  /** Pay `hpCostFraction` of max HP as true self-damage, then set up a threshold shield. */
+  | { kind: 'pay_hp_threshold_shield'; hpCostFraction: number; threshold: number }
   /** Cause the opponent to skip their next turn (no skill consumed, just delayed). */
   | { kind: 'pause_opponent' }
   /** Randomly shuffle the opponent's remaining (unused) active skills. */

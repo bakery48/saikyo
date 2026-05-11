@@ -1137,6 +1137,14 @@ function applySkill(args: {
       log.push({ kind: 'shield', player: userSide, amount: e.threshold });
       break;
     }
+    case 'pay_hp_threshold_shield': {
+      const cost = Math.max(1, Math.floor(user.maxHp * e.hpCostFraction));
+      user.hp = Math.max(1, user.hp - cost);
+      log.push({ kind: 'damage', from: userSide, to: userSide, amount: cost, hpAfter: user.hp });
+      user.thresholdShield = e.threshold;
+      log.push({ kind: 'shield', player: userSide, amount: e.threshold });
+      break;
+    }
     case 'buff_self': {
       applyStatMod(user, e.stat, e.amount, e.duration);
       log.push({ kind: 'buff', player: userSide, stat: e.stat, amount: e.amount, duration: e.duration });
