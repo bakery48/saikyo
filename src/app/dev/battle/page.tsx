@@ -296,6 +296,8 @@ export default function DevBattlePage() {
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   // Keep a snapshot of the sides that produced the last run (for monster reconstruction)
   const [runSides, setRunSides] = useState<{ a: SideState; b: SideState } | null>(null);
+  // Bumped on every successful run so BattleStage remounts and replays from the top.
+  const [runKey, setRunKey] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [seed, setSeed] = useState('');
@@ -318,6 +320,7 @@ export default function DevBattlePage() {
       const data = (await res.json()) as RunResult;
       setRunResult(data);
       setRunSides({ a: { ...sideA }, b: { ...sideB } });
+      setRunKey((k) => k + 1);
       if (overrideSeed === undefined && !seed) setSeed(String(data.seed));
     } catch (err) {
       setError(String(err));
@@ -382,7 +385,7 @@ export default function DevBattlePage() {
         <div style={{ marginTop: 20 }}>
           <div style={{ fontSize: 12, opacity: 0.5, marginBottom: 8 }}>seed: {runResult!.seed}</div>
           {/* Game-identical battle animation */}
-          <BattleStage state={fakeData.state} match={fakeData.match} />
+          <BattleStage key={runKey} state={fakeData.state} match={fakeData.match} />
 
           {/* Collapsible raw log */}
           <details style={{ marginTop: 16 }}>
