@@ -115,6 +115,8 @@ type CombatStats = Stats & {
   /** Active pierce flag currently in effect for the in-progress active. */
   forcePierceActive: boolean;
   passiveIds: string[];
+  /** Number of sin-tagged skills this side owns (computed at battle start). */
+  sinCount: number;
 };
 
 function initCombat(m: Monster): CombatStats {
@@ -167,6 +169,7 @@ function initCombat(m: Monster): CombatStats {
     forceAmpActive: 1,
     forcePierceActive: false,
     passiveIds: [],
+    sinCount: 0,
   };
   return c;
 }
@@ -308,6 +311,8 @@ function applyBattleStartPassives(
         break;
     }
   }
+
+  self.sinCount = sinCount;
 
   // Automatic sin bonus — no passive card required; scales with tier.
   if (sinCount > 0) {
@@ -1058,7 +1063,16 @@ function applySkill(args: {
     return;
   }
   log.push({ kind: 'skill_use', player: userSide, skillId: skill.id, name: skill.name });
-  const e = skill.effect;
+  // Sin card override: if the user holds enough sins, replace the sin effect with a scaling attack.
+  const rawEffect = skill.effect;
+  const sinMult =
+    skill.tag === 'sin' && user.sinCount >= 7 ? 5.0
+    : skill.tag === 'sin' && user.sinCount >= 5 ? 2.5
+    : skill.tag === 'sin' && user.sinCount >= 3 ? 1.5
+    : null;
+  const e: typeof rawEffect = sinMult !== null
+    ? { kind: 'attack', mult: sinMult, useStat: 'atk', attackKind: 'passthrough' }
+    : rawEffect;
   // Multi-attack pending: only attack/true_damage qualify; otherwise fizzle and self-damage.
   if (user.pendingMultiAttack > 0 && e.kind !== 'attack' && e.kind !== 'true_damage') {
     const penalty = user.pendingMultiAttackPenalty;
