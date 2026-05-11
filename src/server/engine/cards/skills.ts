@@ -76,7 +76,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-013', name: '一時停止', rarity: 'SR', nameTag: 'ポーズ', active: { effect: { kind: 'pause_opponent' } } },
   { id: 'sk-sr-014', name: 'ハリケーン', rarity: 'SR', nameTag: 'ストーム', active: { effect: { kind: 'shuffle_opponent_actives' } } },
   { id: 'sk-sr-015', name: '二重起動', rarity: 'SR', nameTag: 'ダブル', active: { effect: { kind: 'next_multi_attack', extraCount: 1, failurePenalty: 2 } } },
-  { id: 'sk-sr-016', name: '百花繚乱', rarity: 'SR', nameTag: 'バリスタ', active: { effect: { kind: 'multi_hit_attack', mult: 0.8, useStat: 'atk', hitCount: 3, attackKind: 'passthrough' } } },
+  { id: 'sk-sr-016', name: '百花繚乱', rarity: 'SSR', nameTag: 'バリスタ', active: { effect: { kind: 'multi_hit_attack', mult: 0.7, useStat: 'atk', hitCount: 4, attackKind: 'passthrough' } } },
   { id: 'sk-sr-017', name: 'フラッシュバック', rarity: 'SR', nameTag: 'フラッシュバック', active: { effect: { kind: 'rewind_skill', rewindBy: 2, selfDamage: 4 } } },
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
@@ -243,10 +243,10 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-r-032',
-    name: '連爪撃',
+    name: '連撃',
     rarity: 'R',
     nameTag: 'クロー',
-    active: { effect: { kind: 'multi_hit_attack', mult: 0.8, useStat: 'atk', hitCount: 2, attackKind: 'claw' } },
+    active: { effect: { kind: 'multi_hit_attack', mult: 0.9, useStat: 'atk', hitCount: 2, attackKind: 'passthrough' } },
   },
   {
     id: 'sk-r-035',
@@ -340,13 +340,6 @@ export const SKILLS: SkillCard[] = [
     rarity: 'SSR',
     nameTag: 'リバイブ',
     active: { effect: { kind: 'heal_max_fraction', denominator: 1 } },
-  },
-  {
-    id: 'sk-ssr-010',
-    name: '滅殺',
-    rarity: 'SSR',
-    nameTag: 'エクスターミネート',
-    active: { effect: { kind: 'multi_hit_attack', mult: 1.5, useStat: 'atk', hitCount: 3, attackKind: 'magic' } },
   },
   {
     id: 'sk-ssr-011',
@@ -445,9 +438,9 @@ export const SKILLS: SkillCard[] = [
   {
     id: 'sk-r-042',
     name: '集中連撃',
-    rarity: 'R',
+    rarity: 'SR',
     nameTag: 'ラピッド',
-    active: { effect: { kind: 'multi_hit_attack', mult: 0.6, useStat: 'atk', hitCount: 3, attackKind: 'strike' } },
+    active: { effect: { kind: 'multi_hit_attack', mult: 0.8, useStat: 'atk', hitCount: 3, attackKind: 'strike' } },
   },
   {
     id: 'sk-r-043',
@@ -514,13 +507,6 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'attack', mult: 1.4, useStat: 'def', attackKind: 'strike' } },
   },
   {
-    id: 'sk-sr-032',
-    name: '業魔',
-    rarity: 'SR',
-    nameTag: 'カルマ',
-    active: { effect: { kind: 'multi_hit_attack', mult: 1.0, useStat: 'atk', hitCount: 2, attackKind: 'magic' } },
-  },
-  {
     id: 'sk-sr-033',
     name: '鎧変換',
     rarity: 'SR',
@@ -562,13 +548,6 @@ export const SKILLS: SkillCard[] = [
     rarity: 'SSR',
     nameTag: 'パーフェクトミラー',
     active: { effect: { kind: 'share_damage_next', percent: 100 } },
-  },
-  {
-    id: 'sk-ssr-017',
-    name: '殺戮の舞',
-    rarity: 'SSR',
-    nameTag: 'カーネイジ',
-    active: { effect: { kind: 'multi_hit_attack', mult: 1.2, useStat: 'atk', hitCount: 4, attackKind: 'sword' } },
   },
   // ── R passives (batch 3) ────────────────────────────────────────────────
   {
