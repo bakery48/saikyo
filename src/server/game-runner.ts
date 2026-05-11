@@ -74,6 +74,7 @@ export class GameRunner {
     yieldForAnimation?: boolean;
     totalRounds?: number;
     miniRoundsPerRound?: number;
+    skillCardCounts?: Record<string, number>;
   }) {
     this.seed = opts.seed;
     this.state = createInitialState({
@@ -82,6 +83,7 @@ export class GameRunner {
       players: opts.humans.map((h) => ({ id: h.id, name: h.name, isCPU: false })),
       totalRounds: opts.totalRounds,
       miniRoundsPerRound: opts.miniRoundsPerRound,
+      skillCardCounts: opts.skillCardCounts,
     });
     this.humanIds = new Set(opts.humans.map((h) => h.id));
     this.pauseOnReveal = opts.pauseOnReveal ?? false;

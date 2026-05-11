@@ -37,6 +37,8 @@ export type RoomView = {
   totalRounds: number;
   /** Number of event/action/draft cycles per round (1-3). */
   miniRoundsPerRound: number;
+  /** Per-card skill deck counts (cardId -> 0|1|2|3). Missing entries use rarity defaults. */
+  skillCardCounts: Record<string, number>;
 };
 
 /** Compact view used in the lobby's room list. */
@@ -125,6 +127,7 @@ export type ClientMessage =
       type: 'set_room_settings';
       totalRounds?: number;
       miniRoundsPerRound?: number;
+      skillCardCounts?: Record<string, number>;
     }
   | { type: 'submit_pick'; baseId: string }
   | { type: 'submit_draft'; skillId: string }

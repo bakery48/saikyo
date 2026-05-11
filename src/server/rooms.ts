@@ -23,6 +23,8 @@ export type Room = {
   totalRounds: number;
   /** How many event/action/draft cycles per round (1-3). */
   miniRoundsPerRound: number;
+  /** Per-card skill deck counts (cardId -> 0|1|2|3). Missing entries use rarity defaults. */
+  skillCardCounts: Record<string, number>;
 };
 
 export class RoomManager {
@@ -45,6 +47,7 @@ export class RoomManager {
       inGame: false,
       totalRounds: clampSetting(settings?.totalRounds ?? 3),
       miniRoundsPerRound: clampSetting(settings?.miniRoundsPerRound ?? 3),
+      skillCardCounts: {},
     };
     this.rooms.set(id, room);
     this.playerToRoom.set(player.id, id);
@@ -129,6 +132,7 @@ export class RoomManager {
       inGame: room.inGame,
       totalRounds: room.totalRounds,
       miniRoundsPerRound: room.miniRoundsPerRound,
+      skillCardCounts: room.skillCardCounts,
     };
   }
 
@@ -138,7 +142,7 @@ export class RoomManager {
    */
   setSettings(
     hostId: string,
-    settings: { totalRounds?: number; miniRoundsPerRound?: number },
+    settings: { totalRounds?: number; miniRoundsPerRound?: number; skillCardCounts?: Record<string, number> },
   ): Room {
     const room = this.getRoomByPlayer(hostId);
     if (!room) throw new Error('not in a room');
@@ -149,6 +153,9 @@ export class RoomManager {
     }
     if (settings.miniRoundsPerRound !== undefined) {
       room.miniRoundsPerRound = clampSetting(settings.miniRoundsPerRound);
+    }
+    if (settings.skillCardCounts !== undefined) {
+      room.skillCardCounts = settings.skillCardCounts;
     }
     return room;
   }

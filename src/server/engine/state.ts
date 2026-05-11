@@ -27,6 +27,13 @@ function clampRoundCount(n: number): number {
   return Math.max(1, Math.min(3, Math.floor(n)));
 }
 
+/** Default number of copies per rarity for the skill deck. */
+function defaultSkillCount(rarity: import('./types').Rarity): number {
+  if (rarity === 'N') return 3;
+  if (rarity === 'R') return 2;
+  return 1; // SR, SSR
+}
+
 /** Build a fresh GameState with shuffled decks and a draft-style monster pick. */
 export function createInitialState(opts: {
   roomId: string;
@@ -36,6 +43,8 @@ export function createInitialState(opts: {
   totalRounds?: number;
   /** How many event/action/draft cycles each round contains (1-3, default 3). */
   miniRoundsPerRound?: number;
+  /** Per-card skill deck counts (cardId -> 0|1|2|3). Missing entries use rarity defaults. */
+  skillCardCounts?: Record<string, number>;
 }): GameState {
   if (opts.players.length < 0 || opts.players.length > 8) {
     throw new Error('players must be 0..8 (CPUs fill remaining slots)');
@@ -90,7 +99,14 @@ export function createInitialState(opts: {
     decks: {
       event: shuffle(EVENTS, rng),
       action: shuffle(ACTIONS, rng),
-      skill: shuffle(SKILLS, rng),
+      skill: (() => {
+        const skillDeck: SkillCard[] = [];
+        for (const card of SKILLS) {
+          const count = opts.skillCardCounts?.[card.id] ?? defaultSkillCount(card.rarity);
+          for (let i = 0; i < count; i++) skillDeck.push(card);
+        }
+        return shuffle(skillDeck, rng);
+      })(),
       eventGrave: [],
       actionGrave: [],
       skillGrave: [],

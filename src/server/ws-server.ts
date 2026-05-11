@@ -68,6 +68,7 @@ export class GameWsServer {
         const room = this.roomManager.setSettings(playerId, {
           totalRounds: msg.totalRounds,
           miniRoundsPerRound: msg.miniRoundsPerRound,
+          skillCardCounts: msg.skillCardCounts,
         });
         this.broadcastRoomState(room.id);
         return;
@@ -194,6 +195,7 @@ export class GameWsServer {
       yieldForAnimation: true,
       totalRounds: room.totalRounds,
       miniRoundsPerRound: room.miniRoundsPerRound,
+      skillCardCounts: room.skillCardCounts,
     });
     this.games.set(room.id, game);
     room.inGame = true;

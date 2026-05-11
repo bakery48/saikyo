@@ -1,5 +1,22 @@
 'use client';
 import type { GameSocket } from '../lib/useGameSocket';
+import type { Rarity } from '../server/engine/types';
+import { SKILLS } from '../server/engine/cards/skills';
+
+const RARITY_COLORS: Record<Rarity, string> = {
+  N: '#888',
+  R: '#27ae60',
+  SR: '#2980b9',
+  SSR: '#8e44ad',
+};
+
+const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
+
+function defaultSkillCount(rarity: Rarity): number {
+  if (rarity === 'N') return 3;
+  if (rarity === 'R') return 2;
+  return 1; // SR, SSR
+}
 
 export function RoomView({ socket }: { socket: GameSocket }) {
   const room = socket.room;
@@ -7,6 +24,33 @@ export function RoomView({ socket }: { socket: GameSocket }) {
   const me = room.players.find((p) => p.id === socket.playerId);
   const isReady = me?.isReady ?? false;
   const isHost = !!me?.isHost;
+  const canEdit = isHost && !room.inGame;
+
+  const skillCardCounts: Record<string, number> = room.skillCardCounts ?? {};
+
+  function getCount(cardId: string, rarity: Rarity): number {
+    return skillCardCounts[cardId] ?? defaultSkillCount(rarity);
+  }
+
+  function setCardCount(cardId: string, count: number) {
+    const newCounts = { ...skillCardCounts, [cardId]: count };
+    socket.send({ type: 'set_room_settings', skillCardCounts: newCounts });
+  }
+
+  function setRarityCount(rarity: Rarity, count: number) {
+    const newCounts = { ...skillCardCounts };
+    for (const card of SKILLS) {
+      if (card.rarity === rarity) {
+        newCounts[card.id] = count;
+      }
+    }
+    socket.send({ type: 'set_room_settings', skillCardCounts: newCounts });
+  }
+
+  const skillsByRarity: Record<Rarity, typeof SKILLS> = { N: [], R: [], SR: [], SSR: [] };
+  for (const card of SKILLS) {
+    skillsByRarity[card.rarity].push(card);
+  }
 
   return (
     <section style={{ display: 'grid', gap: 16, maxWidth: 640 }}>
@@ -46,6 +90,100 @@ export function RoomView({ socket }: { socket: GameSocket }) {
             socket.send({ type: 'set_room_settings', miniRoundsPerRound: v })
           }
         />
+      </fieldset>
+
+      <fieldset
+        style={{
+          border: '1px solid #ccc',
+          borderRadius: 6,
+          padding: '8px 12px',
+          display: 'grid',
+          gap: 8,
+        }}
+      >
+        <legend style={{ padding: '0 4px', fontSize: 13, fontWeight: 600 }}>
+          スキルデッキ設定 {canEdit ? '(ホストのみ編集可)' : '(読み取り専用)'}
+        </legend>
+
+        {/* Rarity bulk controls */}
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', fontSize: 12 }}>
+          <span style={{ fontWeight: 600, fontSize: 12 }}>レアリティ一括:</span>
+          {RARITIES.map((rarity) => (
+            <span key={rarity} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ color: RARITY_COLORS[rarity], fontWeight: 700 }}>{rarity}:</span>
+              {[0, 1, 2, 3].map((n) => (
+                <button
+                  key={n}
+                  disabled={!canEdit}
+                  onClick={() => setRarityCount(rarity, n)}
+                  style={{
+                    fontSize: 11,
+                    padding: '2px 6px',
+                    cursor: canEdit ? 'pointer' : 'default',
+                    background: skillsByRarity[rarity].every((c) => getCount(c.id, rarity) === n)
+                      ? RARITY_COLORS[rarity]
+                      : '#eee',
+                    color: skillsByRarity[rarity].every((c) => getCount(c.id, rarity) === n) ? '#fff' : '#333',
+                    border: '1px solid #ccc',
+                    borderRadius: 3,
+                  }}
+                >
+                  {n}
+                </button>
+              ))}
+            </span>
+          ))}
+        </div>
+
+        <hr style={{ margin: '4px 0', border: 'none', borderTop: '1px solid #eee' }} />
+
+        {/* Per-card controls grouped by rarity */}
+        {RARITIES.map((rarity) => (
+          <div key={rarity}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: RARITY_COLORS[rarity], marginBottom: 4 }}>
+              {rarity}
+            </div>
+            <div style={{ display: 'grid', gap: 3 }}>
+              {skillsByRarity[rarity].map((card) => {
+                const current = getCount(card.id, card.rarity);
+                return (
+                  <div
+                    key={card.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: 12,
+                    }}
+                  >
+                    <span style={{ minWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {card.name}
+                    </span>
+                    {[0, 1, 2, 3].map((n) => (
+                      <button
+                        key={n}
+                        disabled={!canEdit}
+                        onClick={() => setCardCount(card.id, n)}
+                        style={{
+                          fontSize: 11,
+                          padding: '2px 6px',
+                          cursor: canEdit ? 'pointer' : 'default',
+                          background: current === n ? RARITY_COLORS[rarity] : '#eee',
+                          color: current === n ? '#fff' : '#333',
+                          border: '1px solid #ccc',
+                          borderRadius: 3,
+                          minWidth: 22,
+                        }}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </fieldset>
 
       <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 6 }}>
