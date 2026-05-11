@@ -158,7 +158,19 @@ export type SkillEffect =
    * either the user's or the opponent's monster. The new slots play at the
    * end of the active queue.
    */
-  | { kind: 'append_struggle'; target: 'self' | 'opponent'; count: number };
+  | { kind: 'append_struggle'; target: 'self' | 'opponent'; count: number }
+  /**
+   * Multiply the damage of EVERY hit in the user's next active by `mult`, and
+   * make those hits pierce damage_reduction / damage_cap / mid_damage_immune.
+   * Consumed when the next active begins (one-shot).
+   */
+  | { kind: 'force_amp'; mult: number }
+  /**
+   * Sword attack repeated `max(1, opponentSPD - userSPD)` times. Each hit deals
+   * max(1, floor(useStat × 1 + flatAtkMod − DEF)). The lower the user's SPD
+   * relative to the opponent, the more hits.
+   */
+  | { kind: 'spd_diff_multi_attack'; flatAtkMod: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind };
 
 export type ActiveSkill = {
   id: string;
@@ -320,7 +332,14 @@ export type PassiveEffect =
   /** At battle start, gain `+allBonus` ATK/DEF/SPD; at each own turn start, lose `hpDrain` HP. */
   | { kind: 'chronos'; allBonus: number; hpDrain: number }
   /** Dynamic: when only one own active remains, gain `amount` to ATK/DEF/SPD attack-side calculations. */
-  | { kind: 'final_form'; amount: number };
+  | { kind: 'final_form'; amount: number }
+  /**
+   * At battle start: opponent becomes unable to dodge, and the user's attacks
+   * ignore the opponent's DEF for the rest of the battle. Cost (self): SPD is
+   * locked to 0 (battle-long, cannot be raised by buffs) and ATK is reduced
+   * by 2.
+   */
+  | { kind: 'absolute_zero' };
 
 export type PassiveSkill = {
   id: string;

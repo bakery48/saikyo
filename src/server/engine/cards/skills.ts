@@ -1135,4 +1135,30 @@ export const SKILLS: SkillCard[] = [
       effect: { kind: 'final_form', amount: 10 },
     },
   },
+  // ── エタニティ三段奥義 ─────────────────────────────────────────────────
+  {
+    id: 'sk-ssrp-010',
+    name: '絶対零度 (passive)',
+    rarity: 'SSR',
+    nameTag: 'ブリザード',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'absolute_zero' },
+    },
+  },
+  {
+    id: 'sk-sr-018',
+    name: '理外の咆哮',
+    rarity: 'SR',
+    nameTag: 'フォース',
+    active: { effect: { kind: 'force_amp', mult: 3 } },
+  },
+  {
+    id: 'sk-ssr-008',
+    name: '永劫の刃',
+    rarity: 'SSR',
+    nameTag: 'エタニティ',
+    active: { effect: { kind: 'spd_diff_multi_attack', flatAtkMod: -1, useStat: 'atk', attackKind: 'sword' } },
+  },
 ];

@@ -109,6 +109,12 @@ export function describeActiveEffect(e: SkillEffect): string {
       return e.target === 'self'
         ? `自分の末尾のスロットに「悪あがき（1で攻撃）」を${e.count}スロット追加`
         : `相手の末尾のスロットに「悪あがき（1で攻撃）」を${e.count}スロット追加`;
+    case 'force_amp':
+      return `次のスロットのダメージを×${e.mult}、軽減・上限を貫通`;
+    case 'spd_diff_multi_attack': {
+      const flatStr = e.flatAtkMod === 0 ? '' : e.flatAtkMod > 0 ? `+${e.flatAtkMod}` : `${e.flatAtkMod}`;
+      return `${e.useStat.toUpperCase()}${flatStr} で攻撃を「相手SPD−自分SPD」回（最低1回）連続発動`;
+    }
   }
 }
 
@@ -267,6 +273,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `バトル開始時にATK/DEF/SPD+${e.allBonus}、自分のターン開始時にHP-${e.hpDrain}`;
     case 'final_form':
       return `最後の自分の攻撃で与ダメ+${e.amount}`;
+    case 'absolute_zero':
+      return `バトル開始時、相手は回避不可・自分の攻撃はDEF無視。代わりに自分のSPDを0に固定、ATK-2`;
   }
 }
 

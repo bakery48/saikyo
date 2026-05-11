@@ -98,6 +98,18 @@ type CombatStats = Stats & {
   lastBreathAvailable: boolean;
   /** False once rebirth has fired this battle. */
   rebirthAvailable: boolean;
+  /** Defender flag: incoming attacks treat DEF as 0 (set by absolute_zero on opponent). */
+  incomingIgnoresDef: boolean;
+  /** Self flag: SPD reads as 0 regardless of mods/buffs (set by absolute_zero). */
+  spdLockedZero: boolean;
+  /** Pending damage multiplier for the NEXT own active (set by force_amp). */
+  forceAmpNext: number;
+  /** Pending pierce flag for the NEXT own active (skips reductions/caps in takeDamage). */
+  forcePierceNext: boolean;
+  /** Active multiplier currently in effect for the in-progress active. */
+  forceAmpActive: number;
+  /** Active pierce flag currently in effect for the in-progress active. */
+  forcePierceActive: boolean;
   passiveIds: string[];
 };
 
@@ -142,6 +154,12 @@ function initCombat(m: Monster): CombatStats {
     revengeBurstAvailable: m.passives.some((p) => p.effect.kind === 'revenge_burst'),
     lastBreathAvailable: m.passives.some((p) => p.effect.kind === 'last_breath'),
     rebirthAvailable: m.passives.some((p) => p.effect.kind === 'rebirth'),
+    incomingIgnoresDef: false,
+    spdLockedZero: false,
+    forceAmpNext: 1,
+    forcePierceNext: false,
+    forceAmpActive: 1,
+    forcePierceActive: false,
     passiveIds: [],
   };
   return c;
@@ -157,6 +175,7 @@ function effStat(c: CombatStats, key: StatKey): number {
   if (key === 'hp') return c.hp;
   if (key === 'atk') return c.atk + c.atkMod + (c.onceBuffs.atk ?? 0);
   if (key === 'def') return c.def + c.defMod + (c.onceBuffs.def ?? 0);
+  if (c.spdLockedZero) return 0;
   return c.spd + c.spdMod + (c.onceBuffs.spd ?? 0);
 }
 
@@ -268,6 +287,15 @@ function applyBattleStartPassives(
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
+      case 'absolute_zero':
+        if (p.trigger.kind === 'battle_start') {
+          opponent.cannotDodge = true;
+          opponent.incomingIgnoresDef = true;
+          self.spdLockedZero = true;
+          self.atkMod -= 2;
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
     }
   }
   return { spdRollBonus };
@@ -343,24 +371,27 @@ function takeDamage(
   side: Side,
   log: BattleEvent[],
   ignoreShield = false,
+  pierceReductions = false,
 ): number {
   if (rawDamage <= 0) return 0;
   // immortal_first_phase: full immunity while activesUsedCount < until.
-  for (const p of passives) {
-    if (p.effect.kind === 'immortal_first_phase' && target.activesUsedCount < p.effect.until) {
-      log.push({ kind: 'passive', player: side, passiveId: p.id });
-      return 0;
+  if (!pierceReductions) {
+    for (const p of passives) {
+      if (p.effect.kind === 'immortal_first_phase' && target.activesUsedCount < p.effect.until) {
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+        return 0;
+      }
     }
   }
   // 影武者 absorb_first_hit: fully eat the first incoming damage instance.
-  if (target.absorbHitsRemaining > 0) {
+  if (!pierceReductions && target.absorbHitsRemaining > 0) {
     target.absorbHitsRemaining -= 1;
     const passive = passives.find((p) => p.effect.kind === 'absorb_first_hit');
     if (passive) log.push({ kind: 'passive', player: side, passiveId: passive.id });
     return 0;
   }
   // Random negation passive (e.g., voltank 1/6 chance).
-  if (target.negateOneIn > 0 && rng.int(1, target.negateOneIn) === 1) {
+  if (!pierceReductions && target.negateOneIn > 0 && rng.int(1, target.negateOneIn) === 1) {
     const passive = passives.find(
       (p) => p.effect.kind === 'damage_negate_chance' && p.trigger.kind === 'on_take_damage',
     );
@@ -397,7 +428,7 @@ function takeDamage(
     target.shield -= absorbed;
     dmg -= absorbed;
   }
-  if (target.damageReduction > 0) {
+  if (!pierceReductions && target.damageReduction > 0) {
     const passive = passives.find(
       (p) => p.effect.kind === 'damage_reduction' && p.trigger.kind === 'on_take_damage',
     );
@@ -405,7 +436,7 @@ function takeDamage(
     dmg = Math.max(0, dmg - target.damageReduction);
   }
   // 逆境 low_hp_damage_reduction: extra reduction while at or below half HP.
-  if (target.maxHp > 0 && target.hp * 2 <= target.maxHp) {
+  if (!pierceReductions && target.maxHp > 0 && target.hp * 2 <= target.maxHp) {
     for (const p of passives) {
       if (p.effect.kind === 'low_hp_damage_reduction' && dmg > 0) {
         const reduce = p.effect.amount;
@@ -415,17 +446,21 @@ function takeDamage(
     }
   }
   // damage_cap: clamp final damage per hit.
-  for (const p of passives) {
-    if (p.effect.kind === 'damage_cap' && dmg > p.effect.maxPerHit) {
-      dmg = p.effect.maxPerHit;
-      log.push({ kind: 'passive', player: side, passiveId: p.id });
+  if (!pierceReductions) {
+    for (const p of passives) {
+      if (p.effect.kind === 'damage_cap' && dmg > p.effect.maxPerHit) {
+        dmg = p.effect.maxPerHit;
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+      }
     }
   }
   // mid_damage_immune: nullify if final dmg falls in [min, max].
-  for (const p of passives) {
-    if (p.effect.kind === 'mid_damage_immune' && dmg >= p.effect.min && dmg <= p.effect.max) {
-      log.push({ kind: 'passive', player: side, passiveId: p.id });
-      return 0;
+  if (!pierceReductions) {
+    for (const p of passives) {
+      if (p.effect.kind === 'mid_damage_immune' && dmg >= p.effect.min && dmg <= p.effect.max) {
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+        return 0;
+      }
     }
   }
   // rage_atk: gain ATK every time this side actually takes damage.
@@ -563,7 +598,7 @@ function resolveAttack(args: {
   const mult = effect.mult * attacker.nextAmp;
   let baseDamage = stat * mult;
   const isFirstAttack = !attacker.firstAttackMade;
-  const ignoreDef = isFirstAttack && attacker.firstAttackTrue;
+  const ignoreDef = (isFirstAttack && attacker.firstAttackTrue) || defender.incomingIgnoresDef;
 
   if (isFirstAttack && attacker.firstAttackAmp > 0) {
     baseDamage += attacker.firstAttackAmp * stat;
@@ -573,6 +608,9 @@ function resolveAttack(args: {
     def = Math.floor(def / attacker.firstAttackDefDiv);
   }
   let raw = Math.max(1, Math.floor(baseDamage - def));
+  if (attacker.forceAmpActive > 1) {
+    raw = Math.max(1, Math.floor(raw * attacker.forceAmpActive));
+  }
   if (isFirstAttack && attacker.firstAttackDamageMult > 1) {
     raw = Math.max(1, Math.floor(raw * attacker.firstAttackDamageMult));
   }
@@ -609,7 +647,7 @@ function resolveAttack(args: {
   }
   // Capture state needed for post-damage triggers.
   const defenderHadShield = defender.shield > 0;
-  let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef);
+  let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef, attacker.forcePierceActive);
   actual = clampWithEndure(defender, actual, defenderPassives, defenderSide, log);
   defender.hp -= actual;
   log.push({
@@ -956,6 +994,12 @@ function applySkill(args: {
   log: BattleEvent[];
 }): void {
   const { user, target, userPassives, targetPassives, userMon, targetMon, skill, userSide, targetSide, rng, log } = args;
+  // Transfer any pending force_amp into the in-progress active (consumed unconditionally,
+  // matching nextAmp semantics on nullify/fizzle).
+  user.forceAmpActive = user.forceAmpNext;
+  user.forcePierceActive = user.forcePierceNext;
+  user.forceAmpNext = 1;
+  user.forcePierceNext = false;
   // Nullification check: opponent flagged nullify on us.
   if (user.nullifyOpponentNext) {
     user.nullifyOpponentNext = false;
@@ -1640,6 +1684,34 @@ function applySkill(args: {
           log,
         });
       }
+      break;
+    }
+    case 'force_amp': {
+      user.forceAmpNext = e.mult;
+      user.forcePierceNext = true;
+      log.push({ kind: 'buff', player: userSide, stat: 'atk', amount: e.mult, duration: 'once' });
+      break;
+    }
+    case 'spd_diff_multi_attack': {
+      const userSpd = effStat(user, 'spd');
+      const oppSpd = effStat(target, 'spd');
+      const hits = Math.max(1, oppSpd - userSpd);
+      for (let i = 0; i < hits; i++) {
+        if (rollDodge(user, target, rng)) {
+          log.push({ kind: 'miss', from: userSide, to: targetSide });
+          continue;
+        }
+        const myStat = e.useStat === 'atk' ? effStat(user, 'atk') : effStat(user, 'spd');
+        const def = target.incomingIgnoresDef ? 0 : effStat(target, 'def');
+        let raw = Math.max(1, Math.floor(myStat + e.flatAtkMod - def));
+        if (user.forceAmpActive > 1) raw = Math.max(1, Math.floor(raw * user.forceAmpActive));
+        let actual = takeDamage(target, raw, rng, targetPassives, targetSide, log, target.incomingIgnoresDef, user.forcePierceActive);
+        actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
+        target.hp -= actual;
+        log.push({ kind: 'damage', from: userSide, to: targetSide, amount: actual, hpAfter: target.hp });
+        if (target.hp <= 0) break;
+      }
+      user.firstAttackMade = true;
       break;
     }
   }
