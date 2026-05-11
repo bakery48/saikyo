@@ -21,12 +21,11 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-n-021', name: '集中', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 2, duration: 'battle' } } },
   { id: 'sk-n-022', name: '加速', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 2, duration: 'battle' } } },
   { id: 'sk-n-025', name: '反撃の構え', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 3, duration: 'once' } } },
-  { id: 'sk-n-026', name: '小細工', rarity: 'N', active: { effect: { kind: 'true_damage', amount: 1 } } },
-  { id: 'sk-n-028', name: '影刺し', rarity: 'N', active: { effect: { kind: 'true_damage', amount: 2 } } },
+  { id: 'sk-n-028', name: '影刺し', rarity: 'R', nameTag: 'シャドウ', active: { effect: { kind: 'true_damage', amount: 4 } } },
 
   // ─── R (Rare) ──────────────────────────────────────────────────────────────
   { id: 'sk-r-001', name: '強攻撃', rarity: 'R', nameTag: 'パワー', active: { effect: { kind: 'attack', mult: 1.3, useStat: 'atk', attackKind: 'passthrough' } } },
-  { id: 'sk-r-002', name: '貫通刺突', rarity: 'R', nameTag: 'ピアサー', active: { effect: { kind: 'true_damage', amount: 4 } } },
+  { id: 'sk-r-002', name: '貫通刺突', rarity: 'SR', nameTag: 'ピアサー', active: { effect: { kind: 'true_damage', amount: 6 } } },
   { id: 'sk-r-004', name: 'いばらの盾', rarity: 'R', nameTag: 'ソーン', active: { effect: { kind: 'reflect_shield', amount: 3 } } },
   { id: 'sk-r-053', name: '硬化盾', rarity: 'R', nameTag: 'ハードシールド', active: { effect: { kind: 'threshold_shield', threshold: 5 } } },
   { id: 'sk-r-054', name: 'オーラ', rarity: 'R', nameTag: 'オーラ', active: { effect: { kind: 'threshold_shield', threshold: 3 } } },
@@ -62,7 +61,7 @@ export const SKILLS: SkillCard[] = [
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
   { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk', attackKind: 'passthrough' } } },
-  { id: 'sk-sr-003', name: '貫通の理', rarity: 'SR', nameTag: 'バニッシャー', active: { effect: { kind: 'true_damage', amount: 7 } } },
+  { id: 'sk-sr-003', name: '貫通の理', rarity: 'SSR', nameTag: 'バニッシャー', active: { effect: { kind: 'true_damage', amount: 8 } } },
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
   { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 7 } } },
   { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 5 } } },
@@ -87,7 +86,6 @@ export const SKILLS: SkillCard[] = [
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
   { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'ドラゴン', active: { effect: { kind: 'attack', mult: 3.0, useStat: 'atk', attackKind: 'passthrough' } } },
-  { id: 'sk-ssr-002', name: '神殺しの一撃', rarity: 'SSR', nameTag: 'ゴッド', active: { effect: { kind: 'true_damage', amount: 12 } } },
   { id: 'sk-ssr-003', name: '聖なる盾', rarity: 'SSR', nameTag: 'セレスチャル', active: { effect: { kind: 'shield', amount: 12 } } },
   { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッドソーン', active: { effect: { kind: 'reflect_shield', amount: 10 } } },
   { id: 'sk-ssr-019', name: 'マキシム・オーラ', rarity: 'SSR', nameTag: 'マキシム', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.5, threshold: 7 } } },
