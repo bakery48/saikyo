@@ -85,6 +85,7 @@ export type SkillEffect =
   | { kind: 'self_damage_max_fraction'; fraction: number }
   /** Heal the opponent by `amount` (capped at their max HP). Used for sin cards. */
   | { kind: 'heal_target'; amount: number }
+  | { kind: 'heal_target_max_fraction'; fraction: number }
   /** Cause the opponent to skip their next turn (no skill consumed, just delayed). */
   | { kind: 'pause_opponent' }
   /** Randomly shuffle the opponent's remaining (unused) active skills. */

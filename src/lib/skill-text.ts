@@ -24,6 +24,8 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `自分に最大HP×${Math.round(e.fraction * 100)}%のダメージ（罪）`;
     case 'heal_target':
       return `相手のHP+${e.amount}（罪）`;
+    case 'heal_target_max_fraction':
+      return `相手のHPを最大HP×${Math.round(e.fraction * 100)}%回復（罪）`;
     case 'true_damage':
       return `DEF無視 ${e.amount} ダメージ`;
     case 'heal':
@@ -432,6 +434,7 @@ export function effectCategory(e: SkillEffect): EffectCategory {
     case 'self_damage':
     case 'self_damage_max_fraction':
     case 'heal_target':
+    case 'heal_target_max_fraction':
       return '罪';
     default:
       return 'その他';

@@ -1131,6 +1131,14 @@ function applySkill(args: {
       }
       break;
     }
+    case 'heal_target_max_fraction': {
+      const amt = Math.max(1, Math.floor(target.maxHp * e.fraction));
+      const applied = healCapped(target, amt);
+      if (applied > 0) {
+        log.push({ kind: 'heal', player: targetSide, amount: applied, hpAfter: target.hp });
+      }
+      break;
+    }
     case 'shield_break_attack': {
       const hasShield = target.shield > 0 || target.reflectShield > 0 || target.thresholdShield > 0;
       const mult = hasShield ? e.multShield : e.multNoShield;
