@@ -31,7 +31,7 @@ export function describeActiveEffect(e: SkillEffect): string {
     case 'target_stat_damage':
       return `相手${e.stat.toUpperCase()}×${e.mult} のDEF無視ダメージ`;
     case 'stat_diff_damage':
-      return `(相手${e.stat.toUpperCase()}−自分${e.stat.toUpperCase()})×${e.mult} のDEF無視ダメージ`;
+      return `|相手${e.stat.toUpperCase()}−自分${e.stat.toUpperCase()}|×${e.mult} のDEF無視ダメージ`;
     case 'target_higher_stat_attack':
       return `相手のATK/DEFの高い方×${e.mult} のDEF無視ダメージ`;
     case 'conditional_attack_if_target_higher':

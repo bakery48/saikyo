@@ -1231,7 +1231,7 @@ function applySkill(args: {
         log.push({ kind: 'miss', from: userSide, to: targetSide });
         break;
       }
-      const diff = Math.max(0, effStat(target, e.stat) - effStat(user, e.stat));
+      const diff = Math.abs(effStat(target, e.stat) - effStat(user, e.stat));
       const dmg = Math.max(1, Math.floor(diff * e.mult * user.nextAmp));
       let actual = takeDamage(target, dmg, rng, targetPassives, targetSide, log, true);
       actual = clampWithEndure(target, actual, targetPassives, targetSide, log);

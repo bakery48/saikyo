@@ -59,10 +59,15 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-063', name: '逆鱗', rarity: 'R', nameTag: 'リバース', active: { effect: { kind: 'target_stat_damage', stat: 'atk', mult: 0.8 } } },
   { id: 'sk-r-064', name: '鎧貫き', rarity: 'R', nameTag: 'アーマーピアサー', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 0.8 } } },
   { id: 'sk-r-065', name: '格上狩り', rarity: 'R', nameTag: 'ジャイアントキラー', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'atk', multIf: 2.0, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-r-066', name: '守り崩し', rarity: 'R', nameTag: 'ウォールブレイク', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'def', multIf: 2.0, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-048', name: '怒りの代償', rarity: 'SR', nameTag: 'リトリビューション', active: { effect: { kind: 'stat_diff_damage', stat: 'atk', mult: 2.0 } } },
-  { id: 'sk-sr-049', name: '防壁崩し', rarity: 'SR', nameTag: 'ウォールブレイク', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'def', multIf: 2.5, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-sr-049', name: '防壁崩し', rarity: 'SR', nameTag: 'フォートレスブレイク', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'def', multIf: 2.5, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-050', name: '反転の刃', rarity: 'SR', nameTag: 'ミラーブレイド', active: { effect: { kind: 'target_higher_stat_attack', mult: 1.0, attackKind: 'sword' } } },
-  { id: 'sk-ssr-021', name: '要塞砲', rarity: 'SSR', nameTag: 'フォートレス', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 1.0 } } },
+  { id: 'sk-sr-051', name: '天の逆鱗', rarity: 'SR', nameTag: 'ドラゴンレイジ', active: { effect: { kind: 'target_stat_damage', stat: 'atk', mult: 1.3 } } },
+  { id: 'sk-sr-052', name: '装甲崩壊', rarity: 'SR', nameTag: 'アーマーブレイク', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 1.3 } } },
+  { id: 'sk-sr-053', name: '大物狩り', rarity: 'SR', nameTag: 'タイタンキラー', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'atk', multIf: 3.0, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-sr-054', name: '要塞砲', rarity: 'SR', nameTag: 'フォートレス', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 0.7 } } },
+  { id: 'sk-ssr-021', name: '絶対要塞砲', rarity: 'SSR', nameTag: 'フォートレスキャノン', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 1.0 } } },
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
   { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk', attackKind: 'passthrough' } } },
