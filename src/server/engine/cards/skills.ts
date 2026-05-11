@@ -70,7 +70,6 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-008', name: '神速の波動', rarity: 'SR', nameTag: 'ゴッドスピード', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-009', name: '威圧の咆哮', rarity: 'SR', nameTag: 'デモン', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-010', name: '次撃3倍', rarity: 'SR', nameTag: 'オーバードライブ', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
-  { id: 'sk-sr-011', name: '完全見切り', rarity: 'SR', nameTag: 'セージ', active: { effect: { kind: 'nullify_next' } } },
   { id: 'sk-sr-012', name: '装甲の粉砕', rarity: 'SR', nameTag: 'クラッシャー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-018', name: '時空の束縛', rarity: 'SR', nameTag: 'タイムストップ', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-020', name: '豪鬼咆哮', rarity: 'SR', nameTag: 'オーバーロード', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 9, duration: 'once' } } },
