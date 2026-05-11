@@ -19,7 +19,7 @@ export function describeActiveEffect(e: SkillEffect): string {
     case 'heal':
       return `HP+${e.amount} 回復`;
     case 'shield':
-      return `次の被ダメ−${e.amount}`;
+      return `シールド${e.amount}（累計で吸収、枯渇で解除）`;
     case 'reflect_shield':
       return `棘シールド${e.amount}（被ダメを吸収＆反射、累計${e.amount}で解除）`;
     case 'threshold_shield':
