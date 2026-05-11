@@ -70,6 +70,11 @@ export type SkillEffect =
   | { kind: 'threshold_shield'; threshold: number }
   /** Pay `hpCostFraction` of max HP as true self-damage, then set up a threshold shield. */
   | { kind: 'pay_hp_threshold_shield'; hpCostFraction: number; threshold: number }
+  /**
+   * Conditional attack: if the opponent has no shield, attack at `multNoShield`.
+   * If the opponent has any shield (regular / reflect / threshold), destroy all shields first then attack at `multShield`.
+   */
+  | { kind: 'shield_break_attack'; useStat: 'atk' | 'def' | 'spd'; multNoShield: number; multShield: number; attackKind?: AttackKind }
   /** Cause the opponent to skip their next turn (no skill consumed, just delayed). */
   | { kind: 'pause_opponent' }
   /** Randomly shuffle the opponent's remaining (unused) active skills. */

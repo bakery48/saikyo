@@ -1082,6 +1082,28 @@ function applySkill(args: {
       }
       break;
     }
+    case 'shield_break_attack': {
+      const hasShield = target.shield > 0 || target.reflectShield > 0 || target.thresholdShield > 0;
+      const mult = hasShield ? e.multShield : e.multNoShield;
+      if (hasShield) {
+        target.shield = 0;
+        target.reflectShield = 0;
+        target.thresholdShield = 0;
+      }
+      resolveAttack({
+        attacker: user,
+        defender: target,
+        attackerPassives: userPassives,
+        defenderPassives: targetPassives,
+        effect: { kind: 'attack', mult, useStat: e.useStat, attackKind: e.attackKind },
+        attackerSide: userSide,
+        defenderSide: targetSide,
+        rng,
+        log,
+      });
+      user.firstAttackMade = true;
+      break;
+    }
     case 'true_damage': {
       const runTrueDamage = (): void => {
         if (rollDodge(user, target, rng)) {

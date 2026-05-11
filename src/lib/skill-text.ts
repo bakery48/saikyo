@@ -12,6 +12,8 @@ export function describeActiveEffect(e: SkillEffect): string {
   switch (e.kind) {
     case 'attack':
       return `${e.useStat.toUpperCase()}×${e.mult} 攻撃`;
+    case 'shield_break_attack':
+      return `盾なし: ${e.useStat.toUpperCase()}×${e.multNoShield} / 盾あり: 全シールド破壊＋${e.useStat.toUpperCase()}×${e.multShield}`;
     case 'true_damage':
       return `DEF無視 ${e.amount} ダメージ`;
     case 'heal':
@@ -362,6 +364,7 @@ export type EffectCategory = '攻撃' | 'バフ' | 'デバフ' | '回復/防御'
 export function effectCategory(e: SkillEffect): EffectCategory {
   switch (e.kind) {
     case 'attack':
+    case 'shield_break_attack':
     case 'true_damage':
     case 'multi_hit_attack':
     case 'deja_vu_attack':
