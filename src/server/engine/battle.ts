@@ -41,6 +41,8 @@ type CombatStats = Stats & {
   shield: number;
   /** Thorn-shield HP; absorbs incoming attack damage and reflects the absorbed amount as true damage to the attacker. Depletes until 0. */
   reflectShield: number;
+  /** Threshold shield; blocks all damage from hits below this value. A hit >= threshold breaks the shield and damage passes through fully. 0 = inactive. */
+  thresholdShield: number;
   /** Whether the next opponent active will be nullified. */
   nullifyOpponentNext: boolean;
   /** Active skill index (next to use). */
@@ -129,6 +131,7 @@ function initCombat(m: Monster): CombatStats {
     nextAmp: 1,
     shield: 0,
     reflectShield: 0,
+    thresholdShield: 0,
     nullifyOpponentNext: false,
     skillIdx: 0,
     firstAttackMade: false,
@@ -435,6 +438,13 @@ function takeDamage(
     const absorbed = Math.min(target.reflectShield, dmg);
     target.reflectShield -= absorbed;
     dmg -= absorbed;
+  }
+  if (!ignoreShield && target.thresholdShield > 0) {
+    if (dmg < target.thresholdShield) {
+      dmg = 0; // hit too small — fully blocked, shield stays
+    } else {
+      target.thresholdShield = 0; // shield broken by a large hit
+    }
   }
   if (!pierceReductions && target.damageReduction > 0) {
     const passive = passives.find(
@@ -1120,6 +1130,11 @@ function applySkill(args: {
     case 'reflect_shield': {
       user.reflectShield += e.amount;
       log.push({ kind: 'shield', player: userSide, amount: e.amount });
+      break;
+    }
+    case 'threshold_shield': {
+      user.thresholdShield = e.threshold;
+      log.push({ kind: 'shield', player: userSide, amount: e.threshold });
       break;
     }
     case 'buff_self': {

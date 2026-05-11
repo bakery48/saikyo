@@ -66,6 +66,8 @@ export type SkillEffect =
   | { kind: 'shield'; amount: number }
   /** Set up a thorn shield with `amount` total HP; while active it absorbs incoming attack damage and reflects the absorbed amount back to the attacker as true damage. */
   | { kind: 'reflect_shield'; amount: number }
+  /** Set up a threshold shield; blocks ALL damage from any single hit below `threshold`. Only a hit of `threshold` or more breaks the shield (damage goes through). Blocks indefinitely until broken. */
+  | { kind: 'threshold_shield'; threshold: number }
   /** Cause the opponent to skip their next turn (no skill consumed, just delayed). */
   | { kind: 'pause_opponent' }
   /** Randomly shuffle the opponent's remaining (unused) active skills. */

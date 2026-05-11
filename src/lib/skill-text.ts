@@ -20,6 +20,8 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `次の被ダメ−${e.amount}`;
     case 'reflect_shield':
       return `棘シールド${e.amount}（被ダメを吸収＆反射、累計${e.amount}で解除）`;
+    case 'threshold_shield':
+      return `不動盾（${e.threshold}未満の攻撃を無効化、${e.threshold}以上で盾が砕ける）`;
     case 'buff_self':
       return `自身${e.stat.toUpperCase()}+${e.amount}（${e.duration === 'battle' ? 'バトル中' : '次の1回'}）`;
     case 'debuff_target':
@@ -401,6 +403,7 @@ export function effectCategory(e: SkillEffect): EffectCategory {
     case 'heal_max_fraction':
     case 'shield':
     case 'reflect_shield':
+    case 'threshold_shield':
     case 'pay_hp_shield':
     case 'break_shield':
       return '回復/防御';
