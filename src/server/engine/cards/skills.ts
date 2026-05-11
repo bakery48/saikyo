@@ -27,7 +27,6 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-001', name: '強攻撃', rarity: 'R', nameTag: 'パワー', active: { effect: { kind: 'attack', mult: 1.3, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-r-002', name: '貫通刺突', rarity: 'SR', nameTag: 'ピアサー', active: { effect: { kind: 'true_damage', amount: 6 } } },
   { id: 'sk-r-004', name: 'いばらの盾', rarity: 'R', nameTag: 'ソーン', active: { effect: { kind: 'reflect_shield', amount: 3 } } },
-  { id: 'sk-r-053', name: '硬化盾', rarity: 'R', nameTag: 'ハードシールド', active: { effect: { kind: 'threshold_shield', threshold: 5 } } },
   { id: 'sk-r-054', name: 'オーラ', rarity: 'R', nameTag: 'オーラ', active: { effect: { kind: 'threshold_shield', threshold: 3 } } },
   { id: 'sk-r-005', name: '気力解放', rarity: 'R', nameTag: 'レイジ', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'once' } } },
   { id: 'sk-r-006', name: '岩石防御', rarity: 'R', nameTag: 'ロックアーマー', active: { effect: { kind: 'buff_self', stat: 'def', amount: 6, duration: 'once' } } },
