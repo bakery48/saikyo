@@ -45,7 +45,7 @@ export function BattleAnimationView({
   return <BattleStage state={state} match={myMatch} />;
 }
 
-function BattleStage({ state, match }: { state: ClientGameState; match: BattleMatch }) {
+export function BattleStage({ state, match }: { state: ClientGameState; match: BattleMatch }) {
   // Indices in the log of every skill_use event (one per "action" the user
   // wants to see step through at STEP_MS).
   const stepLogIndices = useMemo(() => {

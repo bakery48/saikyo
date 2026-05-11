@@ -62,5 +62,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     aName: a.name,
     bName: b.name,
     seed,
+    startHpA: body.a.stats.hp,
+    startHpB: body.b.stats.hp,
   });
 }
