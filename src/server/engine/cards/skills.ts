@@ -224,13 +224,6 @@ export const SKILLS: SkillCard[] = [
   },
   // ── R actives (new) ─────────────────────────────────────────────────────
   {
-    id: 'sk-r-028',
-    name: '氷縛り',
-    rarity: 'R',
-    nameTag: 'フリーズ',
-    active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 4, duration: 'battle' } },
-  },
-  {
     id: 'sk-r-029',
     name: '吸命術',
     rarity: 'R',
