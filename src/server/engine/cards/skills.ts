@@ -11,7 +11,6 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-n-001', name: '攻撃', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-n-009', name: '回復', rarity: 'N', active: { effect: { kind: 'heal', amount: 3 } } },
   { id: 'sk-n-010', name: '小盾', rarity: 'N', active: { effect: { kind: 'shield', amount: 2 } } },
-  { id: 'sk-n-026', name: '砕けぬ盾', rarity: 'N', active: { effect: { kind: 'threshold_shield', threshold: 3 } } },
   { id: 'sk-n-011', name: '気合の構え', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 3, duration: 'once' } } },
   { id: 'sk-n-012', name: '守護の構え', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'def', amount: 3, duration: 'once' } } },
   { id: 'sk-n-013', name: '威嚇', rarity: 'N', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 2, duration: 'battle' } } },
