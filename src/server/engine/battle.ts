@@ -39,6 +39,8 @@ type CombatStats = Stats & {
   nextAmp: number;
   /** Pending shield (flat damage reduction on next incoming attack). */
   shield: number;
+  /** Thorn-shield HP; absorbs incoming attack damage and reflects the absorbed amount as true damage to the attacker. Depletes until 0. */
+  reflectShield: number;
   /** Whether the next opponent active will be nullified. */
   nullifyOpponentNext: boolean;
   /** Active skill index (next to use). */
@@ -126,6 +128,7 @@ function initCombat(m: Monster): CombatStats {
     onceBuffs: {},
     nextAmp: 1,
     shield: 0,
+    reflectShield: 0,
     nullifyOpponentNext: false,
     skillIdx: 0,
     firstAttackMade: false,
@@ -428,6 +431,11 @@ function takeDamage(
     target.shield -= absorbed;
     dmg -= absorbed;
   }
+  if (!ignoreShield && target.reflectShield > 0) {
+    const absorbed = Math.min(target.reflectShield, dmg);
+    target.reflectShield -= absorbed;
+    dmg -= absorbed;
+  }
   if (!pierceReductions && target.damageReduction > 0) {
     const passive = passives.find(
       (p) => p.effect.kind === 'damage_reduction' && p.trigger.kind === 'on_take_damage',
@@ -649,6 +657,7 @@ function resolveAttack(args: {
   }
   // Capture state needed for post-damage triggers.
   const defenderHadShield = defender.shield > 0;
+  const defenderReflectShieldBefore = defender.reflectShield;
   let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef, attacker.forcePierceActive);
   actual = clampWithEndure(defender, actual, defenderPassives, defenderSide, log);
   defender.hp -= actual;
@@ -758,6 +767,14 @@ function resolveAttack(args: {
         log.push({ kind: 'damage', from: attackerSide, to: defenderSide, amount: bonus, hpAfter: defender.hp });
       }
     }
+  }
+  // reflect_shield: reflect absorbed damage back to the attacker as true damage.
+  const reflectShieldAbsorbed = defenderReflectShieldBefore - defender.reflectShield;
+  if (reflectShieldAbsorbed > 0) {
+    let r = takeDamage(attacker, reflectShieldAbsorbed, rng, attackerPassives, attackerSide, log, true);
+    r = clampWithEndure(attacker, r, attackerPassives, attackerSide, log);
+    attacker.hp -= r;
+    log.push({ kind: 'damage', from: defenderSide, to: attackerSide, amount: r, hpAfter: attacker.hp });
   }
   // share_damage_next: reflect a portion of the dealt damage back to the attacker.
   if (actual > 0 && defender.shareDamageNextPercent > 0) {
@@ -1098,6 +1115,11 @@ function applySkill(args: {
       const gain = e.amount * user.shieldMultiplier;
       user.shield += gain;
       log.push({ kind: 'shield', player: userSide, amount: gain });
+      break;
+    }
+    case 'reflect_shield': {
+      user.reflectShield += e.amount;
+      log.push({ kind: 'shield', player: userSide, amount: e.amount });
       break;
     }
     case 'buff_self': {

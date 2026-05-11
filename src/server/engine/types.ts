@@ -64,6 +64,8 @@ export type SkillEffect =
   | { kind: 'heal'; amount: number }
   /** Reduce next incoming damage by a flat amount. */
   | { kind: 'shield'; amount: number }
+  /** Set up a thorn shield with `amount` total HP; while active it absorbs incoming attack damage and reflects the absorbed amount back to the attacker as true damage. */
+  | { kind: 'reflect_shield'; amount: number }
   /** Cause the opponent to skip their next turn (no skill consumed, just delayed). */
   | { kind: 'pause_opponent' }
   /** Randomly shuffle the opponent's remaining (unused) active skills. */
