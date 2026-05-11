@@ -161,6 +161,12 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
   const debuffToB = currentSkillEventRange.some(
     (e) => e.kind === 'debuff' && e.player === 'b',
   );
+  const healToA = currentSkillEventRange.some(
+    (e) => e.kind === 'heal' && e.player === 'a' && e.amount > 0,
+  );
+  const healToB = currentSkillEventRange.some(
+    (e) => e.kind === 'heal' && e.player === 'b' && e.amount > 0,
+  );
 
   // Pre-battle dice information (the LAST pair of rolls is the deciding one).
   const rolls = match.log.filter(
@@ -229,6 +235,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
           missKey={missByA ? `miss-a-${stepIdx}` : null}
           buffKey={buffToA ? `buff-a-${stepIdx}` : null}
           debuffKey={debuffToA ? `debuff-a-${stepIdx}` : null}
+          healKey={healToA ? `heal-a-${stepIdx}` : null}
           hitKind={currentAttackKind}
         />
         <div
@@ -270,6 +277,7 @@ function BattleStage({ state, match }: { state: ClientGameState; match: BattleMa
             missKey={missByB ? `miss-b-${stepIdx}` : null}
             buffKey={buffToB ? `buff-b-${stepIdx}` : null}
             debuffKey={debuffToB ? `debuff-b-${stepIdx}` : null}
+            healKey={healToB ? `heal-b-${stepIdx}` : null}
             hitKind={currentAttackKind}
           />
         )}
@@ -290,6 +298,7 @@ function MonsterColumn({
   missKey,
   buffKey,
   debuffKey,
+  healKey,
   hitKind,
 }: {
   player: ClientPlayer | undefined;
@@ -307,6 +316,8 @@ function MonsterColumn({
   buffKey: string | null;
   /** Non-null + unique key when this side received a debuff this step. */
   debuffKey: string | null;
+  /** Non-null + unique key when this side was healed this step. */
+  healKey: string | null;
   /** Visual category of the incoming attack. */
   hitKind: Exclude<AttackKind, 'passthrough'>;
 }) {
@@ -368,6 +379,7 @@ function MonsterColumn({
           {slashKey && <HitEffect key={slashKey} kind={hitKind} />}
           {buffKey && <BuffEffect key={buffKey} />}
           {debuffKey && <DebuffEffect key={debuffKey} />}
+          {healKey && <HealEffect key={healKey} />}
           {missKey && <MissBadge key={missKey} />}
         </div>
         <div style={{ fontSize: 14, fontWeight: 600 }}>
@@ -997,6 +1009,66 @@ function BuffEffect() {
         <polygon key={i} className="spark"
           points={`${cx},${cy! - 6} ${cx! + 2},${cy! - 2} ${cx! + 6},${cy! - 2} ${cx! + 3},${cy! + 1} ${cx! + 4},${cy! + 6} ${cx},${cy! + 3} ${cx! - 4},${cy! + 6} ${cx! - 3},${cy! + 1} ${cx! - 6},${cy! - 2} ${cx! - 2},${cy! - 2}`}
           fill={i % 2 === 0 ? '#ffd700' : '#fffaaa'}
+          style={{ transformOrigin: '50px 70px' }} />
+      ))}
+    </svg>
+  );
+}
+
+/** 回復：緑の十字＋上昇する葉っぱ。 */
+function HealEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.7 }, { opacity: 0 }],
+      { duration: 900, fill: 'forwards' },
+    );
+    const cross = svg.querySelector<SVGElement>('.cross');
+    if (cross) {
+      cross.animate(
+        [
+          { transform: 'scale(0.4)', opacity: 0 },
+          { transform: 'scale(1.1)', opacity: 1, offset: 0.4 },
+          { transform: 'scale(1)',   opacity: 1, offset: 0.7 },
+          { transform: 'scale(1.3)', opacity: 0 },
+        ],
+        { duration: 850, fill: 'forwards', easing: 'ease-out' },
+      );
+    }
+    svg.querySelectorAll<SVGElement>('.leaf').forEach((el, i) => {
+      const startX = 30 + (i % 5) * 10;
+      const rise = 22 + (i % 3) * 6;
+      el.animate(
+        [
+          { transform: `translate(${startX - 50}px, 18px) scale(0.5) rotate(0deg)`, opacity: 0 },
+          { transform: `translate(${startX - 50 + (i % 2 === 0 ? 4 : -4)}px, ${-rise}px) scale(1) rotate(${i % 2 === 0 ? 90 : -90}deg)`, opacity: 1, offset: 0.5 },
+          { transform: `translate(${startX - 50 + (i % 2 === 0 ? 7 : -7)}px, ${-rise - 8}px) scale(0.4) rotate(${i % 2 === 0 ? 180 : -180}deg)`, opacity: 0 },
+        ],
+        { duration: 700 + i * 40, delay: i * 60, fill: 'forwards', easing: 'ease-out' },
+      );
+    });
+  }, []);
+  const leaves = [
+    [45, 70], [55, 72], [38, 78], [62, 76], [50, 84],
+  ];
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 8px rgba(60,200,80,0.95))' }}>
+      {/* Central healing cross */}
+      <g className="cross" style={{ transformOrigin: '50px 50px' }}>
+        <rect x="42" y="30" width="16" height="40" rx="3" fill="#3ec850" />
+        <rect x="30" y="42" width="40" height="16" rx="3" fill="#3ec850" />
+        <rect x="44" y="32" width="12" height="36" rx="2" fill="#90ee90" />
+        <rect x="32" y="44" width="36" height="12" rx="2" fill="#90ee90" />
+      </g>
+      {/* Rising leaves */}
+      {leaves.map(([cx, cy], i) => (
+        <ellipse key={i} className="leaf"
+          cx={cx} cy={cy} rx={3.5} ry={6}
+          fill={i % 2 === 0 ? '#5fdb5f' : '#88ee88'}
           style={{ transformOrigin: '50px 70px' }} />
       ))}
     </svg>
