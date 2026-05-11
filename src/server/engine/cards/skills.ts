@@ -237,7 +237,7 @@ export const SKILLS: SkillCard[] = [
     name: '吸命術',
     rarity: 'R',
     nameTag: 'ドレイン',
-    active: { effect: { kind: 'drain_hp', amount: 5 } },
+    active: { effect: { kind: 'drain_hp', amount: 1 } },
   },
   {
     id: 'sk-r-030',
@@ -301,7 +301,7 @@ export const SKILLS: SkillCard[] = [
     name: '吸命波',
     rarity: 'SR',
     nameTag: 'ライフドレイン',
-    active: { effect: { kind: 'drain_hp', amount: 8 } },
+    active: { effect: { kind: 'drain_hp', amount: 3 } },
   },
   {
     id: 'sk-sr-022',
@@ -372,7 +372,7 @@ export const SKILLS: SkillCard[] = [
     name: '完全吸命',
     rarity: 'SSR',
     nameTag: 'ソウルイーター',
-    active: { effect: { kind: 'drain_hp', amount: 12 } },
+    active: { effect: { kind: 'drain_hp', amount: 5 } },
   },
   {
     id: 'sk-ssr-012',
