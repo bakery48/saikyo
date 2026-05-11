@@ -613,10 +613,10 @@ function HitEffect({ kind }: { kind: Exclude<AttackKind, 'passthrough'> }) {
     case 'sword':   return <SwordEffect />;
     case 'claw':    return <ClawEffect />;
     case 'magic':   return <MagicEffect />;
-    case 'fire':    return <ElementalMagicEffect colors={['#ff6600','#ff3300','#ffaa00','#ff8800','#ffcc00']} glow="rgba(255,80,0,0.9)" />;
-    case 'water':   return <ElementalMagicEffect colors={['#0099ff','#0066cc','#66ccff','#3388ee','#88ddff']} glow="rgba(0,120,255,0.9)" />;
-    case 'ice':     return <ElementalMagicEffect colors={['#aaeeff','#66ddff','#ccffff','#88eeff','#ddfaff']} glow="rgba(100,220,255,0.9)" />;
-    case 'wind':    return <ElementalMagicEffect colors={['#88dd44','#55aa22','#aaee66','#77cc33','#ccee88']} glow="rgba(100,220,60,0.9)" />;
+    case 'fire':    return <FireEffect />;
+    case 'water':   return <WaterEffect />;
+    case 'ice':     return <IceEffect />;
+    case 'wind':    return <WindEffect />;
   }
 }
 
@@ -740,38 +740,201 @@ function ClawEffect() {
 }
 
 /** 魔法: purple/blue sparkles — glowing orbs that burst outward. */
-/** 属性魔法：色だけ差し替えた汎用エフェクト。 */
-function ElementalMagicEffect({ colors, glow }: { colors: string[]; glow: string }) {
+/** 炎魔法：炎が下から吹き上がり広がる。 */
+function FireEffect() {
   const ref = useRef<SVGSVGElement>(null);
   useEffect(() => {
     const svg = ref.current;
     if (!svg) return;
     svg.animate(
-      [
-        { opacity: 0, transform: 'scale(0.6)' },
-        { opacity: 1, transform: 'scale(1.1)', offset: 0.25 },
-        { opacity: 1, transform: 'scale(1.15)', offset: 0.6 },
-        { opacity: 0, transform: 'scale(1.5)' },
-      ],
-      { duration: 900, fill: 'forwards', easing: 'ease-out' },
+      [{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.7 }, { opacity: 0 }],
+      { duration: 950, fill: 'forwards' },
     );
+    // 各炎舌をランダムなタイミングで上昇させる
+    const flames = svg.querySelectorAll<SVGElement>('.flame');
+    flames.forEach((el, i) => {
+      el.animate(
+        [
+          { transform: 'translateY(0px) scaleX(1)',   opacity: 0.9 },
+          { transform: `translateY(-${14 + i * 4}px) scaleX(${0.6 + i * 0.1})`, opacity: 1,   offset: 0.4 },
+          { transform: `translateY(-${22 + i * 6}px) scaleX(${0.3 + i * 0.05})`, opacity: 0 },
+        ],
+        { duration: 700 + i * 80, delay: i * 60, fill: 'forwards', easing: 'ease-out' },
+      );
+    });
   }, []);
-  const positions: [number, number, number][] = [
-    [50, 18, 9], [78, 38, 7], [68, 72, 8], [30, 68, 7], [22, 36, 6],
+  // 炎舌: [cx, baseY, rx, ry, color]
+  const tongues: [number, number, number, number, string][] = [
+    [50, 72, 10, 20, '#ff4400'],
+    [38, 76, 7,  15, '#ff6600'],
+    [62, 76, 7,  15, '#ff6600'],
+    [50, 68, 6,  24, '#ffaa00'],
+    [44, 74, 4,  12, '#ffcc00'],
+    [56, 74, 4,  12, '#ffcc00'],
   ];
   return (
     <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
       style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
-               filter: `drop-shadow(0 0 8px ${glow})` }}>
-      {positions.map(([cx, cy, r], i) => (
-        <circle key={i} cx={cx} cy={cy} r={r} fill={colors[i]!} opacity={0.85} />
+               filter: 'drop-shadow(0 0 10px rgba(255,80,0,0.95))' }}>
+      {tongues.map(([cx, cy, rx, ry, fill], i) => (
+        <ellipse key={i} className="flame" cx={cx} cy={cy} rx={rx} ry={ry}
+          fill={fill} opacity={0.92} style={{ transformOrigin: `${cx}px ${cy}px` }} />
       ))}
-      <circle cx={50} cy={50} r={13} fill="#ffffff" opacity={0.9} />
-      <line x1="50" y1="18" x2="50" y2="50" stroke={colors[0]!} strokeWidth="1.5" strokeDasharray="3 3" />
-      <line x1="78" y1="38" x2="50" y2="50" stroke={colors[1]!} strokeWidth="1.5" strokeDasharray="3 3" />
-      <line x1="68" y1="72" x2="50" y2="50" stroke={colors[2]!} strokeWidth="1.5" strokeDasharray="3 3" />
-      <line x1="30" y1="68" x2="50" y2="50" stroke={colors[3]!} strokeWidth="1.5" strokeDasharray="3 3" />
-      <line x1="22" y1="36" x2="50" y2="50" stroke={colors[4]!} strokeWidth="1.5" strokeDasharray="3 3" />
+      {/* 爆心 */}
+      <circle cx="50" cy="76" r="9" fill="#fff0aa" opacity={0.95} />
+    </svg>
+  );
+}
+
+/** 水魔法：中心から波紋が広がり水滴が飛び散る。 */
+function WaterEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [{ opacity: 0 }, { opacity: 1, offset: 0.08 }, { opacity: 1, offset: 0.75 }, { opacity: 0 }],
+      { duration: 900, fill: 'forwards' },
+    );
+    // 波紋リング
+    svg.querySelectorAll<SVGElement>('.ripple').forEach((el, i) => {
+      el.animate(
+        [
+          { r: '4', opacity: 0.9, strokeWidth: '3' },
+          { r: `${22 + i * 14}`, opacity: 0, strokeWidth: '0.5' },
+        ],
+        { duration: 750, delay: i * 140, fill: 'forwards', easing: 'ease-out' },
+      );
+    });
+    // 水滴
+    svg.querySelectorAll<SVGElement>('.drop').forEach((el, i) => {
+      const angle = (i / 6) * Math.PI * 2;
+      const dx = Math.cos(angle) * 30;
+      const dy = Math.sin(angle) * 30;
+      el.animate(
+        [
+          { transform: 'translate(0,0)', opacity: 1 },
+          { transform: `translate(${dx}px,${dy}px)`, opacity: 0 },
+        ],
+        { duration: 600, delay: 80, fill: 'forwards', easing: 'ease-out' },
+      );
+    });
+  }, []);
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 8px rgba(0,140,255,0.9))' }}>
+      {[0, 1, 2].map((i) => (
+        <circle key={i} className="ripple" cx="50" cy="50" r="4"
+          fill="none" stroke={i === 0 ? '#aaddff' : i === 1 ? '#55aaff' : '#0077cc'} strokeWidth="3" />
+      ))}
+      {Array.from({ length: 6 }, (_, i) => {
+        const a = (i / 6) * Math.PI * 2;
+        return (
+          <ellipse key={i} className="drop"
+            cx={50 + Math.cos(a) * 6} cy={50 + Math.sin(a) * 6}
+            rx="3" ry="5"
+            fill="#66ccff" opacity={0.9}
+            style={{ transformOrigin: '50px 50px' }} />
+        );
+      })}
+      <circle cx="50" cy="50" r="7" fill="#ffffff" opacity={0.95} />
+    </svg>
+  );
+}
+
+/** 氷魔法：中心から結晶の欠片が放射状に飛び出す。 */
+function IceEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.65 }, { opacity: 0 }],
+      { duration: 850, fill: 'forwards' },
+    );
+    svg.querySelectorAll<SVGElement>('.shard').forEach((el, i) => {
+      const angle = (i / 8) * Math.PI * 2;
+      const dist = 30 + (i % 2) * 8;
+      el.animate(
+        [
+          { transform: 'translate(0,0) scale(0.2)', opacity: 1 },
+          { transform: `translate(${Math.cos(angle) * dist}px,${Math.sin(angle) * dist}px) scale(1)`, opacity: 0.9, offset: 0.5 },
+          { transform: `translate(${Math.cos(angle) * dist * 1.3}px,${Math.sin(angle) * dist * 1.3}px) scale(0.6)`, opacity: 0 },
+        ],
+        { duration: 650, delay: i * 30, fill: 'forwards', easing: 'ease-out' },
+      );
+    });
+  }, []);
+  const shardColor = (i: number) => i % 3 === 0 ? '#ddfaff' : i % 3 === 1 ? '#88eeff' : '#aaddff';
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 10px rgba(120,230,255,0.95))' }}>
+      {Array.from({ length: 8 }, (_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const len = 10 + (i % 2) * 4;
+        const px = 50 + Math.cos(angle) * 5;
+        const py = 50 + Math.sin(angle) * 5;
+        return (
+          <polygon key={i} className="shard"
+            points={`${px},${py - len} ${px + len * 0.3},${py} ${px},${py + len * 0.4} ${px - len * 0.3},${py}`}
+            fill={shardColor(i)}
+            style={{ transformOrigin: '50px 50px' }} />
+        );
+      })}
+      <circle cx="50" cy="50" r="6" fill="#ffffff" opacity={0.98} />
+    </svg>
+  );
+}
+
+/** 風魔法：弧を描く旋風が中心から広がる。 */
+function WindEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    svg.animate(
+      [{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.7 }, { opacity: 0 }],
+      { duration: 900, fill: 'forwards' },
+    );
+    svg.querySelectorAll<SVGElement>('.arc').forEach((el, i) => {
+      const len = (el as SVGPathElement).getTotalLength?.() ?? 100;
+      (el as SVGPathElement).style.strokeDasharray = String(len);
+      (el as SVGPathElement).style.strokeDashoffset = String(len);
+      el.animate(
+        [{ strokeDashoffset: len, opacity: 0.9 }, { strokeDashoffset: 0, opacity: 1 }],
+        { duration: 350, delay: i * 100, fill: 'forwards', easing: 'ease-out' },
+      );
+      el.animate(
+        [{ opacity: 1 }, { opacity: 0 }],
+        { duration: 300, delay: 350 + i * 100 + 200, fill: 'forwards' },
+      );
+    });
+    svg.animate(
+      [
+        { transform: 'rotate(0deg)',  opacity: 0 },
+        { transform: 'rotate(0deg)',  opacity: 1,  offset: 0.08 },
+        { transform: 'rotate(30deg)', opacity: 1,  offset: 0.7 },
+        { transform: 'rotate(45deg)', opacity: 0 },
+      ],
+      { duration: 900, fill: 'forwards', easing: 'ease-out' },
+    );
+  }, []);
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 8px rgba(100,220,60,0.9))',
+               transformOrigin: 'center' }}>
+      {/* 3本の旋風弧 */}
+      <path className="arc" d="M50,50 Q70,20 90,40" fill="none" stroke="#88dd44" strokeWidth="4" strokeLinecap="round" />
+      <path className="arc" d="M50,50 Q20,30 15,60" fill="none" stroke="#aaee66" strokeWidth="4" strokeLinecap="round" />
+      <path className="arc" d="M50,50 Q65,75 40,88" fill="none" stroke="#66cc33" strokeWidth="4" strokeLinecap="round" />
+      {/* 細めの補助弧 */}
+      <path className="arc" d="M50,50 Q76,30 92,56" fill="none" stroke="#ccee88" strokeWidth="2" strokeLinecap="round" />
+      <path className="arc" d="M50,50 Q22,22 10,50" fill="none" stroke="#ccee88" strokeWidth="2" strokeLinecap="round" />
+      <path className="arc" d="M50,50 Q58,80 34,92" fill="none" stroke="#ccee88" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="50" cy="50" r="6" fill="#eeffcc" opacity={0.95} />
     </svg>
   );
 }
