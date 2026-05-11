@@ -14,7 +14,7 @@ const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
 
 function defaultSkillCount(rarity: Rarity): number {
   if (rarity === 'N') return 4;
-  if (rarity === 'R') return 2;
+  if (rarity === 'R') return 1;
   return 1; // SR, SSR
 }
 
