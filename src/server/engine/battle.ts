@@ -214,6 +214,7 @@ function consumeOnceBuffs(c: CombatStats): void {
 /** Apply battle-start passives (mutates combat state and returns log entries). */
 function applyBattleStartPassives(
   passives: PassiveSkill[],
+  actives: ActiveSkill[],
   self: CombatStats,
   opponent: CombatStats,
   side: Side,
@@ -221,6 +222,9 @@ function applyBattleStartPassives(
   log: BattleEvent[],
 ): { spdRollBonus: number } {
   let spdRollBonus = 0;
+  const sinCount =
+    actives.filter((a) => a.tag === 'sin').length +
+    passives.filter((p) => p.tag === 'sin').length;
   for (const p of passives) {
     self.passiveIds.push(p.id);
     switch (p.effect.kind) {
@@ -299,6 +303,14 @@ function applyBattleStartPassives(
           opponent.incomingIgnoresDef = true;
           self.spdLockedZero = true;
           self.atkMod -= 2;
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      case 'sin_amplify':
+        if (p.trigger.kind === 'battle_start' && sinCount > 0) {
+          if (p.effect.perSin.atk) self.atkMod += p.effect.perSin.atk * sinCount;
+          if (p.effect.perSin.def) self.defMod += p.effect.perSin.def * sinCount;
+          if (p.effect.perSin.spd) self.spdMod += p.effect.perSin.spd * sinCount;
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
@@ -1079,6 +1091,36 @@ function applySkill(args: {
       // ケルベロス extra_attack_chance: 一度だけ proc を試行して再発動。
       if (rollExtraAttack(user, userPassives, userSide, rng, log)) {
         runAttack();
+      }
+      break;
+    }
+    case 'grant_target_shield': {
+      target.shield += e.amount;
+      log.push({ kind: 'shield', player: targetSide, amount: e.amount });
+      break;
+    }
+    case 'buff_target': {
+      applyStatMod(target, e.stat, e.amount, e.duration);
+      log.push({ kind: 'buff', player: targetSide, stat: e.stat, amount: e.amount, duration: e.duration });
+      break;
+    }
+    case 'self_damage': {
+      const dmg = Math.max(0, Math.min(e.amount, user.hp - 1));
+      user.hp -= dmg;
+      log.push({ kind: 'damage', from: userSide, to: userSide, amount: dmg, hpAfter: user.hp });
+      break;
+    }
+    case 'self_damage_max_fraction': {
+      const raw = Math.max(1, Math.floor(user.maxHp * e.fraction));
+      const dmg = Math.max(0, Math.min(raw, user.hp - 1));
+      user.hp -= dmg;
+      log.push({ kind: 'damage', from: userSide, to: userSide, amount: dmg, hpAfter: user.hp });
+      break;
+    }
+    case 'heal_target': {
+      const applied = healCapped(target, e.amount);
+      if (applied > 0) {
+        log.push({ kind: 'heal', player: targetSide, amount: applied, hpAfter: target.hp });
       }
       break;
     }
@@ -1896,8 +1938,8 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
     }
   }
 
-  const { spdRollBonus: aBonus } = applyBattleStartPassives(a.passives, sa, sb, 'a', rng, log);
-  const { spdRollBonus: bBonus } = applyBattleStartPassives(b.passives, sb, sa, 'b', rng, log);
+  const { spdRollBonus: aBonus } = applyBattleStartPassives(a.passives, a.actives, sa, sb, 'a', rng, log);
+  const { spdRollBonus: bBonus } = applyBattleStartPassives(b.passives, b.actives, sb, sa, 'b', rng, log);
 
   const first = rollFirst(sa, sb, aBonus, bBonus, rng, log);
   log.push({ kind: 'first', player: first });

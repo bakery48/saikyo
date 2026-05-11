@@ -331,6 +331,7 @@ const CATEGORY_COLOR: Record<EffectCategory, string> = {
   'バフ': '#d4a017',
   'デバフ': '#8e44ad',
   '回復/防御': '#27ae60',
+  '罪': '#7a2e2e',
   'その他': '#888',
 };
 

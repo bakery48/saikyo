@@ -42,6 +42,14 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-015', name: '癒しの風', rarity: 'R', nameTag: 'ヒーリング', active: { effect: { kind: 'heal', amount: 5 } } },
   { id: 'sk-r-016', name: '中盾', rarity: 'R', nameTag: 'シルバー', active: { effect: { kind: 'shield', amount: 4 } } },
   { id: 'sk-r-055', name: '盾割り', rarity: 'R', nameTag: 'シールドブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.0, multShield: 2.0, attackKind: 'strike' } } },
+  // ─── 七つの大罪 (Sin cards) ──────────────────────────────────────────────
+  { id: 'sk-r-056', name: '虚栄の罪', rarity: 'R', nameTag: 'プライド', tag: 'sin', active: { effect: { kind: 'grant_target_shield', amount: 1 } } },
+  { id: 'sk-r-057', name: '嫉妬の罪', rarity: 'R', nameTag: 'エンヴィ', tag: 'sin', active: { effect: { kind: 'buff_target', stat: 'atk', amount: 2, duration: 'battle' } } },
+  { id: 'sk-r-058', name: '怠惰の罪', rarity: 'R', nameTag: 'スロウス', tag: 'sin', active: { effect: { kind: 'buff_self', stat: 'spd', amount: -4, duration: 'battle' } } },
+  { id: 'sk-r-059', name: '憤怒の罪', rarity: 'R', nameTag: 'ラース', tag: 'sin', active: { effect: { kind: 'self_damage', amount: 5 } } },
+  { id: 'sk-r-060', name: '強欲の罪', rarity: 'R', nameTag: 'グリード', tag: 'sin', active: { effect: { kind: 'buff_self', stat: 'def', amount: -5, duration: 'battle' } } },
+  { id: 'sk-r-061', name: '暴食の罪', rarity: 'R', nameTag: 'グラトニー', tag: 'sin', active: { effect: { kind: 'self_damage_max_fraction', fraction: 0.5 } } },
+  { id: 'sk-r-062', name: '色欲の罪', rarity: 'R', nameTag: 'ラスト', tag: 'sin', active: { effect: { kind: 'heal_target', amount: 5 } } },
   { id: 'sk-r-017', name: '要塞', rarity: 'R', nameTag: 'バランス', active: { effect: { kind: 'buff_self', stat: 'def', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-018', name: '速攻', rarity: 'R', nameTag: 'ラピッド', active: { effect: { kind: 'attack', mult: 1.1, useStat: 'spd', attackKind: 'passthrough' } } },
   { id: 'sk-r-019', name: 'シールドバッシュ', rarity: 'R', nameTag: 'バッシュ', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'def', attackKind: 'strike' } } },
@@ -890,6 +898,17 @@ export const SKILLS: SkillCard[] = [
       effect: { kind: 'regen_shield', amount: 2 },
     },
   },
+  {
+    id: 'sk-rp-024',
+    name: '贖罪 (passive)',
+    rarity: 'R',
+    nameTag: 'ペナンス',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'sin_amplify', perSin: { atk: 2 } },
+    },
+  },
   // SR passives
   {
     id: 'sk-srp-013',
@@ -1023,6 +1042,17 @@ export const SKILLS: SkillCard[] = [
       effect: { kind: 'selective_immune', attackKind: 'magic' },
     },
   },
+  {
+    id: 'sk-srp-025',
+    name: '罪の支配者 (passive)',
+    rarity: 'SR',
+    nameTag: 'シンマスター',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'sin_amplify', perSin: { atk: 2, def: 2 } },
+    },
+  },
   // SSR passives
   {
     id: 'sk-ssrp-004',
@@ -1100,6 +1130,17 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'battle_start' },
       effect: { kind: 'absolute_zero' },
+    },
+  },
+  {
+    id: 'sk-ssrp-011',
+    name: '七つの大罪 (passive)',
+    rarity: 'SSR',
+    nameTag: 'セブンシンズ',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'sin_amplify', perSin: { atk: 3, def: 3, spd: 3 } },
     },
   },
   {

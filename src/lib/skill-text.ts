@@ -14,6 +14,16 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `${e.useStat.toUpperCase()}×${e.mult} 攻撃`;
     case 'shield_break_attack':
       return `盾なし: ${e.useStat.toUpperCase()}×${e.multNoShield} / 盾あり: 全シールド破壊＋${e.useStat.toUpperCase()}×${e.multShield}`;
+    case 'grant_target_shield':
+      return `相手にシールド+${e.amount}（罪）`;
+    case 'buff_target':
+      return `相手${e.stat.toUpperCase()}+${e.amount}（${e.duration === 'battle' ? 'バトル中' : '次の1回'}・罪）`;
+    case 'self_damage':
+      return `自分にHP−${e.amount}（罪）`;
+    case 'self_damage_max_fraction':
+      return `自分に最大HP×${Math.round(e.fraction * 100)}%のダメージ（罪）`;
+    case 'heal_target':
+      return `相手のHP+${e.amount}（罪）`;
     case 'true_damage':
       return `DEF無視 ${e.amount} ダメージ`;
     case 'heal':
@@ -27,7 +37,7 @@ export function describeActiveEffect(e: SkillEffect): string {
     case 'pay_hp_threshold_shield':
       return `最大HP${e.hpCostFraction * 100}%を消費、不動盾（${e.threshold - 1}以下の攻撃を無効化、${e.threshold}以上で盾が砕ける）`;
     case 'buff_self':
-      return `自身${e.stat.toUpperCase()}+${e.amount}（${e.duration === 'battle' ? 'バトル中' : '次の1回'}）`;
+      return `自身${e.stat.toUpperCase()}${e.amount >= 0 ? '+' : ''}${e.amount}（${e.duration === 'battle' ? 'バトル中' : '次の1回'}）`;
     case 'debuff_target':
       return `相手${e.stat.toUpperCase()}−${e.amount}（${e.duration === 'battle' ? 'バトル中' : '次の1回'}）`;
     case 'next_amp':
@@ -244,6 +254,13 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `バトル開始時に相手のATK/DEF/SPDの増減を自分にコピー`;
     case 'stat_swap_battle_start':
       return `バトル開始時に自分のATKとDEFを入れ替え`;
+    case 'sin_amplify': {
+      const parts: string[] = [];
+      if (e.perSin.atk) parts.push(`ATK+${e.perSin.atk}`);
+      if (e.perSin.def) parts.push(`DEF+${e.perSin.def}`);
+      if (e.perSin.spd) parts.push(`SPD+${e.perSin.spd}`);
+      return `バトル開始時、所持する罪1個につき自分の${parts.join('/')}（バトル中）`;
+    }
     case 'regen_shield':
       return `自分のターン開始時にシールドを${e.amount}まで補充`;
     case 'damage_to_shield':
@@ -315,6 +332,7 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'equalize_spd' ||
     p.effect.kind === 'first_received_damage_div' ||
     p.effect.kind === 'mirror_stats' ||
+    p.effect.kind === 'sin_amplify' ||
     p.effect.kind === 'stat_swap_battle_start' ||
     p.effect.kind === 'damage_to_shield' ||
     p.effect.kind === 'shield_thorns' ||
@@ -358,7 +376,7 @@ export function describeSkillCard(c: { active?: { effect: SkillEffect }; passive
   return '';
 }
 
-export type EffectCategory = '攻撃' | 'バフ' | 'デバフ' | '回復/防御' | 'その他';
+export type EffectCategory = '攻撃' | 'バフ' | 'デバフ' | '回復/防御' | '罪' | 'その他';
 
 /** Derive the broad visual category of an active skill effect. */
 export function effectCategory(e: SkillEffect): EffectCategory {
@@ -413,6 +431,12 @@ export function effectCategory(e: SkillEffect): EffectCategory {
     case 'pay_hp_shield':
     case 'break_shield':
       return '回復/防御';
+    case 'grant_target_shield':
+    case 'buff_target':
+    case 'self_damage':
+    case 'self_damage_max_fraction':
+    case 'heal_target':
+      return '罪';
     default:
       return 'その他';
   }

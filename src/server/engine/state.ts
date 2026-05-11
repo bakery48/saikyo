@@ -275,6 +275,7 @@ export function addSkillCardToMonster(
       effect: card.passive.effect,
       rarity: card.rarity,
       nameTag: tag,
+      tag: card.tag,
     };
     player.monster.passives.push(passive);
     state.log.push({ kind: 'skill_acquired', playerId: player.id, skillId: passive.id, rarity: card.rarity });
@@ -288,6 +289,7 @@ export function addSkillCardToMonster(
     order,
     rarity: card.rarity,
     nameTag: tag,
+    tag: card.tag,
     effect: card.active.effect,
   };
   player.monster.actives.push(active);

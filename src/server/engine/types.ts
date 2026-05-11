@@ -75,6 +75,16 @@ export type SkillEffect =
    * If the opponent has any shield (regular / reflect / threshold), destroy all shields first then attack at `multShield`.
    */
   | { kind: 'shield_break_attack'; useStat: 'atk' | 'def' | 'spd'; multNoShield: number; multShield: number; attackKind?: AttackKind }
+  /** Grant the opponent a shield (cumulative absorber). Used for sin cards. */
+  | { kind: 'grant_target_shield'; amount: number }
+  /** Apply a positive stat mod to the opponent (buff them). Used for sin cards. */
+  | { kind: 'buff_target'; stat: 'atk' | 'def' | 'spd'; amount: number; duration: 'once' | 'battle' }
+  /** Deal flat true damage to self (ignores DEF/shield), clamped to leave ≥1 HP. */
+  | { kind: 'self_damage'; amount: number }
+  /** Deal true damage to self equal to floor(maxHp × fraction), clamped to leave ≥1 HP. */
+  | { kind: 'self_damage_max_fraction'; fraction: number }
+  /** Heal the opponent by `amount` (capped at their max HP). Used for sin cards. */
+  | { kind: 'heal_target'; amount: number }
   /** Cause the opponent to skip their next turn (no skill consumed, just delayed). */
   | { kind: 'pause_opponent' }
   /** Randomly shuffle the opponent's remaining (unused) active skills. */
@@ -192,6 +202,9 @@ export type SkillEffect =
    */
   | { kind: 'spd_diff_multi_attack'; flatAtkMod: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind };
 
+/** Optional metadata tag for skills. Currently only 'sin' (七つの大罪系カード) is used. */
+export type SkillTag = 'sin';
+
 export type ActiveSkill = {
   id: string;
   /** Sequence number — actives are processed top-to-bottom by `order`. */
@@ -200,6 +213,8 @@ export type ActiveSkill = {
   rarity?: Rarity;
   /** Short noun (e.g. "パワー") used to compose monster display names. */
   nameTag?: string;
+  /** Optional classification tag (e.g., 'sin'). Used by passives that scale with tagged skills. */
+  tag?: SkillTag;
   effect: SkillEffect;
 };
 
@@ -312,6 +327,8 @@ export type PassiveEffect =
   | { kind: 'mirror_stats' }
   /** At battle start, swap own ATK and DEF for the entire battle. */
   | { kind: 'stat_swap_battle_start' }
+  /** At battle start, count this monster's skills tagged 'sin' and grant `perSin` stat boost per sin (battle-long). */
+  | { kind: 'sin_amplify'; perSin: { atk?: number; def?: number; spd?: number } }
   /** At the start of each own turn, set shield to at least `amount`. */
   | { kind: 'regen_shield'; amount: number }
   /** When taking damage, convert `percent`% of the raw amount into shield gain (rounded down). */
@@ -370,6 +387,8 @@ export type PassiveSkill = {
   rarity?: Rarity;
   /** Short noun (e.g. "ガード") used to compose monster display names. */
   nameTag?: string;
+  /** Optional classification tag (e.g., 'sin'). */
+  tag?: SkillTag;
 };
 
 export type MonsterBase = {
@@ -447,6 +466,8 @@ export type SkillCard = {
   rarity: Rarity;
   /** Noun used to compose monster names (e.g. "パワー"). Absent on N-rarity cards. */
   nameTag?: string;
+  /** Optional classification tag (e.g., 'sin'). Propagated to the resulting ActiveSkill/PassiveSkill on acquisition. */
+  tag?: SkillTag;
   /** If undefined this skill becomes an active skill (default). */
   isPassive?: boolean;
   active?: Omit<ActiveSkill, 'id' | 'order' | 'name' | 'nameTag'>;
