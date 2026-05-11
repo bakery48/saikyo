@@ -64,7 +64,6 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
   { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 7 } } },
   { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 5 } } },
-  { id: 'sk-sr-045', name: '不動の盾', rarity: 'SR', nameTag: 'ストーンウォール', active: { effect: { kind: 'threshold_shield', threshold: 7 } } },
   { id: 'sk-sr-046', name: 'ハイ・オーラ', rarity: 'SR', nameTag: 'ハイオーラ', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.25, threshold: 5 } } },
   { id: 'sk-sr-047', name: '鎧砕き', rarity: 'SR', nameTag: 'アーマークラッシャー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.2, multShield: 3.0, attackKind: 'strike' } } },
   { id: 'sk-sr-006', name: '剛力の解放', rarity: 'SR', nameTag: 'タイタン', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'battle' } } },
