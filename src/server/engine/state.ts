@@ -27,10 +27,11 @@ function clampRoundCount(n: number): number {
   return Math.max(1, Math.min(3, Math.floor(n)));
 }
 
-/** Default number of copies per rarity for the skill deck. */
-function defaultSkillCount(rarity: import('./types').Rarity): number {
-  if (rarity === 'N') return 4;
-  if (rarity === 'R') return 1;
+/** Default number of copies per card for the skill deck. */
+function defaultSkillCount(card: import('./types').SkillCard): number {
+  if (card.tag === 'sin') return 2;
+  if (card.rarity === 'N') return 4;
+  if (card.rarity === 'R') return 1;
   return 1; // SR, SSR
 }
 
@@ -102,7 +103,7 @@ export function createInitialState(opts: {
       skill: (() => {
         const skillDeck: SkillCard[] = [];
         for (const card of SKILLS) {
-          const count = opts.skillCardCounts?.[card.id] ?? defaultSkillCount(card.rarity);
+          const count = opts.skillCardCounts?.[card.id] ?? defaultSkillCount(card);
           for (let i = 0; i < count; i++) skillDeck.push(card);
         }
         return shuffle(skillDeck, rng);

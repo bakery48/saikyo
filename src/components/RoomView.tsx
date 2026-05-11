@@ -1,6 +1,6 @@
 'use client';
 import type { GameSocket } from '../lib/useGameSocket';
-import type { Rarity } from '../server/engine/types';
+import type { Rarity, SkillCard } from '../server/engine/types';
 import { SKILLS } from '../server/engine/cards/skills';
 
 const RARITY_COLORS: Record<Rarity, string> = {
@@ -12,9 +12,10 @@ const RARITY_COLORS: Record<Rarity, string> = {
 
 const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
 
-function defaultSkillCount(rarity: Rarity): number {
-  if (rarity === 'N') return 4;
-  if (rarity === 'R') return 1;
+function defaultSkillCount(card: SkillCard): number {
+  if (card.tag === 'sin') return 2;
+  if (card.rarity === 'N') return 4;
+  if (card.rarity === 'R') return 1;
   return 1; // SR, SSR
 }
 
@@ -28,8 +29,8 @@ export function RoomView({ socket }: { socket: GameSocket }) {
 
   const skillCardCounts: Record<string, number> = room.skillCardCounts ?? {};
 
-  function getCount(cardId: string, rarity: Rarity): number {
-    return skillCardCounts[cardId] ?? defaultSkillCount(rarity);
+  function getCount(card: SkillCard): number {
+    return skillCardCounts[card.id] ?? defaultSkillCount(card);
   }
 
   function setCardCount(cardId: string, count: number) {
@@ -120,10 +121,10 @@ export function RoomView({ socket }: { socket: GameSocket }) {
                     fontSize: 11,
                     padding: '2px 6px',
                     cursor: canEdit ? 'pointer' : 'default',
-                    background: skillsByRarity[rarity].every((c) => getCount(c.id, rarity) === n)
+                    background: skillsByRarity[rarity].every((c) => getCount(c) === n)
                       ? RARITY_COLORS[rarity]
                       : '#eee',
-                    color: skillsByRarity[rarity].every((c) => getCount(c.id, rarity) === n) ? '#fff' : '#333',
+                    color: skillsByRarity[rarity].every((c) => getCount(c) === n) ? '#fff' : '#333',
                     border: '1px solid #ccc',
                     borderRadius: 3,
                   }}
@@ -145,7 +146,7 @@ export function RoomView({ socket }: { socket: GameSocket }) {
             </div>
             <div style={{ display: 'grid', gap: 3 }}>
               {skillsByRarity[rarity].map((card) => {
-                const current = getCount(card.id, card.rarity);
+                const current = getCount(card);
                 return (
                   <div
                     key={card.id}
