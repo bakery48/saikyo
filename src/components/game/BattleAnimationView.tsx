@@ -199,10 +199,13 @@ export function BattleStage({ state, match }: { state: ClientGameState; match: B
     if (hasDamage) {
       const src = ATTACK_SE[currentAttackKind];
       if (src) playSE(src);
+    } else if (hasHeal) {
+      playSE('/audio/se/heal.mp3');
+    } else if (hasBuff) {
+      playSE('/audio/se/buff.mp3');
+    } else if (hasDebuff) {
+      playSE('/audio/se/debuff.mp3');
     }
-    if (hasHeal)   playSE('/audio/se/heal.mp3');
-    if (!hasDamage && hasBuff)   playSE('/audio/se/buff.mp3');
-    if (!hasDamage && hasDebuff) playSE('/audio/se/debuff.mp3');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preroll, stepIdx]);
 
