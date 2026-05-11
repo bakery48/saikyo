@@ -1472,10 +1472,6 @@ function applySkill(args: {
       break;
     }
     case 'execute': {
-      if (rollDodge(user, target, rng)) {
-        log.push({ kind: 'miss', from: userSide, to: targetSide });
-        break;
-      }
       if (target.hp > 0 && target.hp <= e.threshold) {
         const lethal = target.hp;
         // endure_fatal can still save them once.
