@@ -34,7 +34,6 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-009', name: '剥離', rarity: 'R', nameTag: 'ブレイカー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-010', name: '束縛', rarity: 'R', nameTag: 'フリーザー', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-029', name: '闘気', rarity: 'R', nameTag: 'フォース', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 4, duration: 'battle' } } },
-  { id: 'sk-r-011', name: '次撃倍化', rarity: 'R', nameTag: 'アンプ', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
   { id: 'sk-r-012', name: '見切り', rarity: 'SR', nameTag: 'ウィザード', active: { effect: { kind: 'nullify_next' } } },
   { id: 'sk-r-015', name: '癒しの風', rarity: 'R', nameTag: 'ヒーリング', active: { effect: { kind: 'heal', amount: 5 } } },
   { id: 'sk-r-016', name: '中盾', rarity: 'R', nameTag: 'シルバー', active: { effect: { kind: 'shield', amount: 4 } } },
