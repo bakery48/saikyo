@@ -45,10 +45,10 @@ export const SKILLS: SkillCard[] = [
   // ─── 七つの大罪 (Sin cards) ──────────────────────────────────────────────
   { id: 'sk-r-056', name: '虚栄の罪', rarity: 'R', nameTag: 'プライド', tag: 'sin', active: { effect: { kind: 'grant_target_shield', amount: 1 } } },
   { id: 'sk-r-057', name: '嫉妬の罪', rarity: 'R', nameTag: 'エンヴィ', tag: 'sin', active: { effect: { kind: 'buff_target', stat: 'atk', amount: 2, duration: 'battle' } } },
-  { id: 'sk-r-058', name: '怠惰の罪', rarity: 'R', nameTag: 'スロウス', tag: 'sin', active: { effect: { kind: 'buff_self', stat: 'spd', amount: -4, duration: 'battle' } } },
-  { id: 'sk-r-059', name: '憤怒の罪', rarity: 'R', nameTag: 'ラース', tag: 'sin', active: { effect: { kind: 'self_damage', amount: 5 } } },
+  { id: 'sk-r-058', name: '怠惰の罪', rarity: 'R', nameTag: 'スロウス', tag: 'sin', active: { effect: { kind: 'self_nullify_next' } } },
+  { id: 'sk-r-059', name: '憤怒の罪', rarity: 'R', nameTag: 'ラース', tag: 'sin', active: { effect: { kind: 'self_damage_max_fraction', fraction: 0.3 } } },
   { id: 'sk-r-060', name: '強欲の罪', rarity: 'R', nameTag: 'グリード', tag: 'sin', active: { effect: { kind: 'buff_self', stat: 'def', amount: -2, duration: 'battle' } } },
-  { id: 'sk-r-061', name: '暴食の罪', rarity: 'R', nameTag: 'グラトニー', tag: 'sin', active: { effect: { kind: 'self_damage_max_fraction', fraction: 0.3 } } },
+  { id: 'sk-r-061', name: '暴食の罪', rarity: 'R', nameTag: 'グラトニー', tag: 'sin', active: { effect: { kind: 'buff_self', stat: 'spd', amount: -4, duration: 'battle' } } },
   { id: 'sk-r-062', name: '色欲の罪', rarity: 'R', nameTag: 'ラスト', tag: 'sin', active: { effect: { kind: 'heal_target_max_fraction', fraction: 0.2 } } },
   { id: 'sk-r-017', name: '要塞', rarity: 'R', nameTag: 'バランス', active: { effect: { kind: 'buff_self', stat: 'def', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-018', name: '速攻', rarity: 'R', nameTag: 'ラピッド', active: { effect: { kind: 'attack', mult: 1.1, useStat: 'spd', attackKind: 'passthrough' } } },

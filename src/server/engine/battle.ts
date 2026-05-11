@@ -1261,6 +1261,11 @@ function applySkill(args: {
       log.push({ kind: 'nullified', player: targetSide, skillId: 'pending' });
       break;
     }
+    case 'self_nullify_next': {
+      user.nullifyOpponentNext = true;
+      log.push({ kind: 'nullified', player: userSide, skillId: 'pending' });
+      break;
+    }
     case 'pause_opponent': {
       target.skipTurnsRemaining += 1;
       // The actual skip is logged later when the opponent's turn is consumed.

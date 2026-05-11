@@ -46,6 +46,8 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `次の自分の攻撃×${e.mult}`;
     case 'nullify_next':
       return `相手の次のスキルを無効`;
+    case 'self_nullify_next':
+      return `自分の次のスロットを無効化（罪）`;
     case 'pause_opponent':
       return `相手の次のターンをスキップ`;
     case 'shuffle_opponent_actives':
@@ -435,6 +437,7 @@ export function effectCategory(e: SkillEffect): EffectCategory {
     case 'self_damage_max_fraction':
     case 'heal_target':
     case 'heal_target_max_fraction':
+    case 'self_nullify_next':
       return '罪';
     default:
       return 'その他';

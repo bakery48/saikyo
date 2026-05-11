@@ -60,6 +60,7 @@ export type SkillEffect =
   | { kind: 'next_amp'; mult: number }
   /** Nullify the next active skill the opponent uses. */
   | { kind: 'nullify_next' }
+  | { kind: 'self_nullify_next' }
   /** Heal self. */
   | { kind: 'heal'; amount: number }
   /** Reduce next incoming damage by a flat amount. */
