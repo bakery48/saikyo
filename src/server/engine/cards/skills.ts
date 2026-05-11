@@ -20,7 +20,6 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-n-020', name: '硬化', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'def', amount: 2, duration: 'battle' } } },
   { id: 'sk-n-021', name: '集中', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 2, duration: 'battle' } } },
   { id: 'sk-n-022', name: '加速', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 2, duration: 'battle' } } },
-  { id: 'sk-n-025', name: '反撃の構え', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 3, duration: 'once' } } },
   { id: 'sk-n-028', name: '影刺し', rarity: 'R', nameTag: 'シャドウ', active: { effect: { kind: 'true_damage', amount: 4 } } },
 
   // ─── R (Rare) ──────────────────────────────────────────────────────────────
@@ -250,13 +249,6 @@ export const SKILLS: SkillCard[] = [
     rarity: 'R',
     nameTag: 'クロー',
     active: { effect: { kind: 'multi_hit_attack', mult: 0.8, useStat: 'atk', hitCount: 2, attackKind: 'claw' } },
-  },
-  {
-    id: 'sk-r-033',
-    name: '鋭集中',
-    rarity: 'R',
-    nameTag: 'フォーカス',
-    active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'once' } },
   },
   {
     id: 'sk-r-035',
