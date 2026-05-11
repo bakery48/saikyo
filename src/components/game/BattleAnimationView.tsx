@@ -13,6 +13,26 @@ import { COLOR_HEX, COLOR_LABEL, pieceStyle } from '../../lib/colors';
 const STEP_MS = 2000;
 const PREROLL_MS = 3000;
 
+const ATTACK_SE: Partial<Record<Exclude<AttackKind, 'passthrough'>, string>> = {
+  strike: '/audio/se/attack.mp3',
+  sword:  '/audio/se/sword.mp3',
+  claw:   '/audio/se/claw.mp3',
+  magic:  '/audio/se/magic.mp3',
+  fire:   '/audio/se/fire.mp3',
+  ice:    '/audio/se/ice.mp3',
+  wind:   '/audio/se/wind.mp3',
+};
+
+function playSE(src: string, volume = 0.6): void {
+  try {
+    const a = new Audio(src);
+    a.volume = volume;
+    a.play().catch(() => {});
+  } catch {
+    // ignore — audio blocked or unavailable
+  }
+}
+
 /**
  * Animated battle view: shows the player's match with two monsters facing
  * each other and steps through their active skills top-to-bottom.
@@ -167,6 +187,24 @@ export function BattleStage({ state, match }: { state: ClientGameState; match: B
   const healToB = currentSkillEventRange.some(
     (e) => e.kind === 'heal' && e.player === 'b' && e.amount > 0,
   );
+
+  // Play SE whenever a step fires.
+  useEffect(() => {
+    if (preroll || stepIdx >= stepLogIndices.length) return;
+    const range = match.log.slice(stepLogIndices[stepIdx]!, upToLogIdx);
+    const hasDamage = range.some((e) => e.kind === 'damage' && e.amount > 0);
+    const hasHeal   = range.some((e) => e.kind === 'heal' && e.amount > 0);
+    const hasBuff   = range.some((e) => e.kind === 'buff');
+    const hasDebuff = range.some((e) => e.kind === 'debuff');
+    if (hasDamage) {
+      const src = ATTACK_SE[currentAttackKind];
+      if (src) playSE(src);
+    }
+    if (hasHeal)   playSE('/audio/se/heal.mp3');
+    if (!hasDamage && hasBuff)   playSE('/audio/se/buff.mp3');
+    if (!hasDamage && hasDebuff) playSE('/audio/se/debuff.mp3');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preroll, stepIdx]);
 
   // Pre-battle dice information (the LAST pair of rolls is the deciding one).
   const rolls = match.log.filter(
