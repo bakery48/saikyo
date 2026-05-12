@@ -190,8 +190,9 @@ export function MonsterPickView({
               <div
                 style={{
                   flexShrink: 0,
-                  width: 90,
-                  alignSelf: 'stretch',
+                  width: 72,
+                  margin: 6,
+                  borderRadius: 4,
                   background: '#4a7a9b',
                   display: 'flex',
                   alignItems: 'center',
@@ -199,7 +200,7 @@ export function MonsterPickView({
                   fontSize: 12,
                   color: '#fff',
                   opacity: 0.7,
-                  boxShadow: 'inset 0 0 0 3px rgba(255,255,255,0.35)',
+                  border: '2px solid #333',
                 }}
               >
                 絵
