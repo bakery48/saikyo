@@ -199,6 +199,7 @@ export function MonsterPickView({
                   fontSize: 12,
                   color: '#fff',
                   opacity: 0.7,
+                  boxShadow: 'inset 0 0 0 3px rgba(255,255,255,0.35)',
                 }}
               >
                 絵
