@@ -121,6 +121,8 @@ type CombatStats = Stats & {
   passiveIds: string[];
   /** Number of sin-tagged skills this side owns (computed at battle start). */
   sinCount: number;
+  /** True once hex_def has fired during the current active skill. Reset before each active resolves. */
+  hexDefFiredThisActive: boolean;
 };
 
 function initCombat(m: Monster): CombatStats {
@@ -176,6 +178,7 @@ function initCombat(m: Monster): CombatStats {
     forcePierceActive: false,
     passiveIds: [],
     sinCount: 0,
+    hexDefFiredThisActive: false,
   };
   return c;
 }
@@ -980,8 +983,10 @@ function applyHexDef(
   log: BattleEvent[],
 ): void {
   if (damageDealt <= 0) return;
+  if (attacker.hexDefFiredThisActive) return;
   for (const p of attackerPassives) {
     if (p.effect.kind === 'hex_def' && damageDealt >= (p.effect.minDamage ?? 1)) {
+      attacker.hexDefFiredThisActive = true;
       defender.defMod -= p.effect.amount;
       log.push({
         kind: 'debuff',
@@ -1121,6 +1126,8 @@ function applySkill(args: {
   log: BattleEvent[];
 }): void {
   const { user, target, userPassives, targetPassives, userMon, targetMon, skill, userSide, targetSide, rng, log } = args;
+  // Reset per-active flags before this skill resolves.
+  user.hexDefFiredThisActive = false;
   // Transfer any pending force_amp into the in-progress active (consumed unconditionally,
   // matching nextAmp semantics on nullify/fizzle).
   user.forceAmpActive = user.forceAmpNext;
