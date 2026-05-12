@@ -399,7 +399,9 @@ export type PassiveEffect =
    * locked to 0 (battle-long, cannot be raised by buffs) and ATK is reduced
    * by 2.
    */
-  | { kind: 'absolute_zero' };
+  | { kind: 'absolute_zero' }
+  /** At battle start, all this side's attacks bypass the opponent's shields (regular / reflect / ghost / threshold). DEF is still applied normally. */
+  | { kind: 'pierce_all_shields' };
 
 export type PassiveSkill = {
   id: string;

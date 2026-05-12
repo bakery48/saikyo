@@ -335,6 +335,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `最後の自分の攻撃で与ダメ+${e.amount}`;
     case 'absolute_zero':
       return `バトル開始時、相手は回避不可・自分の攻撃はDEF無視。代わりに自分のSPDを0に固定、ATK-2`;
+    case 'pierce_all_shields':
+      return `自分の攻撃は相手のシールドを無視する（DEFは通常通り計算）`;
   }
 }
 

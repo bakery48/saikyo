@@ -112,6 +112,8 @@ type CombatStats = Stats & {
   forceAmpNext: number;
   /** Pending pierce flag for the NEXT own active (skips reductions/caps in takeDamage). */
   forcePierceNext: boolean;
+  /** Set by pierce_all_shields: every attack from this side bypasses all defender shields. */
+  alwaysPierceShield: boolean;
   /** Active multiplier currently in effect for the in-progress active. */
   forceAmpActive: number;
   /** Active pierce flag currently in effect for the in-progress active. */
@@ -169,6 +171,7 @@ function initCombat(m: Monster): CombatStats {
     spdLockedZero: false,
     forceAmpNext: 1,
     forcePierceNext: false,
+    alwaysPierceShield: m.passives.some((p) => p.effect.kind === 'pierce_all_shields'),
     forceAmpActive: 1,
     forcePierceActive: false,
     passiveIds: [],
@@ -326,6 +329,12 @@ function applyBattleStartPassives(
           opponent.incomingIgnoresDef = true;
           self.spdLockedZero = true;
           self.atkMod -= 2;
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      case 'pierce_all_shields':
+        if (p.trigger.kind === 'battle_start') {
+          self.alwaysPierceShield = true;
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
@@ -755,7 +764,7 @@ function resolveAttack(args: {
   const defenderHadShield = defender.shield > 0;
   const defenderReflectShieldBefore = defender.reflectShield;
   const defenderGhostShieldBefore = defender.ghostShield;
-  let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef, attacker.forcePierceActive);
+  let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef || attacker.alwaysPierceShield, attacker.forcePierceActive);
   actual = clampWithEndure(defender, actual, defenderPassives, defenderSide, log);
   defender.hp -= actual;
   log.push({

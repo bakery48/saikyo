@@ -240,6 +240,20 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
+    baseId: 'specter',
+    name: 'スペクター',
+    attackKind: 'magic',
+    stats: { hp: 13, atk: 3, def: 4, spd: 6 },
+    passives: [
+      {
+        id: 'specter-p1',
+        name: '幽体通過',
+        trigger: { kind: 'battle_start' },
+        effect: { kind: 'pierce_all_shields' },
+      },
+    ],
+  },
+  {
     baseId: 'bug',
     name: 'バグ',
     attackKind: 'magic',
