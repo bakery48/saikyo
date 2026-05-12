@@ -145,25 +145,14 @@ export const SKILLS: SkillCard[] = [
     passive: { trigger: { kind: 'on_take_damage' }, effect: { kind: 'endure_fatal' } },
   },
   {
-    id: 'sk-ssrp-001',
+    id: 'sk-rp-025',
     name: '影討ち (passive)',
-    rarity: 'SSR',
+    rarity: 'R',
     nameTag: 'アサシン',
     isPassive: true,
     passive: {
       trigger: { kind: 'first_attack' },
       effect: { kind: 'first_attack_def_div', denominator: 2 },
-    },
-  },
-  {
-    id: 'sk-ssrp-002',
-    name: '時の積層 (passive)',
-    rarity: 'SSR',
-    nameTag: 'タイムロード',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'battle_start' },
-      effect: { kind: 'atk_per_active', amount: 2, every: 2 },
     },
   },
   {
@@ -378,17 +367,6 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'battle_start' },
       effect: { kind: 'stat_mod', stat: 'hp', amount: 4 },
-    },
-  },
-  {
-    id: 'sk-rp-006',
-    name: '連撃の才 (passive)',
-    rarity: 'R',
-    nameTag: 'コンボ',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_deal_damage' },
-      effect: { kind: 'atk_per_active', amount: 2, every: 2 },
     },
   },
   // ── SR passives (new) ───────────────────────────────────────────────────
@@ -838,6 +816,50 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'first_attack' },
       effect: { kind: 'first_attack_damage_mult', mult: 1.5 },
+    },
+  },
+  {
+    id: 'sk-np-001',
+    name: '俊足 (passive)',
+    rarity: 'N',
+    nameTag: 'ダッシュ',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'spd_roll_bonus', amount: 1 },
+    },
+  },
+  {
+    id: 'sk-rp-026',
+    name: '駿足 (passive)',
+    rarity: 'R',
+    nameTag: 'スプリンター',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'spd_roll_bonus', amount: 2 },
+    },
+  },
+  {
+    id: 'sk-rp-027',
+    name: '才能の片鱗 (passive)',
+    rarity: 'R',
+    nameTag: 'タレント',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'pick_higher_buff_mult', mult: 1.2 },
+    },
+  },
+  {
+    id: 'sk-rp-028',
+    name: '周期律 (passive)',
+    rarity: 'R',
+    nameTag: 'サイクル',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_own_turn_start' },
+      effect: { kind: 'even_turn_atk_bonus', amount: 2 },
     },
   },
   {

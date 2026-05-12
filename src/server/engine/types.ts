@@ -254,6 +254,8 @@ export type PassiveEffect =
   /** Flat % added to the SPD dodge roll on incoming attacks. */
   | { kind: 'dodge_bonus'; percent: number }
   | { kind: 'pick_higher_buff'; amount: number }
+  /** At battle start, multiply the higher of ATK/DEF by `mult` (adds floor(stat * (mult-1)) as a buff). */
+  | { kind: 'pick_higher_buff_mult'; mult: number }
   /**
    * Adds `amount` ATK for each `every` (default 1) actives this side has
    * already used in the battle. So `{ amount: 1, every: 1 }` is +1 ATK per
@@ -351,6 +353,7 @@ export type PassiveEffect =
   | { kind: 'first_strike_steal_atk'; amount: number }
   /** Dynamic: every odd-numbered own attack (1st, 3rd, 5th, …) gains `amount` damage. */
   | { kind: 'odd_turn_atk_bonus'; amount: number }
+  | { kind: 'even_turn_atk_bonus'; amount: number }
   /** Dynamic: each successive own attack adds `amount` × actives-used-so-far to damage. */
   | { kind: 'chain_damage_bonus'; amount: number }
   /** At each own turn start, heal `amount` × actives-used-so-far HP. */

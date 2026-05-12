@@ -196,6 +196,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `回避率+${e.percent}%`;
     case 'pick_higher_buff':
       return `ATKとDEFの高い方に+${e.amount}`;
+    case 'pick_higher_buff_mult':
+      return `ATKとDEFの高い方を×${e.mult}`;
     case 'atk_per_active':
       return e.every && e.every > 1
         ? `${e.every}回攻撃ごとにATK+${e.amount}`
@@ -282,6 +284,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `初撃時に相手のATKを${e.amount}奪取（バトル中）`;
     case 'odd_turn_atk_bonus':
       return `奇数回目の自分の攻撃で与ダメ+${e.amount}`;
+    case 'even_turn_atk_bonus':
+      return `偶数回目の自分の攻撃で与ダメ+${e.amount}`;
     case 'chain_damage_bonus':
       return `攻撃するたびに与ダメ+${e.amount}（累積）`;
     case 'growth_heal':
@@ -365,6 +369,8 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'selective_immune' ||
     p.effect.kind === 'attack_kind_resist' ||
     p.effect.kind === 'odd_turn_atk_bonus' ||
+    p.effect.kind === 'even_turn_atk_bonus' ||
+    p.effect.kind === 'pick_higher_buff_mult' ||
     p.effect.kind === 'chain_damage_bonus' ||
     p.effect.kind === 'second_wind' ||
     p.effect.kind === 'swap_atk_def_after_first_attack' ||

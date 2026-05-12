@@ -247,6 +247,15 @@ function applyBattleStartPassives(
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
+      case 'pick_higher_buff_mult':
+        if (p.trigger.kind === 'battle_start') {
+          const atk = effStat(self, 'atk');
+          const def = effStat(self, 'def');
+          if (atk >= def) self.atkMod += Math.floor(atk * (p.effect.mult - 1));
+          else self.defMod += Math.floor(def * (p.effect.mult - 1));
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
       case 'damage_reduction':
         self.damageReduction += p.effect.amount;
         break;
@@ -625,6 +634,12 @@ function resolveAttack(args: {
   if (attacker.activesUsedCount % 2 === 0) {
     for (const p of attackerPassives) {
       if (p.effect.kind === 'odd_turn_atk_bonus') atkBoost += p.effect.amount;
+    }
+  }
+  // even_turn_atk_bonus: bonus on every even-numbered own attack (2nd, 4th, ...).
+  if (attacker.activesUsedCount % 2 === 1) {
+    for (const p of attackerPassives) {
+      if (p.effect.kind === 'even_turn_atk_bonus') atkBoost += p.effect.amount;
     }
   }
   // chain_damage_bonus: each subsequent own attack scales linearly.
