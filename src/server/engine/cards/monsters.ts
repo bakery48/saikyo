@@ -179,7 +179,7 @@ export const MONSTERS: MonsterBase[] = [
       {
         id: 'cerberus-p1',
         name: '連携攻撃',
-        trigger: { kind: 'first_attack' },
+        trigger: { kind: 'on_deal_damage' },
         effect: { kind: 'extra_attack_chance', percent: 10 },
       },
     ],
