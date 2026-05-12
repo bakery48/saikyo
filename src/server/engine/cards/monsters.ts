@@ -67,7 +67,7 @@ export const MONSTERS: MonsterBase[] = [
         id: 'elf-p1',
         name: '軽やかな舞踊',
         trigger: { kind: 'on_take_damage' },
-        effect: { kind: 'dodge_bonus', percent: 15 },
+        effect: { kind: 'dodge_bonus', percent: 20 },
       },
     ],
   },

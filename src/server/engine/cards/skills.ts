@@ -411,7 +411,7 @@ export const SKILLS: SkillCard[] = [
     isPassive: true,
     passive: {
       trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'dodge_bonus', percent: 20 },
+      effect: { kind: 'dodge_bonus', percent: 15 },
     },
   },
   // ── SSR passive (new) ───────────────────────────────────────────────────
@@ -849,6 +849,17 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'battle_start' },
       effect: { kind: 'stat_swap_battle_start' },
+    },
+  },
+  {
+    id: 'sk-rp-024',
+    name: '闘気 (passive)',
+    rarity: 'R',
+    nameTag: 'ファイター',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'first_attack' },
+      effect: { kind: 'first_attack_damage_mult', mult: 1.5 },
     },
   },
   {
