@@ -188,6 +188,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `被ダメ−${e.amount}`;
     case 'turn_start_heal':
       return `HP+${e.amount} 回復`;
+    case 'turn_start_heal_even':
+      return `偶数ターン開始時HP+${e.amount} 回復`;
     case 'damage_negate_chance':
       return `${e.oneIn}分の1で被ダメ無効`;
     case 'dodge_bonus':

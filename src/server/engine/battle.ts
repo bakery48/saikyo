@@ -353,6 +353,17 @@ function applyTurnStartPassives(
         }
         break;
       }
+      case 'turn_start_heal_even': {
+        // activesUsedCount is the number of turns completed; fire on 2nd, 4th... turns (count is odd).
+        if (self.activesUsedCount % 2 === 1) {
+          const applied = healCapped(self, p.effect.amount);
+          if (applied > 0) {
+            log.push({ kind: 'heal', player: side, amount: applied, hpAfter: self.hp });
+            log.push({ kind: 'passive', player: side, passiveId: p.id });
+          }
+        }
+        break;
+      }
       case 'regen_shield': {
         const goal = p.effect.amount * self.shieldMultiplier;
         if (self.shield < goal) {

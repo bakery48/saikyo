@@ -249,6 +249,7 @@ export type PassiveEffect =
   | { kind: 'spd_roll_bonus'; amount: number }
   | { kind: 'damage_reduction'; amount: number }
   | { kind: 'turn_start_heal'; amount: number }
+  | { kind: 'turn_start_heal_even'; amount: number }
   | { kind: 'damage_negate_chance'; oneIn: number }
   /** Flat % added to the SPD dodge roll on incoming attacks. */
   | { kind: 'dodge_bonus'; percent: number }

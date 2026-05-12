@@ -118,7 +118,7 @@ export const SKILLS: SkillCard[] = [
     rarity: 'R',
     nameTag: 'リジェネ',
     isPassive: true,
-    passive: { trigger: { kind: 'on_own_turn_start' }, effect: { kind: 'turn_start_heal', amount: 1 } },
+    passive: { trigger: { kind: 'on_own_turn_start' }, effect: { kind: 'turn_start_heal_even', amount: 2 } },
   },
   {
     id: 'sk-srp-001',
@@ -393,17 +393,6 @@ export const SKILLS: SkillCard[] = [
   },
   // ── SR passives (new) ───────────────────────────────────────────────────
   {
-    id: 'sk-srp-009',
-    name: '鉄壁 (passive)',
-    rarity: 'SR',
-    nameTag: 'フォートレス',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'damage_reduction', amount: 3 },
-    },
-  },
-  {
     id: 'sk-srp-010',
     name: '閃光回避 (passive)',
     rarity: 'SR',
@@ -583,17 +572,6 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'on_deal_damage' },
       effect: { kind: 'bonus_vs_low_hp', amount: 3 },
-    },
-  },
-  {
-    id: 'sk-rp-009',
-    name: '朝の祈り (passive)',
-    rarity: 'R',
-    nameTag: 'ペイレ',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_own_turn_start' },
-      effect: { kind: 'turn_start_heal', amount: 2 },
     },
   },
   // ── SR passives (batch 3) ───────────────────────────────────────────────
