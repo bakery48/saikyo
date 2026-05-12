@@ -212,14 +212,14 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'prism',
-    name: 'プリズム',
-    attackKind: 'magic',
+    baseId: 'dragon',
+    name: 'ドラゴン',
+    attackKind: 'claw',
     stats: { hp: 9, atk: 5, def: 2, spd: 6 },
     passives: [
       {
-        id: 'prism-p1',
-        name: 'プリズムシールド',
+        id: 'dragon-p1',
+        name: '龍鱗の加護',
         trigger: { kind: 'on_take_damage' },
         effect: { kind: 'mid_damage_immune', min: 4, max: 9 },
       },
