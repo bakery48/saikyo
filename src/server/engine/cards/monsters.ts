@@ -270,7 +270,7 @@ export const MONSTERS: MonsterBase[] = [
   },
   {
     baseId: 'sentinel',
-    name: 'センチネル',
+    name: 'ゴースト',
     attackKind: 'strike',
     stats: { hp: 16, atk: 4, def: 8, spd: 3 },
     passives: [
