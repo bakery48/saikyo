@@ -4,7 +4,7 @@ import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 import { MONSTERS } from '../../server/engine/cards/monsters';
-import { passiveTooltip } from '../../lib/skill-text';
+import { passiveTooltip, describePassive } from '../../lib/skill-text';
 import { SkillNameHover } from './SkillNameHover';
 
 const PIECE_SIZE_CARD = 22;
@@ -144,11 +144,11 @@ export function MonsterPickView({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(4, 1fr)',
           gap: 8,
         }}
       >
-        {MONSTERS.map((m) => {
+        {MONSTERS.filter((m) => !m.hidden).map((m) => {
           const claimed = claimedBy.get(m.baseId);
           const inPool = isPoolMonster(m.baseId);
           const onCard = pieces[m.baseId];
@@ -158,105 +158,106 @@ export function MonsterPickView({
             myCommittedPick === m.baseId ||
             tentative === m.baseId ||
             (claimed && claimed.id === socket.playerId);
+          const borderColor = myPieceHere
+            ? '#0066cc'
+            : conflict
+              ? '#c44'
+              : claimed
+                ? '#aaa'
+                : canClick
+                  ? '#0a8'
+                  : '#ccc';
           return (
             <button
               key={m.baseId}
               disabled={!canClick}
               onClick={() => placeOrCommit(m.baseId)}
               style={{
-                position: 'relative',
-                border: `3px solid ${
-                  myPieceHere
-                    ? '#0066cc'
-                    : conflict
-                      ? '#c44'
-                      : claimed
-                        ? '#aaa'
-                        : canClick
-                          ? '#0a8'
-                          : '#ccc'
-                }`,
+                border: `3px solid ${borderColor}`,
                 borderRadius: 8,
-                padding: 12,
+                padding: 0,
                 background: claimed ? '#f0f0f0' : !inPool ? '#f6f6f6' : '#fff',
                 color: claimed ? '#666' : 'inherit',
                 cursor: canClick ? 'pointer' : 'default',
                 textAlign: 'left',
                 opacity: claimed ? 0.78 : 1,
-                minHeight: 140,
-                display: 'grid',
-                gap: 6,
+                display: 'flex',
+                flexDirection: 'row',
+                overflow: 'hidden',
               }}
             >
-              {/* Pieces row — pieces with player name labels. */}
+              {/* Left: monster image placeholder */}
               <div
                 style={{
+                  flexShrink: 0,
+                  width: 90,
+                  alignSelf: 'stretch',
+                  background: '#4a7a9b',
                   display: 'flex',
-                  gap: 6,
                   alignItems: 'center',
-                  flexWrap: 'wrap',
-                  minHeight: PIECE_SIZE_CARD + 4,
+                  justifyContent: 'center',
+                  fontSize: 12,
+                  color: '#fff',
+                  opacity: 0.7,
                 }}
               >
-                {claimed && (
-                  <PieceLabel
-                    player={claimed}
-                    note="獲得"
-                    extraStyle={{ outline: '2px solid #d4a000', outlineOffset: 2 }}
-                  />
+                絵
+              </div>
+              {/* Right: info */}
+              <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{m.name}</div>
+                <div style={{ fontSize: 11, opacity: 0.75 }}>
+                  HP{m.stats.hp} ATK{m.stats.atk} DEF{m.stats.def} SPD{m.stats.spd}
+                </div>
+                {m.passives.length > 0 && (
+                  <div style={{ fontSize: 11, marginTop: 2 }}>
+                    {m.passives.map((p, i) => (
+                      <div key={p.id ?? `${m.baseId}-${i}`}>
+                        <SkillNameHover label={p.name} tooltip={passiveTooltip(p)} />
+                        <span style={{ opacity: 0.7, marginLeft: 4 }}>
+                          {describePassive(p)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 )}
-                {onCard?.committed.map((p) => (
-                  <PieceLabel key={p.id} player={p} note="決定" />
-                ))}
-                {onCard?.tentative && (
-                  <PieceLabel
-                    player={onCard.tentative}
-                    note="未確定"
-                    extraStyle={{ opacity: 0.55, borderStyle: 'dashed' }}
-                  />
-                )}
-                {conflict && (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      background: '#c44',
-                      color: '#fff',
-                      borderRadius: 4,
-                      padding: '1px 6px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    かぶり
-                  </span>
+                {/* Pieces row */}
+                {(claimed || onCard?.committed.length || onCard?.tentative || conflict) && (
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 2 }}>
+                    {claimed && (
+                      <PieceLabel
+                        player={claimed}
+                        note="獲得"
+                        extraStyle={{ outline: '2px solid #d4a000', outlineOffset: 2 }}
+                      />
+                    )}
+                    {onCard?.committed.map((p) => (
+                      <PieceLabel key={p.id} player={p} note="決定" />
+                    ))}
+                    {onCard?.tentative && (
+                      <PieceLabel
+                        player={onCard.tentative}
+                        note="未確定"
+                        extraStyle={{ opacity: 0.55, borderStyle: 'dashed' }}
+                      />
+                    )}
+                    {conflict && (
+                      <span
+                        style={{
+                          fontSize: 11,
+                          background: '#c44',
+                          color: '#fff',
+                          borderRadius: 4,
+                          padding: '1px 6px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        かぶり
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
-              <div style={{ fontWeight: 600, fontSize: 15 }}>{m.name}</div>
-              <div style={{ fontSize: 12, opacity: 0.85 }}>
-                HP{m.stats.hp} ATK{m.stats.atk} DEF{m.stats.def} SPD{m.stats.spd}
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  opacity: 0.85,
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 4,
-                }}
-              >
-                {m.passives.length === 0 ? (
-                  <em style={{ opacity: 0.5 }}>(なし)</em>
-                ) : (
-                  m.passives.map((p, i) => (
-                    <span key={p.id ?? `${m.baseId}-${i}`}>
-                      <SkillNameHover label={p.name} tooltip={passiveTooltip(p)} />
-                      {i < m.passives.length - 1 ? '、' : ''}
-                    </span>
-                  ))
-                )}
-              </div>
-              {claimed && (
-                <div style={{ fontSize: 11, fontWeight: 600 }}>→ {claimed.name} の獲得</div>
-              )}
             </button>
           );
         })}
