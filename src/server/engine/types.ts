@@ -367,6 +367,8 @@ export type PassiveEffect =
   | { kind: 'double_shield' }
   /** When the last active skill is used, grant self a reflect shield of `amount`. */
   | { kind: 'grant_reflect_shield_on_last_active'; amount: number }
+  /** When the last active skill is used, grant self a ghost shield of `amount` (reflects absorbed + floor(atk*0.5)). */
+  | { kind: 'grant_ghost_shield_on_last_active'; amount: number }
   /** Defender flag: incoming attacks of `attackKind` are fully nullified. */
   | { kind: 'selective_immune'; attackKind: Exclude<AttackKind, 'passthrough'> }
   /** Defender flag: incoming attacks of `attackKind` lose `amount` damage. */

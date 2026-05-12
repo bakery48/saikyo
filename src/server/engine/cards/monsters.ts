@@ -278,7 +278,7 @@ export const MONSTERS: MonsterBase[] = [
         id: 'sentinel-p1',
         name: '鉄壁の誓い',
         trigger: { kind: 'on_last_active_used' },
-        effect: { kind: 'grant_reflect_shield_on_last_active', amount: 99 },
+        effect: { kind: 'grant_ghost_shield_on_last_active', amount: 99 },
       },
     ],
   },

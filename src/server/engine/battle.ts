@@ -41,6 +41,8 @@ type CombatStats = Stats & {
   shield: number;
   /** Thorn-shield HP; absorbs incoming attack damage and reflects the absorbed amount as true damage to the attacker. Depletes until 0. */
   reflectShield: number;
+  /** Ghost-shield HP; absorbs incoming attack damage and reflects (absorbed + floor(attacker.atk * 0.5)) as true damage. Depletes until 0. */
+  ghostShield: number;
   /** Threshold shield; blocks all damage from hits below this value. A hit >= threshold breaks the shield and damage passes through fully. 0 = inactive. */
   thresholdShield: number;
   /** Whether the next opponent active will be nullified. */
@@ -133,6 +135,7 @@ function initCombat(m: Monster): CombatStats {
     nextAmp: 1,
     shield: 0,
     reflectShield: 0,
+    ghostShield: 0,
     thresholdShield: 0,
     nullifyOpponentNext: false,
     skillIdx: 0,
@@ -463,6 +466,11 @@ function takeDamage(
     target.reflectShield -= absorbed;
     dmg -= absorbed;
   }
+  if (!ignoreShield && target.ghostShield > 0) {
+    const absorbed = Math.min(target.ghostShield, dmg);
+    target.ghostShield -= absorbed;
+    dmg -= absorbed;
+  }
   if (!ignoreShield && target.thresholdShield > 0) {
     if (dmg < target.thresholdShield) {
       dmg = 0; // hit too small — fully blocked, shield stays
@@ -692,6 +700,7 @@ function resolveAttack(args: {
   // Capture state needed for post-damage triggers.
   const defenderHadShield = defender.shield > 0;
   const defenderReflectShieldBefore = defender.reflectShield;
+  const defenderGhostShieldBefore = defender.ghostShield;
   let actual = takeDamage(defender, raw, rng, defenderPassives, defenderSide, log, ignoreDef, attacker.forcePierceActive);
   actual = clampWithEndure(defender, actual, defenderPassives, defenderSide, log);
   defender.hp -= actual;
@@ -809,6 +818,16 @@ function resolveAttack(args: {
     r = clampWithEndure(attacker, r, attackerPassives, attackerSide, log);
     attacker.hp -= r;
     log.push({ kind: 'damage', from: defenderSide, to: attackerSide, amount: r, hpAfter: attacker.hp });
+  }
+  // ghost_shield: reflect absorbed + floor(attacker.atk * 0.5) as true damage to the attacker.
+  const ghostShieldAbsorbed = defenderGhostShieldBefore - defender.ghostShield;
+  if (ghostShieldAbsorbed > 0) {
+    const bonus = Math.floor(effStat(attacker, 'atk') * 0.5);
+    const r = ghostShieldAbsorbed + bonus;
+    let rd = takeDamage(attacker, r, rng, attackerPassives, attackerSide, log, true);
+    rd = clampWithEndure(attacker, rd, attackerPassives, attackerSide, log);
+    attacker.hp -= rd;
+    log.push({ kind: 'damage', from: defenderSide, to: attackerSide, amount: rd, hpAfter: attacker.hp });
   }
   // share_damage_next: reflect a portion of the dealt damage back to the attacker.
   if (actual > 0 && defender.shareDamageNextPercent > 0) {
@@ -1154,12 +1173,13 @@ function applySkill(args: {
       break;
     }
     case 'shield_break_attack': {
-      const hasShield = target.shield > 0 || target.reflectShield > 0 || target.thresholdShield > 0;
+      const hasShield = target.shield > 0 || target.reflectShield > 0 || target.thresholdShield > 0 || target.ghostShield > 0;
       const mult = hasShield ? e.multShield : e.multNoShield;
       if (hasShield) {
         target.shield = 0;
         target.reflectShield = 0;
         target.thresholdShield = 0;
+        target.ghostShield = 0;
       }
       resolveAttack({
         attacker: user,
@@ -1972,6 +1992,12 @@ function applyOnActiveUsedPassives(
       switch (p.effect.kind) {
         case 'grant_reflect_shield_on_last_active': {
           user.reflectShield += p.effect.amount;
+          log.push({ kind: 'shield', player: side, amount: p.effect.amount });
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+          break;
+        }
+        case 'grant_ghost_shield_on_last_active': {
+          user.ghostShield += p.effect.amount;
           log.push({ kind: 'shield', player: side, amount: p.effect.amount });
           log.push({ kind: 'passive', player: side, passiveId: p.id });
           break;

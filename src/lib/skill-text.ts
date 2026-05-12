@@ -294,6 +294,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `シールドの獲得量が2倍`;
     case 'grant_reflect_shield_on_last_active':
       return `最後のスロット発動後、反射シールド${e.amount}を自分に付与`;
+    case 'grant_ghost_shield_on_last_active':
+      return `最後のスロット発動後、幽霊シールド${e.amount}を自分に付与（反射ダメージ+相手ATK×0.5）`;
     case 'selective_immune':
       return `${attackKindLabel(e.attackKind)}属性の被ダメを完全無効化`;
     case 'attack_kind_resist':
