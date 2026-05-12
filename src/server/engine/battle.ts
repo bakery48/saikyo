@@ -1965,6 +1965,20 @@ function applyOnActiveUsedPassives(
       }
     }
   }
+  // on_last_active_used: fires once when activesUsedCount reaches totalActives.
+  if (user.activesUsedCount === user.totalActives) {
+    for (const p of passives) {
+      if (p.trigger.kind !== 'on_last_active_used') continue;
+      switch (p.effect.kind) {
+        case 'grant_reflect_shield_on_last_active': {
+          user.reflectShield += p.effect.amount;
+          log.push({ kind: 'shield', player: side, amount: p.effect.amount });
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+          break;
+        }
+      }
+    }
+  }
 }
 
 function rollFirst(

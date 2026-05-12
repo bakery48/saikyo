@@ -235,7 +235,8 @@ export type PassiveTrigger =
   | { kind: 'on_own_turn_start' }
   | { kind: 'on_take_damage' }
   | { kind: 'on_deal_damage' }
-  | { kind: 'on_own_active_used' };
+  | { kind: 'on_own_active_used' }
+  | { kind: 'on_last_active_used' };
 
 export type PassiveEffect =
   | { kind: 'stat_mod'; stat: StatKey; amount: number }
@@ -364,6 +365,8 @@ export type PassiveEffect =
   | { kind: 'slow_starter'; breakpoint: number; malus: number; bonus: number }
   /** Any shield gained by this side is multiplied (e.g., 2 = double). */
   | { kind: 'double_shield' }
+  /** When the last active skill is used, grant self a reflect shield of `amount`. */
+  | { kind: 'grant_reflect_shield_on_last_active'; amount: number }
   /** Defender flag: incoming attacks of `attackKind` are fully nullified. */
   | { kind: 'selective_immune'; attackKind: Exclude<AttackKind, 'passthrough'> }
   /** Defender flag: incoming attacks of `attackKind` lose `amount` damage. */

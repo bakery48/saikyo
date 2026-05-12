@@ -164,6 +164,8 @@ export function describePassiveTrigger(t: PassiveTrigger): string {
       return '与ダメ時';
     case 'on_own_active_used':
       return '自分がスロットを発動した後';
+    case 'on_last_active_used':
+      return '最後のスロットを発動した後';
   }
 }
 
@@ -290,6 +292,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `${e.breakpoint}回目までは与ダメ-${e.malus}、それ以降は与ダメ+${e.bonus}`;
     case 'double_shield':
       return `シールドの獲得量が2倍`;
+    case 'grant_reflect_shield_on_last_active':
+      return `最後のスロット発動後、反射シールド${e.amount}を自分に付与`;
     case 'selective_immune':
       return `${attackKindLabel(e.attackKind)}属性の被ダメを完全無効化`;
     case 'attack_kind_resist':

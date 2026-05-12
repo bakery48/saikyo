@@ -268,6 +268,20 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
   },
+  {
+    baseId: 'sentinel',
+    name: 'センチネル',
+    attackKind: 'strike',
+    stats: { hp: 16, atk: 4, def: 8, spd: 3 },
+    passives: [
+      {
+        id: 'sentinel-p1',
+        name: '鉄壁の誓い',
+        trigger: { kind: 'on_last_active_used' },
+        effect: { kind: 'grant_reflect_shield_on_last_active', amount: 99 },
+      },
+    ],
+  },
 ];
 
 export const MONSTERS_BY_ID: Record<string, MonsterBase> = Object.fromEntries(
