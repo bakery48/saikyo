@@ -1,7 +1,8 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { SKILLS } from '../../../server/engine/cards/skills';
-import { describeSkillCard, effectCategory, type EffectCategory } from '../../../lib/skill-text';
+import { MONSTERS } from '../../../server/engine/cards/monsters';
+import { describePassive, describeSkillCard, effectCategory, type EffectCategory } from '../../../lib/skill-text';
 import type { AttackKind, Rarity, SkillCard, SkillEffect } from '../../../server/engine/types';
 
 const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
@@ -293,7 +294,139 @@ export default function DevSkillsPage() {
           </pre>
         </details>
       )}
+
+      <MonsterPassiveEditor />
     </main>
+  );
+}
+
+type MonsterPassiveEdits = Record<string, { description?: string }>;
+
+function MonsterPassiveEditor() {
+  const [edits, setEdits] = useState<MonsterPassiveEdits>({});
+
+  const rows = useMemo(
+    () =>
+      MONSTERS.flatMap((m) =>
+        m.passives.map((p) => ({ monsterName: m.name, baseId: m.baseId, passive: p })),
+      ),
+    [],
+  );
+
+  const setDesc = (passiveId: string, value: string): void => {
+    setEdits((prev) => ({ ...prev, [passiveId]: { description: value } }));
+  };
+
+  const changedEntries = useMemo(() => {
+    const out: Array<{ passiveId: string; description: string }> = [];
+    for (const r of rows) {
+      const e = edits[r.passive.id];
+      if (e?.description === undefined) continue;
+      const orig = r.passive.description ?? '';
+      if (e.description !== orig) {
+        out.push({ passiveId: r.passive.id, description: e.description });
+      }
+    }
+    return out;
+  }, [edits, rows]);
+
+  const apply = async (): Promise<void> => {
+    if (changedEntries.length === 0) return;
+    try {
+      const res = await fetch('/api/dev/apply-monster-edits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changedEntries),
+      });
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      const data = (await res.json()) as { count: number };
+      alert(`${data.count} 件を monsters.overrides.json に反映しました。Next.js がホットリロードします。`);
+      setEdits({});
+    } catch (err) {
+      alert(`反映に失敗しました: ${String(err)}`);
+    }
+  };
+
+  const reset = (): void => {
+    if (confirm('モンスターパッシブの編集を破棄しますか？')) setEdits({});
+  };
+
+  return (
+    <section style={{ marginTop: 24 }}>
+      <h2 style={{ margin: '0 0 8px', fontSize: 18 }}>モンスター固有スキル説明文</h2>
+      <p style={{ fontSize: 12, opacity: 0.7, margin: '0 0 8px' }}>
+        各モンスター固有パッシブの説明文を編集可能。空にすると effect から自動生成に戻ります。
+      </p>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ fontSize: 12, opacity: 0.7 }}>変更 {changedEntries.length} 件</span>
+        <button
+          type="button"
+          onClick={apply}
+          disabled={changedEntries.length === 0}
+          style={{
+            background: '#2a6',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 3,
+            padding: '4px 10px',
+            cursor: 'pointer',
+          }}
+        >
+          反映（overrides.json に書き込み）
+        </button>
+        <button type="button" onClick={reset} disabled={Object.keys(edits).length === 0}>
+          編集を破棄
+        </button>
+      </div>
+      <div style={{ overflow: 'auto', border: '1px solid #ccc', borderRadius: 4 }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: '#eef', position: 'sticky', top: 0 }}>
+              <Th>モンスター</Th>
+              <Th>パッシブ名</Th>
+              <Th>パッシブID</Th>
+              <Th>説明文（空=自動生成）</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => {
+              const currentDesc =
+                edits[r.passive.id]?.description !== undefined
+                  ? edits[r.passive.id]!.description!
+                  : r.passive.description ?? '';
+              const autoDesc = describePassive(r.passive);
+              const dirty =
+                edits[r.passive.id]?.description !== undefined &&
+                edits[r.passive.id]!.description !== (r.passive.description ?? '');
+              return (
+                <tr
+                  key={r.passive.id}
+                  style={{
+                    background: dirty ? '#fffbe6' : 'transparent',
+                    borderBottom: '1px solid #eee',
+                  }}
+                >
+                  <Td>{r.monsterName}</Td>
+                  <Td>{r.passive.name}</Td>
+                  <Td>
+                    <code style={{ fontSize: 11 }}>{r.passive.id}</code>
+                  </Td>
+                  <Td style={{ minWidth: 320 }}>
+                    <input
+                      type="text"
+                      value={currentDesc}
+                      onChange={(ev) => setDesc(r.passive.id, ev.target.value)}
+                      style={{ ...cellInputStyle, color: currentDesc ? '#000' : '#999' }}
+                      placeholder={autoDesc}
+                    />
+                  </Td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 

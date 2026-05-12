@@ -215,7 +215,7 @@ export function MonsterPickView({
                       <div key={p.id ?? `${m.baseId}-${i}`}>
                         <SkillNameHover label={p.name} tooltip={passiveTooltip(p)} />
                         <span style={{ opacity: 0.7, marginLeft: 4 }}>
-                          {describePassive(p)}
+                          {p.description ?? describePassive(p)}
                         </span>
                       </div>
                     ))}

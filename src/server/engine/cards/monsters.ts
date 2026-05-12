@@ -1,4 +1,5 @@
 import type { MonsterBase } from '../types';
+import rawOverrides from './monsters.overrides.json';
 
 export const MONSTERS: MonsterBase[] = [
   {
@@ -297,6 +298,19 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
 ];
+
+type PassiveOverride = { description?: string };
+const passiveOverrides = rawOverrides as Record<string, PassiveOverride>;
+
+if (Object.keys(passiveOverrides).length > 0) {
+  for (const m of MONSTERS) {
+    for (const p of m.passives) {
+      const ov = passiveOverrides[p.id];
+      if (!ov) continue;
+      if (ov.description !== undefined) p.description = ov.description;
+    }
+  }
+}
 
 export const MONSTERS_BY_ID: Record<string, MonsterBase> = Object.fromEntries(
   MONSTERS.map((m) => [m.baseId, m]),

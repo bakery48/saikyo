@@ -414,6 +414,8 @@ export type PassiveSkill = {
   nameTag?: string;
   /** Optional classification tag (e.g., 'sin'). */
   tag?: SkillTag;
+  /** Manual override for the passive's description text (used by monster-base passives via the dev editor). Falls back to auto-generated text if absent. */
+  description?: string;
 };
 
 export type MonsterBase = {

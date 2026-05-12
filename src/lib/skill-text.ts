@@ -501,7 +501,7 @@ export function activeTooltip(a: ActiveSkill): string {
 
 /** Tooltip body for a passive skill (trigger+effect + tag, newline-separated). */
 export function passiveTooltip(p: PassiveSkill): string {
-  const lines = [describePassive(p)];
+  const lines = [p.description ?? describePassive(p)];
   if (p.nameTag) lines.push(`tag: ${p.nameTag}`);
   return lines.join('\n');
 }
