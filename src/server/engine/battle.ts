@@ -965,11 +965,26 @@ function rollExtraAttack(
         log.push({ kind: 'passive', player: userSide, passiveId: p.id });
         return true;
       }
-      // Only one such passive should attempt to proc per skill use.
       break;
     }
   }
   return false;
+}
+
+/** Run extra attacks from extra_attack_chance, chaining until no proc (max 10 chains). */
+function runExtraAttacks(
+  user: CombatStats,
+  userPassives: PassiveSkill[],
+  userSide: Side,
+  rng: RNG,
+  log: BattleEvent[],
+  runAttack: () => void,
+): void {
+  let chains = 0;
+  while (chains < 10 && rollExtraAttack(user, userPassives, userSide, rng, log)) {
+    runAttack();
+    chains++;
+  }
 }
 
 /** ウィザード hex_def: each successful hit shaves DEF off the target permanently (battle-only). */
@@ -1190,10 +1205,7 @@ function applySkill(args: {
       user.pendingMultiAttackPenalty = 0;
       for (let i = 0; i < repeats; i++) runAttack();
       user.firstAttackMade = true;
-      // ケルベロス extra_attack_chance: 一度だけ proc を試行して再発動。
-      if (rollExtraAttack(user, userPassives, userSide, rng, log)) {
-        runAttack();
-      }
+      runExtraAttacks(user, userPassives, userSide, rng, log, runAttack);
       break;
     }
     case 'grant_target_shield': {
@@ -1286,9 +1298,7 @@ function applySkill(args: {
       user.pendingMultiAttackPenalty = 0;
       for (let i = 0; i < repeats; i++) runTrueDamage();
       user.firstAttackMade = true;
-      if (rollExtraAttack(user, userPassives, userSide, rng, log)) {
-        runTrueDamage();
-      }
+      runExtraAttacks(user, userPassives, userSide, rng, log, runTrueDamage);
       break;
     }
     case 'target_stat_damage': {
@@ -1504,7 +1514,7 @@ function applySkill(args: {
       };
       for (let i = 0; i < e.hitCount; i++) runHit();
       user.firstAttackMade = true;
-      if (rollExtraAttack(user, userPassives, userSide, rng, log)) runHit();
+      runExtraAttacks(user, userPassives, userSide, rng, log, runHit);
       break;
     }
     case 'heal_max_fraction': {
@@ -1961,7 +1971,7 @@ function applySkill(args: {
         log,
       });
       user.firstAttackMade = true;
-      if (rollExtraAttack(user, userPassives, userSide, rng, log)) {
+      runExtraAttacks(user, userPassives, userSide, rng, log, () => {
         resolveAttack({
           attacker: user,
           defender: target,
@@ -1973,7 +1983,7 @@ function applySkill(args: {
           rng,
           log,
         });
-      }
+      });
       break;
     }
     case 'force_amp': {
