@@ -632,15 +632,7 @@ function resolveAttack(args: {
     }
     return;
   }
-  // atk_per_active passives (potentially multiple, each with its own
-  // amount/every) contribute to ATK based on how many actives are used so far.
   let atkBoost = 0;
-  for (const p of attackerPassives) {
-    if (p.effect.kind === 'atk_per_active') {
-      const every = p.effect.every ?? 1;
-      atkBoost += p.effect.amount * Math.floor(attacker.activesUsedCount / every);
-    }
-  }
   // low_hp_atk_bonus: dynamic — only counts while at or below half HP.
   const isLowHp = attacker.maxHp > 0 && attacker.hp * 2 <= attacker.maxHp;
   if (isLowHp) {
@@ -2026,6 +2018,11 @@ function applyOnActiveUsedPassives(
   for (const p of passives) {
     if (p.trigger.kind !== 'on_own_active_used') continue;
     switch (p.effect.kind) {
+      case 'atk_per_active':
+        user.atkMod += p.effect.amount;
+        log.push({ kind: 'buff', player: side, stat: 'atk', amount: p.effect.amount, duration: 'battle' });
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+        break;
       case 'decay_atk_per_active':
         user.atkMod -= p.effect.amount;
         log.push({ kind: 'debuff', player: side, stat: 'atk', amount: p.effect.amount, duration: 'battle' });
