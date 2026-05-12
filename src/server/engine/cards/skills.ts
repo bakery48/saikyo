@@ -105,14 +105,6 @@ export const SKILLS: SkillCard[] = [
 
   // ─── Passive skill cards ───────────────────────────────────────────────────
   {
-    id: 'sk-rp-001',
-    name: '先制の構え (passive)',
-    rarity: 'R',
-    nameTag: 'リーダー',
-    isPassive: true,
-    passive: { trigger: { kind: 'first_attack' }, effect: { kind: 'first_attack_amp', amount: 1 } },
-  },
-  {
     id: 'sk-rp-002',
     name: '再生 (passive)',
     rarity: 'R',
