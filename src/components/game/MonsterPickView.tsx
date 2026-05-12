@@ -186,7 +186,7 @@ export function MonsterPickView({
                 overflow: 'hidden',
               }}
             >
-              {/* Left: monster image placeholder */}
+              {/* Left: monster image */}
               <div
                 style={{
                   flexShrink: 0,
@@ -201,9 +201,15 @@ export function MonsterPickView({
                   color: '#fff',
                   opacity: 0.7,
                   border: '2px solid #333',
+                  overflow: 'hidden',
                 }}
               >
-                絵
+                <img
+                  src={`/monsters/${m.baseId}.png`}
+                  alt={m.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 1 }}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                />
               </div>
               {/* Right: info */}
               <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
