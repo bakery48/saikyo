@@ -1126,29 +1126,7 @@ export const SKILLS: SkillCard[] = [
       effect: { kind: 'double_shield' },
     },
   },
-  {
-    id: 'sk-srp-024',
-    name: '魔法封じ (passive)',
-    rarity: 'SR',
-    nameTag: 'マジックシール',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'selective_immune', attackKind: 'magic' },
-    },
-  },
   // SSR passives
-  {
-    id: 'sk-ssrp-004',
-    name: '鋼鉄の鎧 (passive)',
-    rarity: 'SSR',
-    nameTag: 'スチールアーマー',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'attack_kind_resist', attackKind: 'strike', amount: 4 },
-    },
-  },
   {
     id: 'sk-ssrp-005',
     name: '断末魔 (passive)',
