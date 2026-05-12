@@ -582,13 +582,6 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'mimic_last' } },
   },
   {
-    id: 'sk-r-050',
-    name: 'シールドバッシュ',
-    rarity: 'R',
-    nameTag: 'バッシュ',
-    active: { effect: { kind: 'def_attack', flat: 2, attackKind: 'strike' } },
-  },
-  {
     id: 'sk-r-051',
     name: 'ハエたたき',
     rarity: 'R',
