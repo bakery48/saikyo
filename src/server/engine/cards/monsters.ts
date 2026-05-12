@@ -240,13 +240,13 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'specter',
+    baseId: 'griffon',
     name: 'グリフォン',
     attackKind: 'claw',
     stats: { hp: 13, atk: 3, def: 4, spd: 6 },
     passives: [
       {
-        id: 'specter-p1',
+        id: 'griffon-p1',
         name: '飛翔斬',
         trigger: { kind: 'battle_start' },
         effect: { kind: 'pierce_all_shields' },
