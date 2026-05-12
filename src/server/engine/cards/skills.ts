@@ -819,17 +819,6 @@ export const SKILLS: SkillCard[] = [
     },
   },
   {
-    id: 'sk-np-001',
-    name: '俊足 (passive)',
-    rarity: 'N',
-    nameTag: 'ダッシュ',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'battle_start' },
-      effect: { kind: 'spd_roll_bonus', amount: 1 },
-    },
-  },
-  {
     id: 'sk-rp-026',
     name: '駿足 (passive)',
     rarity: 'R',
