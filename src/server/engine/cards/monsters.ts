@@ -264,7 +264,7 @@ export const MONSTERS: MonsterBase[] = [
         id: 'knight-p1',
         name: '背水の覚悟',
         trigger: { kind: 'battle_start' },
-        effect: { kind: 'low_hp_atk_bonus', amount: 4 },
+        effect: { kind: 'low_hp_atk_mult', mult: 2, thresholdFraction: 0.5 },
       },
     ],
   },

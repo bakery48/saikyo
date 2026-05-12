@@ -541,6 +541,16 @@ function takeDamage(
       }
     }
   }
+  // mid_damage_reduce: divide damage in [min, max] by denominator.
+  if (!pierceReductions) {
+    for (const p of passives) {
+      if (p.effect.kind === 'mid_damage_reduce' && dmg >= p.effect.min && dmg <= p.effect.max) {
+        const denom = Math.max(1, p.effect.denominator);
+        dmg = Math.floor(dmg / denom);
+        log.push({ kind: 'passive', player: side, passiveId: p.id });
+      }
+    }
+  }
   // rage_atk: gain ATK every time this side actually takes damage (optionally only above minDamage).
   if (dmg > 0) {
     for (const p of passives) {
@@ -628,6 +638,16 @@ function resolveAttack(args: {
     for (const p of attackerPassives) {
       if (p.effect.kind === 'low_hp_atk_bonus') {
         atkBoost += p.effect.amount;
+      }
+    }
+  }
+  // low_hp_atk_mult: while at or below thresholdFraction of max HP, multiply ATK.
+  for (const p of attackerPassives) {
+    if (p.effect.kind === 'low_hp_atk_mult' && attacker.maxHp > 0) {
+      const threshold = attacker.maxHp * p.effect.thresholdFraction;
+      if (attacker.hp <= threshold) {
+        const baseAtk = effStat(attacker, 'atk');
+        atkBoost += Math.floor(baseAtk * (p.effect.mult - 1));
       }
     }
   }

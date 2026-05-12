@@ -274,6 +274,8 @@ export type PassiveEffect =
   | { kind: 'counter_damage'; denominator: number }
   /** While hp ≤ maxHp/2, gain `amount` ATK on attacks (dynamic check at attack time). */
   | { kind: 'low_hp_atk_bonus'; amount: number }
+  /** While at or below `thresholdFraction` of max HP, multiply ATK by `mult`. */
+  | { kind: 'low_hp_atk_mult'; mult: number; thresholdFraction: number }
   /**
    * Once per battle, an attack that would drop hp to 0 instead leaves
    * floor(maxHp / reviveDenominator) (clamped to ≥1). When `reviveDenominator`
@@ -311,6 +313,8 @@ export type PassiveEffect =
    * through normally — high-burst attacks can still break through.
    */
   | { kind: 'mid_damage_immune'; min: number; max: number }
+  /** If incoming damage falls in [min, max], divide it by `denominator` instead of nullifying. */
+  | { kind: 'mid_damage_reduce'; min: number; max: number; denominator: number }
   /** Cap incoming damage per hit at `maxPerHit` (after reductions). */
   | { kind: 'damage_cap'; maxPerHit: number }
   /** When attacking and the target is at or below half HP, deal `amount` extra true damage. */

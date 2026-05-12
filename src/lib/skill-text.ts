@@ -218,6 +218,15 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `被ダメの1/${e.denominator}（切り捨て）を相手に反射`;
     case 'low_hp_atk_bonus':
       return `HPが半分以下のときATK+${e.amount}`;
+    case 'low_hp_atk_mult': {
+      const frac = e.thresholdFraction;
+      const fracLabel =
+        Math.abs(frac - 0.5) < 1e-6 ? '1/2'
+        : Math.abs(frac - 1 / 3) < 1e-6 ? '1/3'
+        : Math.abs(frac - 0.25) < 1e-6 ? '1/4'
+        : `${frac}`;
+      return `HPが${fracLabel}以下のときATK×${e.mult}`;
+    }
     case 'endure_fatal':
       return e.reviveDenominator
         ? `1度だけ最大HPの1/${e.reviveDenominator}（切り捨て）で耐える`
@@ -244,6 +253,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `攻撃で${e.threshold}以下のダメージを与えたとき追加${e.bonus}ダメージ`;
     case 'mid_damage_immune':
       return `${e.min}〜${e.max}のダメージを無効化`;
+    case 'mid_damage_reduce':
+      return `${e.min}〜${e.max}のダメージを1/${e.denominator}に軽減`;
     case 'damage_cap':
       return `1回に受けるダメージは最大${e.maxPerHit}まで`;
     case 'bonus_vs_low_hp':
@@ -368,6 +379,8 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'tail_fury' ||
     p.effect.kind === 'slow_burn' ||
     p.effect.kind === 'mid_damage_immune' ||
+    p.effect.kind === 'mid_damage_reduce' ||
+    p.effect.kind === 'low_hp_atk_mult' ||
     p.effect.kind === 'predator_buff' ||
     p.effect.kind === 'opp_crit_block' ||
     p.effect.kind === 'slow_starter' ||
