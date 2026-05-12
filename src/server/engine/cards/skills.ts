@@ -381,18 +381,6 @@ export const SKILLS: SkillCard[] = [
       effect: { kind: 'dodge_bonus', percent: 15 },
     },
   },
-  // ── SSR passive (new) ───────────────────────────────────────────────────
-  {
-    id: 'sk-ssrp-003',
-    name: '不死の意志 (passive)',
-    rarity: 'SSR',
-    nameTag: 'ネクロ',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'endure_fatal', reviveDenominator: 3 },
-    },
-  },
   // ── R actives (batch 3) ─────────────────────────────────────────────────
   {
     id: 'sk-r-039',
@@ -849,6 +837,72 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'on_own_turn_start' },
       effect: { kind: 'even_turn_atk_bonus', amount: 2 },
+    },
+  },
+  {
+    id: 'sk-rp-029',
+    name: '吸命 (passive)',
+    rarity: 'R',
+    nameTag: 'ドレイン',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_deal_damage' },
+      effect: { kind: 'lifesteal', denominator: 4 },
+    },
+  },
+  {
+    id: 'sk-rp-030',
+    name: '蛮勇 (passive)',
+    rarity: 'R',
+    nameTag: 'バーサーク',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'rage_atk', amount: 1, minDamage: 3 },
+    },
+  },
+  {
+    id: 'sk-rp-031',
+    name: '弱体の術 (passive)',
+    rarity: 'R',
+    nameTag: 'ウィーケン',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_deal_damage' },
+      effect: { kind: 'hex_def', amount: 1, minDamage: 3 },
+    },
+  },
+  {
+    id: 'sk-rp-032',
+    name: '千載一遇 (passive)',
+    rarity: 'R',
+    nameTag: 'チャンス',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'extra_attack_chance', percent: 5 },
+    },
+  },
+  {
+    id: 'sk-rp-033',
+    name: '棘返し (passive)',
+    rarity: 'R',
+    nameTag: 'カウンター',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'counter_damage', denominator: 4 },
+    },
+  },
+  {
+    id: 'sk-rp-034',
+    name: '加護の盾 (passive)',
+    rarity: 'R',
+    nameTag: 'ブレス',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'grant_shield', amount: 1 },
     },
   },
   {

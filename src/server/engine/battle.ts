@@ -240,6 +240,14 @@ function applyBattleStartPassives(
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
+      case 'grant_shield':
+        if (p.trigger.kind === 'battle_start') {
+          const gain = p.effect.amount * self.shieldMultiplier;
+          self.shield += gain;
+          log.push({ kind: 'shield', player: side, amount: gain });
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
       case 'pick_higher_buff':
         if (p.trigger.kind === 'battle_start') {
           if (effStat(self, 'atk') >= effStat(self, 'def')) self.atkMod += p.effect.amount;
@@ -533,10 +541,10 @@ function takeDamage(
       }
     }
   }
-  // rage_atk: gain ATK every time this side actually takes damage.
+  // rage_atk: gain ATK every time this side actually takes damage (optionally only above minDamage).
   if (dmg > 0) {
     for (const p of passives) {
-      if (p.effect.kind === 'rage_atk') {
+      if (p.effect.kind === 'rage_atk' && dmg >= (p.effect.minDamage ?? 1)) {
         target.atkMod += p.effect.amount;
         log.push({
           kind: 'buff',
@@ -952,7 +960,7 @@ function applyHexDef(
 ): void {
   if (damageDealt <= 0) return;
   for (const p of attackerPassives) {
-    if (p.effect.kind === 'hex_def') {
+    if (p.effect.kind === 'hex_def' && damageDealt >= (p.effect.minDamage ?? 1)) {
       defender.defMod -= p.effect.amount;
       log.push({
         kind: 'debuff',

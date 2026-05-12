@@ -265,9 +265,9 @@ export type PassiveEffect =
   /** Heal floor(damage / denominator) for every hit landed by this monster. */
   | { kind: 'lifesteal'; denominator: number }
   /** Each time this side takes damage, gain `amount` ATK (battle-long, accumulating). */
-  | { kind: 'rage_atk'; amount: number }
+  | { kind: 'rage_atk'; amount: number; minDamage?: number }
   /** Each time this side deals damage, reduce target's DEF by `amount` (battle-long, accumulating). */
-  | { kind: 'hex_def'; amount: number }
+  | { kind: 'hex_def'; amount: number; minDamage?: number }
   /** Each active skill use has a `percent` chance to fire a second time. */
   | { kind: 'extra_attack_chance'; percent: number }
   /** When taking damage, reflect floor(damage / denominator) back to the attacker. */
@@ -369,6 +369,8 @@ export type PassiveEffect =
   | { kind: 'slow_starter'; breakpoint: number; malus: number; bonus: number }
   /** Any shield gained by this side is multiplied (e.g., 2 = double). */
   | { kind: 'double_shield' }
+  /** At battle start, gain `amount` shield. */
+  | { kind: 'grant_shield'; amount: number }
   /** When the last active skill is used, grant self a reflect shield of `amount`. */
   | { kind: 'grant_reflect_shield_on_last_active'; amount: number }
   /** When the last active skill is used, grant self a ghost shield of `amount` (reflects absorbed + floor(atk*0.5)). */

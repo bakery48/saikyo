@@ -205,9 +205,13 @@ export function describePassiveEffect(e: PassiveEffect): string {
     case 'lifesteal':
       return `与えたダメージの1/${e.denominator}を回復`;
     case 'rage_atk':
-      return `被ダメ時にATK+${e.amount}（バトル中累積）`;
+      return e.minDamage
+        ? `${e.minDamage}以上の被ダメ時にATK+${e.amount}（バトル中累積）`
+        : `被ダメ時にATK+${e.amount}（バトル中累積）`;
     case 'hex_def':
-      return `与ダメ時に相手のDEF-${e.amount}（バトル中累積）`;
+      return e.minDamage
+        ? `${e.minDamage}以上の与ダメ時に相手のDEF-${e.amount}（バトル中累積）`
+        : `与ダメ時に相手のDEF-${e.amount}（バトル中累積）`;
     case 'extra_attack_chance':
       return `攻撃時${e.percent}%で2回発動`;
     case 'counter_damage':
@@ -296,6 +300,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `相手のクリティカルを無効化`;
     case 'slow_starter':
       return `${e.breakpoint}回目までは与ダメ-${e.malus}、それ以降は与ダメ+${e.bonus}`;
+    case 'grant_shield':
+      return `バトル開始時シールド+${e.amount}`;
     case 'double_shield':
       return `シールドの獲得量が2倍`;
     case 'grant_reflect_shield_on_last_active':
@@ -365,6 +371,7 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'predator_buff' ||
     p.effect.kind === 'opp_crit_block' ||
     p.effect.kind === 'slow_starter' ||
+    p.effect.kind === 'grant_shield' ||
     p.effect.kind === 'double_shield' ||
     p.effect.kind === 'selective_immune' ||
     p.effect.kind === 'attack_kind_resist' ||
