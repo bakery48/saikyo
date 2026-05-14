@@ -320,6 +320,7 @@ export function BattleStage({ state, match }: { state: ClientGameState; match: B
             debuffKey={debuffToB ? `debuff-b-${stepIdx}` : null}
             healKey={healToB ? `heal-b-${stepIdx}` : null}
             hitKind={currentAttackKind}
+            mirror
           />
         )}
       </div>
@@ -341,6 +342,7 @@ function MonsterColumn({
   debuffKey,
   healKey,
   hitKind,
+  mirror = false,
 }: {
   player: ClientPlayer | undefined;
   mon: Monster | null;
@@ -361,6 +363,8 @@ function MonsterColumn({
   healKey: string | null;
   /** Visual category of the incoming attack. */
   hitKind: Exclude<AttackKind, 'passthrough'>;
+  /** Mirror the monster art horizontally (used for the right-hand side). */
+  mirror?: boolean;
 }) {
   if (!player || !mon) {
     return (
@@ -415,18 +419,18 @@ function MonsterColumn({
           position: 'relative',
         }}
       >
-        <div style={{ position: 'relative', width: 80, height: 80 }}>
-          <span style={{ ...pieceStyle(player.color, { size: 80 }), position: 'absolute', inset: 0 }} />
+        <div style={{ position: 'relative', width: 128, height: 128 }}>
+          <span style={{ ...pieceStyle(player.color, { size: 128 }), position: 'absolute', inset: 0 }} />
           <img
             src={`/monsters/${mon.baseId}.png`}
             alt={mon.name}
             style={{
               position: 'absolute',
               inset: 0,
-              width: 80,
-              height: 80,
-              objectFit: 'cover',
-              borderRadius: '50%',
+              width: 128,
+              height: 128,
+              objectFit: 'contain',
+              transform: mirror ? 'scaleX(-1)' : undefined,
             }}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = 'none';
