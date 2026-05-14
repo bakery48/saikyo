@@ -5,6 +5,11 @@ import { MONSTERS } from '../../../server/engine/cards/monsters';
 import { describePassive, describeSkillCard, effectCategory, type EffectCategory } from '../../../lib/skill-text';
 import type { AttackKind, Rarity, SkillCard, SkillEffect } from '../../../server/engine/types';
 
+type SortCol = 'id' | 'rarity' | 'name' | 'tag' | 'category';
+type SortDir = 'asc' | 'desc';
+
+const RARITY_ORDER: Record<string, number> = { N: 0, R: 1, SR: 2, SSR: 3 };
+
 const RARITIES: Rarity[] = ['N', 'R', 'SR', 'SSR'];
 const ATTACK_KINDS: AttackKind[] = ['strike', 'sword', 'claw', 'magic', 'fire', 'water', 'ice', 'wind', 'passthrough'];
 const ATTACK_KIND_LABEL: Record<AttackKind, string> = {
@@ -42,15 +47,44 @@ function hasAttackKindSlot(c: SkillCard): boolean {
 export default function DevSkillsPage() {
   const [edits, setEdits] = useState<Edits>({});
   const [filter, setFilter] = useState('');
+  const [sortCol, setSortCol] = useState<SortCol>('id');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  const toggleSort = (col: SortCol) => {
+    if (sortCol === col) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortCol(col);
+      setSortDir('asc');
+    }
+  };
 
   const rows = useMemo(() => {
     const f = filter.trim().toLowerCase();
-    return SKILLS.filter((c) => {
+    const filtered = SKILLS.filter((c) => {
       if (!f) return true;
       const blob = `${c.id} ${c.name} ${c.nameTag ?? ''} ${describeSkillCard(c)}`.toLowerCase();
       return blob.includes(f);
     });
-  }, [filter]);
+    const sign = sortDir === 'asc' ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      let va: string | number;
+      let vb: string | number;
+      switch (sortCol) {
+        case 'id':   va = a.id;   vb = b.id;   break;
+        case 'rarity': va = RARITY_ORDER[a.rarity] ?? 0; vb = RARITY_ORDER[b.rarity] ?? 0; break;
+        case 'name': va = a.name; vb = b.name; break;
+        case 'tag':  va = a.nameTag ?? ''; vb = b.nameTag ?? ''; break;
+        case 'category':
+          va = a.passive ? 'passive' : a.active ? effectCategory(a.active.effect) : '';
+          vb = b.passive ? 'passive' : b.active ? effectCategory(b.active.effect) : '';
+          break;
+      }
+      if (va < vb) return -sign;
+      if (va > vb) return sign;
+      return 0;
+    });
+  }, [filter, sortCol, sortDir]);
 
   const setField = <K extends keyof Edits[string]>(
     id: string,
@@ -170,12 +204,12 @@ export default function DevSkillsPage() {
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
           <thead>
             <tr style={{ background: '#eef', position: 'sticky', top: 0 }}>
-              <Th>ID</Th>
-              <Th>レアリティ</Th>
-              <Th>カード名</Th>
-              <Th>タグ</Th>
+              <SortTh col="id" cur={sortCol} dir={sortDir} onClick={toggleSort}>ID</SortTh>
+              <SortTh col="rarity" cur={sortCol} dir={sortDir} onClick={toggleSort}>レアリティ</SortTh>
+              <SortTh col="name" cur={sortCol} dir={sortDir} onClick={toggleSort}>カード名</SortTh>
+              <SortTh col="tag" cur={sortCol} dir={sortDir} onClick={toggleSort}>タグ</SortTh>
               <Th>説明文（空=自動生成）</Th>
-              <Th>カテゴリ</Th>
+              <SortTh col="category" cur={sortCol} dir={sortDir} onClick={toggleSort}>カテゴリ</SortTh>
               <Th>攻撃属性</Th>
             </tr>
           </thead>
@@ -451,6 +485,35 @@ function Th({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
+    </th>
+  );
+}
+
+function SortTh({
+  col, cur, dir, onClick, children,
+}: {
+  col: SortCol; cur: SortCol; dir: SortDir; onClick: (col: SortCol) => void; children: React.ReactNode;
+}) {
+  const active = cur === col;
+  return (
+    <th
+      onClick={() => onClick(col)}
+      style={{
+        textAlign: 'left',
+        padding: '6px 8px',
+        borderBottom: '2px solid #aac',
+        fontWeight: 600,
+        fontSize: 12,
+        cursor: 'pointer',
+        userSelect: 'none',
+        whiteSpace: 'nowrap',
+        background: active ? '#dde' : undefined,
+      }}
+    >
+      {children}
+      <span style={{ marginLeft: 4, opacity: active ? 1 : 0.3 }}>
+        {active ? (dir === 'asc' ? '▲' : '▼') : '▲'}
+      </span>
     </th>
   );
 }
