@@ -51,7 +51,6 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-019', name: 'シールドバッシュ', rarity: 'R', nameTag: 'バッシュ', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'def', attackKind: 'strike' } } },
   { id: 'sk-r-021', name: '生命変換', rarity: 'R', nameTag: 'コンバート', active: { effect: { kind: 'pay_hp_shield', hpCost: 3, shieldAmount: 5 } } },
   { id: 'sk-r-022', name: '取引', rarity: 'R', nameTag: 'トレーダー', active: { effect: { kind: 'pay_hp_debuff_all', hpCost: 4, amount: 1 } } },
-  { id: 'sk-r-023', name: '賭け一閃', rarity: 'R', nameTag: 'ギャンブラー', active: { effect: { kind: 'gamble_true_damage', amount: 8, percent: 50 } } },
   { id: 'sk-r-024', name: 'エネルギーチャージ', rarity: 'R', nameTag: 'バッテリー', active: { effect: { kind: 'buff_self_all', amount: 1, duration: 'battle' } } },
   { id: 'sk-r-025', name: 'リフレイン', rarity: 'R', nameTag: 'リフレイン', active: { effect: { kind: 'rewind_skill', rewindBy: 1, selfDamage: 2 } } },
   { id: 'sk-r-026', name: 'デジャヴ・アタック', rarity: 'R', nameTag: 'デジャヴ', active: { effect: { kind: 'deja_vu_attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
@@ -241,13 +240,6 @@ export const SKILLS: SkillCard[] = [
     rarity: 'R',
     nameTag: 'クロー',
     active: { effect: { kind: 'multi_hit_attack', mult: 0.9, useStat: 'atk', hitCount: 2, attackKind: 'passthrough' } },
-  },
-  {
-    id: 'sk-r-035',
-    name: '陽炎',
-    rarity: 'R',
-    nameTag: 'ミラージュ',
-    active: { effect: { kind: 'gamble_true_damage', amount: 8, percent: 60 } },
   },
   {
     id: 'sk-r-036',
