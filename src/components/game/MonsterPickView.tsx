@@ -199,7 +199,6 @@ export function MonsterPickView({
                   justifyContent: 'center',
                   fontSize: 12,
                   color: '#fff',
-                  opacity: 0.7,
                   border: '2px solid #333',
                   overflow: 'hidden',
                 }}
@@ -207,7 +206,7 @@ export function MonsterPickView({
                 <img
                   src={`/monsters/${m.baseId}.png`}
                   alt={m.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 1 }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                 />
               </div>
