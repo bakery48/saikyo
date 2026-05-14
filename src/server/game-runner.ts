@@ -429,6 +429,9 @@ export class GameRunner {
       s.draft
         ? `dr:${s.draft.pool.length}/${Object.keys(s.draft.submittedPicks).length}/a${s.draft.attempt}`
         : '-',
+      s.actionPhase
+        ? `ac:${s.actionPhase.pendingPlayerIds.length}/${Object.keys(s.actionPhase.submittedPlays).length}`
+        : '-',
       s.reward ? Object.keys(s.reward.choices).length : '-',
     ].join('|');
   }

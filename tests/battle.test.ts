@@ -280,12 +280,16 @@ describe('Battle engine — determinism', () => {
 });
 
 describe('Battle engine — heal & shield', () => {
-  it('heal increases HP', () => {
+  it('heal increases HP (capped at max)', () => {
+    // a (spd 1) is hit first for 10, dropping to 10/20, then heals 5 -> 15.
     const a = mkMonster({
-      hp: 10, atk: 0, def: 0, spd: 10,
+      hp: 20, atk: 0, def: 0, spd: 1,
       actives: [mkActive({ kind: 'heal', amount: 5 })],
     });
-    const b = mkMonster({ hp: 50, atk: 0, def: 0, spd: 1, actives: [] });
+    const b = mkMonster({
+      hp: 50, atk: 10, def: 0, spd: 10,
+      actives: [mkActive({ kind: 'attack', mult: 1, useStat: 'atk' })],
+    });
     const result = runBattle(a, b, 1);
     expect(result.finalHp.a).toBe(15);
   });

@@ -60,9 +60,24 @@ function runDraftPhase(state: GameState, policy: Policy): void {
   }
 }
 
+/** Resolve a reward phase by letting the policy choose for every pending player. */
+function runRewardPhase(state: GameState, policy: Policy): void {
+  for (const pid of state.reward!.pendingPlayerIds) {
+    submitReward(state, pid, policy.chooseReward(state, pid));
+  }
+  resolveRewardPhase(state);
+}
+
 export function runMiniRound(state: GameState, policy: Policy): void {
   expectPhase(state, 'event');
   resolveEventPhase(state);
+  // An `extra_battle` event card detours through battle + reward before
+  // returning to this mini-round's action phase.
+  if (state.phase === 'battle') {
+    runBattlePhase(state);
+    expectPhase(state, 'reward');
+    runRewardPhase(state, policy);
+  }
   expectPhase(state, 'action');
   startActionPhase(state);
   for (const player of state.players) {

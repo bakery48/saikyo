@@ -29,9 +29,11 @@ const findCard = (id: string): SkillCard => {
 };
 
 describe('Skill name tags', () => {
-  it('every R/SR/SSR card has a non-empty nameTag (N cards have none)', () => {
+  it('every R/SR/SSR card has a non-empty nameTag (plain N cards have none)', () => {
     for (const c of SKILLS) {
-      if (c.rarity === 'N') {
+      // Sin cards are N-rarity but intentionally carry a nameTag so they still
+      // feed the naming system.
+      if (c.rarity === 'N' && c.tag !== 'sin') {
         expect(c.nameTag).toBeUndefined();
       } else {
         expect(c.nameTag).toBeTypeOf('string');
@@ -44,9 +46,9 @@ describe('Skill name tags', () => {
     const state = setupReady();
     const player = state.players.find((p) => p.id === 'p1')!;
     const active = addSkillCardToMonster(state, player, findCard('sk-r-001')); // パワー
-    const passive = addSkillCardToMonster(state, player, findCard('sk-rp-001')); // リーダー
+    const passive = addSkillCardToMonster(state, player, findCard('sk-srp-001')); // タンク
     expect(active.nameTag).toBe('パワー');
-    expect(passive.nameTag).toBe('リーダー');
+    expect(passive.nameTag).toBe('タンク');
   });
 
   it('getAvailableTags reflects all nameTag-bearing skills', () => {

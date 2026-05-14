@@ -3,6 +3,67 @@ import { GameRunner } from '../src/server/game-runner';
 
 const human = { id: 'h1', name: 'Human' };
 
+/**
+ * Submit a choice for the human in whatever phase the runner is paused on,
+ * then advance. Returns false once the human is no longer being waited on in
+ * that phase (or the game finished), so callers can drive to a target phase.
+ */
+function actForHuman(runner: GameRunner): void {
+  const s = runner.state;
+  switch (s.phase) {
+    case 'pick_monster': {
+      if (!s.monsterPick || s.monsterPick.submittedPicks[human.id]) break;
+      if (!s.monsterPick.pendingPlayerIds.includes(human.id)) break;
+      runner.submitPick(human.id, s.monsterPick.pool[0]!.baseId);
+      break;
+    }
+    case 'draft': {
+      if (!s.draft || s.draft.submittedPicks[human.id]) break;
+      if (!s.draft.pendingPlayerIds.includes(human.id)) break;
+      const used = new Set(Object.values(s.draft.submittedPicks));
+      const unused = s.draft.pool.find((c) => !used.has(c.id)) ?? s.draft.pool[0]!;
+      runner.submitDraft(human.id, unused.id);
+      break;
+    }
+    case 'action': {
+      if (!s.actionPhase || s.actionPhase.submittedPlays[human.id]) break;
+      if (!s.actionPhase.pendingPlayerIds.includes(human.id)) break;
+      const me = s.players.find((p) => p.id === human.id)!;
+      const card = me.actionHand[0]!;
+      const extras =
+        card.effect.kind === 'stat_mod_choice'
+          ? { chosenStat: 'atk' as const }
+          : card.effect.kind === 'swap_actives'
+            ? { swap: { targetPlayerId: human.id, skillIdA: '', skillIdB: '' } }
+            : undefined;
+      // swap_actives with no valid target would throw; fall back to another card.
+      if (card.effect.kind === 'swap_actives') {
+        const alt = me.actionHand.find((c) => c.effect.kind !== 'swap_actives');
+        if (alt) {
+          runner.submitAction(human.id, alt.id);
+          break;
+        }
+      }
+      runner.submitAction(human.id, card.id, extras);
+      break;
+    }
+    case 'reward':
+      if (!s.reward || s.reward.choices[human.id]) break;
+      if (!s.reward.pendingPlayerIds.includes(human.id)) break;
+      runner.submitReward(human.id, { kind: 'skill_top' });
+      break;
+  }
+}
+
+/** Drive the runner until it reaches `target` phase or finishes. */
+function driveToPhase(runner: GameRunner, target: GameRunner['state']['phase']): void {
+  let safety = 300;
+  while (runner.state.phase !== target && runner.state.phase !== 'finished' && safety-- > 0) {
+    actForHuman(runner);
+    runner.advance();
+  }
+}
+
 describe('GameRunner', () => {
   it('with all-CPU room runs to finished after a single advance call', () => {
     const runner = new GameRunner({
@@ -30,9 +91,7 @@ describe('GameRunner', () => {
   it('after human pick, advances through cpu picks and pauses on draft for human', () => {
     const runner = new GameRunner({ roomId: 'r1', seed: 42, humans: [human] });
     runner.advance();
-    const baseId = runner.state.monsterPick!.pool[0]!.baseId;
-    runner.submitPick(human.id, baseId);
-    runner.advance();
+    driveToPhase(runner, 'draft');
     expect(runner.state.phase).toBe('draft');
     expect(runner.state.draft).not.toBeNull();
     expect(runner.state.draft!.pendingPlayerIds).toContain(human.id);
@@ -45,8 +104,7 @@ describe('GameRunner', () => {
   it('after human draft pick, advances through resolution and into next phase', () => {
     const runner = new GameRunner({ roomId: 'r1', seed: 42, humans: [human] });
     runner.advance();
-    runner.submitPick(human.id, runner.state.monsterPick!.pool[0]!.baseId);
-    runner.advance();
+    driveToPhase(runner, 'draft');
     const used = new Set(Object.values(runner.state.draft!.submittedPicks));
     const unused = runner.state.draft!.pool.find((c) => !used.has(c.id))!;
     runner.submitDraft(human.id, unused.id);
@@ -57,27 +115,7 @@ describe('GameRunner', () => {
   it('full game with 1 human (auto-picks first option each time) completes', () => {
     const runner = new GameRunner({ roomId: 'r1', seed: 1234, humans: [human] });
     runner.advance();
-    let safety = 200;
-    while (runner.state.phase !== 'finished' && safety-- > 0) {
-      switch (runner.state.phase) {
-        case 'pick_monster': {
-          const pool = runner.state.monsterPick!.pool;
-          runner.submitPick(human.id, pool[0]!.baseId);
-          break;
-        }
-        case 'draft': {
-          const used = new Set(Object.values(runner.state.draft!.submittedPicks));
-          const unused = runner.state.draft!.pool.find((c) => !used.has(c.id))
-            ?? runner.state.draft!.pool[0]!;
-          runner.submitDraft(human.id, unused.id);
-          break;
-        }
-        case 'reward':
-          runner.submitReward(human.id, { kind: 'skill_top' });
-          break;
-      }
-      runner.advance();
-    }
+    driveToPhase(runner, 'finished');
     expect(runner.state.phase).toBe('finished');
     expect(runner.state.champion).not.toBeNull();
   });

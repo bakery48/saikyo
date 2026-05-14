@@ -30,13 +30,34 @@ function forceCardInHand(state: GameState, player: Player, cardId: string): Acti
   return replacement;
 }
 
+/** Build the extras arg a card needs (chosenStat / swap), if any. */
+function extrasForCard(state: GameState, playerId: string, cardId: string) {
+  const player = state.players.find((p) => p.id === playerId)!;
+  const card = player.actionHand.find((c) => c.id === cardId);
+  if (card?.effect.kind === 'stat_mod_choice') {
+    return { chosenStat: 'atk' as const };
+  }
+  if (card?.effect.kind === 'swap_actives') {
+    const target = state.players.find((p) => p.monster && p.monster.actives.length >= 2);
+    if (target) {
+      const actives = target.monster!.actives;
+      return { swap: { targetPlayerId: target.id, skillIdA: actives[0]!.id, skillIdB: actives[1]!.id } };
+    }
+  }
+  return undefined;
+}
+
+function play(state: GameState, playerId: string, cardId: string): void {
+  submitActionPlay(state, playerId, cardId, extrasForCard(state, playerId, cardId));
+}
+
 /** Submit player[0]'s chosen card and submit the rest's first hand card. */
 function playAll(state: GameState, targetPlayerId: string, targetCardId: string): void {
-  submitActionPlay(state, targetPlayerId, targetCardId);
+  play(state, targetPlayerId, targetCardId);
   for (const p of state.players) {
     if (p.id === targetPlayerId) continue;
     if (p.actionHand.length === 0) continue;
-    submitActionPlay(state, p.id, p.actionHand[0]!.id);
+    play(state, p.id, p.actionHand[0]!.id);
   }
   resolveActionPhase(state);
 }
@@ -52,7 +73,7 @@ describe('Action phase', () => {
     startActionPhase(state);
     for (const p of state.players) {
       if (p.actionHand.length === 0) continue;
-      submitActionPlay(state, p.id, p.actionHand[0]!.id);
+      play(state, p.id, p.actionHand[0]!.id);
     }
     resolveActionPhase(state);
     expect(state.phase).toBe('draft');
@@ -68,10 +89,10 @@ describe('Action phase', () => {
   it('permanent stat_mod modifies the monster base stats immediately', () => {
     const target = state.players[0]!;
     startActionPhase(state);
-    forceCardInHand(state, target, 'ac-005'); // permanent ATK +1
+    forceCardInHand(state, target, 'ac-005'); // 修練 = permanent ATK +2
     const beforeAtk = target.monster!.stats.atk;
     playAll(state, target.id, 'ac-005');
-    expect(target.monster!.stats.atk).toBe(beforeAtk + 1);
+    expect(target.monster!.stats.atk).toBe(beforeAtk + 2);
   });
 
   it('draw_skill_top adds a skill to the player monster', () => {

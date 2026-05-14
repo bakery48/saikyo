@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createInitialState, submitMonsterPick } from '../src/server/engine/state';
 import { PLAYER_COLORS } from '../src/server/engine/types';
+import { MONSTERS } from '../src/server/engine/cards/monsters';
 import { completeMonsterPicks } from './helpers';
 
 describe('Game setup', () => {
@@ -17,16 +18,18 @@ describe('Game setup', () => {
     expect(state.players.filter((p) => p.isCPU)).toHaveLength(6);
   });
 
-  it('reveals 8 unique monsters in the initial pick draft', () => {
+  it('reveals every non-hidden monster (all unique) in the initial pick draft', () => {
     const state = createInitialState({
       roomId: 'r1',
       seed: 1,
       players: [{ id: 'p1', name: 'A', isCPU: false }],
     });
+    const visibleCount = MONSTERS.filter((m) => !m.hidden).length;
     expect(state.monsterPick).not.toBeNull();
-    expect(state.monsterPick!.pool).toHaveLength(8);
+    expect(state.monsterPick!.pool).toHaveLength(visibleCount);
     const ids = new Set(state.monsterPick!.pool.map((m) => m.baseId));
-    expect(ids.size).toBe(8);
+    expect(ids.size).toBe(visibleCount);
+    expect(state.monsterPick!.pool.every((m) => !m.hidden)).toBe(true);
   });
 
   it('assigns each player a distinct color from PLAYER_COLORS', () => {
