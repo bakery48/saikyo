@@ -119,6 +119,8 @@ export type ClientMessage =
       miniRoundsPerRound?: number;
     }
   | { type: 'join_room'; roomId: string; playerName: string }
+  /** Reconnect handshake: try to reclaim a seat held during the grace period. */
+  | { type: 'rejoin'; playerId: string }
   | { type: 'leave_room' }
   | { type: 'set_ready'; isReady: boolean }
   | { type: 'list_rooms' }
@@ -150,6 +152,10 @@ export type ClientMessage =
 /** Messages the server sends to the client. */
 export type ServerMessage =
   | { type: 'welcome'; playerId: string }
+  /** Rejoin succeeded — the connection now owns `playerId` again. */
+  | { type: 'rejoin_ok'; playerId: string }
+  /** Rejoin failed (grace period expired or unknown id) — fall back to lobby. */
+  | { type: 'rejoin_failed' }
   | { type: 'room_state'; room: RoomView }
   | { type: 'rooms_list'; rooms: RoomSummary[] }
   | { type: 'left_room' }

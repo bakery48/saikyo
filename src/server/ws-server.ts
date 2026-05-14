@@ -14,10 +14,20 @@ export class GameWsServer {
   private roomManager = new RoomManager();
   /** Active games keyed by roomId. */
   private games = new Map<string, GameRunner>();
+  /**
+   * Players who disconnected mid-game. Their seat is held (still in the room
+   * and game) until the timer fires, at which point the seat is handed to the
+   * CPU. A `rejoin` within the window reclaims the seat.
+   */
+  private pendingDisconnects = new Map<string, NodeJS.Timeout>(); // playerId -> timer
+  /** How long a disconnected player's seat is held before the CPU takes over. */
+  private static readonly REJOIN_GRACE_MS = 30_000;
 
   /** Called by the HTTP server on every accepted ws upgrade. */
   handleConnection(ws: WebSocket): void {
-    const playerId = randomUUID();
+    // `playerId` is reassignable: a successful `rejoin` adopts the player's
+    // previous id so the rest of this connection's lifetime uses it.
+    let playerId: string = randomUUID();
     this.connections.set(playerId, ws);
     this.send(ws, { type: 'welcome', playerId });
 
@@ -27,6 +37,11 @@ export class GameWsServer {
         msg = JSON.parse(raw.toString());
       } catch {
         this.send(ws, { type: 'error', message: 'invalid json' });
+        return;
+      }
+      if (msg.type === 'rejoin') {
+        const adopted = this.handleRejoin(playerId, msg.playerId, ws);
+        if (adopted) playerId = adopted;
         return;
       }
       try {
@@ -41,6 +56,41 @@ export class GameWsServer {
     });
 
     this.sendRoomsList(ws);
+  }
+
+  /**
+   * Reconnect handshake. If `oldPlayerId` has a seat being held in the grace
+   * period, rebind this connection to it and restore the player's view.
+   * Returns the adopted id on success, or null if the rejoin failed.
+   */
+  private handleRejoin(
+    currentId: string,
+    oldPlayerId: string,
+    ws: WebSocket,
+  ): string | null {
+    const timer = this.pendingDisconnects.get(oldPlayerId);
+    if (!timer) {
+      // No seat being held — grace period expired or unknown id.
+      this.send(ws, { type: 'rejoin_failed' });
+      return null;
+    }
+    clearTimeout(timer);
+    this.pendingDisconnects.delete(oldPlayerId);
+    // Rebind the live connection from the throwaway id to the original one.
+    this.connections.delete(currentId);
+    this.playerNames.delete(currentId);
+    this.connections.set(oldPlayerId, ws);
+
+    this.send(ws, { type: 'rejoin_ok', playerId: oldPlayerId });
+    const room = this.roomManager.getRoomByPlayer(oldPlayerId);
+    if (room) {
+      this.send(ws, { type: 'room_state', room: this.roomManager.toRoomView(room) });
+      const game = this.games.get(room.id);
+      if (game) {
+        this.send(ws, { type: 'game_state', state: game.toClientState(oldPlayerId) });
+      }
+    }
+    return oldPlayerId;
   }
 
   private handleMessage(playerId: string, msg: ClientMessage): void {
@@ -418,25 +468,57 @@ export class GameWsServer {
   }
 
   private handleDisconnect(playerId: string): void {
-    // Capture the room/game before leavePlayer drops the player→room mapping.
     const roomBefore = this.roomManager.getRoomByPlayer(playerId);
     const game = roomBefore ? this.games.get(roomBefore.id) : null;
     const gameInProgress = !!game && game.state.phase !== 'finished';
-    // Hand the disconnected player's seat to the CPU so the game doesn't stall
-    // waiting on a human who is no longer connected.
-    if (gameInProgress) {
-      game!.convertToCpu(playerId);
+
+    // Mid-game disconnect: hold the seat for a grace window so a quick reload
+    // can reclaim it. The connection is dropped but the player stays in the
+    // room and game until the timer fires (see finalizeDisconnect).
+    if (gameInProgress && game!.isHuman(playerId)) {
+      this.connections.delete(playerId);
+      const existing = this.pendingDisconnects.get(playerId);
+      if (existing) clearTimeout(existing);
+      const timer = setTimeout(
+        () => this.finalizeDisconnect(playerId),
+        GameWsServer.REJOIN_GRACE_MS,
+      );
+      this.pendingDisconnects.set(playerId, timer);
+      return;
     }
+
+    // Lobby disconnect (or game already finished): leave immediately.
     const { room, destroyed } = this.roomManager.leavePlayer(playerId);
     this.connections.delete(playerId);
     this.playerNames.delete(playerId);
     if (destroyed && roomBefore) {
-      // Room emptied out — drop its game too.
+      this.games.delete(roomBefore.id);
+    } else if (room) {
+      this.broadcastRoomState(room.id);
+    }
+    this.broadcastRoomsList();
+  }
+
+  /**
+   * Grace period expired without a rejoin: hand the seat to the CPU, remove
+   * the player from the room, and drive the game forward.
+   */
+  private finalizeDisconnect(playerId: string): void {
+    this.pendingDisconnects.delete(playerId);
+    const roomBefore = this.roomManager.getRoomByPlayer(playerId);
+    const game = roomBefore ? this.games.get(roomBefore.id) : null;
+    const gameInProgress = !!game && game.state.phase !== 'finished';
+    if (gameInProgress) game!.convertToCpu(playerId);
+
+    const { room, destroyed } = this.roomManager.leavePlayer(playerId);
+    this.connections.delete(playerId);
+    this.playerNames.delete(playerId);
+    if (destroyed && roomBefore) {
       this.games.delete(roomBefore.id);
     } else if (room) {
       this.broadcastRoomState(room.id);
       if (gameInProgress) {
-        // CPU has taken over the empty seat — drive the game forward.
+        // CPU has taken over the seat — drive the game past the empty input.
         this.driveGame(room);
       }
     }

@@ -19,6 +19,8 @@ export type GameSocket = {
 };
 
 const RECONNECT_DELAY_MS = 1500;
+/** localStorage key holding our playerId across reloads so we can rejoin. */
+const PLAYER_ID_KEY = 'saikyo.playerId';
 
 export function useGameSocket(): GameSocket {
   const [connected, setConnected] = useState(false);
@@ -29,6 +31,9 @@ export function useGameSocket(): GameSocket {
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const closedByCleanup = useRef(false);
+  // Holds the fresh id from `welcome` while a rejoin is in flight; committed
+  // only if the rejoin fails.
+  const pendingNewId = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -43,12 +48,8 @@ export function useGameSocket(): GameSocket {
       };
       ws.onclose = () => {
         setConnected(false);
-        // Drop any stale per-session state — on reconnect the server will
-        // assign a brand-new playerId and the previous game (with the old
-        // playerId) is no longer reachable.
-        setPlayerId(null);
-        setRoom(null);
-        setGame(null);
+        // Keep playerId / room / game in place: on reconnect we attempt a
+        // rejoin to reclaim the seat, and the server replays room/game state.
         if (!closedByCleanup.current) {
           setTimeout(connect, RECONNECT_DELAY_MS);
         }
@@ -61,9 +62,39 @@ export function useGameSocket(): GameSocket {
           return;
         }
         switch (msg.type) {
-          case 'welcome':
-            setPlayerId(msg.playerId);
+          case 'welcome': {
+            const saved =
+              typeof window !== 'undefined'
+                ? window.localStorage.getItem(PLAYER_ID_KEY)
+                : null;
+            if (saved) {
+              // Try to reclaim the previous seat; hold the fresh id until we
+              // hear back whether the rejoin succeeded.
+              pendingNewId.current = msg.playerId;
+              ws.send(JSON.stringify({ type: 'rejoin', playerId: saved }));
+            } else {
+              setPlayerId(msg.playerId);
+              window.localStorage?.setItem(PLAYER_ID_KEY, msg.playerId);
+            }
             break;
+          }
+          case 'rejoin_ok':
+            setPlayerId(msg.playerId);
+            window.localStorage?.setItem(PLAYER_ID_KEY, msg.playerId);
+            pendingNewId.current = null;
+            break;
+          case 'rejoin_failed': {
+            const fresh = pendingNewId.current;
+            pendingNewId.current = null;
+            if (fresh) {
+              setPlayerId(fresh);
+              window.localStorage?.setItem(PLAYER_ID_KEY, fresh);
+            }
+            // The held seat is gone — fall back to the lobby.
+            setRoom(null);
+            setGame(null);
+            break;
+          }
           case 'room_state':
             setRoom(msg.room);
             break;
