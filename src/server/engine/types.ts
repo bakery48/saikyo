@@ -471,6 +471,8 @@ export type ActionEffect =
   | { kind: 'recover_skill_from_grave' }
   | { kind: 'draw_skill_top' }
   | { kind: 'discard_random_active' }
+  /** Discard one random sin-tagged skill from the user's monster. No-op if none. */
+  | { kind: 'cleanse_sin' }
   | { kind: 'gain_passive'; passive: PassiveSkill }
   /** Swap the order of two active skills on any player's monster (target chosen at play time). */
   | { kind: 'swap_actives' }

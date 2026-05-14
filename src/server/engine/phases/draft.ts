@@ -1,8 +1,41 @@
 import type { DraftState, GameState, SkillCard } from '../types';
-import { drawN, drawTop } from '../deck';
+import type { RNG } from '../rng';
+import { drawTop } from '../deck';
 import { addSkillCardToMonster, getPlayer, makeRng, saveRng } from '../state';
 
 const DRAFT_POOL_SIZE = 8;
+
+/** Pull one sin-tagged card out of the deck (or grave as fallback). */
+function pullSinCard(deck: SkillCard[], grave: SkillCard[]): SkillCard | undefined {
+  let idx = deck.findIndex((c) => c.tag === 'sin');
+  if (idx >= 0) return deck.splice(idx, 1)[0];
+  idx = grave.findIndex((c) => c.tag === 'sin');
+  if (idx >= 0) return grave.splice(idx, 1)[0];
+  return undefined;
+}
+
+/**
+ * Build the draft pool: exactly one sin card (if any remain) plus non-sin
+ * cards filling the rest. Sins drawn while filling are diverted to the grave
+ * so the pool never holds more than the single guaranteed one.
+ */
+function buildDraftPool(deck: SkillCard[], grave: SkillCard[], rng: RNG): SkillCard[] {
+  const sinCard = pullSinCard(deck, grave);
+  const target = sinCard ? DRAFT_POOL_SIZE - 1 : DRAFT_POOL_SIZE;
+  const rest: SkillCard[] = [];
+  let safety = 0;
+  while (rest.length < target && safety < 500) {
+    safety++;
+    const card = drawTop(deck, grave, rng);
+    if (!card) break;
+    if (card.tag === 'sin') {
+      grave.push(card);
+      continue;
+    }
+    rest.push(card);
+  }
+  return sinCard ? [sinCard, ...rest] : rest;
+}
 
 /** Open a draft phase: reveal up to 8 skill cards. */
 export function startDraft(state: GameState): void {
@@ -15,7 +48,7 @@ export function startDraft(state: GameState): void {
     return;
   }
   const rng = makeRng(state);
-  const pool = drawN(state.decks.skill, state.decks.skillGrave, DRAFT_POOL_SIZE, rng);
+  const pool = buildDraftPool(state.decks.skill, state.decks.skillGrave, rng);
   saveRng(state, rng);
   if (pool.length === 0) {
     // Skill deck is fully exhausted — skip drafting and advance to next phase.

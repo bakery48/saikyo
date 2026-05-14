@@ -347,10 +347,12 @@ function applyBattleStartPassives(
   self.sinCount = sinCount;
 
   // Automatic sin bonus — no passive card required; scales with tier.
-  if (sinCount > 0) {
-    const atkPerSin = sinCount >= 7 ? 4 : sinCount >= 3 ? 3 : 2;
-    const defPerSin = sinCount >= 7 ? 3 : sinCount >= 5 ? 2 : sinCount >= 3 ? 1 : 0;
-    const spdPerSin = sinCount >= 7 ? 2 : sinCount >= 5 ? 1 : 0;
+  // Tiers are intentionally back-loaded: 1-3 sins are pure downside (curse
+  // pool forces ~1 onto everyone), real payoff starts at 5+.
+  if (sinCount >= 4) {
+    const atkPerSin = sinCount >= 7 ? 4 : sinCount >= 6 ? 3 : sinCount >= 5 ? 2 : 1;
+    const defPerSin = sinCount >= 7 ? 3 : sinCount >= 6 ? 2 : sinCount >= 5 ? 1 : 0;
+    const spdPerSin = sinCount >= 7 ? 2 : sinCount >= 6 ? 1 : 0;
     const atkBonus = atkPerSin * sinCount;
     const defBonus = defPerSin * sinCount;
     const spdBonus = spdPerSin * sinCount;
@@ -1163,8 +1165,8 @@ function applySkill(args: {
   const rawEffect = skill.effect;
   const sinMult =
     skill.tag === 'sin' && user.sinCount >= 7 ? 5.0
-    : skill.tag === 'sin' && user.sinCount >= 5 ? 2.5
-    : skill.tag === 'sin' && user.sinCount >= 3 ? 1.5
+    : skill.tag === 'sin' && user.sinCount >= 6 ? 2.5
+    : skill.tag === 'sin' && user.sinCount >= 5 ? 1.5
     : null;
   const e: typeof rawEffect = sinMult !== null
     ? { kind: 'attack', mult: sinMult, useStat: 'atk', attackKind: 'passthrough' }

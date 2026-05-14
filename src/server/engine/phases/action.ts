@@ -51,6 +51,24 @@ function applyActionEffect(
       player.monster.actives.forEach((s, i) => (s.order = i + 1));
       break;
     }
+    case 'cleanse_sin': {
+      const sinActives = player.monster.actives
+        .map((s, i) => ({ s, i }))
+        .filter(({ s }) => s.tag === 'sin');
+      const sinPassives = player.monster.passives
+        .map((p, i) => ({ p, i }))
+        .filter(({ p }) => p.tag === 'sin');
+      const total = sinActives.length + sinPassives.length;
+      if (total === 0) break;
+      const pick = rng.int(0, total - 1);
+      if (pick < sinActives.length) {
+        player.monster.actives.splice(sinActives[pick]!.i, 1);
+        player.monster.actives.forEach((s, i) => (s.order = i + 1));
+      } else {
+        player.monster.passives.splice(sinPassives[pick - sinActives.length]!.i, 1);
+      }
+      break;
+    }
     case 'gain_passive': {
       player.monster.passives.push({ ...card.effect.passive });
       break;

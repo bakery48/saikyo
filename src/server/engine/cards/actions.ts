@@ -61,4 +61,6 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-058', name: '汎用訓練', effect: { kind: 'stat_mod_choice', amount: 1 } },
   { id: 'ac-059', name: 'スキル順入れ替え', effect: { kind: 'swap_actives' } },
   { id: 'ac-060', name: 'バグ発生', effect: { kind: 'become_bug' } },
+  { id: 'ac-061', name: '解呪', effect: { kind: 'cleanse_sin' } },
+  { id: 'ac-062', name: '懺悔', effect: { kind: 'cleanse_sin' } },
 ];

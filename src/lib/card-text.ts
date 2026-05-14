@@ -60,6 +60,8 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       return 'スキル山札から1枚追加';
     case 'discard_random_active':
       return 'スロット1つをランダムに破棄';
+    case 'cleanse_sin':
+      return '自分の罪カードを1枚ランダムに破棄';
     case 'gain_passive':
       return `パッシブ獲得: ${e.passive.name}`;
     case 'swap_actives':

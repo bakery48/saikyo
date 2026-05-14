@@ -169,17 +169,6 @@ export const SKILLS: SkillCard[] = [
     },
   },
   {
-    id: 'sk-rp-004',
-    name: '呪いの鎖 (passive)',
-    rarity: 'R',
-    nameTag: 'カース',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_own_active_used' },
-      effect: { kind: 'self_decay', hp: 1, atk: 0, def: 0, spd: 0 },
-    },
-  },
-  {
     id: 'sk-srp-006',
     name: 'クリティカル (passive)',
     rarity: 'SR',
@@ -651,17 +640,6 @@ export const SKILLS: SkillCard[] = [
   },
   // ── 30 new passives ─────────────────────────────────────────────────────
   // R passives
-  {
-    id: 'sk-rp-012',
-    name: '消耗 (passive)',
-    rarity: 'R',
-    nameTag: 'デクライン',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_own_active_used' },
-      effect: { kind: 'decay_atk_per_active', amount: 1 },
-    },
-  },
   {
     id: 'sk-rp-013',
     name: '盾形成 (passive)',

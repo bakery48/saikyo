@@ -23,8 +23,24 @@ import {
 import { runBattlePhase } from './phases/battle';
 import { resolveRewardPhase, submitReward } from './phases/reward';
 import { runTournament } from './phases/tournament';
-import { greedyPolicy, type Policy } from './policy';
-import type { GameState } from './types';
+import { chooseStatForActionCard, greedyPolicy, type Policy } from './policy';
+import type { ActionCard, GameState } from './types';
+
+/** Build the `extras` arg for submitActionPlay based on the card's effect. */
+function actionExtras(state: GameState, playerId: string, card: ActionCard) {
+  const player = state.players.find((p) => p.id === playerId)!;
+  if (card.effect.kind === 'stat_mod_choice' && player.monster) {
+    return { chosenStat: chooseStatForActionCard(player.monster.stats) };
+  }
+  if (card.effect.kind === 'swap_actives') {
+    const target = state.players.find((p) => p.monster && p.monster.actives.length >= 2);
+    if (target) {
+      const actives = target.monster!.actives;
+      return { swap: { targetPlayerId: target.id, skillIdA: actives[0]!.id, skillIdB: actives[1]!.id } };
+    }
+  }
+  return undefined;
+}
 
 function expectPhase(state: GameState, expected: GameState['phase']): void {
   if (state.phase !== expected) {
@@ -52,7 +68,7 @@ export function runMiniRound(state: GameState, policy: Policy): void {
   for (const player of state.players) {
     if (!player.monster || player.actionHand.length === 0) continue;
     const card = policy.pickActionCard(state, player.id, player.actionHand);
-    submitActionPlay(state, player.id, card.id);
+    submitActionPlay(state, player.id, card.id, actionExtras(state, player.id, card));
   }
   resolveActionPhase(state);
   expectPhase(state, 'draft');
