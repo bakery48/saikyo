@@ -418,12 +418,27 @@ export class GameWsServer {
   }
 
   private handleDisconnect(playerId: string): void {
+    // Capture the room/game before leavePlayer drops the player→room mapping.
+    const roomBefore = this.roomManager.getRoomByPlayer(playerId);
+    const game = roomBefore ? this.games.get(roomBefore.id) : null;
+    const gameInProgress = !!game && game.state.phase !== 'finished';
+    // Hand the disconnected player's seat to the CPU so the game doesn't stall
+    // waiting on a human who is no longer connected.
+    if (gameInProgress) {
+      game!.convertToCpu(playerId);
+    }
     const { room, destroyed } = this.roomManager.leavePlayer(playerId);
     this.connections.delete(playerId);
     this.playerNames.delete(playerId);
-    if (room && !destroyed) {
+    if (destroyed && roomBefore) {
+      // Room emptied out — drop its game too.
+      this.games.delete(roomBefore.id);
+    } else if (room) {
       this.broadcastRoomState(room.id);
-      if (room.players.length === 0) this.games.delete(room.id);
+      if (gameInProgress) {
+        // CPU has taken over the empty seat — drive the game forward.
+        this.driveGame(room);
+      }
     }
     this.broadcastRoomsList();
   }

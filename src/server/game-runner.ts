@@ -95,6 +95,18 @@ export class GameRunner {
   }
 
   /**
+   * Hand a (disconnected) human's seat to the CPU: the engine stops waiting on
+   * them and the greedy policy makes their choices from here on. No-op if the
+   * player isn't a human in this game.
+   */
+  convertToCpu(playerId: string): void {
+    if (!this.humanIds.has(playerId)) return;
+    this.humanIds.delete(playerId);
+    const p = this.state.players.find((pl) => pl.id === playerId);
+    if (p) p.isCPU = true;
+  }
+
+  /**
    * Returns true exactly once after the game enters the 'finished' phase
    * with a champion. Used by the WS layer so the champion is saved to the
    * hall of fame at most once per game.
