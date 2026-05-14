@@ -46,7 +46,7 @@ describe('Skill name tags', () => {
     const state = setupReady();
     const player = state.players.find((p) => p.id === 'p1')!;
     const active = addSkillCardToMonster(state, player, findCard('sk-r-001')); // パワー
-    const passive = addSkillCardToMonster(state, player, findCard('sk-srp-001')); // タンク
+    const passive = addSkillCardToMonster(state, player, findCard('sk-rp-043')); // タンク
     expect(active.nameTag).toBe('パワー');
     expect(passive.nameTag).toBe('タンク');
   });

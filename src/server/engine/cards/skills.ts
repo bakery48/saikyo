@@ -112,7 +112,7 @@ export const SKILLS: SkillCard[] = [
     passive: { trigger: { kind: 'on_own_turn_start' }, effect: { kind: 'turn_start_heal_even', amount: 2 } },
   },
   {
-    id: 'sk-srp-001',
+    id: 'sk-rp-043',
     name: '鋼の体 (passive)',
     rarity: 'R',
     nameTag: 'タンク',
