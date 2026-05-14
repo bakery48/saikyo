@@ -51,7 +51,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-019', name: 'シールドバッシュ', rarity: 'R', nameTag: 'バッシュ', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'def', attackKind: 'strike' } } },
   { id: 'sk-r-021', name: '生命変換', rarity: 'R', nameTag: 'コンバート', active: { effect: { kind: 'pay_hp_shield', hpCost: 3, shieldAmount: 5 } } },
   { id: 'sk-r-022', name: '取引', rarity: 'R', nameTag: 'トレーダー', active: { effect: { kind: 'pay_hp_debuff_all', hpCost: 4, amount: 1 } } },
-  { id: 'sk-r-024', name: 'エネルギーチャージ', rarity: 'R', nameTag: 'バッテリー', active: { effect: { kind: 'buff_self_all', amount: 1, duration: 'battle' } } },
+  { id: 'sk-n-029', name: 'エネルギーチャージ', rarity: 'N', active: { effect: { kind: 'buff_self_all', amount: 1, duration: 'battle' } } },
   { id: 'sk-r-025', name: 'リフレイン', rarity: 'R', nameTag: 'リフレイン', active: { effect: { kind: 'rewind_skill', rewindBy: 1, selfDamagePercent: 15 } } },
   { id: 'sk-r-026', name: 'デジャヴ・アタック', rarity: 'R', nameTag: 'デジャヴ', active: { effect: { kind: 'deja_vu_attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   // ─── 相手ステータス参照（カウンターメタ） ──────────────────────────────────
@@ -284,6 +284,13 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'buff_self_all', amount: 3, duration: 'battle' } },
   },
   {
+    id: 'sk-ssr-022',
+    name: '限界突破',
+    rarity: 'SSR',
+    nameTag: 'リミットブレイク',
+    active: { effect: { kind: 'buff_self_all', amount: 4, duration: 'battle' } },
+  },
+  {
     id: 'sk-sr-027',
     name: '霊脈',
     rarity: 'SR',
@@ -398,7 +405,7 @@ export const SKILLS: SkillCard[] = [
     name: '大気合',
     rarity: 'R',
     nameTag: 'ヒロイック',
-    active: { effect: { kind: 'buff_self_all', amount: 2, duration: 'once' } },
+    active: { effect: { kind: 'buff_self_all', amount: 2, duration: 'battle' } },
   },
   {
     id: 'sk-r-048',
