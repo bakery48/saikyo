@@ -180,17 +180,6 @@ export const SKILLS: SkillCard[] = [
     },
   },
   {
-    id: 'sk-srp-007',
-    name: '影武者 (passive)',
-    rarity: 'SR',
-    nameTag: 'シャドウ',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'absorb_first_hit' },
-    },
-  },
-  {
     id: 'sk-srp-008',
     name: '同調 (passive)',
     rarity: 'SR',
@@ -546,13 +535,23 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-rp-010',
-    name: '慎重派 (passive)',
+    name: '守りの加護 (passive)',
     rarity: 'R',
     nameTag: 'プルーデント',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'first_received_damage_div', denominator: 2 },
+      effect: { kind: 'first_received_damage_reduce', remainPercent: 50 },
+    },
+  },
+  {
+    id: 'sk-np-002',
+    name: '備えの加護 (passive)',
+    rarity: 'N',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'first_received_damage_reduce', remainPercent: 75 },
     },
   },
   {

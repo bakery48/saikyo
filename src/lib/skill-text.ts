@@ -261,10 +261,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `相手がHP半分以下のとき与ダメ+${e.amount}（DEF無視）`;
     case 'paralyze_chance':
       return `攻撃時${e.percent}%で相手の次のターンをスキップ`;
-    case 'first_received_damage_div':
-      return e.denominator === 2
-        ? `バトル最初の被ダメージを1/2（切り捨て）にする`
-        : `バトル最初の被ダメージを1/${e.denominator}（切り捨て）にする`;
+    case 'first_received_damage_reduce':
+      return `バトル最初の被ダメージを${e.remainPercent}%（切り捨て）にする`;
     case 'decay_atk_per_active':
       return `スロット発動後にATK-${e.amount}（バトル中累積）`;
     case 'shield_on_active':
@@ -366,7 +364,7 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'low_hp_damage_reduction' ||
     p.effect.kind === 'crit_chance' ||
     p.effect.kind === 'equalize_spd' ||
-    p.effect.kind === 'first_received_damage_div' ||
+    p.effect.kind === 'first_received_damage_reduce' ||
     p.effect.kind === 'mirror_stats' ||
     p.effect.kind === 'stat_swap_battle_start' ||
     p.effect.kind === 'damage_to_shield' ||

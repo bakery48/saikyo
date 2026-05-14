@@ -87,7 +87,7 @@ type CombatStats = Stats & {
    * reflect this percent of it back to the attacker as true damage. Then reset to 0.
    */
   shareDamageNextPercent: number;
-  /** Has this side taken at least one damage instance? Used by first_received_damage_div. */
+  /** Has this side taken at least one damage instance? Used by first_received_damage_reduce. */
   firstDamageReceived: boolean;
   /** Stored copy of this side's most recently used skill effect, for `mimic_last`. */
   lastUsedEffect: SkillEffect | null;
@@ -459,7 +459,7 @@ function takeDamage(
       }
     }
   }
-  // 影武者 absorb_first_hit: fully eat the first incoming damage instance.
+  // absorb_first_hit (聖甲虫の加護): fully eat the first incoming damage instance.
   if (!pierceReductions && target.absorbHitsRemaining > 0) {
     target.absorbHitsRemaining -= 1;
     const passive = passives.find((p) => p.effect.kind === 'absorb_first_hit');
@@ -488,12 +488,12 @@ function takeDamage(
       }
     }
   }
-  // 慎重派 first_received_damage_div: first damage instance per battle is divided.
+  // first_received_damage_reduce: first damage instance per battle is reduced.
   if (!target.firstDamageReceived) {
     for (const p of passives) {
-      if (p.effect.kind === 'first_received_damage_div') {
-        const denom = Math.max(1, p.effect.denominator);
-        dmg = Math.floor(dmg / denom);
+      if (p.effect.kind === 'first_received_damage_reduce') {
+        const remain = Math.max(0, Math.min(100, p.effect.remainPercent));
+        dmg = Math.floor((dmg * remain) / 100);
         log.push({ kind: 'passive', player: side, passiveId: p.id });
       }
     }

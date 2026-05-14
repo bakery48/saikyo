@@ -321,8 +321,8 @@ export type PassiveEffect =
   | { kind: 'bonus_vs_low_hp'; amount: number }
   /** When this side deals damage, with `percent` chance the target loses their next turn. */
   | { kind: 'paralyze_chance'; percent: number }
-  /** The first time this side takes damage in a battle, divide the incoming amount by `denominator` (floor). */
-  | { kind: 'first_received_damage_div'; denominator: number }
+  /** The first time this side takes damage in a battle, keep only `remainPercent`% of the incoming amount (floor). */
+  | { kind: 'first_received_damage_reduce'; remainPercent: number }
   /** Each time this side resolves an active skill, lose `amount` ATK (battle-long, accumulating). */
   | { kind: 'decay_atk_per_active'; amount: number }
   /** Each time this side resolves an active skill, gain `amount` shield. */
