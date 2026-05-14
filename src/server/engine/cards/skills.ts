@@ -169,17 +169,6 @@ export const SKILLS: SkillCard[] = [
     },
   },
   {
-    id: 'sk-srp-006',
-    name: 'クリティカル (passive)',
-    rarity: 'SR',
-    nameTag: 'スナイパー',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_deal_damage' },
-      effect: { kind: 'crit_chance', percent: 20, mult: 2 },
-    },
-  },
-  {
     id: 'sk-srp-008',
     name: '同調 (passive)',
     rarity: 'SR',
@@ -1063,17 +1052,6 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'on_deal_damage' },
       effect: { kind: 'predator_buff', amount: 3 },
-    },
-  },
-  {
-    id: 'sk-srp-021',
-    name: '防壁意志 (passive)',
-    rarity: 'SR',
-    nameTag: 'ガードオブウィル',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'opp_crit_block' },
     },
   },
   {

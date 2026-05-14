@@ -296,8 +296,6 @@ export type PassiveEffect =
   | { kind: 'reverse_actives_both' }
   /** While hp ≤ maxHp/2, reduce incoming damage by `amount`. */
   | { kind: 'low_hp_damage_reduction'; amount: number }
-  /** When attacking, with `percent` chance multiply post-DEF damage by `mult`. */
-  | { kind: 'crit_chance'; percent: number; mult: number }
   /** First time this side would take damage, fully absorb it. */
   | { kind: 'absorb_first_hit' }
   /** At battle start, set both sides' SPD to the average of their two SPDs. */
@@ -364,8 +362,6 @@ export type PassiveEffect =
   | { kind: 'growth_heal'; amount: number }
   /** Dynamic: while opponent's HP < own HP, gain `amount` to attack damage. */
   | { kind: 'predator_buff'; amount: number }
-  /** Defender flag: enemy `crit_chance` procs are nullified against this side. */
-  | { kind: 'opp_crit_block' }
   /**
    * First `breakpoint` own attacks suffer `-malus` damage; subsequent attacks
    * gain `+bonus` damage instead.

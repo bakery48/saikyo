@@ -727,18 +727,6 @@ function resolveAttack(args: {
   if (isFirstAttack && attacker.firstAttackDamageMult > 1) {
     raw = Math.max(1, Math.floor(raw * attacker.firstAttackDamageMult));
   }
-  // クリティカル crit_chance: roll once per attack; on proc, multiply post-DEF damage.
-  // opp_crit_block on the defender nullifies the crit roll entirely.
-  const critBlocked = defenderPassives.some((p) => p.effect.kind === 'opp_crit_block');
-  if (!critBlocked) {
-    for (const p of attackerPassives) {
-      if (p.effect.kind === 'crit_chance' && rng.next() < p.effect.percent / 100) {
-        raw = Math.max(1, Math.floor(raw * p.effect.mult));
-        log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
-        break;
-      }
-    }
-  }
   // selective_immune / attack_kind_resist: defender reactions tied to the attack's kind.
   const incomingKind = effect.attackKind;
   if (incomingKind && incomingKind !== 'passthrough') {

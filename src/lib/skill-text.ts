@@ -243,8 +243,6 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `両者のスロット順が逆になる`;
     case 'low_hp_damage_reduction':
       return `HPが半分以下のとき被ダメ-${e.amount}`;
-    case 'crit_chance':
-      return `攻撃時${e.percent}%でダメージ×${e.mult}`;
     case 'absorb_first_hit':
       return `1度だけ被ダメージを完全無効`;
     case 'equalize_spd':
@@ -305,8 +303,6 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `自分のターン開始時に発動回数×${e.amount}HP回復`;
     case 'predator_buff':
       return `相手HPが自分より低いとき与ダメ+${e.amount}`;
-    case 'opp_crit_block':
-      return `相手のクリティカルを無効化`;
     case 'slow_starter':
       return `${e.breakpoint}回目までは与ダメ-${e.malus}、それ以降は与ダメ+${e.bonus}`;
     case 'grant_shield':
@@ -362,7 +358,6 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'first_attack_damage_mult' ||
     p.effect.kind === 'reverse_actives_both' ||
     p.effect.kind === 'low_hp_damage_reduction' ||
-    p.effect.kind === 'crit_chance' ||
     p.effect.kind === 'equalize_spd' ||
     p.effect.kind === 'first_received_damage_reduce' ||
     p.effect.kind === 'mirror_stats' ||
@@ -382,7 +377,6 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'mid_damage_reduce' ||
     p.effect.kind === 'low_hp_atk_mult' ||
     p.effect.kind === 'predator_buff' ||
-    p.effect.kind === 'opp_crit_block' ||
     p.effect.kind === 'slow_starter' ||
     p.effect.kind === 'grant_shield' ||
     p.effect.kind === 'double_shield' ||
