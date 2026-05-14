@@ -1,5 +1,5 @@
 'use client';
-import type { BattleEvent, BattleMatch } from '../../server/engine/types';
+import type { BattleEvent, BattleMatch, BattleMonsterSnapshot } from '../../server/engine/types';
 import type { ClientPlayer } from '../../shared/messages';
 
 export function BattleLogView({
@@ -56,6 +56,20 @@ function reasonLabel(r: 'hp_zero' | 'tiebreak_hp' | 'tiebreak_spd' | 'draw'): st
 function formatBattleEvent(e: BattleEvent, aName: string, bName: string): string {
   const who = (s: 'a' | 'b') => (s === 'a' ? aName : bName);
   switch (e.kind) {
+    case 'battle_start': {
+      const fmt = (m: BattleMonsterSnapshot) => {
+        const st = m.stats;
+        const passives = m.passives.map((p) => p.name).join('、') || 'なし';
+        const actives =
+          m.actives
+            .slice()
+            .sort((x, y) => x.order - y.order)
+            .map((x) => x.name)
+            .join('、') || 'なし';
+        return `${m.name}（${m.baseId}） HP${st.hp} ATK${st.atk} DEF${st.def} SPD${st.spd} / パッシブ: ${passives} / スロット: ${actives}`;
+      };
+      return `[開始] ${fmt(e.a)}  VS  ${fmt(e.b)}`;
+    }
     case 'roll':
       return `${who(e.player)} SPD${e.spd}+ダイス${e.die}=${e.total}`;
     case 'first':

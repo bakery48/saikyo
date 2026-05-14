@@ -1,6 +1,7 @@
 import type {
   ActiveSkill,
   BattleEvent,
+  BattleMonsterSnapshot,
   BattleResult,
   Monster,
   PassiveSkill,
@@ -2119,9 +2120,24 @@ function rollFirst(
  *  - Winner: whoever reduced opponent HP to <= 0 first. If neither, higher remaining HP.
  *  - Ties broken by SPD, then 'draw'.
  */
+function snapshotMonster(m: Monster): BattleMonsterSnapshot {
+  return {
+    ownerId: m.ownerId,
+    baseId: m.baseId,
+    name: m.name,
+    attackKind: m.attackKind,
+    stats: { ...m.stats },
+    passives: m.passives.map((p) => structuredClone(p)),
+    actives: m.actives.map((a) => structuredClone(a)),
+  };
+}
+
 export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
   const rng = new RNG(seed);
   const log: BattleEvent[] = [];
+  // Snapshot both monsters as-entered so the battle can be fully reconstructed
+  // and analysed from its log alone.
+  log.push({ kind: 'battle_start', a: snapshotMonster(a), b: snapshotMonster(b) });
   const sa = initCombat(a);
   const sb = initCombat(b);
 

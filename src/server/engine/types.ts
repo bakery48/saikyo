@@ -505,7 +505,20 @@ export type SkillCard = {
   description?: string;
 };
 
+/** Full snapshot of a monster as it entered battle — included in the log so a
+ * battle can be fully reconstructed/analysed from its log alone. */
+export type BattleMonsterSnapshot = {
+  ownerId: string;
+  baseId: string;
+  name: string;
+  attackKind: Exclude<AttackKind, 'passthrough'>;
+  stats: Stats;
+  passives: PassiveSkill[];
+  actives: ActiveSkill[];
+};
+
 export type BattleEvent =
+  | { kind: 'battle_start'; a: BattleMonsterSnapshot; b: BattleMonsterSnapshot }
   | { kind: 'roll'; player: 'a' | 'b'; spd: number; die: number; total: number }
   | { kind: 'first'; player: 'a' | 'b' }
   | { kind: 'skill_use'; player: 'a' | 'b'; skillId: string; name: string }
