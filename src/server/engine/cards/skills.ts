@@ -1100,17 +1100,6 @@ export const SKILLS: SkillCard[] = [
     },
   },
   {
-    id: 'sk-ssrp-007',
-    name: '輪廻 (passive)',
-    rarity: 'SSR',
-    nameTag: 'リバース',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'rebirth' },
-    },
-  },
-  {
     id: 'sk-ssrp-008',
     name: '時の神 (passive)',
     rarity: 'SSR',

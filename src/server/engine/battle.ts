@@ -103,8 +103,6 @@ type CombatStats = Stats & {
   revengeBurstAvailable: boolean;
   /** False once last_breath has fired this battle. */
   lastBreathAvailable: boolean;
-  /** False once rebirth has fired this battle. */
-  rebirthAvailable: boolean;
   /** Defender flag: incoming attacks treat DEF as 0 (set by absolute_zero on opponent). */
   incomingIgnoresDef: boolean;
   /** Self flag: SPD reads as 0 regardless of mods/buffs (set by absolute_zero). */
@@ -169,7 +167,6 @@ function initCombat(m: Monster): CombatStats {
     shieldMultiplier: m.passives.some((p) => p.effect.kind === 'double_shield') ? 2 : 1,
     revengeBurstAvailable: m.passives.some((p) => p.effect.kind === 'revenge_burst'),
     lastBreathAvailable: m.passives.some((p) => p.effect.kind === 'last_breath'),
-    rebirthAvailable: m.passives.some((p) => p.effect.kind === 'rebirth'),
     incomingIgnoresDef: false,
     spdLockedZero: false,
     forceAmpNext: 1,
@@ -1072,18 +1069,6 @@ function clampWithEndure(
 ): number {
   if (damage <= 0) return damage;
   if (defender.hp - damage > 0) return damage;
-  // rebirth: when reduced to ≤0 HP, fully restore once.
-  if (defender.rebirthAvailable) {
-    defender.rebirthAvailable = false;
-    const passive = passives.find((p) => p.effect.kind === 'rebirth');
-    if (passive) log.push({ kind: 'passive', player: side, passiveId: passive.id });
-    const heal = defender.maxHp - defender.hp;
-    if (heal > 0) {
-      defender.hp = defender.maxHp;
-      log.push({ kind: 'heal', player: side, amount: heal, hpAfter: defender.hp });
-    }
-    return 0;
-  }
   if (!defender.endureFatalAvailable) return damage;
   defender.endureFatalAvailable = false;
   const passive = passives.find((p) => p.effect.kind === 'endure_fatal');

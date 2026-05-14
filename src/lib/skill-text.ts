@@ -321,8 +321,6 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `戦闘不能になる際に相手に${e.amount}DEF無視ダメージ`;
     case 'immortal_first_phase':
       return `自分のスロット使用回数${e.until}回未満まで被ダメ無効`;
-    case 'rebirth':
-      return `1度だけ戦闘不能時にHP全回復`;
     case 'chronos':
       return `バトル開始時にATK/DEF/SPD+${e.allBonus}、自分のターン開始時にHP-${e.hpDrain}`;
     case 'final_form':
@@ -367,7 +365,6 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'dodge_counter' ||
     p.effect.kind === 'revenge_burst' ||
     p.effect.kind === 'last_breath' ||
-    p.effect.kind === 'rebirth' ||
     p.effect.kind === 'immortal_first_phase' ||
     p.effect.kind === 'chronos' ||
     p.effect.kind === 'final_form' ||

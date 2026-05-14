@@ -384,7 +384,6 @@ export type PassiveEffect =
   /** While `activesUsedCount < until`, this side takes 0 damage. Wears off after the threshold. */
   | { kind: 'immortal_first_phase'; until: number }
   /** Once per battle, when reduced to ≤0 HP, restore to full instead. */
-  | { kind: 'rebirth' }
   /** At battle start, gain `+allBonus` ATK/DEF/SPD; at each own turn start, lose `hpDrain` HP. */
   | { kind: 'chronos'; allBonus: number; hpDrain: number }
   /** Dynamic: when only one own active remains, gain `amount` to ATK/DEF/SPD attack-side calculations. */
