@@ -881,10 +881,9 @@ export const SKILLS: SkillCard[] = [
     },
   },
   {
-    id: 'sk-rp-037',
+    id: 'sk-np-003',
     name: '一刺し (passive)',
-    rarity: 'R',
-    nameTag: 'スティング',
+    rarity: 'N',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_deal_damage' },
