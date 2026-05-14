@@ -535,7 +535,7 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-rp-010',
-    name: '守りの加護 (passive)',
+    name: '甲虫の加護 (passive)',
     rarity: 'R',
     nameTag: 'プルーデント',
     isPassive: true,
@@ -546,7 +546,7 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-np-002',
-    name: '備えの加護 (passive)',
+    name: '幼虫の加護 (passive)',
     rarity: 'N',
     isPassive: true,
     passive: {
