@@ -882,7 +882,7 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-rp-037',
-    name: 'ちくり (passive)',
+    name: '一刺し (passive)',
     rarity: 'R',
     nameTag: 'スティング',
     isPassive: true,
@@ -893,7 +893,7 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-rp-038',
-    name: 'チクチク (passive)',
+    name: '滅多刺し (passive)',
     rarity: 'R',
     nameTag: 'ピックス',
     isPassive: true,

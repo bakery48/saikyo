@@ -234,7 +234,7 @@ export const MONSTERS: MonsterBase[] = [
     passives: [
       {
         id: 'goblin-p1',
-        name: 'チクチク攻撃',
+        name: '群がる刃',
         trigger: { kind: 'on_deal_damage' },
         effect: { kind: 'low_damage_bonus', threshold: 2, bonus: 3 },
       },
