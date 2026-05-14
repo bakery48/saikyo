@@ -207,7 +207,7 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-n-030',
-    name: '小弱体',
+    name: '翳り',
     rarity: 'N',
     active: { effect: { kind: 'debuff_all', amount: 1 } },
   },
@@ -256,21 +256,21 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-r-067',
-    name: '中弱体',
+    name: '黒霧',
     rarity: 'R',
     nameTag: 'ウィークン',
     active: { effect: { kind: 'debuff_all', amount: 2 } },
   },
   {
     id: 'sk-sr-055',
-    name: '大弱体',
+    name: '暗転',
     rarity: 'SR',
     nameTag: 'ヘクス',
     active: { effect: { kind: 'debuff_all', amount: 3 } },
   },
   {
     id: 'sk-ssr-023',
-    name: '極弱体',
+    name: '皆既',
     rarity: 'SSR',
     nameTag: 'カタストロフ',
     active: { effect: { kind: 'debuff_all', amount: 4 } },
