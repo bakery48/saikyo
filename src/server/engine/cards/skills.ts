@@ -206,10 +206,9 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'steal_stat', stat: 'atk', amount: 2 } },
   },
   {
-    id: 'sk-r-031',
-    name: '全力弱体',
-    rarity: 'R',
-    nameTag: 'デビリテイト',
+    id: 'sk-n-030',
+    name: '小弱体',
+    rarity: 'N',
     active: { effect: { kind: 'debuff_all', amount: 1 } },
   },
   {
@@ -256,11 +255,25 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'steal_stat', stat: 'def', amount: 3 } },
   },
   {
-    id: 'sk-sr-023',
-    name: '全弱体改',
+    id: 'sk-r-067',
+    name: '中弱体',
+    rarity: 'R',
+    nameTag: 'ウィークン',
+    active: { effect: { kind: 'debuff_all', amount: 2 } },
+  },
+  {
+    id: 'sk-sr-055',
+    name: '大弱体',
     rarity: 'SR',
     nameTag: 'ヘクス',
-    active: { effect: { kind: 'debuff_all', amount: 2 } },
+    active: { effect: { kind: 'debuff_all', amount: 3 } },
+  },
+  {
+    id: 'sk-ssr-023',
+    name: '極弱体',
+    rarity: 'SSR',
+    nameTag: 'カタストロフ',
+    active: { effect: { kind: 'debuff_all', amount: 4 } },
   },
   {
     id: 'sk-sr-024',
