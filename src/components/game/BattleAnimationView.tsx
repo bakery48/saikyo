@@ -8,7 +8,7 @@ import type {
   BattleMatch,
   Monster,
 } from '../../server/engine/types';
-import { COLOR_HEX, COLOR_LABEL, pieceStyle } from '../../lib/colors';
+import { COLOR_HEX, COLOR_LABEL } from '../../lib/colors';
 
 const STEP_MS = 2000;
 const PREROLL_MS = 3000;
@@ -419,16 +419,23 @@ function MonsterColumn({
           position: 'relative',
         }}
       >
-        <div style={{ position: 'relative', width: 128, height: 128 }}>
-          <span style={{ ...pieceStyle(player.color, { size: 128 }), position: 'absolute', inset: 0 }} />
+        <div
+          style={{
+            position: 'relative',
+            width: 184,
+            height: 184,
+            background: `${COLOR_HEX[player.color] ?? '#888'}22`,
+            borderRadius: 8,
+          }}
+        >
           <img
             src={`/monsters/${mon.baseId}.png`}
             alt={mon.name}
             style={{
               position: 'absolute',
               inset: 0,
-              width: 128,
-              height: 128,
+              width: 184,
+              height: 184,
               objectFit: 'contain',
               transform: mirror ? 'scaleX(-1)' : undefined,
             }}
