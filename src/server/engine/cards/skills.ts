@@ -344,14 +344,14 @@ export const SKILLS: SkillCard[] = [
   },
   // ── SR passives (new) ───────────────────────────────────────────────────
   {
-    id: 'sk-srp-010',
-    name: '閃光回避 (passive)',
-    rarity: 'SR',
+    id: 'sk-rp-044',
+    name: '煌めく舞踊 (passive)',
+    rarity: 'R',
     nameTag: 'イリュージョン',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'dodge_bonus', percent: 15 },
+      effect: { kind: 'dodge_bonus', percent: 10 },
     },
   },
   // ── R actives (batch 3) ─────────────────────────────────────────────────
@@ -578,14 +578,13 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'coup_de_grace', threshold: 10, amount: 99, attackKind: 'passthrough' } },
   },
   {
-    id: 'sk-rp-011',
-    name: 'ダンスステップ (passive)',
-    rarity: 'R',
-    nameTag: 'ダンサー',
+    id: 'sk-np-001',
+    name: '軽やかな舞踊 (passive)',
+    rarity: 'N',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'dodge_bonus', percent: 10 },
+      effect: { kind: 'dodge_bonus', percent: 5 },
     },
   },
   {

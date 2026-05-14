@@ -66,7 +66,7 @@ export const MONSTERS: MonsterBase[] = [
     passives: [
       {
         id: 'fairy-p1',
-        name: '軽やかな舞踊',
+        name: '妖しい舞踊',
         trigger: { kind: 'on_take_damage' },
         effect: { kind: 'dodge_bonus', percent: 20 },
       },
