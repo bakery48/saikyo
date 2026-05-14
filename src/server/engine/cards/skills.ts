@@ -184,7 +184,7 @@ export const SKILLS: SkillCard[] = [
   },
   // ── R actives (new) ─────────────────────────────────────────────────────
   {
-    id: 'sk-r-029',
+    id: 'sk-r-069',
     name: '吸命術',
     rarity: 'R',
     nameTag: 'ドレイン',
@@ -219,7 +219,7 @@ export const SKILLS: SkillCard[] = [
   },
   // ── SR actives (new) ────────────────────────────────────────────────────
   {
-    id: 'sk-sr-018',
+    id: 'sk-sr-056',
     name: '盾砕き',
     rarity: 'SR',
     nameTag: 'シールドブレイカー',
@@ -304,7 +304,7 @@ export const SKILLS: SkillCard[] = [
   },
   // ── SSR actives (new) ───────────────────────────────────────────────────
   {
-    id: 'sk-ssr-008',
+    id: 'sk-sr-058',
     name: '命懸け',
     rarity: 'SR',
     nameTag: 'サクリファイス',
@@ -1130,7 +1130,7 @@ export const SKILLS: SkillCard[] = [
     },
   },
   {
-    id: 'sk-sr-018',
+    id: 'sk-sr-057',
     name: '理外の咆哮',
     rarity: 'SR',
     nameTag: 'フォース',
