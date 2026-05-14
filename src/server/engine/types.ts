@@ -173,7 +173,7 @@ export type SkillEffect =
    */
   | { kind: 'pin_attack'; mult: number; useStat: 'atk' | 'spd'; flat: number; attackKind?: AttackKind }
   /** Deal `targetStat × mult` as DEF-ignoring damage based on the opponent's current stat. */
-  | { kind: 'target_stat_damage'; stat: 'atk' | 'def'; mult: number }
+  | { kind: 'target_stat_damage'; stat: 'atk' | 'def' | 'spd'; mult: number }
   /** If opponent's `stat` is strictly greater than user's, attack at `multIf`; otherwise `multElse`. */
   | { kind: 'conditional_attack_if_target_higher'; stat: 'atk' | 'def'; multIf: number; multElse: number; useStat: 'atk' | 'def' | 'spd'; attackKind?: AttackKind }
   /** DEF-ignoring damage equal to max(0, opponent[stat] - user[stat]) × mult. */
