@@ -396,13 +396,6 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'hp_to_atk', divisor: 3 } },
   },
   {
-    id: 'sk-r-045',
-    name: '闇打ち',
-    rarity: 'R',
-    nameTag: 'シャドウ',
-    active: { effect: { kind: 'true_damage', amount: 5 } },
-  },
-  {
     id: 'sk-r-046',
     name: '大気合',
     rarity: 'R',
