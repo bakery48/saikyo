@@ -1526,9 +1526,10 @@ function applySkill(args: {
     }
     case 'rewind_skill': {
       // Self-damage always applies, even if the rewind itself fizzles.
-      if (e.selfDamage > 0) {
-        user.hp -= e.selfDamage;
-        log.push({ kind: 'damage', from: userSide, to: userSide, amount: e.selfDamage, hpAfter: user.hp });
+      const selfDmg = Math.max(1, Math.floor((user.maxHp * e.selfDamagePercent) / 100));
+      if (e.selfDamagePercent > 0) {
+        user.hp -= selfDmg;
+        log.push({ kind: 'damage', from: userSide, to: userSide, amount: selfDmg, hpAfter: user.hp });
       }
       // Mark this rewind card as consumed so it's skipped on forward replay.
       user.consumedSkillIds.add(skill.id);

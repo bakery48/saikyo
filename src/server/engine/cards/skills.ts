@@ -52,7 +52,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-021', name: '生命変換', rarity: 'R', nameTag: 'コンバート', active: { effect: { kind: 'pay_hp_shield', hpCost: 3, shieldAmount: 5 } } },
   { id: 'sk-r-022', name: '取引', rarity: 'R', nameTag: 'トレーダー', active: { effect: { kind: 'pay_hp_debuff_all', hpCost: 4, amount: 1 } } },
   { id: 'sk-r-024', name: 'エネルギーチャージ', rarity: 'R', nameTag: 'バッテリー', active: { effect: { kind: 'buff_self_all', amount: 1, duration: 'battle' } } },
-  { id: 'sk-r-025', name: 'リフレイン', rarity: 'R', nameTag: 'リフレイン', active: { effect: { kind: 'rewind_skill', rewindBy: 1, selfDamage: 2 } } },
+  { id: 'sk-r-025', name: 'リフレイン', rarity: 'R', nameTag: 'リフレイン', active: { effect: { kind: 'rewind_skill', rewindBy: 1, selfDamagePercent: 15 } } },
   { id: 'sk-r-026', name: 'デジャヴ・アタック', rarity: 'R', nameTag: 'デジャヴ', active: { effect: { kind: 'deja_vu_attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   // ─── 相手ステータス参照（カウンターメタ） ──────────────────────────────────
   { id: 'sk-r-063', name: '逆鱗', rarity: 'R', nameTag: 'リバース', active: { effect: { kind: 'target_stat_damage', stat: 'atk', mult: 0.8 } } },
@@ -89,7 +89,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-014', name: 'ハリケーン', rarity: 'SR', nameTag: 'ストーム', active: { effect: { kind: 'shuffle_opponent_actives' } } },
   { id: 'sk-sr-015', name: '二重起動', rarity: 'SR', nameTag: 'ダブル', active: { effect: { kind: 'next_multi_attack', extraCount: 1, failurePenalty: 2 } } },
   { id: 'sk-sr-016', name: '百花繚乱', rarity: 'SSR', nameTag: 'バリスタ', active: { effect: { kind: 'multi_hit_attack', mult: 0.7, useStat: 'atk', hitCount: 4, attackKind: 'passthrough' } } },
-  { id: 'sk-sr-017', name: 'フラッシュバック', rarity: 'SR', nameTag: 'フラッシュバック', active: { effect: { kind: 'rewind_skill', rewindBy: 2, selfDamage: 4 } } },
+  { id: 'sk-sr-017', name: 'フラッシュバック', rarity: 'SR', nameTag: 'フラッシュバック', active: { effect: { kind: 'rewind_skill', rewindBy: 2, selfDamagePercent: 25 } } },
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
   { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'ドラゴン', active: { effect: { kind: 'attack', mult: 3.0, useStat: 'atk', attackKind: 'passthrough' } } },
@@ -100,7 +100,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-004', name: '集中砲火', rarity: 'SSR', nameTag: 'クロノス', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
   { id: 'sk-ssr-005', name: '三重起動', rarity: 'SSR', nameTag: 'トリプル', active: { effect: { kind: 'next_multi_attack', extraCount: 2, failurePenalty: 6 } } },
   { id: 'sk-ssr-006', name: '時を巻き戻す', rarity: 'SSR', nameTag: 'リワインド', active: { effect: { kind: 'heal_max_fraction', denominator: 2 } } },
-  { id: 'sk-ssr-007', name: 'エターナル', rarity: 'SSR', nameTag: 'エターナル', active: { effect: { kind: 'rewind_skill', rewindBy: 3, selfDamage: 7 } } },
+  { id: 'sk-ssr-007', name: 'エターナル', rarity: 'SSR', nameTag: 'エターナル', active: { effect: { kind: 'rewind_skill', rewindBy: 3, selfDamagePercent: 40 } } },
 
   // ─── Passive skill cards ───────────────────────────────────────────────────
   {

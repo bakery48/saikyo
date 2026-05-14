@@ -111,11 +111,11 @@ export type SkillEffect =
   | { kind: 'heal_max_fraction'; denominator: number }
   /**
    * Replay one of the user's earlier active skills `rewindBy` slots before this
-   * one. Always self-damages by `selfDamage`. The skill is single-use per
-   * battle (can't be brought back via further rewinds). Fizzles harmlessly if
-   * the rewind target doesn't exist or is already consumed.
+   * one. Always self-damages by `selfDamagePercent`% of max HP. The skill is
+   * single-use per battle (can't be brought back via further rewinds). Fizzles
+   * harmlessly if the rewind target doesn't exist or is already consumed.
    */
-  | { kind: 'rewind_skill'; rewindBy: number; selfDamage: number }
+  | { kind: 'rewind_skill'; rewindBy: number; selfDamagePercent: number }
   /**
    * Attack with bonus ATK = number of times this exact skill has been used in
    * the current battle (counting the current use). Damage formula otherwise

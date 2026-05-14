@@ -77,7 +77,7 @@ export function describeActiveEffect(e: SkillEffect): string {
         ? `HP全回復`
         : `最大HPの1/${e.denominator}を回復`;
     case 'rewind_skill':
-      return `スロットを${e.rewindBy}つ戻す（廃棄・自分に${e.selfDamage}ダメージ）`;
+      return `スロットを${e.rewindBy}つ戻す（廃棄・最大HPの${e.selfDamagePercent}%反動）`;
     case 'deja_vu_attack':
       return `${e.useStat.toUpperCase()}+N で攻撃（N=このカードのバトル中の使用回数、mult ${e.mult}）`;
     case 'drain_hp':
