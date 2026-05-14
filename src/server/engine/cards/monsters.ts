@@ -248,7 +248,7 @@ export const MONSTERS: MonsterBase[] = [
     passives: [
       {
         id: 'griffon-p1',
-        name: '飛翔斬',
+        name: '天空の覇者',
         trigger: { kind: 'battle_start' },
         effect: { kind: 'pierce_all_shields' },
       },
@@ -291,7 +291,7 @@ export const MONSTERS: MonsterBase[] = [
     passives: [
       {
         id: 'ghost-p1',
-        name: '鉄壁の誓い',
+        name: '残留思念',
         trigger: { kind: 'on_last_active_used' },
         effect: { kind: 'grant_ghost_shield_on_last_active', amount: 99 },
       },
