@@ -284,13 +284,13 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
-    baseId: 'sentinel',
+    baseId: 'ghost',
     name: 'ゴースト',
     attackKind: 'strike',
     stats: { hp: 16, atk: 4, def: 8, spd: 3 },
     passives: [
       {
-        id: 'sentinel-p1',
+        id: 'ghost-p1',
         name: '鉄壁の誓い',
         trigger: { kind: 'on_last_active_used' },
         effect: { kind: 'grant_ghost_shield_on_last_active', amount: 99 },
