@@ -874,7 +874,7 @@ export const SKILLS: SkillCard[] = [
   {
     id: 'sk-rp-036',
     name: '光霧の鱗 (passive)',
-    rarity: 'R',
+    rarity: 'SR',
     nameTag: 'ミラージュ',
     isPassive: true,
     passive: {
