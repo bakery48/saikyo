@@ -417,6 +417,21 @@ function MonsterColumn({
       >
         <div style={{ position: 'relative', width: 80, height: 80 }}>
           <span style={{ ...pieceStyle(player.color, { size: 80 }), position: 'absolute', inset: 0 }} />
+          <img
+            src={`/monsters/${mon.baseId}.png`}
+            alt={mon.name}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: 80,
+              height: 80,
+              objectFit: 'cover',
+              borderRadius: '50%',
+            }}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none';
+            }}
+          />
           {slashKey && <HitEffect key={slashKey} kind={hitKind} />}
           {buffKey && <BuffEffect key={buffKey} />}
           {debuffKey && <DebuffEffect key={debuffKey} />}
