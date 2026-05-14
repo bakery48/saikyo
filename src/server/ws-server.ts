@@ -52,7 +52,7 @@ export class GameWsServer {
     });
 
     ws.on('close', () => {
-      this.handleDisconnect(playerId);
+      this.handleDisconnect(playerId, ws);
     });
 
     this.sendRoomsList(ws);
@@ -69,13 +69,27 @@ export class GameWsServer {
     ws: WebSocket,
   ): string | null {
     const timer = this.pendingDisconnects.get(oldPlayerId);
-    if (!timer) {
-      // No seat being held — grace period expired or unknown id.
-      this.send(ws, { type: 'rejoin_failed' });
-      return null;
+    if (timer) {
+      clearTimeout(timer);
+      this.pendingDisconnects.delete(oldPlayerId);
+    } else {
+      // No grace timer yet. Either the old socket's close hasn't been processed
+      // (a race on reload, since the fresh page can connect before the old
+      // socket finishes closing) or this is a stale id. Accept the rejoin only
+      // if the seat is still a live in-game human — the old socket's eventual
+      // close is then a no-op thanks to the connections guard in
+      // handleDisconnect.
+      const liveRoom = this.roomManager.getRoomByPlayer(oldPlayerId);
+      const liveGame = liveRoom ? this.games.get(liveRoom.id) : null;
+      const stillSeated =
+        !!liveGame &&
+        liveGame.state.phase !== 'finished' &&
+        liveGame.isHuman(oldPlayerId);
+      if (!stillSeated) {
+        this.send(ws, { type: 'rejoin_failed' });
+        return null;
+      }
     }
-    clearTimeout(timer);
-    this.pendingDisconnects.delete(oldPlayerId);
     // Rebind the live connection from the throwaway id to the original one.
     this.connections.delete(currentId);
     this.playerNames.delete(currentId);
@@ -467,7 +481,10 @@ export class GameWsServer {
     }
   }
 
-  private handleDisconnect(playerId: string): void {
+  private handleDisconnect(playerId: string, ws: WebSocket): void {
+    // Stale close: this socket was already superseded (e.g. by a rejoin that
+    // won the race against this close event). Nothing to do.
+    if (this.connections.get(playerId) !== ws) return;
     const roomBefore = this.roomManager.getRoomByPlayer(playerId);
     const game = roomBefore ? this.games.get(roomBefore.id) : null;
     const gameInProgress = !!game && game.state.phase !== 'finished';
