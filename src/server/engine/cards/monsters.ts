@@ -220,7 +220,7 @@ export const MONSTERS: MonsterBase[] = [
     passives: [
       {
         id: 'dragon-p1',
-        name: '龍鱗の加護',
+        name: '紅龍の鱗',
         trigger: { kind: 'on_take_damage' },
         effect: { kind: 'mid_damage_immune', min: 4, max: 9 },
       },
