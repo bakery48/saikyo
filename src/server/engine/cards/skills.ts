@@ -114,7 +114,7 @@ export const SKILLS: SkillCard[] = [
   {
     id: 'sk-srp-001',
     name: '鋼の体 (passive)',
-    rarity: 'SR',
+    rarity: 'R',
     nameTag: 'タンク',
     isPassive: true,
     passive: { trigger: { kind: 'on_take_damage' }, effect: { kind: 'damage_reduction', amount: 1 } },
