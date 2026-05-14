@@ -44,11 +44,25 @@ function hasAttackKindSlot(c: SkillCard): boolean {
   );
 }
 
+function cardEffectKind(c: SkillCard): string {
+  return c.active?.effect.kind ?? c.passive?.effect.kind ?? '';
+}
+
 export default function DevSkillsPage() {
   const [edits, setEdits] = useState<Edits>({});
   const [filter, setFilter] = useState('');
+  const [effectFilter, setEffectFilter] = useState('');
   const [sortCol, setSortCol] = useState<SortCol>('id');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  const effectKindOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const c of SKILLS) {
+      const k = cardEffectKind(c);
+      if (k) counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, []);
 
   const toggleSort = (col: SortCol) => {
     if (sortCol === col) {
@@ -62,8 +76,9 @@ export default function DevSkillsPage() {
   const rows = useMemo(() => {
     const f = filter.trim().toLowerCase();
     const filtered = SKILLS.filter((c) => {
+      if (effectFilter && cardEffectKind(c) !== effectFilter) return false;
       if (!f) return true;
-      const blob = `${c.id} ${c.name} ${c.nameTag ?? ''} ${describeSkillCard(c)}`.toLowerCase();
+      const blob = `${c.id} ${c.name} ${c.nameTag ?? ''} ${cardEffectKind(c)} ${describeSkillCard(c)}`.toLowerCase();
       return blob.includes(f);
     });
     const sign = sortDir === 'asc' ? 1 : -1;
@@ -75,16 +90,20 @@ export default function DevSkillsPage() {
         case 'rarity': va = RARITY_ORDER[a.rarity] ?? 0; vb = RARITY_ORDER[b.rarity] ?? 0; break;
         case 'name': va = a.name; vb = b.name; break;
         case 'tag':  va = a.nameTag ?? ''; vb = b.nameTag ?? ''; break;
-        case 'category':
-          va = a.passive ? 'passive' : a.active ? effectCategory(a.active.effect) : '';
-          vb = b.passive ? 'passive' : b.active ? effectCategory(b.active.effect) : '';
+        case 'category': {
+          // Sort by category, then group same effect kinds together.
+          const ca = a.passive ? 'passive' : a.active ? effectCategory(a.active.effect) : '';
+          const cb = b.passive ? 'passive' : b.active ? effectCategory(b.active.effect) : '';
+          va = `${ca} ${cardEffectKind(a)}`;
+          vb = `${cb} ${cardEffectKind(b)}`;
           break;
+        }
       }
       if (va < vb) return -sign;
       if (va > vb) return sign;
       return 0;
     });
-  }, [filter, sortCol, sortDir]);
+  }, [filter, effectFilter, sortCol, sortDir]);
 
   const setField = <K extends keyof Edits[string]>(
     id: string,
@@ -180,11 +199,24 @@ export default function DevSkillsPage() {
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
         <input
           type="text"
-          placeholder="検索（名前・タグ・説明・ID）"
+          placeholder="検索（名前・タグ・説明・効果・ID）"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           style={{ padding: '4px 8px', minWidth: 240 }}
         />
+        <select
+          value={effectFilter}
+          onChange={(e) => setEffectFilter(e.target.value)}
+          style={{ padding: '4px 8px' }}
+          title="効果の種類で絞り込み"
+        >
+          <option value="">効果すべて</option>
+          {effectKindOptions.map(([kind, count]) => (
+            <option key={kind} value={kind}>
+              {kind} ({count})
+            </option>
+          ))}
+        </select>
         <span style={{ fontSize: 12, opacity: 0.7 }}>
           {rows.length} / {SKILLS.length} 件 — 変更 {changedEntries.length} 件
         </span>
