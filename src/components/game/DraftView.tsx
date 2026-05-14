@@ -140,6 +140,10 @@ export function DraftView({
                 cursor: canClick ? 'pointer' : 'default',
                 textAlign: 'left',
                 minHeight: 110,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                justifyContent: 'flex-start',
               }}
             >
               <div
