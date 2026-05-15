@@ -77,6 +77,12 @@ function applySwapActives(state: GameState, swap: NonNullable<ActionPlay['swap']
 export function startActionPhase(state: GameState): void {
   if (state.phase !== 'action') throw new Error('not in action phase');
   if (state.actionPhase) return; // already started
+  if (state.skipNextActionPhase) {
+    state.skipNextActionPhase = false;
+    state.phase = 'event';
+    state.log.push({ kind: 'phase_change', phase: 'event', round: state.round, miniRound: state.miniRound });
+    return;
+  }
 
   const rng = makeRng(state);
   const pending: string[] = [];
@@ -186,10 +192,10 @@ export function resolveActionPhase(state: GameState): void {
   }
   state.actionPhase = null;
   state.actionPhaseSummary = summary.plays.length > 0 ? summary : null;
-  state.phase = 'draft';
+  state.phase = 'event';
   state.log.push({
     kind: 'phase_change',
-    phase: 'draft',
+    phase: 'event',
     round: state.round,
     miniRound: state.miniRound,
   });

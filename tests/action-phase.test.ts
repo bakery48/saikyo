@@ -7,6 +7,7 @@ import {
 } from '../src/server/engine/phases/action';
 import type { ActionCard, GameState, Player } from '../src/server/engine/types';
 import { ACTIONS } from '../src/server/engine/cards/actions';
+import { chooseStatForActionCard } from '../src/server/engine/policy';
 import { completeMonsterPicks } from './helpers';
 
 function setupAtAction(seed = 2): GameState {
@@ -36,7 +37,12 @@ function playAll(state: GameState, targetPlayerId: string, targetCardId: string)
   for (const p of state.players) {
     if (p.id === targetPlayerId) continue;
     if (p.actionHand.length === 0) continue;
-    submitActionPlay(state, p.id, p.actionHand[0]!.id);
+    const card = p.actionHand[0]!;
+    const chosenStat =
+      card.effect.kind === 'stat_mod_choice' && p.monster
+        ? chooseStatForActionCard(p.monster.stats)
+        : undefined;
+    submitActionPlay(state, p.id, card.id, { chosenStat });
   }
   resolveActionPhase(state);
 }
@@ -47,15 +53,20 @@ describe('Action phase', () => {
     state = setupAtAction();
   });
 
-  it('every player draws one and then plays one card, advancing to draft', () => {
+  it('every player draws one and then plays one card, advancing to event', () => {
     const beforeDeckPlusGrave = state.decks.action.length + state.decks.actionGrave.length;
     startActionPhase(state);
     for (const p of state.players) {
       if (p.actionHand.length === 0) continue;
-      submitActionPlay(state, p.id, p.actionHand[0]!.id);
+      const card = p.actionHand[0]!;
+      const chosenStat =
+        card.effect.kind === 'stat_mod_choice' && p.monster
+          ? chooseStatForActionCard(p.monster.stats)
+          : undefined;
+      submitActionPlay(state, p.id, card.id, { chosenStat });
     }
     resolveActionPhase(state);
-    expect(state.phase).toBe('draft');
+    expect(state.phase).toBe('event');
     // Action card pool size (deck + grave + hands) is conserved.
     const handsAfter = state.players.reduce((n, p) => n + p.actionHand.length, 0);
     expect(state.decks.action.length + state.decks.actionGrave.length + handsAfter).toBe(
@@ -68,10 +79,10 @@ describe('Action phase', () => {
   it('permanent stat_mod modifies the monster base stats immediately', () => {
     const target = state.players[0]!;
     startActionPhase(state);
-    forceCardInHand(state, target, 'ac-005'); // permanent ATK +1
+    forceCardInHand(state, target, 'ac-005'); // permanent ATK +2
     const beforeAtk = target.monster!.stats.atk;
     playAll(state, target.id, 'ac-005');
-    expect(target.monster!.stats.atk).toBe(beforeAtk + 1);
+    expect(target.monster!.stats.atk).toBe(beforeAtk + 2);
   });
 
   it('draw_skill_top adds a skill to the player monster', () => {

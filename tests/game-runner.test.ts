@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GameRunner } from '../src/server/game-runner';
+import { chooseStatForActionCard } from '../src/server/engine/policy';
 
 const human = { id: 'h1', name: 'Human' };
 
@@ -27,11 +28,25 @@ describe('GameRunner', () => {
     expect(submitted).not.toContain(human.id);
   });
 
-  it('after human pick, advances through cpu picks and pauses on draft for human', () => {
+  it('after human pick, pauses in action phase waiting for human', () => {
     const runner = new GameRunner({ roomId: 'r1', seed: 42, humans: [human] });
     runner.advance();
     const baseId = runner.state.monsterPick!.pool[0]!.baseId;
     runner.submitPick(human.id, baseId);
+    runner.advance();
+    expect(runner.state.phase).toBe('action');
+    expect(runner.state.actionPhase).not.toBeNull();
+    expect(runner.state.actionPhase!.pendingPlayerIds).toContain(human.id);
+  });
+
+  it('after human action play, advances through event and pauses on draft for human', () => {
+    const runner = new GameRunner({ roomId: 'r1', seed: 42, humans: [human] });
+    runner.advance();
+    runner.submitPick(human.id, runner.state.monsterPick!.pool[0]!.baseId);
+    runner.advance();
+    // Now in action phase — human submits their first hand card.
+    const hand = runner.state.players.find((p) => p.id === human.id)!.actionHand;
+    runner.submitAction(human.id, hand[0]!.id);
     runner.advance();
     expect(runner.state.phase).toBe('draft');
     expect(runner.state.draft).not.toBeNull();
@@ -46,6 +61,9 @@ describe('GameRunner', () => {
     const runner = new GameRunner({ roomId: 'r1', seed: 42, humans: [human] });
     runner.advance();
     runner.submitPick(human.id, runner.state.monsterPick!.pool[0]!.baseId);
+    runner.advance();
+    const hand = runner.state.players.find((p) => p.id === human.id)!.actionHand;
+    runner.submitAction(human.id, hand[0]!.id);
     runner.advance();
     const used = new Set(Object.values(runner.state.draft!.submittedPicks));
     const unused = runner.state.draft!.pool.find((c) => !used.has(c.id))!;
@@ -63,6 +81,19 @@ describe('GameRunner', () => {
         case 'pick_monster': {
           const pool = runner.state.monsterPick!.pool;
           runner.submitPick(human.id, pool[0]!.baseId);
+          break;
+        }
+        case 'action': {
+          const humanPlayer = runner.state.players.find((p) => p.id === human.id)!;
+          const hand = humanPlayer.actionHand;
+          if (hand.length > 0) {
+            const card = hand[0]!;
+            const chosenStat =
+              card.effect.kind === 'stat_mod_choice' && humanPlayer.monster
+                ? chooseStatForActionCard(humanPlayer.monster.stats)
+                : undefined;
+            runner.submitAction(human.id, card.id, { chosenStat });
+          }
           break;
         }
         case 'draft': {

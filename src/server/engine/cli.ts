@@ -23,7 +23,7 @@ import {
 import { runBattlePhase } from './phases/battle';
 import { resolveRewardPhase, submitReward } from './phases/reward';
 import { runTournament } from './phases/tournament';
-import { greedyPolicy, type Policy } from './policy';
+import { chooseStatForActionCard, greedyPolicy, type Policy } from './policy';
 import type { GameState } from './types';
 
 function expectPhase(state: GameState, expected: GameState['phase']): void {
@@ -45,16 +45,30 @@ function runDraftPhase(state: GameState, policy: Policy): void {
 }
 
 export function runMiniRound(state: GameState, policy: Policy): void {
-  expectPhase(state, 'event');
-  resolveEventPhase(state);
   expectPhase(state, 'action');
   startActionPhase(state);
-  for (const player of state.players) {
-    if (!player.monster || player.actionHand.length === 0) continue;
-    const card = policy.pickActionCard(state, player.id, player.actionHand);
-    submitActionPlay(state, player.id, card.id);
+  if (state.phase === 'action') {
+    for (const player of state.players) {
+      if (!player.monster || player.actionHand.length === 0) continue;
+      const card = policy.pickActionCard(state, player.id, player.actionHand);
+      const chosenStat =
+        card.effect.kind === 'stat_mod_choice' && player.monster
+          ? chooseStatForActionCard(player.monster.stats)
+          : undefined;
+      submitActionPlay(state, player.id, card.id, { chosenStat });
+    }
+    resolveActionPhase(state);
   }
-  resolveActionPhase(state);
+  expectPhase(state, 'event');
+  resolveEventPhase(state);
+  // extra_battle event card: run the battle + reward before proceeding to draft.
+  if (state.phase === 'battle') {
+    runBattlePhase(state);
+    for (const pid of state.reward?.pendingPlayerIds ?? []) {
+      submitReward(state, pid, policy.chooseReward(state, pid));
+    }
+    if (state.reward) resolveRewardPhase(state);
+  }
   expectPhase(state, 'draft');
   runDraftPhase(state, policy);
 }
@@ -81,7 +95,7 @@ export function runFullGame(state: GameState, policy: Policy = greedyPolicy): vo
   runMonsterPickPhase(state, policy);
 
   while (state.phase !== 'finished') {
-    if (state.phase === 'event') {
+    if (state.phase === 'action') {
       runMiniRound(state, policy);
     } else if (state.phase === 'battle') {
       runBattlePhase(state);

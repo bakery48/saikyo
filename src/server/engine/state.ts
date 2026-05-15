@@ -237,10 +237,10 @@ function fallbackMonsterDistribute(state: GameState): void {
 
 function finalizeMonsterPick(state: GameState): void {
   state.monsterPick = null;
-  state.phase = 'event';
+  state.phase = 'action';
   state.log.push({
     kind: 'phase_change',
-    phase: 'event',
+    phase: 'action',
     round: state.round,
     miniRound: state.miniRound,
   });
