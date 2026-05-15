@@ -657,12 +657,23 @@ export type TournamentMatch = {
   a: string;
   b: string;
   winner: string | null;
+  startHpA: number;
+  startHpB: number;
+  finalHpA: number;
+  finalHpB: number;
   log: BattleEvent[];
 };
 
 export type TournamentState = {
   bracket: TournamentMatch[];
-  currentMatchIdx: number;
+  /** Players still alive at the start of each round; rounds[0] is round 1. */
+  rounds: string[][];
+  /** 1-indexed current round; matches in this round consume rounds[currentRound-1] in pairs. */
+  currentRound: number;
+  /** Pair index (0-based) into rounds[currentRound-1] for the next match to run. */
+  pairIdx: number;
+  /** Total number of rounds (log2 of bracket size). */
+  totalRounds: number;
   champion: string | null;
 };
 

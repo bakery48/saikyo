@@ -5,13 +5,13 @@ import { snapshotMonsterForBattle } from './battle';
 import { getPlayer, makeRng, saveRng } from '../state';
 
 /**
- * Run a single-elimination tournament with all players that have a monster.
- * Player count rounds up to a bracket size with byes for missing slots.
- *
- * On completion, sets state.champion and state.phase = 'finished'.
+ * Initialize the tournament: build the seeded bracket but don't run matches yet.
+ * Subsequent calls to `stepTournamentMatch` run one match at a time so the
+ * ws layer can pause for battle animations between them.
  */
-export function runTournament(state: GameState): void {
+export function startTournament(state: GameState): void {
   if (state.phase !== 'tournament') throw new Error('not in tournament phase');
+  if (state.tournament) return;
   const rng = makeRng(state);
   const competitors = shuffle(
     state.players.filter((p) => p.monster).map((p) => p.id),
@@ -24,46 +24,77 @@ export function runTournament(state: GameState): void {
   while (size < competitors.length) size *= 2;
   while (competitors.length < size) competitors.push('__bye__');
 
-  const tournament: TournamentState = {
+  const totalRounds = size > 1 ? Math.log2(size) : 0;
+  // rounds[0] = round 1 roster, rounds[r] = winners after round r (= round r+1 roster),
+  // rounds[totalRounds] = final champion (single element).
+  const rounds: string[][] = [competitors.slice()];
+  for (let r = 1; r <= totalRounds; r++) rounds.push([]);
+
+  state.tournament = {
     bracket: [],
-    currentMatchIdx: 0,
+    rounds,
+    currentRound: 1,
+    pairIdx: 0,
+    totalRounds,
     champion: null,
   };
-  state.tournament = tournament;
+}
 
-  const totalRounds = Math.log2(size);
-  let active = competitors.slice();
-  for (let roundIdx = 1; roundIdx <= totalRounds; roundIdx++) {
-    const next: string[] = [];
-    for (let i = 0; i < active.length; i += 2) {
-      const aId = active[i]!;
-      const bId = active[i + 1]!;
-      const winner = runMatch(state, aId, bId, roundIdx, tournament);
-      next.push(winner);
+/**
+ * Run a single tournament match. Returns true when the entire tournament is
+ * complete (champion decided, phase advanced to 'finished').
+ */
+export function stepTournamentMatch(state: GameState): boolean {
+  if (state.phase !== 'tournament') throw new Error('not in tournament phase');
+  if (!state.tournament) startTournament(state);
+  const t = state.tournament!;
+  if (t.totalRounds === 0) {
+    // Single (or zero) competitor: skip straight to finish.
+    finalizeTournament(state, t.rounds[0]?.[0] ?? null);
+    return true;
+  }
+
+  const currentRoundPlayers = t.rounds[t.currentRound - 1]!;
+  const aIdx = t.pairIdx * 2;
+  const bIdx = aIdx + 1;
+  const aId = currentRoundPlayers[aIdx]!;
+  const bId = currentRoundPlayers[bIdx]!;
+  const winner = runMatch(state, aId, bId, t.currentRound, t);
+  t.rounds[t.currentRound]?.push(winner);
+  t.pairIdx += 1;
+
+  // Reached end of current round?
+  if (t.pairIdx * 2 >= currentRoundPlayers.length) {
+    if (t.currentRound >= t.totalRounds) {
+      const championId = t.rounds[t.currentRound]?.[0] ?? null;
+      finalizeTournament(state, championId);
+      return true;
     }
-    active = next;
+    t.currentRound += 1;
+    t.pairIdx = 0;
   }
-  const championId = active[0]!;
-  if (championId === '__bye__') {
-    state.phase = 'finished';
-    return;
+  return false;
+}
+
+function finalizeTournament(state: GameState, championId: string | null): void {
+  const t = state.tournament;
+  if (championId && championId !== '__bye__' && t) {
+    t.champion = championId;
+    const player = getPlayer(state, championId);
+    if (player.monster) {
+      const champ: Champion = {
+        playerId: championId,
+        monster: {
+          ...player.monster,
+          stats: { ...player.monster.stats },
+          passives: player.monster.passives.map((p) => ({ ...p })),
+          actives: player.monster.actives.map((a) => ({ ...a })),
+        },
+      };
+      state.champion = champ;
+      state.log.push({ kind: 'champion', playerId: championId });
+    }
   }
-  tournament.champion = championId;
-  const player = getPlayer(state, championId);
-  if (player.monster) {
-    const champ: Champion = {
-      playerId: championId,
-      monster: {
-        ...player.monster,
-        stats: { ...player.monster.stats },
-        passives: player.monster.passives.map((p) => ({ ...p })),
-        actives: player.monster.actives.map((a) => ({ ...a })),
-      },
-    };
-    state.champion = champ;
-    state.log.push({ kind: 'champion', playerId: championId });
-  }
-  // Consume any leftover per-battle flags now that the tournament is over.
   state.nextBattleReverseActives = false;
   state.phase = 'finished';
   state.log.push({
@@ -72,6 +103,14 @@ export function runTournament(state: GameState): void {
     round: state.round,
     miniRound: state.miniRound,
   });
+}
+
+/** @deprecated Use `startTournament` + repeated `stepTournamentMatch`. Kept for tests. */
+export function runTournament(state: GameState): void {
+  startTournament(state);
+  while (state.phase === 'tournament') {
+    stepTournamentMatch(state);
+  }
 }
 
 function runMatch(
@@ -92,6 +131,10 @@ function runMatch(
   let attempt = 0;
   let winnerSide: 'a' | 'b' = 'a';
   let lastLog;
+  let startHpA = a.monster.stats.hp;
+  let startHpB = b.monster.stats.hp;
+  let finalHpA = 0;
+  let finalHpB = 0;
   while (attempt < 4) {
     const monA = snapshotMonsterForBattle(a);
     const monB = snapshotMonsterForBattle(b);
@@ -104,6 +147,10 @@ function runMatch(
     saveRng(state, rng);
     const result = runBattle(monA, monB, matchSeed);
     lastLog = result.log;
+    startHpA = monA.stats.hp;
+    startHpB = monB.stats.hp;
+    finalHpA = result.finalHp.a;
+    finalHpB = result.finalHp.b;
     if (result.winner === 'a' || result.winner === 'b') {
       winnerSide = result.winner;
       break;
@@ -117,6 +164,10 @@ function runMatch(
     a: aId,
     b: bId,
     winner: winnerId,
+    startHpA,
+    startHpB,
+    finalHpA,
+    finalHpB,
     log: lastLog ?? [],
   };
   tournament.bracket.push(match);

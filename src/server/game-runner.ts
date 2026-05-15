@@ -20,7 +20,7 @@ import {
 } from './engine/phases/draft';
 import { runBattlePhase } from './engine/phases/battle';
 import { resolveRewardPhase, submitReward } from './engine/phases/reward';
-import { runTournament } from './engine/phases/tournament';
+import { startTournament, stepTournamentMatch } from './engine/phases/tournament';
 import { chooseStatForActionCard, greedyPolicy } from './engine/policy';
 import { validateMonsterName } from './engine/naming';
 
@@ -65,6 +65,8 @@ export class GameRunner {
   private eventResolvedSinceConsume = false;
   /** Same idea for the action phase. */
   private actionResolvedSinceConsume = false;
+  /** Set after a tournament match is run, so the ws layer can animate it. */
+  private tournamentMatchResolvedSinceConsume = false;
 
   constructor(opts: {
     roomId: string;
@@ -143,6 +145,8 @@ export class GameRunner {
       const battleResolvedNow = phaseBefore === 'battle' && this.state.phase !== 'battle';
       const eventResolvedNow = phaseBefore === 'event' && this.state.phase !== 'event';
       const actionResolvedNow = phaseBefore === 'action' && this.state.phase !== 'action';
+      const tournamentMatchResolvedNow =
+        phaseBefore === 'tournament' && this.tournamentMatchResolvedSinceConsume;
       if (battleResolvedNow) this.battleResolvedSinceConsume = true;
       if (eventResolvedNow) this.eventResolvedSinceConsume = true;
       if (actionResolvedNow) this.actionResolvedSinceConsume = true;
@@ -150,7 +154,10 @@ export class GameRunner {
       // Yield to the ws layer right after a phase that needs an animation —
       // otherwise the next step (e.g. resolveRewardPhase) clears state.battle
       // before the client gets a chance to render the battle log.
-      if (this.yieldForAnimation && (battleResolvedNow || eventResolvedNow || actionResolvedNow)) {
+      if (
+        this.yieldForAnimation &&
+        (battleResolvedNow || eventResolvedNow || actionResolvedNow || tournamentMatchResolvedNow)
+      ) {
         return;
       }
       if (this.snapshotKey() === before) {
@@ -182,6 +189,21 @@ export class GameRunner {
     return v;
   }
 
+  consumeTournamentMatchResolved(): boolean {
+    const v = this.tournamentMatchResolvedSinceConsume;
+    this.tournamentMatchResolvedSinceConsume = false;
+    return v;
+  }
+
+  private stepTournament(): boolean {
+    if (!this.state.tournament) startTournament(this.state);
+    const finished = stepTournamentMatch(this.state);
+    // Mark the match as resolved so the ws layer can pause for animation
+    // before the next step runs.
+    this.tournamentMatchResolvedSinceConsume = true;
+    return finished ? false : false;
+  }
+
   /** Returns true if the runner is now waiting on a human action. */
   private step(): boolean {
     switch (this.state.phase) {
@@ -200,8 +222,7 @@ export class GameRunner {
       case 'reward':
         return this.stepReward();
       case 'tournament':
-        runTournament(this.state);
-        return false;
+        return this.stepTournament();
       case 'finished':
         return true;
       case 'setup':
@@ -482,6 +503,9 @@ export class GameRunner {
         ? `ac:${s.actionPhase.pendingPlayerIds.length}/${Object.keys(s.actionPhase.submittedPlays).length}`
         : '-',
       s.reward ? Object.keys(s.reward.choices).length : '-',
+      s.tournament
+        ? `tn:r${s.tournament.currentRound}/p${s.tournament.pairIdx}/b${s.tournament.bracket.length}`
+        : '-',
     ].join('|');
   }
 }

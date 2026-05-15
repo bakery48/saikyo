@@ -49,6 +49,19 @@ export function BattleAnimationView({
   socket: GameSocket;
 }) {
   const myId = socket.playerId;
+  if (state.phase === 'tournament') {
+    const bracket = state.tournament?.bracket ?? [];
+    const latest = bracket[bracket.length - 1];
+    if (!latest) {
+      return (
+        <section style={{ display: 'grid', gap: 12 }}>
+          <h2 style={{ margin: 0 }}>トーナメント</h2>
+          <p>準備中...</p>
+        </section>
+      );
+    }
+    return <BattleStage state={state} match={latest as unknown as BattleMatch} title={`トーナメント R${latest.round}`} />;
+  }
   const matches = state.battle?.matches ?? [];
   const myMatch =
     matches.find((m) => m.a === myId || m.b === myId) ?? matches[0];
@@ -65,7 +78,15 @@ export function BattleAnimationView({
   return <BattleStage state={state} match={myMatch} />;
 }
 
-export function BattleStage({ state, match }: { state: ClientGameState; match: BattleMatch }) {
+export function BattleStage({
+  state,
+  match,
+  title,
+}: {
+  state: ClientGameState;
+  match: BattleMatch;
+  title?: string;
+}) {
   // Indices in the log of every skill_use event (one per "action" the user
   // wants to see step through at STEP_MS).
   const stepLogIndices = useMemo(() => {
@@ -234,7 +255,7 @@ export function BattleStage({ state, match }: { state: ClientGameState; match: B
 
   return (
     <section style={{ display: 'grid', gap: 16 }}>
-      <h2 style={{ margin: 0 }}>戦闘</h2>
+      <h2 style={{ margin: 0 }}>{title ?? '戦闘'}</h2>
       <p style={{ margin: 0, opacity: 0.8 }}>
         {preroll
           ? '🎲 ダイスロール…'

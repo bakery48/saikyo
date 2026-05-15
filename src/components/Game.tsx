@@ -146,6 +146,8 @@ function renderPhase(
       return <DraftView state={state} socket={socket} />;
     case 'battle':
       return <BattleAnimationView state={state} socket={socket} />;
+    case 'tournament':
+      return <BattleAnimationView state={state} socket={socket} />;
     case 'reward':
       return <RewardView state={state} socket={socket} />;
     case 'finished':

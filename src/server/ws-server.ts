@@ -312,6 +312,7 @@ export class GameWsServer {
     // following reward phase resolves, so we have to render it before the
     // engine progresses any further.
     if (this.maybeBattleAnimationPause(room)) return;
+    if (this.maybeTournamentAnimationPause(room)) return;
     if (this.maybeEventPhasePause(room)) return;
     if (this.maybeActionPhasePause(room)) return;
     if (this.maybeAutoReveal(room)) return;
@@ -361,6 +362,33 @@ export class GameWsServer {
    * every skill_use event at BATTLE_STEP_MS, then broadcast the real
    * (post-battle) state.
    */
+  /**
+   * After a single tournament match resolves, hold the client on a synthesized
+   * 'tournament' state long enough to animate the battle log, then continue.
+   */
+  private maybeTournamentAnimationPause(room: Room): boolean {
+    const game = this.games.get(room.id);
+    if (!game) return false;
+    if (!game.consumeTournamentMatchResolved()) return false;
+    const bracket = game.state.tournament?.bracket ?? [];
+    const lastMatch = bracket[bracket.length - 1];
+    if (!lastMatch) return false;
+    let skillUses = 0;
+    for (const e of lastMatch.log) if (e.kind === 'skill_use') skillUses++;
+    if (skillUses === 0) {
+      // Bye / unwinnable match: no animation, just continue.
+      this.driveGame(room);
+      return true;
+    }
+    const durationMs =
+      GameWsServer.BATTLE_PREROLL_MS +
+      skillUses * GameWsServer.BATTLE_STEP_MS +
+      GameWsServer.BATTLE_TAIL_MS;
+    this.broadcastGameStateWithPhase(room, 'tournament');
+    setTimeout(() => this.driveGame(room), durationMs);
+    return true;
+  }
+
   private maybeBattleAnimationPause(room: Room): boolean {
     const game = this.games.get(room.id);
     if (!game) return false;
