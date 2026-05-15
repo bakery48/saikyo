@@ -26,9 +26,9 @@ describe('Game setup', () => {
     });
     const visibleCount = MONSTERS.filter((m) => !m.hidden).length;
     expect(state.monsterPick).not.toBeNull();
-    expect(state.monsterPick!.pool).toHaveLength(visibleCount);
+    expect(state.monsterPick!.pool).toHaveLength(Math.min(8, visibleCount));
     const ids = new Set(state.monsterPick!.pool.map((m) => m.baseId));
-    expect(ids.size).toBe(visibleCount);
+    expect(ids.size).toBe(state.monsterPick!.pool.length);
     expect(state.monsterPick!.pool.every((m) => !m.hidden)).toBe(true);
   });
 

@@ -148,7 +148,7 @@ export function MonsterPickView({
           gap: 8,
         }}
       >
-        {MONSTERS.filter((m) => !m.hidden).map((m) => {
+        {MONSTERS.filter((m) => !m.hidden && (claimedBy.has(m.baseId) || isPoolMonster(m.baseId))).map((m) => {
           const claimed = claimedBy.get(m.baseId);
           const inPool = isPoolMonster(m.baseId);
           const onCard = pieces[m.baseId];
