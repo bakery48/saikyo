@@ -657,7 +657,7 @@ export const SKILLS: SkillCard[] = [
     name: '諸行無常の刃',
     rarity: 'SR',
     nameTag: 'ヴァニッシュ',
-    active: { effect: { kind: 'attack_then_dispel', mult: 1.0, useStat: 'atk', flat: -2, attackKind: 'sword' } },
+    active: { effect: { kind: 'attack_then_dispel', mult: 0.8, useStat: 'atk', flat: 0, attackKind: 'sword' } },
   },
   {
     id: 'sk-sr-041',
