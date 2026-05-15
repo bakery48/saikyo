@@ -664,7 +664,7 @@ export const SKILLS: SkillCard[] = [
     name: '明鏡止水の刃',
     rarity: 'SR',
     nameTag: 'クリアマインド',
-    active: { effect: { kind: 'attack_then_cleanse', mult: 1.0, useStat: 'atk', flat: -2, attackKind: 'sword' } },
+    active: { effect: { kind: 'attack_then_cleanse', mult: 0.8, useStat: 'atk', flat: 0, attackKind: 'sword' } },
   },
   // ── batch 6: append-struggle pair ───────────────────────────────────────
   {
