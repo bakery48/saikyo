@@ -30,9 +30,13 @@ function actForHuman(runner: GameRunner): void {
       const me = s.players.find((p) => p.id === human.id)!;
       if (!me || !s.buildPhase) break;
       if (!s.buildPhase.pendingPlayerIds.includes(human.id)) break;
-      const allCards = [...me.skillStock, ...me.skillSlots];
-      const slotIds = allCards.slice(0, 9).map((c) => c.id);
-      runner.submitBuild(human.id, slotIds);
+      const allCards = [
+        ...me.skillStock,
+        ...(me.skillSlots.filter((c) => c !== null) as import('../src/server/engine/types').SkillCard[]),
+      ];
+      const slots: (string | null)[] = Array(9).fill(null);
+      allCards.slice(0, 9).forEach((c, i) => { slots[i] = c.id; });
+      runner.submitBuild(human.id, { slots, activeSlotCount: 9 });
       break;
     }
     case 'action': {

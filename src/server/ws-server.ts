@@ -217,7 +217,7 @@ export class GameWsServer {
         return;
       }
       case 'submit_build': {
-        this.runGameAction(playerId, (game) => game.submitBuild(playerId, msg.slotCardIds));
+        this.runGameAction(playerId, (game) => game.submitBuild(playerId, { slots: msg.slots, activeSlotCount: msg.activeSlotCount }));
         return;
       }
       case 'reorder_slots': {

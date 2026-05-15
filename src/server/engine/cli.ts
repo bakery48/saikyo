@@ -69,20 +69,14 @@ function runPackDraftPhase(state: GameState, policy: Policy): void {
   }
 }
 
-function runBuildPhaseAll(state: GameState): void {
+function runBuildPhaseAll(state: GameState, policy: Policy): void {
   startBuildPhase(state);
   if (!state.buildPhase) return;
   for (const player of state.players) {
     if (!player.monster) continue;
     if (!state.buildPhase.pendingPlayerIds.includes(player.id)) continue;
-    // Greedy: slot all available cards (up to 9, sorted by rarity)
-    const allCards = [...player.skillStock, ...player.skillSlots];
-    const sorted = allCards.slice().sort((a, b) => {
-      const rank: Record<string, number> = { N: 1, R: 2, SR: 3, SSR: 4 };
-      return (rank[b.rarity] ?? 0) - (rank[a.rarity] ?? 0);
-    });
-    const slotIds = sorted.slice(0, 9).map((c) => c.id);
-    submitBuild(state, player.id, slotIds);
+    const config = policy.buildSlots(state, player.id);
+    submitBuild(state, player.id, config);
   }
   resolveBuildPhase(state);
 }
@@ -114,7 +108,7 @@ export function runOneRound(state: GameState, policy: Policy): void {
   runPackDraftPhase(state, policy);
 
   expectPhase(state, 'build');
-  runBuildPhaseAll(state);
+  runBuildPhaseAll(state, policy);
 
   expectPhase(state, 'event');
   resolveEventPhase(state);

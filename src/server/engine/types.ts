@@ -550,6 +550,9 @@ export type BattleResult = {
 
 // ─── Game (multi-phase) state ────────────────────────────────────────────────
 
+/** Number of skill slots per player (fixed). */
+export const TOTAL_SKILL_SLOTS = 9;
+
 export type Player = {
   id: string;
   name: string;
@@ -563,10 +566,18 @@ export type Player = {
    * Visible only to the owner over the wire.
    */
   actionHand: ActionCard[];
-  /** All skill cards the player owns (not currently slotted). */
+  /** All skill cards the player owns but hasn't slotted. */
   skillStock: SkillCard[];
-  /** Skill cards the player has slotted (active in battle). Max 9, ordered. */
-  skillSlots: SkillCard[];
+  /**
+   * Exactly TOTAL_SKILL_SLOTS (9) entries. null = default attack (ATK×1.0).
+   * Only indices 0..activeSlotCount-1 are active in battle; the rest are inactive.
+   */
+  skillSlots: (SkillCard | null)[];
+  /**
+   * How many of the 9 slots participate in battle (0-TOTAL_SKILL_SLOTS).
+   * Removing slot N sets activeSlotCount = N-1, making slots N..8 inactive.
+   */
+  activeSlotCount: number;
 };
 
 export type Phase =
@@ -603,8 +614,12 @@ export type PackDraftState = {
 export type BuildPhaseState = {
   /** Player IDs that still need to submit their build. */
   pendingPlayerIds: string[];
-  /** Submitted slot configurations: playerId -> ordered cardIds (max 9). */
-  submittedSlots: Record<string, string[]>;
+  /**
+   * Submitted build configs per player.
+   * slots: 9-entry array, each is a card ID or null (= default attack).
+   * activeSlotCount: how many of those 9 slots are active in battle.
+   */
+  submittedSlots: Record<string, { slots: (string | null)[]; activeSlotCount: number }>;
 };
 
 /** Monster pick draft — analogous to skill DraftState but for monsters. */

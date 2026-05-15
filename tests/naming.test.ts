@@ -20,7 +20,12 @@ function slotCard(state: GameState, player: Player, card: SkillCard): SkillCard 
   const stockCard = addSkillCardToMonster(state, player, card);
   // Move from stock to slots immediately for test purposes
   player.skillStock = player.skillStock.filter((c) => c.id !== stockCard.id);
-  player.skillSlots.push(stockCard);
+  const nullIdx = player.skillSlots.findIndex((s) => s === null);
+  if (nullIdx >= 0) {
+    player.skillSlots[nullIdx] = stockCard;
+  } else {
+    player.skillSlots.push(stockCard);
+  }
   syncMonsterFromSlots(state, player);
   return stockCard;
 }

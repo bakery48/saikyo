@@ -5,6 +5,7 @@ import type {
   ActionPlay,
   GameState,
   Player,
+  SkillCard,
   StatKey,
 } from '../types';
 import { drawTop } from '../deck';
@@ -45,28 +46,29 @@ function applyActionEffect(
       break;
     }
     case 'discard_random_active': {
-      // Remove a random active skill from skillSlots (only slotted active cards)
-      const activeSlots = player.skillSlots
-        .map((c, i) => ({ c, i }))
-        .filter(({ c }) => !c.isPassive && c.active);
-      if (activeSlots.length === 0) break;
-      const pick = rng.int(0, activeSlots.length - 1);
-      const { c: discarded, i: slotIdx } = activeSlots[pick]!;
-      player.skillSlots.splice(slotIdx, 1);
-      // Discarded card goes to skill graveyard
+      // Find non-null active skill cards within the active slot range
+      const candidates: { card: SkillCard; idx: number }[] = [];
+      for (let i = 0; i < player.activeSlotCount; i++) {
+        const c = player.skillSlots[i];
+        if (c !== null && !c.isPassive && c.active) candidates.push({ card: c, idx: i });
+      }
+      if (candidates.length === 0) break;
+      const { card: discarded, idx } = candidates[rng.int(0, candidates.length - 1)]!;
+      player.skillSlots[idx] = null; // revert slot to default attack
       state.decks.skillGrave.push(discarded);
       syncMonsterFromSlots(state, player);
       break;
     }
     case 'cleanse_sin': {
-      // Remove a random sin-tagged skill from skillSlots
-      const sinSlots = player.skillSlots
-        .map((c, i) => ({ c, i }))
-        .filter(({ c }) => c.tag === 'sin');
-      if (sinSlots.length === 0) break;
-      const pick = rng.int(0, sinSlots.length - 1);
-      const { c: discarded, i: slotIdx } = sinSlots[pick]!;
-      player.skillSlots.splice(slotIdx, 1);
+      // Find sin-tagged cards in active slots
+      const candidates: { card: SkillCard; idx: number }[] = [];
+      for (let i = 0; i < player.activeSlotCount; i++) {
+        const c = player.skillSlots[i];
+        if (c !== null && c.tag === 'sin') candidates.push({ card: c, idx: i });
+      }
+      if (candidates.length === 0) break;
+      const { card: discarded, idx } = candidates[rng.int(0, candidates.length - 1)]!;
+      player.skillSlots[idx] = null;
       state.decks.skillGrave.push(discarded);
       syncMonsterFromSlots(state, player);
       break;
@@ -101,17 +103,14 @@ function applyActionEffect(
 function applySwapActives(state: GameState, swap: NonNullable<ActionPlay['swap']>): void {
   const target = state.players.find((p) => p.id === swap.targetPlayerId);
   if (!target?.monster) return;
-  // Swap is based on monster.actives IDs; map back to skillSlots positions.
-  // skillSlot cards have the same id as monster.actives (set by syncMonsterFromSlots).
   const slots = target.skillSlots;
-  const idxA = slots.findIndex((c) => c.id === swap.skillIdA);
-  const idxB = slots.findIndex((c) => c.id === swap.skillIdB);
+  // Only non-null cards have skill IDs; default_attack slots are skipped
+  const idxA = slots.findIndex((c) => c !== null && c.id === swap.skillIdA);
+  const idxB = slots.findIndex((c) => c !== null && c.id === swap.skillIdB);
   if (idxA < 0 || idxB < 0 || idxA === idxB) return;
-  // Swap the two slots
   const tmp = slots[idxA]!;
   slots[idxA] = slots[idxB]!;
   slots[idxB] = tmp;
-  // Re-sync monster from slots after the swap
   syncMonsterFromSlots(state, target);
 }
 

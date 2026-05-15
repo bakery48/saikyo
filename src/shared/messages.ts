@@ -84,7 +84,8 @@ export type ClientGameState = {
   /** This viewer's skill stock (all owned cards not slotted). Null for non-player viewers. */
   mySkillStock: SkillCard[] | null;
   /** This viewer's skill slots (active in battle). Null for non-player viewers. */
-  mySkillSlots: SkillCard[] | null;
+  mySkillSlots: (SkillCard | null)[] | null;
+  myActiveSlotCount: number | null;
   battle: { matches: BattleMatch[] } | null;
   reward: RewardState | null;
   tournament: TournamentState | null;
@@ -150,7 +151,7 @@ export type ClientMessage =
       swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string };
     }
   | { type: 'submit_reward'; choice: RewardChoice }
-  | { type: 'submit_build'; slotCardIds: string[] }
+  | { type: 'submit_build'; slots: (string | null)[]; activeSlotCount: number }
   | { type: 'reorder_slots'; order: string[] }
   | { type: 'rename_monster'; name: string }
   | { type: 'leave_game' }

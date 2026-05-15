@@ -64,7 +64,8 @@ export function createInitialState(opts: {
     monster: null,
     actionHand: [],
     skillStock: [],
-    skillSlots: [],
+    skillSlots: Array(9).fill(null) as (import('./types').SkillCard | null)[],
+    activeSlotCount: 9,
   }));
   let cpuIdx = 1;
   while (seats.length < 8) {
@@ -75,7 +76,8 @@ export function createInitialState(opts: {
       monster: null,
       actionHand: [],
       skillStock: [],
-      skillSlots: [],
+      skillSlots: Array(9).fill(null) as (import('./types').SkillCard | null)[],
+      activeSlotCount: 9,
     });
     cpuIdx++;
   }
@@ -305,31 +307,36 @@ export function addSkillCardToMonster(
 
 /**
  * Derive monster.actives and monster.passives from player.skillSlots.
- * Base monster passives come from the monster template; acquired passives
- * come from passive-type skills in skillSlots.
+ * Slots 0..activeSlotCount-1 are active; null slots become default attacks.
+ * Base monster passives are always preserved.
  */
 export function syncMonsterFromSlots(state: GameState, player: Player): void {
   if (!player.monster) return;
 
-  // Base passives from the monster template (no rarity = base monster passive).
   const base = MONSTERS_BY_ID[player.monster.baseId];
   const basePassives: PassiveSkill[] = base ? base.passives.map((p) => ({ ...p })) : [];
 
   const actives: ActiveSkill[] = [];
   const acquiredPassives: PassiveSkill[] = [];
 
-  for (let idx = 0; idx < player.skillSlots.length; idx++) {
-    const card = player.skillSlots[idx]!;
-    // Cards in skillSlots already have unique IDs (set when added to stock).
-    const tag = card.rarity === 'N' ? undefined : card.nameTag;
-    if (card.isPassive && card.passive) {
+  for (let idx = 0; idx < player.activeSlotCount; idx++) {
+    const card = player.skillSlots[idx] ?? null;
+    if (card === null) {
+      // Default attack slot
+      actives.push({
+        id: `default_attack@${idx}`,
+        name: 'アタック',
+        order: idx + 1,
+        effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' },
+      });
+    } else if (card.isPassive && card.passive) {
       acquiredPassives.push({
         id: card.id,
         name: card.name,
         trigger: card.passive.trigger,
         effect: card.passive.effect,
         rarity: card.rarity,
-        nameTag: tag,
+        nameTag: card.rarity === 'N' ? undefined : card.nameTag,
         tag: card.tag,
       });
     } else if (card.active) {
@@ -338,7 +345,7 @@ export function syncMonsterFromSlots(state: GameState, player: Player): void {
         name: card.name,
         order: idx + 1,
         rarity: card.rarity,
-        nameTag: tag,
+        nameTag: card.rarity === 'N' ? undefined : card.nameTag,
         tag: card.tag,
         effect: card.active.effect,
       });
@@ -348,7 +355,6 @@ export function syncMonsterFromSlots(state: GameState, player: Player): void {
   player.monster.actives = actives;
   player.monster.passives = [...basePassives, ...acquiredPassives];
 
-  // Strip any name tags no longer valid given the new actives/passives.
   stripInvalidNameTags(player.monster);
 }
 

@@ -10,8 +10,8 @@ export type Policy = {
   pickDraftCard(state: GameState, playerId: string, pack: SkillCard[]): SkillCard;
   pickActionCard(state: GameState, playerId: string, hand: ActionCard[]): ActionCard;
   chooseReward(state: GameState, playerId: string): RewardChoice;
-  /** Choose which cards to slot during the build phase. Returns ordered card IDs (max 9). */
-  buildSlots(state: GameState, playerId: string): string[];
+  /** Choose which cards to slot during the build phase. */
+  buildSlots(state: GameState, playerId: string): { slots: (string | null)[]; activeSlotCount: number };
 };
 
 /** Score a monster by total of its base stats — simple heuristic. */
@@ -92,12 +92,17 @@ export const greedyPolicy: Policy = {
   },
   buildSlots(state, playerId) {
     const player = state.players.find((p) => p.id === playerId)!;
-    // Greedy: slot all available cards sorted by rarity (highest first), max 9
-    const allCards = [...player.skillStock, ...player.skillSlots];
+    // Greedy: slot highest-rarity cards first, fill remaining with null (default attack)
+    const allCards = [
+      ...player.skillStock,
+      ...(player.skillSlots.filter((c) => c !== null) as import('./types').SkillCard[]),
+    ];
     const sorted = allCards.slice().sort((a, b) => {
       return (RARITY_RANK[b.rarity] ?? 0) - (RARITY_RANK[a.rarity] ?? 0);
     });
-    return sorted.slice(0, 9).map((c) => c.id);
+    const slots: (string | null)[] = Array(9).fill(null);
+    sorted.slice(0, 9).forEach((c, i) => { slots[i] = c.id; });
+    return { slots, activeSlotCount: 9 };
   },
 };
 
@@ -162,7 +167,12 @@ export const firstOptionPolicy: Policy = {
   chooseReward: () => ({ kind: 'skill_top' }),
   buildSlots: (state, playerId) => {
     const player = state.players.find((p) => p.id === playerId)!;
-    const allCards = [...player.skillStock, ...player.skillSlots];
-    return allCards.slice(0, 9).map((c) => c.id);
+    const allCards = [
+      ...player.skillStock,
+      ...(player.skillSlots.filter((c) => c !== null) as import('./types').SkillCard[]),
+    ];
+    const slots: (string | null)[] = Array(9).fill(null);
+    allCards.slice(0, 9).forEach((c, i) => { slots[i] = c.id; });
+    return { slots, activeSlotCount: 9 };
   },
 };

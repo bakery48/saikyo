@@ -303,16 +303,8 @@ export class GameRunner {
       if (this.isHuman(pid)) {
         waiting = true;
       } else {
-        // CPU greedy: slot all available cards sorted by rarity (highest first), max 9
-        const player = this.state.players.find((p) => p.id === pid);
-        if (!player) continue;
-        const allCards = [...player.skillStock, ...player.skillSlots];
-        const sorted = allCards.slice().sort((a, b) => {
-          const rank: Record<string, number> = { N: 1, R: 2, SR: 3, SSR: 4 };
-          return (rank[b.rarity] ?? 0) - (rank[a.rarity] ?? 0);
-        });
-        const slotIds = sorted.slice(0, 9).map((c) => c.id);
-        submitBuild(this.state, pid, slotIds);
+        const config = greedyPolicy.buildSlots(this.state, pid);
+        submitBuild(this.state, pid, config);
       }
     }
     if (waiting) return true;
@@ -418,11 +410,11 @@ export class GameRunner {
     submitPackPick(this.state, playerId, cardId);
   }
 
-  submitBuild(playerId: string, slotCardIds: string[]): void {
+  submitBuild(playerId: string, config: { slots: (string | null)[]; activeSlotCount: number }): void {
     if (this.state.phase !== 'build' || !this.state.buildPhase) {
       throw new Error('not in build phase');
     }
-    submitBuild(this.state, playerId, slotCardIds);
+    submitBuild(this.state, playerId, config);
   }
 
   submitAction(
@@ -455,17 +447,22 @@ export class GameRunner {
     }
     const player = this.state.players.find((p) => p.id === playerId);
     if (!player || !player.monster) throw new Error('player has no monster');
-    const slots = player.skillSlots;
-    if (order.length !== slots.length) throw new Error('order length mismatch');
-    const idToCard = new Map(slots.map((c) => [c.id, c]));
+    // Build a map from card ID to slot position for non-null cards
+    const nonNullSlots = player.skillSlots
+      .map((c, i) => ({ c, i }))
+      .filter((x): x is { c: import('./engine/types').SkillCard; i: number } => x.c !== null);
+    const idToCard = new Map(nonNullSlots.map(({ c }) => [c.id, c]));
+    if (order.length !== nonNullSlots.length) throw new Error('order length mismatch');
     const seen = new Set<string>();
     for (const id of order) {
-      if (!idToCard.has(id) || seen.has(id)) {
-        throw new Error('invalid order');
-      }
+      if (!idToCard.has(id) || seen.has(id)) throw new Error('invalid order');
       seen.add(id);
     }
-    player.skillSlots = order.map((id) => idToCard.get(id)!);
+    // Place reordered cards back into the same indices
+    const positions = nonNullSlots.map(({ i }) => i);
+    for (let k = 0; k < order.length; k++) {
+      player.skillSlots[positions[k]!] = idToCard.get(order[k]!)!;
+    }
     syncMonsterFromSlots(this.state, player);
   }
 
@@ -520,6 +517,7 @@ export class GameRunner {
       myActionHand: me ? me.actionHand : null,
       mySkillStock: me ? me.skillStock : null,
       mySkillSlots: me ? me.skillSlots : null,
+      myActiveSlotCount: me ? me.activeSlotCount : null,
       recentLog: s.log.slice(-80),
       deckCounts: {
         event: s.decks.event.length,

@@ -1,7 +1,8 @@
 import type { BuildPhaseState, GameState, SkillCard } from '../types';
+import { TOTAL_SKILL_SLOTS } from '../types';
 import { getPlayer, syncMonsterFromSlots } from '../state';
 
-const MAX_SLOTS = 9;
+const MAX_SLOTS = TOTAL_SKILL_SLOTS;
 
 /** Start the build phase — create pending state for all players with monsters. */
 export function startBuildPhase(state: GameState): void {
@@ -17,29 +18,45 @@ export function startBuildPhase(state: GameState): void {
 
 /**
  * Submit a player's slot configuration.
- * `slotCardIds` is an ordered list of card IDs (from the player's total inventory)
- * to place in skillSlots. Max 9 cards.
+ * `slots` is a 9-entry array; each entry is a card ID or null (= default attack).
+ * `activeSlotCount` is how many of those 9 slots participate in battle (0-9).
+ * Slots beyond activeSlotCount are inactive regardless of their content.
  */
-export function submitBuild(state: GameState, playerId: string, slotCardIds: string[]): void {
+export function submitBuild(
+  state: GameState,
+  playerId: string,
+  config: { slots: (string | null)[]; activeSlotCount: number },
+): void {
   if (state.phase !== 'build' || !state.buildPhase) throw new Error('not in build phase');
   const player = getPlayer(state, playerId);
   if (!player.monster) throw new Error('player has no monster');
-  if (slotCardIds.length > MAX_SLOTS) throw new Error(`max ${MAX_SLOTS} slots`);
 
-  // Validate all cardIds belong to player's total inventory (stock + current slots)
-  const allCards = [...player.skillStock, ...player.skillSlots];
+  const { slots, activeSlotCount } = config;
+  if (activeSlotCount < 0 || activeSlotCount > MAX_SLOTS) {
+    throw new Error(`activeSlotCount must be 0-${MAX_SLOTS}`);
+  }
+  if (slots.length !== MAX_SLOTS) {
+    throw new Error(`slots must have exactly ${MAX_SLOTS} entries`);
+  }
+
+  // Validate all non-null cardIds belong to player's total inventory
+  const allCards: SkillCard[] = [
+    ...player.skillStock,
+    ...(player.skillSlots.filter((c) => c !== null) as SkillCard[]),
+  ];
   const allCardIds = new Set(allCards.map((c) => c.id));
-  for (const id of slotCardIds) {
-    if (!allCardIds.has(id)) throw new Error(`card ${id} not owned by player ${playerId}`);
+  const usedIds: string[] = [];
+  for (const id of slots) {
+    if (id !== null) {
+      if (!allCardIds.has(id)) throw new Error(`card ${id} not owned by player ${playerId}`);
+      usedIds.push(id);
+    }
   }
-  // Ensure no duplicates in slotCardIds
-  if (new Set(slotCardIds).size !== slotCardIds.length) {
-    throw new Error('duplicate card IDs in slotCardIds');
-  }
+  if (new Set(usedIds).size !== usedIds.length) throw new Error('duplicate card IDs in slots');
 
-  state.buildPhase.submittedSlots[playerId] = slotCardIds;
+  state.buildPhase.submittedSlots[playerId] = { slots, activeSlotCount };
   state.buildPhase.pendingPlayerIds = state.buildPhase.pendingPlayerIds.filter((id) => id !== playerId);
-  state.log.push({ kind: 'build_submitted', playerId, slotCount: slotCardIds.length });
+  state.log.push({ kind: 'build_submitted', playerId, slotCount: activeSlotCount });
 }
 
 /** True once all pending players have submitted their builds. */
@@ -49,8 +66,10 @@ export function allBuildsIn(state: GameState): boolean {
 
 /**
  * Apply all submitted builds and advance to event phase.
- * Each player's skillSlots and skillStock are updated, and monster stats
- * are derived from slots.
+ * - skillSlots becomes the new 9-entry array (null = default attack)
+ * - activeSlotCount is updated
+ * - Cards not in the active slots go back to skillStock
+ * - monster.actives/passives are re-derived from the new slots
  */
 export function resolveBuildPhase(state: GameState): void {
   if (state.phase !== 'build' || !state.buildPhase) throw new Error('not in build phase');
@@ -58,32 +77,47 @@ export function resolveBuildPhase(state: GameState): void {
 
   for (const player of state.players) {
     if (!player.monster) continue;
-    const slotIds = state.buildPhase.submittedSlots[player.id] ?? player.skillSlots.map((c) => c.id);
-    const allCards = [...player.skillStock, ...player.skillSlots];
+
+    const submitted = state.buildPhase.submittedSlots[player.id];
+    const allCards: SkillCard[] = [
+      ...player.skillStock,
+      ...(player.skillSlots.filter((c) => c !== null) as SkillCard[]),
+    ];
     const cardById = new Map(allCards.map((c) => [c.id, c]));
 
-    // Build new slots (in order)
-    const newSlots: SkillCard[] = [];
-    for (const id of slotIds) {
-      const card = cardById.get(id);
-      if (card) newSlots.push(card);
+    if (!submitted) {
+      // No submission: keep current arrangement, just sync monster
+      syncMonsterFromSlots(state, player);
+      continue;
     }
 
-    // New stock = all cards not in slots
-    const slotIdSet = new Set(slotIds);
-    const newStock = allCards.filter((c) => !slotIdSet.has(c.id));
+    const { slots: slotIds, activeSlotCount } = submitted;
 
+    // Build new 9-element slot array from submitted IDs
+    const newSlots: (SkillCard | null)[] = Array(MAX_SLOTS).fill(null);
+    const usedIds = new Set<string>();
+    for (let i = 0; i < MAX_SLOTS; i++) {
+      const id = slotIds[i] ?? null;
+      if (id !== null) {
+        const card = cardById.get(id);
+        if (card) {
+          newSlots[i] = card;
+          usedIds.add(id);
+        }
+      }
+    }
+
+    // Cards not placed in any slot go back to skillStock
     player.skillSlots = newSlots;
-    player.skillStock = newStock;
+    player.activeSlotCount = activeSlotCount;
+    player.skillStock = allCards.filter((c) => !usedIds.has(c.id));
 
-    // Sync monster.actives and monster.passives from slots
     syncMonsterFromSlots(state, player);
   }
 
   state.buildPhase = null;
   state.log.push({ kind: 'build_resolved' });
 
-  // Advance to event phase
   state.phase = 'event';
   state.log.push({
     kind: 'phase_change',
