@@ -102,7 +102,6 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-020', name: '絶壁砕き', rarity: 'SSR', nameTag: 'ウォールブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.5, multShield: 4.0, attackKind: 'strike' } } },
   { id: 'sk-ssr-004', name: '集中砲火', rarity: 'SSR', nameTag: 'クロノス', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
   { id: 'sk-ssr-005', name: '三重起動', rarity: 'SSR', nameTag: 'トリプル', active: { effect: { kind: 'next_multi_attack', extraCount: 2, failurePenalty: 6 } } },
-  { id: 'sk-ssr-006', name: '時を巻き戻す', rarity: 'SSR', nameTag: 'リワインド', active: { effect: { kind: 'heal_max_fraction', denominator: 2 } } },
   { id: 'sk-ssr-007', name: 'エターナル', rarity: 'SSR', nameTag: 'エターナル', active: { effect: { kind: 'rewind_skill', rewindBy: 3, selfDamagePercent: 40 } } },
 
   // ─── Passive skill cards ───────────────────────────────────────────────────
@@ -344,13 +343,6 @@ export const SKILLS: SkillCard[] = [
     rarity: 'SR',
     nameTag: 'サクリファイス',
     active: { effect: { kind: 'sacrifice_attack', hpRatio: 0.5 } },
-  },
-  {
-    id: 'sk-ssr-009',
-    name: '完全回復',
-    rarity: 'SSR',
-    nameTag: 'リバイブ',
-    active: { effect: { kind: 'heal_max_fraction', denominator: 1 } },
   },
   {
     id: 'sk-ssr-011',
