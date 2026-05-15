@@ -451,11 +451,9 @@ export type EventEffect =
   | { kind: 'add_skill_top' }
   /** Reverse every monster's active-skill order for the next battle. */
   | { kind: 'reverse_actives_next_battle' }
-  /** Skip the upcoming action phase of this mini-round. */
+  /** Skip the action phase this round (advance directly to draft). */
   | { kind: 'skip_action_phase' }
-  /** Skip the upcoming draft phase of this mini-round. */
-  | { kind: 'skip_draft_phase' }
-  /** Run a one-off battle now, then resume with action → draft of this mini-round. */
+  /** Run an extra battle immediately; after its reward phase, resume the normal end-of-round battle. */
   | { kind: 'extra_battle' };
 
 export type EventCard = {
