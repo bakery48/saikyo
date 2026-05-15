@@ -1027,17 +1027,6 @@ export const SKILLS: SkillCard[] = [
   },
   // SR passives
   {
-    id: 'sk-srp-013',
-    name: '衝撃緩衝 (passive)',
-    rarity: 'SR',
-    nameTag: 'バッファー',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'damage_to_shield', percent: 50 },
-    },
-  },
-  {
     id: 'sk-srp-015',
     name: '反転の構え (passive)',
     rarity: 'SR',
