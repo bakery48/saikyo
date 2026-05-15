@@ -563,6 +563,10 @@ export type Player = {
    * Visible only to the owner over the wire.
    */
   actionHand: ActionCard[];
+  /** All skill cards the player owns (not currently slotted). */
+  skillStock: SkillCard[];
+  /** Skill cards the player has slotted (active in battle). Max 9, ordered. */
+  skillSlots: SkillCard[];
 };
 
 export type Phase =
@@ -571,26 +575,36 @@ export type Phase =
   | 'event'
   | 'action'
   | 'draft'
+  | 'build'
   | 'battle'
   | 'reward'
   | 'tournament'
   | 'finished';
 
-export type DraftState = {
-  /** Cards currently revealed and available for picking. */
-  pool: SkillCard[];
-  /** Player IDs that still need to make a pick. */
+/** Pack-based booster draft state. */
+export type PackDraftState = {
+  /** Fixed player order for this draft (randomized at draft start). */
+  draftOrder: string[];
+  /** Which pass we're on (0-4, one per card in each pack). */
+  passIndex: number;
+  /** Each player's current pack of cards to pick from. */
+  packs: Record<string, SkillCard[]>;
+  /** Player IDs that still need to make a pick this pass. */
   pendingPlayerIds: string[];
-  /** Submitted picks for the current draft sub-round. */
-  submittedPicks: Record<string, string>; // playerId -> skillCardId
-  /** Cards each player has acquired during this draft phase. */
-  acquired: Record<string, string[]>; // playerId -> skillCardIds
-  /** Cards removed from the pool because of conflicts. */
-  setAside: SkillCard[];
-  /** Number of resolution attempts so far (used to break ties). */
-  attempt: number;
+  /** Submitted picks for the current pass: playerId -> cardId. */
+  submittedPicks: Record<string, string>;
+  /** Cards each player has acquired so far (actual card objects). */
+  acquired: Record<string, SkillCard[]>;
   /** True for ~2s after all picks are submitted so clients can show everyone's choices. */
   revealing?: boolean;
+};
+
+/** Build phase state: players arrange their skillStock into skillSlots. */
+export type BuildPhaseState = {
+  /** Player IDs that still need to submit their build. */
+  pendingPlayerIds: string[];
+  /** Submitted slot configurations: playerId -> ordered cardIds (max 9). */
+  submittedSlots: Record<string, string[]>;
 };
 
 /** Monster pick draft — analogous to skill DraftState but for monsters. */
@@ -718,9 +732,10 @@ export type GameEvent =
   | { kind: 'skill_acquired'; playerId: string; skillId: string; rarity: Rarity }
   | { kind: 'draft_revealed'; cards: string[] }
   | { kind: 'draft_pick_submitted'; playerId: string; skillId: string }
-  | { kind: 'draft_resolved'; assignments: Record<string, string> } // playerId -> skillId
-  | { kind: 'draft_conflict'; skillId: string; players: string[] }
-  | { kind: 'draft_fallback'; playerId: string; skillId: string }
+  | { kind: 'draft_pass_resolved'; passIndex: number }
+  | { kind: 'draft_finished' }
+  | { kind: 'build_submitted'; playerId: string; slotCount: number }
+  | { kind: 'build_resolved' }
   | { kind: 'battle_match'; a: string; b: string; winner: 'a' | 'b' | 'draw' }
   | { kind: 'reward_chosen'; playerId: string; choice: RewardChoice }
   | { kind: 'tournament_match'; round: number; a: string; b: string; winner: string }
@@ -733,7 +748,7 @@ export type GameState = {
   /** Monster pick draft state (null outside of pick_monster phase). */
   monsterPick: MonsterPickState | null;
   round: number; // 1..totalRounds
-  miniRound: number; // 1..miniRoundsPerRound (event/action/draft cycles within a round)
+  miniRound: number; // 1..miniRoundsPerRound (kept for compatibility, not used in main flow)
   /** Configurable: how many big rounds the game runs for (default 3). */
   totalRounds: number;
   /** Configurable: how many event/action/draft cycles each round contains (default 3). */
@@ -747,7 +762,10 @@ export type GameState = {
     actionGrave: ActionCard[];
     skillGrave: SkillCard[];
   };
-  draft: DraftState | null;
+  /** Pack-based booster draft state (null outside of draft phase). */
+  packDraft: PackDraftState | null;
+  /** Build phase state (null outside of build phase). */
+  buildPhase: BuildPhaseState | null;
   /** Active during action phase while waiting for plays. Null otherwise. */
   actionPhase: ActionPhaseState | null;
   battle: BattlePhaseState | null;
@@ -765,10 +783,8 @@ export type GameState = {
   nextBattleReverseActives: boolean;
   /** When true, the upcoming `advanceFromEvent` skips action and goes straight to draft. Cleared on use. */
   skipNextActionPhase: boolean;
-  /** When true, the upcoming `startDraft` call skips drafting and advances to the next phase. Cleared on use. */
-  skipNextDraftPhase: boolean;
   /** When true, the upcoming `advanceFromEvent` transitions to battle (extra battle). Cleared on use. */
   extraBattlePending: boolean;
-  /** Set when an extra battle starts so the following reward returns to action instead of advancing the round. */
-  returnToActionAfterReward: boolean;
+  /** Set when an extra battle starts so the following reward returns to battle instead of advancing the round. */
+  returnToBattleAfterReward: boolean;
 };

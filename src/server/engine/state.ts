@@ -12,10 +12,11 @@ import type {
 import { PLAYER_COLORS } from './types';
 import { RNG } from './rng';
 import { shuffle, drawTop } from './deck';
-import { MONSTERS } from './cards/monsters';
+import { MONSTERS, MONSTERS_BY_ID } from './cards/monsters';
 import { EVENTS } from './cards/events';
 import { ACTIONS } from './cards/actions';
 import { SKILLS } from './cards/skills';
+import { stripInvalidNameTags } from './naming';
 
 export type PlayerSeed = { id: string; name: string; isCPU: boolean };
 
@@ -62,6 +63,8 @@ export function createInitialState(opts: {
     isCPU: p.isCPU,
     monster: null,
     actionHand: [],
+    skillStock: [],
+    skillSlots: [],
   }));
   let cpuIdx = 1;
   while (seats.length < 8) {
@@ -71,6 +74,8 @@ export function createInitialState(opts: {
       isCPU: true,
       monster: null,
       actionHand: [],
+      skillStock: [],
+      skillSlots: [],
     });
     cpuIdx++;
   }
