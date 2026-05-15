@@ -1977,15 +1977,13 @@ function applySkill(args: {
     case 'deja_vu_attack': {
       const count = (user.skillUseCounts[skill.id] ?? 0) + 1;
       user.skillUseCounts[skill.id] = count;
-      // Fold the bonus into the once-buff so resolveAttack picks it up; it will be cleared by consumeOnceBuffs.
-      user.onceBuffs.atk = (user.onceBuffs.atk ?? 0) + count;
-      log.push({ kind: 'buff', player: userSide, stat: 'atk', amount: count, duration: 'once' });
+      const mult = e.mult * count;
       resolveAttack({
         attacker: user,
         defender: target,
         attackerPassives: userPassives,
         defenderPassives: targetPassives,
-        effect: { kind: 'attack', mult: e.mult, useStat: e.useStat },
+        effect: { kind: 'attack', mult, useStat: e.useStat },
         attackerSide: userSide,
         defenderSide: targetSide,
         rng,
@@ -1998,7 +1996,7 @@ function applySkill(args: {
           defender: target,
           attackerPassives: userPassives,
           defenderPassives: targetPassives,
-          effect: { kind: 'attack', mult: e.mult, useStat: e.useStat },
+          effect: { kind: 'attack', mult, useStat: e.useStat },
           attackerSide: userSide,
           defenderSide: targetSide,
           rng,
