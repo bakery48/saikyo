@@ -1116,17 +1116,6 @@ export const SKILLS: SkillCard[] = [
   },
   // SSR passives
   {
-    id: 'sk-ssrp-005',
-    name: '断末魔 (passive)',
-    rarity: 'SSR',
-    nameTag: 'デスラトル',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'last_breath', amount: 12 },
-    },
-  },
-  {
     id: 'sk-ssrp-006',
     name: '神域の幼生 (passive)',
     rarity: 'SSR',
