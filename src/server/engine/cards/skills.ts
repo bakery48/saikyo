@@ -49,7 +49,6 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-017', name: '要塞', rarity: 'R', nameTag: 'バランス', active: { effect: { kind: 'buff_self', stat: 'def', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-018', name: '速攻', rarity: 'R', nameTag: 'ラピッド', active: { effect: { kind: 'attack', mult: 1.1, useStat: 'spd', attackKind: 'passthrough' } } },
   { id: 'sk-r-019', name: 'シールドバッシュ', rarity: 'R', nameTag: 'バッシュ', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'def', attackKind: 'strike' } } },
-  { id: 'sk-r-021', name: '生命変換', rarity: 'R', nameTag: 'コンバート', active: { effect: { kind: 'pay_hp_shield', hpCost: 3, shieldAmount: 5 } } },
   { id: 'sk-r-022', name: '取引', rarity: 'R', nameTag: 'トレーダー', active: { effect: { kind: 'pay_hp_debuff_all', hpCost: 4, amount: 1 } } },
   { id: 'sk-n-029', name: 'エネルギーチャージ', rarity: 'N', active: { effect: { kind: 'buff_self_all', amount: 1, duration: 'battle' } } },
   { id: 'sk-r-025', name: 'リフレイン', rarity: 'R', nameTag: 'リフレイン', active: { effect: { kind: 'rewind_skill', rewindBy: 1, selfDamagePercent: 15 } } },
