@@ -330,9 +330,9 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'buff_self_all', amount: 4, duration: 'battle' } },
   },
   {
-    id: 'sk-sr-027',
+    id: 'sk-ssr-033',
     name: '霊脈',
-    rarity: 'SR',
+    rarity: 'SSR',
     nameTag: 'スピリット',
     active: { effect: { kind: 'heal_max_fraction', denominator: 2 } },
   },
