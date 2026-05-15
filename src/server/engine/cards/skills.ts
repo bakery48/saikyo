@@ -1047,17 +1047,6 @@ export const SKILLS: SkillCard[] = [
     },
   },
   {
-    id: 'sk-srp-014',
-    name: 'セカンドウィンド (passive)',
-    rarity: 'SR',
-    nameTag: 'セカンド',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'first_attack' },
-      effect: { kind: 'second_wind', amount: 4 },
-    },
-  },
-  {
     id: 'sk-srp-015',
     name: '反転の構え (passive)',
     rarity: 'SR',
