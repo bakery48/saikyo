@@ -374,6 +374,29 @@ export class GameRunner {
     submitReward(this.state, playerId, choice);
   }
 
+  /** Reorder the player's active skill slots. Only allowed in reward phase. */
+  reorderSlots(playerId: string, order: string[]): void {
+    if (this.state.phase !== 'reward') {
+      throw new Error('slot reorder only available in reward phase');
+    }
+    const player = this.state.players.find((p) => p.id === playerId);
+    if (!player || !player.monster) throw new Error('player has no monster');
+    const actives = player.monster.actives;
+    if (order.length !== actives.length) throw new Error('order length mismatch');
+    const idToSkill = new Map(actives.map((s) => [s.id, s]));
+    const seen = new Set<string>();
+    for (const id of order) {
+      if (!idToSkill.has(id) || seen.has(id)) {
+        throw new Error('invalid order');
+      }
+      seen.add(id);
+    }
+    order.forEach((id, idx) => {
+      idToSkill.get(id)!.order = idx;
+    });
+    actives.sort((a, b) => a.order - b.order);
+  }
+
   /**
    * Rename the player's monster. Allowed any time the player has a monster and
    * the game is still running. The new name must be composed of the monster's

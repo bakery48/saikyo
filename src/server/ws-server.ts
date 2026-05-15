@@ -216,6 +216,10 @@ export class GameWsServer {
         this.runGameAction(playerId, (game) => game.submitReward(playerId, msg.choice));
         return;
       }
+      case 'reorder_slots': {
+        this.runGameAction(playerId, (game) => game.reorderSlots(playerId, msg.order));
+        return;
+      }
       case 'rename_monster': {
         this.handleRename(playerId, msg.name);
         return;

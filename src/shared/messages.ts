@@ -142,6 +142,7 @@ export type ClientMessage =
       swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string };
     }
   | { type: 'submit_reward'; choice: RewardChoice }
+  | { type: 'reorder_slots'; order: string[] }
   | { type: 'rename_monster'; name: string }
   | { type: 'leave_game' }
   /** Dev/test only: prepend a specific event card to the top of the event deck. */
