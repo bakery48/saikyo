@@ -112,6 +112,14 @@ export const SKILLS: SkillCard[] = [
     rarity: 'R',
     nameTag: 'リジェネ',
     isPassive: true,
+    passive: { trigger: { kind: 'on_own_turn_start' }, effect: { kind: 'turn_start_heal_even', amount: 1 } },
+  },
+  {
+    id: 'sk-srp-024',
+    name: '大再生 (passive)',
+    rarity: 'SR',
+    nameTag: 'ハイリジェネ',
+    isPassive: true,
     passive: { trigger: { kind: 'on_own_turn_start' }, effect: { kind: 'turn_start_heal_even', amount: 2 } },
   },
   {
