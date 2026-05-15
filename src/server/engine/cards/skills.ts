@@ -526,7 +526,7 @@ export const SKILLS: SkillCard[] = [
     isPassive: true,
     passive: {
       trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'damage_cap', maxPerHit: 6 },
+      effect: { kind: 'damage_cap', maxPerHit: 10 },
     },
   },
   {
@@ -560,7 +560,7 @@ export const SKILLS: SkillCard[] = [
     isPassive: true,
     passive: {
       trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'damage_cap', maxPerHit: 3 },
+      effect: { kind: 'damage_cap', maxPerHit: 9 },
     },
   },
   // ── batch 4: misc thematic cards ────────────────────────────────────────
@@ -1189,6 +1189,17 @@ export const SKILLS: SkillCard[] = [
     passive: {
       trigger: { kind: 'battle_start' },
       effect: { kind: 'absolute_zero' },
+    },
+  },
+  {
+    id: 'sk-ssrp-012',
+    name: '鉄壁の加護 (passive)',
+    rarity: 'SSR',
+    nameTag: 'アイアンウォール',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_take_damage' },
+      effect: { kind: 'damage_cap', maxPerHit: 8 },
     },
   },
   {
