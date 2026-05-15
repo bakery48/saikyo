@@ -115,7 +115,7 @@ export function describeActiveEffect(e: SkillEffect): string {
     case 'def_attack':
       return e.flat > 0 ? `DEF+${e.flat} で攻撃` : `DEF で攻撃`;
     case 'swat_attack':
-      return `${e.useStat.toUpperCase()}×${e.mult} 攻撃（回避時は相手SPD分のDEF無視ダメージ）`;
+      return `${e.useStat.toUpperCase()}×${e.mult} 攻撃（回避時は相手SPD×${e.dodgeMult ?? 1.0}のDEF無視ダメージ）`;
     case 'coup_de_grace':
       return `${e.threshold}スロット目以降の発動で${e.amount}ダメージ`;
     case 'pin_attack': {

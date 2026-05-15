@@ -590,11 +590,18 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'mimic_last' } },
   },
   {
-    id: 'sk-r-051',
+    id: 'sk-sr-059',
     name: 'ハエたたき',
-    rarity: 'R',
+    rarity: 'SR',
     nameTag: 'スワッター',
     active: { effect: { kind: 'swat_attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' } },
+  },
+  {
+    id: 'sk-ssr-029',
+    name: '真・ハエたたき',
+    rarity: 'SSR',
+    nameTag: 'グランドスワッター',
+    active: { effect: { kind: 'swat_attack', mult: 1.0, useStat: 'atk', attackKind: 'strike', dodgeMult: 1.5 } },
   },
   // ── batch 5: late-game / control / counter ──────────────────────────────
   {

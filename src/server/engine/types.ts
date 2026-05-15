@@ -163,7 +163,7 @@ export type SkillEffect =
    * `mult` × useStat attack that, when the defender dodges, instead deals
    * defender.SPD as true damage (cannot itself be dodged).
    */
-  | { kind: 'swat_attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind }
+  | { kind: 'swat_attack'; mult: number; useStat: 'atk' | 'spd'; attackKind?: AttackKind; dodgeMult?: number }
   /** When this skill is the `threshold`-th or later active used in the battle, deal `amount` true damage. Otherwise no effect. */
   | { kind: 'coup_de_grace'; threshold: number; amount: number; attackKind?: AttackKind }
   /**

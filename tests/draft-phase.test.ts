@@ -9,7 +9,7 @@ import {
 import type { GameState, Monster } from '../src/server/engine/types';
 import { completeMonsterPicks } from './helpers';
 
-function setupAtDraft(seed = 3): GameState {
+function setupAtDraft(seed = 30): GameState {
   const state = createInitialState({
     roomId: 'r',
     seed,

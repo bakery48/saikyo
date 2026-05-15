@@ -1909,7 +1909,7 @@ function applySkill(args: {
       const dodged = rollDodge(user, target, rng);
       if (dodged) {
         log.push({ kind: 'miss', from: userSide, to: targetSide });
-        const swatDmg = Math.max(1, effStat(target, 'spd'));
+        const swatDmg = Math.max(1, Math.floor(effStat(target, 'spd') * (e.dodgeMult ?? 1.0)));
         let actual = takeDamage(target, swatDmg, rng, targetPassives, targetSide, log, true);
         actual = clampWithEndure(target, actual, targetPassives, targetSide, log);
         target.hp -= actual;
