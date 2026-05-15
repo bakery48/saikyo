@@ -387,13 +387,6 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'cleanse_self' } },
   },
   {
-    id: 'sk-r-041',
-    name: '体強化',
-    rarity: 'R',
-    nameTag: 'リフォーム',
-    active: { effect: { kind: 'swap_atk_def' } },
-  },
-  {
     id: 'sk-r-042',
     name: '集中連撃',
     rarity: 'SR',
