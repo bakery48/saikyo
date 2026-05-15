@@ -131,14 +131,6 @@ export const SKILLS: SkillCard[] = [
     passive: { trigger: { kind: 'on_take_damage' }, effect: { kind: 'damage_reduction', amount: 1 } },
   },
   {
-    id: 'sk-srp-002',
-    name: '見切りの構え (passive)',
-    rarity: 'SR',
-    nameTag: 'ファントム',
-    isPassive: true,
-    passive: { trigger: { kind: 'on_take_damage' }, effect: { kind: 'damage_negate_chance', oneIn: 6 } },
-  },
-  {
     id: 'sk-rp-045',
     name: '食いしばり (passive)',
     rarity: 'R',
