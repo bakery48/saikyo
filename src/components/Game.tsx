@@ -65,13 +65,6 @@ export function Game({ socket }: { socket: GameSocket }) {
         }}
       >
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-          <strong>{formatPhaseTitle(state)}</strong>
-          <RulesButton />
-          <BgmPlayer />
-          <span style={{ marginLeft: 'auto', fontSize: 12, opacity: 0.6 }}>
-            deck: event {state.deckCounts.event} · action {state.deckCounts.action} · skill{' '}
-            {state.deckCounts.skill}
-          </span>
           <button
             onClick={() => {
               if (window.confirm('ゲームから退出しますか？')) {
@@ -80,16 +73,24 @@ export function Game({ socket }: { socket: GameSocket }) {
             }}
             style={{
               fontSize: 12,
-              padding: '2px 8px',
+              padding: '4px 10px',
               cursor: 'pointer',
               border: '1px solid #c44',
               borderRadius: 4,
               background: '#fff',
               color: '#c44',
+              fontWeight: 600,
             }}
           >
             退出
           </button>
+          <strong>{formatPhaseTitle(state)}</strong>
+          <RulesButton />
+          <BgmPlayer />
+          <span style={{ marginLeft: 'auto', fontSize: 12, opacity: 0.6 }}>
+            deck: event {state.deckCounts.event} · action {state.deckCounts.action} · skill{' '}
+            {state.deckCounts.skill}
+          </span>
         </div>
         <PhaseProgress state={state} />
       </header>
