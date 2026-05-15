@@ -270,7 +270,7 @@ export function describePassiveEffect(e: PassiveEffect): string {
     case 'tail_fury':
       return `残りスロット${e.threshold}以下のとき与ダメ+${e.amount}`;
     case 'slow_burn':
-      return `自分のターン開始時に相手HP-${e.amount}（DEF無視）`;
+      return `毒[${e.amount}]（自分のターン開始時に相手HP-${e.amount}・DEF無視）`;
     case 'revenge_burst':
       return `初めてHP半分以下になったとき相手に${e.amount}DEF無視ダメージ`;
     case 'dodge_counter':
