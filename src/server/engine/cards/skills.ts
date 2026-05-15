@@ -63,6 +63,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-048', name: '怒りの代償', rarity: 'SR', nameTag: 'リトリビューション', active: { effect: { kind: 'stat_diff_damage', stat: 'atk', mult: 2.0 } } },
   { id: 'sk-sr-049', name: '防壁崩し', rarity: 'SR', nameTag: 'フォートレスブレイク', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'def', multIf: 2.5, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-050', name: '反転の刃', rarity: 'SR', nameTag: 'ミラーブレイド', active: { effect: { kind: 'target_higher_stat_attack', mult: 1.0, attackKind: 'sword' } } },
+  { id: 'sk-ssr-028', name: '真・反転の刃', rarity: 'SSR', nameTag: 'グランドミラー', active: { effect: { kind: 'target_higher_stat_attack', mult: 1.3, attackKind: 'sword' } } },
   { id: 'sk-sr-051', name: '剛剣返し', rarity: 'SR', nameTag: 'レイジングブレード', active: { effect: { kind: 'target_stat_damage', stat: 'atk', mult: 1.2 } } },
   { id: 'sk-sr-052', name: '剛盾返し', rarity: 'SR', nameTag: 'レイジングシールド', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 1.1 } } },
   { id: 'sk-sr-053', name: '大物狩り', rarity: 'SR', nameTag: 'タイタンキラー', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'atk', multIf: 3.0, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
