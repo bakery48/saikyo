@@ -1654,6 +1654,15 @@ function applySkill(args: {
       user.defMod = tmpMod;
       break;
     }
+    case 'swap_target_atk_def': {
+      const tmpBase = target.atk;
+      target.atk = target.def;
+      target.def = tmpBase;
+      const tmpMod = target.atkMod;
+      target.atkMod = target.defMod;
+      target.defMod = tmpMod;
+      break;
+    }
     case 'hp_to_atk': {
       const missing = Math.max(0, user.maxHp - user.hp);
       const bonus = Math.floor(missing / e.divisor);

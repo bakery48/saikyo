@@ -144,6 +144,8 @@ export type SkillEffect =
   | { kind: 'cleanse_self' }
   /** Swap the user's ATK and DEF (both base stats and battle-long modifiers) for the rest of the battle. */
   | { kind: 'swap_atk_def' }
+  /** Swap the target's ATK and DEF (both base stats and battle-long modifiers) for the rest of the battle. */
+  | { kind: 'swap_target_atk_def' }
   /** Buff own ATK by floor((maxHp - currentHp) / divisor) for the rest of the battle. */
   | { kind: 'hp_to_atk'; divisor: number }
   /** Set up: the next time this side takes attack damage, reflect `percent`% of it back to the attacker as true damage. */

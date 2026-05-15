@@ -493,6 +493,13 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'swap_atk_def' } },
   },
   {
+    id: 'sk-ssr-032',
+    name: '真・鎧変換',
+    rarity: 'SSR',
+    nameTag: 'メタモルスティール',
+    active: { effect: { kind: 'swap_target_atk_def' } },
+  },
+  {
     id: 'sk-sr-034',
     name: '怒りの覚醒',
     rarity: 'SR',

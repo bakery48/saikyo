@@ -102,6 +102,8 @@ export function describeActiveEffect(e: SkillEffect): string {
       return `自分にかかっている能力低下を全て解除`;
     case 'swap_atk_def':
       return `自身のATKとDEFを入れ替え（バトル中）`;
+    case 'swap_target_atk_def':
+      return `相手のATKとDEFを入れ替え（バトル中）`;
     case 'hp_to_atk':
       return `失ったHPの1/${e.divisor}だけATK上昇（バトル中）`;
     case 'share_damage_next':
