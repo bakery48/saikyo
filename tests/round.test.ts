@@ -4,7 +4,7 @@ import { runOneRound } from '../src/server/engine/cli';
 import { greedyPolicy } from '../src/server/engine/policy';
 import { completeMonsterPicks } from './helpers';
 
-describe('Full round (3 × event/action/draft)', () => {
+describe('Full round (3 × action/event/draft)', () => {
   it('completes one round and ends in battle phase', () => {
     const state = createInitialState({
       roomId: 'demo',

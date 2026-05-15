@@ -67,7 +67,7 @@ describe('Game setup', () => {
     });
     expect(state.phase).toBe('pick_monster');
     completeMonsterPicks(state);
-    expect(state.phase).toBe('event');
+    expect(state.phase).toBe('action');
     expect(state.players.every((p) => p.monster)).toBe(true);
     expect(state.monsterPick).toBeNull();
   });

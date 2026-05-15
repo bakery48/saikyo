@@ -49,7 +49,7 @@ describe('Draft phase', () => {
     const finished = resolveDraftSubRound(state);
     expect(finished).toBe(true);
     expect(state.draft).toBeNull();
-    expect(['event', 'battle']).toContain(state.phase);
+    expect(['action', 'battle']).toContain(state.phase);
     // Each player gained exactly 1 skill (active or passive).
     for (const p of state.players) {
       expect(totalSkills(p.monster!)).toBe(before[p.id]! + 1);

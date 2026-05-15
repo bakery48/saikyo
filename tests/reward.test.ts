@@ -62,7 +62,7 @@ describe('Reward phase', () => {
     resolveRewardPhase(state);
     expect(state.round).toBe(beforeRound + 1);
     expect(state.miniRound).toBe(1);
-    expect(state.phase).toBe('event');
+    expect(state.phase).toBe('action');
     expect(state.battle).toBeNull();
     expect(state.reward).toBeNull();
   });

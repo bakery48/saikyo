@@ -56,10 +56,10 @@ function advanceFromReward(state: GameState): void {
   // phase of the same mini-round instead of advancing the round.
   if (state.returnToActionAfterReward) {
     state.returnToActionAfterReward = false;
-    state.phase = 'action';
+    state.phase = 'draft';
     state.log.push({
       kind: 'phase_change',
-      phase: 'action',
+      phase: 'draft',
       round: state.round,
       miniRound: state.miniRound,
     });
@@ -72,10 +72,10 @@ function advanceFromReward(state: GameState): void {
     state.phase = 'finished';
     return;
   }
-  state.phase = 'event';
+  state.phase = 'action';
   state.log.push({
     kind: 'phase_change',
-    phase: 'event',
+    phase: 'action',
     round: state.round,
     miniRound: state.miniRound,
   });

@@ -114,16 +114,13 @@ export function resolveEventPhase(state: GameState): void {
 }
 
 function advanceFromEvent(state: GameState): void {
-  // Honor pending event-card flags. Extra battle takes priority over a skip.
+  // Honor pending event-card flags.
   if (state.extraBattlePending) {
     state.extraBattlePending = false;
     state.returnToActionAfterReward = true;
     state.phase = 'battle';
-  } else if (state.skipNextActionPhase) {
-    state.skipNextActionPhase = false;
-    state.phase = 'draft';
   } else {
-    state.phase = 'action';
+    state.phase = 'draft';
   }
   state.log.push({
     kind: 'phase_change',

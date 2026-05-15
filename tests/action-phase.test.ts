@@ -76,7 +76,7 @@ describe('Action phase', () => {
       play(state, p.id, p.actionHand[0]!.id);
     }
     resolveActionPhase(state);
-    expect(state.phase).toBe('draft');
+    expect(state.phase).toBe('event');
     // Action card pool size (deck + grave + hands) is conserved.
     const handsAfter = state.players.reduce((n, p) => n + p.actionHand.length, 0);
     expect(state.decks.action.length + state.decks.actionGrave.length + handsAfter).toBe(

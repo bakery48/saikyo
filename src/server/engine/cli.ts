@@ -69,15 +69,6 @@ function runRewardPhase(state: GameState, policy: Policy): void {
 }
 
 export function runMiniRound(state: GameState, policy: Policy): void {
-  expectPhase(state, 'event');
-  resolveEventPhase(state);
-  // An `extra_battle` event card detours through battle + reward before
-  // returning to this mini-round's action phase.
-  if (state.phase === 'battle') {
-    runBattlePhase(state);
-    expectPhase(state, 'reward');
-    runRewardPhase(state, policy);
-  }
   expectPhase(state, 'action');
   startActionPhase(state);
   for (const player of state.players) {
@@ -86,11 +77,20 @@ export function runMiniRound(state: GameState, policy: Policy): void {
     submitActionPlay(state, player.id, card.id, actionExtras(state, player.id, card));
   }
   resolveActionPhase(state);
+  expectPhase(state, 'event');
+  resolveEventPhase(state);
+  // An `extra_battle` event card detours through battle + reward before
+  // returning to this mini-round's draft phase.
+  if (state.phase === 'battle') {
+    runBattlePhase(state);
+    expectPhase(state, 'reward');
+    runRewardPhase(state, policy);
+  }
   expectPhase(state, 'draft');
   runDraftPhase(state, policy);
 }
 
-/** Run all 3 mini-rounds (event/action/draft) of a single big round. */
+/** Run all 3 mini-rounds (action/event/draft) of a single big round. */
 export function runOneRound(state: GameState, policy: Policy = greedyPolicy): void {
   for (let i = 0; i < 3; i++) {
     runMiniRound(state, policy);
@@ -112,7 +112,7 @@ export function runFullGame(state: GameState, policy: Policy = greedyPolicy): vo
   runMonsterPickPhase(state, policy);
 
   while (state.phase !== 'finished') {
-    if (state.phase === 'event') {
+    if (state.phase === 'action') {
       runMiniRound(state, policy);
     } else if (state.phase === 'battle') {
       runBattlePhase(state);

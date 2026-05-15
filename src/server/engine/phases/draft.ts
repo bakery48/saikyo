@@ -198,7 +198,7 @@ function advanceAfterDraft(state: GameState): void {
   // Advance to the next mini-round, or to battle/tournament if the last mini-round just ended.
   if (state.miniRound < state.miniRoundsPerRound) {
     state.miniRound += 1;
-    state.phase = 'event';
+    state.phase = 'action';
   } else {
     state.phase = state.round >= state.totalRounds ? 'tournament' : 'battle';
   }
