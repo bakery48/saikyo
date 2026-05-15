@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <main style={{ padding: 24, fontFamily: 'sans-serif', display: 'grid', gap: 24, maxWidth: 1100, margin: '0 auto' }}>
       <header>
-        <h1 style={{ margin: 0 }}>Saikyo Monster Battle</h1>
+        <h1 style={{ margin: 0 }}>さいきょうのモンスター</h1>
         <p style={{ margin: '4px 0', opacity: 0.7 }}>
           {socket.connected ? '接続中' : '接続待ち...'}
           {socket.playerId ? ` · player ${socket.playerId.slice(0, 8)}` : ''}

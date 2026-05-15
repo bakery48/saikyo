@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
 export const metadata = {
-  title: 'Saikyo Monster Battle',
-  description: 'Build the strongest monster — multiplayer board game',
+  title: 'さいきょうのモンスター',
+  description: 'さいきょうのモンスターを作ろう — マルチプレイヤーボードゲーム',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
