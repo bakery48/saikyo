@@ -376,17 +376,6 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'sacrifice_attack', hpRatio: 0.8 } },
   },
   // ── R passives (new) ────────────────────────────────────────────────────
-  {
-    id: 'sk-rp-005',
-    name: '生命力 (passive)',
-    rarity: 'R',
-    nameTag: 'バイタル',
-    isPassive: true,
-    passive: {
-      trigger: { kind: 'battle_start' },
-      effect: { kind: 'stat_mod', stat: 'hp', amount: 4 },
-    },
-  },
   // ── SR passives (new) ───────────────────────────────────────────────────
   {
     id: 'sk-rp-044',
