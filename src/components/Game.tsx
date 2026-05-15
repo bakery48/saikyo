@@ -24,6 +24,7 @@ const PHASE_LABEL: Record<string, string> = {
   event: 'イベントフェーズ',
   action: 'アクションフェーズ',
   draft: 'ドラフトフェーズ',
+  build: 'ビルドフェーズ',
   battle: '戦闘フェーズ',
   reward: '鍛え直し',
   tournament: '最終トーナメント',
@@ -144,6 +145,8 @@ function renderPhase(
       return <ActionPhaseView state={state} socket={socket} />;
     case 'draft':
       return <DraftView state={state} socket={socket} />;
+    case 'build':
+      return <AutoPhaseView state={state} label={PHASE_LABEL['build'] ?? 'ビルドフェーズ'} />;
     case 'battle':
       return <BattleAnimationView state={state} socket={socket} />;
     case 'tournament':

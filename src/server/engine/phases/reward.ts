@@ -52,14 +52,26 @@ function applyReward(state: GameState, player: Player, choice: RewardChoice): vo
 }
 
 function advanceFromReward(state: GameState): void {
-  // After an extra-battle (triggered by an event card), return to the action
-  // phase of the same mini-round instead of advancing the round.
-  if (state.returnToActionAfterReward) {
-    state.returnToActionAfterReward = false;
-    state.phase = 'draft';
+  // After an extra-battle (triggered by an event card), return to the
+  // regular end-of-round battle instead of advancing the round.
+  if (state.returnToBattleAfterReward) {
+    state.returnToBattleAfterReward = false;
+    state.phase = 'battle';
     state.log.push({
       kind: 'phase_change',
-      phase: 'draft',
+      phase: 'battle',
+      round: state.round,
+      miniRound: state.miniRound,
+    });
+    return;
+  }
+  if (state.round >= state.totalRounds) {
+    // All rounds complete — proceed to tournament without incrementing round.
+    state.miniRound = 1;
+    state.phase = 'tournament';
+    state.log.push({
+      kind: 'phase_change',
+      phase: 'tournament',
       round: state.round,
       miniRound: state.miniRound,
     });
@@ -67,11 +79,6 @@ function advanceFromReward(state: GameState): void {
   }
   state.round += 1;
   state.miniRound = 1;
-  if (state.round > state.totalRounds) {
-    // Should not happen — the last round ends with tournament, not reward.
-    state.phase = 'finished';
-    return;
-  }
   state.phase = 'action';
   state.log.push({
     kind: 'phase_change',

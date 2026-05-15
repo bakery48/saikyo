@@ -44,7 +44,7 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
       state.skipNextActionPhase = true;
       return;
     case 'skip_draft_phase':
-      state.skipNextDraftPhase = true;
+      // Draft is now pack-based and always runs; this flag is a no-op in the new flow.
       return;
     case 'extra_battle':
       state.extraBattlePending = true;
@@ -116,11 +116,13 @@ export function resolveEventPhase(state: GameState): void {
 function advanceFromEvent(state: GameState): void {
   // Honor pending event-card flags.
   if (state.extraBattlePending) {
+    // Extra battle: run a battle now, then after reward return to the regular battle.
     state.extraBattlePending = false;
-    state.returnToActionAfterReward = true;
+    state.returnToBattleAfterReward = true;
     state.phase = 'battle';
   } else {
-    state.phase = 'draft';
+    // Normal flow: event → battle (end of round).
+    state.phase = 'battle';
   }
   state.log.push({
     kind: 'phase_change',

@@ -16,7 +16,7 @@ import { MONSTERS, MONSTERS_BY_ID } from './cards/monsters';
 import { EVENTS } from './cards/events';
 import { ACTIONS } from './cards/actions';
 import { SKILLS } from './cards/skills';
-import { stripInvalidNameTags } from './naming';
+import { stripInvalidNameTags, getAvailableTags, composeMonsterName } from './naming';
 
 export type PlayerSeed = { id: string; name: string; isCPU: boolean };
 
@@ -121,7 +121,8 @@ export function createInitialState(opts: {
       actionGrave: [],
       skillGrave: [],
     },
-    draft: null,
+    packDraft: null,
+    buildPhase: null,
     actionPhase: null,
     battle: null,
     reward: null,
@@ -133,9 +134,8 @@ export function createInitialState(opts: {
     actionPhaseSummary: null,
     nextBattleReverseActives: false,
     skipNextActionPhase: false,
-    skipNextDraftPhase: false,
     extraBattlePending: false,
-    returnToActionAfterReward: false,
+    returnToBattleAfterReward: false,
   };
   // Deal the initial action card hand (4 cards each) right at game start so
   // players can see their hand from the very beginning, even during monster pick.
@@ -284,43 +284,72 @@ export function monsterFromBase(base: MonsterBase, ownerId: string): Monster {
   };
 }
 
-/** Add a SkillCard to a player's monster as either an active or passive skill. */
+/**
+ * Add a SkillCard to a player's skillStock (total inventory).
+ * The card will be available to slot during the build phase.
+ * Also logs the acquisition event.
+ */
 export function addSkillCardToMonster(
   state: GameState,
   player: Player,
   card: SkillCard,
-): ActiveSkill | PassiveSkill {
+): SkillCard {
   if (!player.monster) throw new Error('player has no monster');
+  // Give the card a unique copy ID so multiple instances don't collide.
   const seq = state.nextSkillInstanceSeq++;
-  const tag = card.rarity === 'N' ? undefined : card.nameTag;
-  if (card.isPassive && card.passive) {
-    const passive: PassiveSkill = {
-      id: `${card.id}#${seq}`,
-      name: card.name,
-      trigger: card.passive.trigger,
-      effect: card.passive.effect,
-      rarity: card.rarity,
-      nameTag: tag,
-      tag: card.tag,
-    };
-    player.monster.passives.push(passive);
-    state.log.push({ kind: 'skill_acquired', playerId: player.id, skillId: passive.id, rarity: card.rarity });
-    return passive;
+  const stockCard: SkillCard = { ...card, id: `${card.id}#${seq}` };
+  player.skillStock.push(stockCard);
+  state.log.push({ kind: 'skill_acquired', playerId: player.id, skillId: stockCard.id, rarity: card.rarity });
+  return stockCard;
+}
+
+/**
+ * Derive monster.actives and monster.passives from player.skillSlots.
+ * Base monster passives come from the monster template; acquired passives
+ * come from passive-type skills in skillSlots.
+ */
+export function syncMonsterFromSlots(state: GameState, player: Player): void {
+  if (!player.monster) return;
+
+  // Base passives from the monster template (no rarity = base monster passive).
+  const base = MONSTERS_BY_ID[player.monster.baseId];
+  const basePassives: PassiveSkill[] = base ? base.passives.map((p) => ({ ...p })) : [];
+
+  const actives: ActiveSkill[] = [];
+  const acquiredPassives: PassiveSkill[] = [];
+
+  for (let idx = 0; idx < player.skillSlots.length; idx++) {
+    const card = player.skillSlots[idx]!;
+    // Cards in skillSlots already have unique IDs (set when added to stock).
+    const tag = card.rarity === 'N' ? undefined : card.nameTag;
+    if (card.isPassive && card.passive) {
+      acquiredPassives.push({
+        id: card.id,
+        name: card.name,
+        trigger: card.passive.trigger,
+        effect: card.passive.effect,
+        rarity: card.rarity,
+        nameTag: tag,
+        tag: card.tag,
+      });
+    } else if (card.active) {
+      actives.push({
+        id: card.id,
+        name: card.name,
+        order: idx + 1,
+        rarity: card.rarity,
+        nameTag: tag,
+        tag: card.tag,
+        effect: card.active.effect,
+      });
+    }
   }
-  if (!card.active) throw new Error(`skill card ${card.id} has no active or passive payload`);
-  const order = player.monster.actives.length + 1;
-  const active: ActiveSkill = {
-    id: `${card.id}#${seq}`,
-    name: card.name,
-    order,
-    rarity: card.rarity,
-    nameTag: tag,
-    tag: card.tag,
-    effect: card.active.effect,
-  };
-  player.monster.actives.push(active);
-  state.log.push({ kind: 'skill_acquired', playerId: player.id, skillId: active.id, rarity: card.rarity });
-  return active;
+
+  player.monster.actives = actives;
+  player.monster.passives = [...basePassives, ...acquiredPassives];
+
+  // Strip any name tags no longer valid given the new actives/passives.
+  stripInvalidNameTags(player.monster);
 }
 
 /** Helper: re-create RNG from state's snapshot, returns it; caller should write back. */

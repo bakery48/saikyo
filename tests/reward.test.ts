@@ -40,17 +40,17 @@ describe('Reward phase', () => {
     expect(target.monster!.stats.atk).toBe(beforeAtk + STAT_UP_AMOUNT.atk);
   });
 
-  it('skill_top reward draws a card from the skill deck and adds to monster', () => {
+  it('skill_top reward draws a card from the skill deck and adds to skillStock', () => {
     const losers = state.reward!.pendingPlayerIds.slice();
     if (losers.length === 0) return;
     const target = state.players.find((p) => p.id === losers[0])!;
-    const before = target.monster!.actives.length + target.monster!.passives.length;
+    const before = target.skillStock.length;
     const deckBefore = state.decks.skill.length;
     for (const pid of losers) {
       submitReward(state, pid, { kind: 'skill_top' });
     }
     resolveRewardPhase(state);
-    const after = target.monster!.actives.length + target.monster!.passives.length;
+    const after = target.skillStock.length;
     expect(after).toBe(before + 1);
     expect(state.decks.skill.length).toBeLessThanOrEqual(deckBefore);
   });

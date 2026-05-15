@@ -4,7 +4,7 @@ import { runOneRound } from '../src/server/engine/cli';
 import { greedyPolicy } from '../src/server/engine/policy';
 import { completeMonsterPicks } from './helpers';
 
-describe('Full round (3 × action/event/draft)', () => {
+describe('Full round (action → draft → build → event → battle)', () => {
   it('completes one round and ends in battle phase', () => {
     const state = createInitialState({
       roomId: 'demo',
@@ -14,16 +14,15 @@ describe('Full round (3 × action/event/draft)', () => {
     completeMonsterPicks(state);
     runOneRound(state, greedyPolicy);
     expect(state.phase).toBe('battle');
-    expect(state.miniRound).toBe(3);
-    // Each player should have gained 3 skills (active or passive) across 3 mini-rounds.
+    // After one round each player should have cards in skillSlots (from draft+build)
     for (const p of state.players) {
-      const acquired = p.monster!.actives.length + p.monster!.passives.length;
-      expect(acquired).toBeGreaterThanOrEqual(3);
+      // Either slots or stock will have cards after a round
+      expect(p.skillSlots.length + p.skillStock.length).toBeGreaterThanOrEqual(1);
     }
-    // Some action grave should have entries (8 players * 3 mini-rounds).
-    expect(state.decks.actionGrave.length).toBe(24);
-    // Event grave: 3 cards.
-    expect(state.decks.eventGrave.length).toBe(3);
+    // Action grave: 8 players × 1 round = 8 cards
+    expect(state.decks.actionGrave.length).toBe(8);
+    // Event grave: 1 card per round
+    expect(state.decks.eventGrave.length).toBe(1);
   });
 
   it('is deterministic with the same seed', () => {

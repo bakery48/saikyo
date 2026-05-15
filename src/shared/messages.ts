@@ -3,14 +3,15 @@ import type {
   ActionPhaseState,
   ActionPhaseSummary,
   BattleMatch,
+  BuildPhaseState,
   Champion,
   Color,
-  DraftState,
   EventCard,
   EventPhaseSummary,
   GameEvent,
   Monster,
   MonsterPickState,
+  PackDraftState,
   Phase,
   RewardChoice,
   RewardState,
@@ -72,11 +73,18 @@ export type ClientGameState = {
   /** Mini-round cycles per round for this game (1-3). */
   miniRoundsPerRound: number;
   phase: Phase;
-  draft: DraftState | null;
+  /** Pack-based booster draft state (null outside of draft phase). */
+  packDraft: PackDraftState | null;
+  /** Build phase state (null outside of build phase). */
+  buildPhase: BuildPhaseState | null;
   /** Action phase selection state — set while waiting for plays. */
   actionPhase: ActionPhaseState | null;
   /** This viewer's hand of action cards (always visible to its owner). Null for non-player viewers. */
   myActionHand: ActionCard[] | null;
+  /** This viewer's skill stock (all owned cards not slotted). Null for non-player viewers. */
+  mySkillStock: SkillCard[] | null;
+  /** This viewer's skill slots (active in battle). Null for non-player viewers. */
+  mySkillSlots: SkillCard[] | null;
   battle: { matches: BattleMatch[] } | null;
   reward: RewardState | null;
   tournament: TournamentState | null;
@@ -142,6 +150,7 @@ export type ClientMessage =
       swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string };
     }
   | { type: 'submit_reward'; choice: RewardChoice }
+  | { type: 'submit_build'; slotCardIds: string[] }
   | { type: 'reorder_slots'; order: string[] }
   | { type: 'rename_monster'; name: string }
   | { type: 'leave_game' }

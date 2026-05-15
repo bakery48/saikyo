@@ -5,6 +5,7 @@ import {
   createInitialState,
   resolveMonsterPickSubRound,
   submitMonsterPick,
+  syncMonsterFromSlots,
 } from './engine/state';
 import { resolveEventPhase } from './engine/phases/event';
 import {
@@ -14,10 +15,17 @@ import {
   allActionPlaysIn,
 } from './engine/phases/action';
 import {
-  startDraft,
-  submitDraftPick,
-  resolveDraftSubRound,
+  startPackDraft,
+  submitPackPick,
+  resolvePackPickRound,
+  allPackPicksIn,
 } from './engine/phases/draft';
+import {
+  startBuildPhase,
+  submitBuild,
+  resolveBuildPhase,
+  allBuildsIn,
+} from './engine/phases/build';
 import { runBattlePhase } from './engine/phases/battle';
 import { resolveRewardPhase, submitReward } from './engine/phases/reward';
 import { startTournament, stepTournamentMatch } from './engine/phases/tournament';
@@ -216,6 +224,8 @@ export class GameRunner {
         return this.stepAction();
       case 'draft':
         return this.stepDraft();
+      case 'build':
+        return this.stepBuild();
       case 'battle':
         runBattlePhase(this.state);
         return false;
@@ -254,21 +264,22 @@ export class GameRunner {
   }
 
   private stepDraft(): boolean {
-    if (!this.state.draft) {
-      startDraft(this.state);
-      // startDraft may end the phase entirely if pool is empty.
+    if (!this.state.packDraft) {
+      startPackDraft(this.state);
       return false;
     }
-    const draft = this.state.draft;
+    const draft = this.state.packDraft;
     if (draft.revealing) return true; // ws layer is showing the reveal
     let waiting = false;
     for (const pid of draft.pendingPlayerIds) {
       if (draft.submittedPicks[pid]) continue;
+      const pack = draft.packs[pid] ?? [];
+      if (pack.length === 0) continue;
       if (this.isHuman(pid)) {
         waiting = true;
       } else {
-        const card = greedyPolicy.pickDraftCard(this.state, pid, draft.pool);
-        submitDraftPick(this.state, pid, card.id);
+        const card = greedyPolicy.pickDraftCard(this.state, pid, pack);
+        submitPackPick(this.state, pid, card.id);
       }
     }
     if (waiting) return true;
@@ -276,7 +287,37 @@ export class GameRunner {
       draft.revealing = true;
       return true;
     }
-    resolveDraftSubRound(this.state);
+    resolvePackPickRound(this.state);
+    return false;
+  }
+
+  private stepBuild(): boolean {
+    if (!this.state.buildPhase) {
+      startBuildPhase(this.state);
+      return false;
+    }
+    const build = this.state.buildPhase;
+    let waiting = false;
+    for (const pid of build.pendingPlayerIds) {
+      if (build.submittedSlots[pid]) continue;
+      if (this.isHuman(pid)) {
+        waiting = true;
+      } else {
+        // CPU greedy: slot all available cards sorted by rarity (highest first), max 9
+        const player = this.state.players.find((p) => p.id === pid);
+        if (!player) continue;
+        const allCards = [...player.skillStock, ...player.skillSlots];
+        const sorted = allCards.slice().sort((a, b) => {
+          const rank: Record<string, number> = { N: 1, R: 2, SR: 3, SSR: 4 };
+          return (rank[b.rarity] ?? 0) - (rank[a.rarity] ?? 0);
+        });
+        const slotIds = sorted.slice(0, 9).map((c) => c.id);
+        submitBuild(this.state, pid, slotIds);
+      }
+    }
+    if (waiting) return true;
+    if (!allBuildsIn(this.state)) return false;
+    resolveBuildPhase(this.state);
     return false;
   }
 
@@ -351,10 +392,10 @@ export class GameRunner {
   // sub-round. Safe no-ops if not in the matching phase / picks not all in.
 
   resolveDraftSubRoundNow(): void {
-    if (this.state.phase !== 'draft' || !this.state.draft) return;
-    const draft = this.state.draft;
+    if (this.state.phase !== 'draft' || !this.state.packDraft) return;
+    const draft = this.state.packDraft;
     if (!draft.pendingPlayerIds.every((id) => !!draft.submittedPicks[id])) return;
-    resolveDraftSubRound(this.state);
+    resolvePackPickRound(this.state);
   }
 
   resolveMonsterPickSubRoundNow(): void {
@@ -370,11 +411,18 @@ export class GameRunner {
     submitMonsterPick(this.state, playerId, baseId);
   }
 
-  submitDraft(playerId: string, skillId: string): void {
-    if (this.state.phase !== 'draft' || !this.state.draft) {
+  submitDraft(playerId: string, cardId: string): void {
+    if (this.state.phase !== 'draft' || !this.state.packDraft) {
       throw new Error('not in draft phase');
     }
-    submitDraftPick(this.state, playerId, skillId);
+    submitPackPick(this.state, playerId, cardId);
+  }
+
+  submitBuild(playerId: string, slotCardIds: string[]): void {
+    if (this.state.phase !== 'build' || !this.state.buildPhase) {
+      throw new Error('not in build phase');
+    }
+    submitBuild(this.state, playerId, slotCardIds);
   }
 
   submitAction(
@@ -395,27 +443,30 @@ export class GameRunner {
     submitReward(this.state, playerId, choice);
   }
 
-  /** Reorder the player's active skill slots. Only allowed in reward phase. */
+  /**
+   * Reorder the player's skill slots. The `order` array should contain all
+   * current skillSlot card IDs in the desired new order. Allowed in reward phase.
+   * Note: the build phase is the primary way to manage slots; this is a shortcut
+   * for quick reordering without a full rebuild.
+   */
   reorderSlots(playerId: string, order: string[]): void {
     if (this.state.phase !== 'reward') {
       throw new Error('slot reorder only available in reward phase');
     }
     const player = this.state.players.find((p) => p.id === playerId);
     if (!player || !player.monster) throw new Error('player has no monster');
-    const actives = player.monster.actives;
-    if (order.length !== actives.length) throw new Error('order length mismatch');
-    const idToSkill = new Map(actives.map((s) => [s.id, s]));
+    const slots = player.skillSlots;
+    if (order.length !== slots.length) throw new Error('order length mismatch');
+    const idToCard = new Map(slots.map((c) => [c.id, c]));
     const seen = new Set<string>();
     for (const id of order) {
-      if (!idToSkill.has(id) || seen.has(id)) {
+      if (!idToCard.has(id) || seen.has(id)) {
         throw new Error('invalid order');
       }
       seen.add(id);
     }
-    order.forEach((id, idx) => {
-      idToSkill.get(id)!.order = idx;
-    });
-    actives.sort((a, b) => a.order - b.order);
+    player.skillSlots = order.map((id) => idToCard.get(id)!);
+    syncMonsterFromSlots(this.state, player);
   }
 
   /**
@@ -457,7 +508,8 @@ export class GameRunner {
       totalRounds: s.totalRounds,
       miniRoundsPerRound: s.miniRoundsPerRound,
       phase: s.phase,
-      draft: s.draft,
+      packDraft: s.packDraft,
+      buildPhase: s.buildPhase,
       actionPhase: s.actionPhase,
       battle: s.battle ? { matches: s.battle.matches } : null,
       reward: s.reward,
@@ -466,6 +518,8 @@ export class GameRunner {
       eventPhaseSummary: s.eventPhaseSummary,
       actionPhaseSummary: s.actionPhaseSummary,
       myActionHand: me ? me.actionHand : null,
+      mySkillStock: me ? me.skillStock : null,
+      mySkillSlots: me ? me.skillSlots : null,
       recentLog: s.log.slice(-80),
       deckCounts: {
         event: s.decks.event.length,
@@ -496,8 +550,11 @@ export class GameRunner {
       s.monsterPick
         ? `mp:${s.monsterPick.pool.length}/${Object.keys(s.monsterPick.submittedPicks).length}/${s.monsterPick.pendingPlayerIds.length}/a${s.monsterPick.attempt}`
         : '-',
-      s.draft
-        ? `dr:${s.draft.pool.length}/${Object.keys(s.draft.submittedPicks).length}/a${s.draft.attempt}`
+      s.packDraft
+        ? `pd:${s.packDraft.passIndex}/${Object.keys(s.packDraft.submittedPicks).length}/${s.packDraft.pendingPlayerIds.length}`
+        : '-',
+      s.buildPhase
+        ? `bp:${s.buildPhase.pendingPlayerIds.length}/${Object.keys(s.buildPhase.submittedSlots).length}`
         : '-',
       s.actionPhase
         ? `ac:${s.actionPhase.pendingPlayerIds.length}/${Object.keys(s.actionPhase.submittedPlays).length}`

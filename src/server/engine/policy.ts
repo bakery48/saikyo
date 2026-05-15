@@ -6,9 +6,12 @@ import type { ActionCard, GameState, MonsterBase, RewardChoice, SkillCard, StatK
  */
 export type Policy = {
   pickMonster(state: GameState, playerId: string, available: MonsterBase[]): MonsterBase;
-  pickDraftCard(state: GameState, playerId: string, pool: SkillCard[]): SkillCard;
+  /** Pick a card from the player's current pack (pack-based booster draft). */
+  pickDraftCard(state: GameState, playerId: string, pack: SkillCard[]): SkillCard;
   pickActionCard(state: GameState, playerId: string, hand: ActionCard[]): ActionCard;
   chooseReward(state: GameState, playerId: string): RewardChoice;
+  /** Choose which cards to slot during the build phase. Returns ordered card IDs (max 9). */
+  buildSlots(state: GameState, playerId: string): string[];
 };
 
 /** Score a monster by total of its base stats — simple heuristic. */
@@ -56,16 +59,16 @@ export const greedyPolicy: Policy = {
     const idx = mixHash(hashCode(playerId), state.rngState, attempt) % top.length;
     return top[idx]!;
   },
-  pickDraftCard(state, playerId, pool) {
-    if (pool.length === 0) return pool[0]!;
-    const maxRank = pool.reduce(
+  pickDraftCard(state, playerId, pack) {
+    if (pack.length === 0) return pack[0]!;
+    const maxRank = pack.reduce(
       (m, c) => Math.max(m, RARITY_RANK[c.rarity] ?? 0),
       0,
     );
-    const best = pool.filter((c) => (RARITY_RANK[c.rarity] ?? 0) === maxRank);
+    const best = pack.filter((c) => (RARITY_RANK[c.rarity] ?? 0) === maxRank);
     if (best.length === 1) return best[0]!;
-    const attempt = state.draft?.attempt ?? 0;
-    const idx = mixHash(hashCode(playerId), state.rngState, attempt) % best.length;
+    const passIndex = state.packDraft?.passIndex ?? 0;
+    const idx = mixHash(hashCode(playerId), state.rngState, passIndex) % best.length;
     return best[idx]!;
   },
   pickActionCard(_state, _playerId, hand) {
@@ -83,9 +86,18 @@ export const greedyPolicy: Policy = {
   chooseReward(state, playerId) {
     const player = state.players.find((p) => p.id === playerId)!;
     const monster = player.monster!;
-    // If the monster is light on actives, take a skill. Otherwise bump the lowest stat.
+    // If the monster has few active slots, take a skill. Otherwise bump the lowest stat.
     if (monster.actives.length < 6) return { kind: 'skill_top' };
     return { kind: 'stat_up', stat: weakestStat(monster.stats) };
+  },
+  buildSlots(state, playerId) {
+    const player = state.players.find((p) => p.id === playerId)!;
+    // Greedy: slot all available cards sorted by rarity (highest first), max 9
+    const allCards = [...player.skillStock, ...player.skillSlots];
+    const sorted = allCards.slice().sort((a, b) => {
+      return (RARITY_RANK[b.rarity] ?? 0) - (RARITY_RANK[a.rarity] ?? 0);
+    });
+    return sorted.slice(0, 9).map((c) => c.id);
   },
 };
 
@@ -145,7 +157,12 @@ function weakestStat(stats: { hp: number; atk: number; def: number; spd: number 
 /** Always pick the first option. Useful for deterministic tests. */
 export const firstOptionPolicy: Policy = {
   pickMonster: (_s, _p, avail) => avail[0]!,
-  pickDraftCard: (_s, _p, pool) => pool[0]!,
+  pickDraftCard: (_s, _p, pack) => pack[0]!,
   pickActionCard: (_s, _p, hand) => hand[0]!,
   chooseReward: () => ({ kind: 'skill_top' }),
+  buildSlots: (state, playerId) => {
+    const player = state.players.find((p) => p.id === playerId)!;
+    const allCards = [...player.skillStock, ...player.skillSlots];
+    return allCards.slice(0, 9).map((c) => c.id);
+  },
 };

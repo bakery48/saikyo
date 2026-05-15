@@ -18,11 +18,21 @@ function actForHuman(runner: GameRunner): void {
       break;
     }
     case 'draft': {
-      if (!s.draft || s.draft.submittedPicks[human.id]) break;
-      if (!s.draft.pendingPlayerIds.includes(human.id)) break;
-      const used = new Set(Object.values(s.draft.submittedPicks));
-      const unused = s.draft.pool.find((c) => !used.has(c.id)) ?? s.draft.pool[0]!;
-      runner.submitDraft(human.id, unused.id);
+      if (!s.packDraft || s.packDraft.submittedPicks[human.id]) break;
+      if (!s.packDraft.pendingPlayerIds.includes(human.id)) break;
+      const myPack = s.packDraft.packs[human.id];
+      if (!myPack || myPack.length === 0) break;
+      runner.submitDraft(human.id, myPack[0]!.id);
+      break;
+    }
+    case 'build': {
+      // Auto-submit: slot all available cards (up to 9)
+      const me = s.players.find((p) => p.id === human.id)!;
+      if (!me || !s.buildPhase) break;
+      if (!s.buildPhase.pendingPlayerIds.includes(human.id)) break;
+      const allCards = [...me.skillStock, ...me.skillSlots];
+      const slotIds = allCards.slice(0, 9).map((c) => c.id);
+      runner.submitBuild(human.id, slotIds);
       break;
     }
     case 'action': {
@@ -93,10 +103,10 @@ describe('GameRunner', () => {
     runner.advance();
     driveToPhase(runner, 'draft');
     expect(runner.state.phase).toBe('draft');
-    expect(runner.state.draft).not.toBeNull();
-    expect(runner.state.draft!.pendingPlayerIds).toContain(human.id);
+    expect(runner.state.packDraft).not.toBeNull();
+    expect(runner.state.packDraft!.pendingPlayerIds).toContain(human.id);
     // The CPUs should have already submitted their draft picks.
-    const submitted = Object.keys(runner.state.draft!.submittedPicks);
+    const submitted = Object.keys(runner.state.packDraft!.submittedPicks);
     expect(submitted.length).toBe(7);
     expect(submitted).not.toContain(human.id);
   });
@@ -105,9 +115,8 @@ describe('GameRunner', () => {
     const runner = new GameRunner({ roomId: 'r1', seed: 42, humans: [human] });
     runner.advance();
     driveToPhase(runner, 'draft');
-    const used = new Set(Object.values(runner.state.draft!.submittedPicks));
-    const unused = runner.state.draft!.pool.find((c) => !used.has(c.id))!;
-    runner.submitDraft(human.id, unused.id);
+    const myPack = runner.state.packDraft!.packs[human.id]!;
+    runner.submitDraft(human.id, myPack[0]!.id);
     runner.advance();
     expect(runner.state.phase).not.toBe('pick_monster');
   });

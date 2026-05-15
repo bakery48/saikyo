@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createInitialState } from '../src/server/engine/state';
 import { resolveEventPhase } from '../src/server/engine/phases/event';
-import { startActionPhase, submitActionPlay, resolveActionPhase } from '../src/server/engine/phases/action';
 import type { GameState } from '../src/server/engine/types';
 import { completeMonsterPicks } from './helpers';
 
@@ -12,13 +11,9 @@ function setupReady(seed = 1): GameState {
     players: [{ id: 'p1', name: 'A', isCPU: false }],
   });
   completeMonsterPicks(state);
-  // Action phase comes before event in the new order; advance through it.
-  startActionPhase(state);
-  for (const p of state.players) {
-    if (!p.monster || p.actionHand.length === 0) continue;
-    submitActionPlay(state, p.id, p.actionHand[0]!.id, {});
-  }
-  resolveActionPhase(state);
+  // In the new flow: action → draft → build → event → battle.
+  // Set state directly to event phase for these focused tests.
+  state.phase = 'event';
   return state;
 }
 
@@ -28,10 +23,10 @@ describe('Event phase', () => {
     state = setupReady();
   });
 
-  it('moves to draft phase after resolving', () => {
+  it('moves to battle phase after resolving', () => {
     expect(state.phase).toBe('event');
     resolveEventPhase(state);
-    expect(state.phase).toBe('draft');
+    expect(state.phase).toBe('battle');
   });
 
   it('moves the played card to graveyard', () => {

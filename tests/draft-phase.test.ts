@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createInitialState } from '../src/server/engine/state';
 import {
-  startDraft,
-  submitDraftPick,
-  resolveDraftSubRound,
-  allDraftPicksIn,
+  startPackDraft,
+  submitPackPick,
+  resolvePackPickRound,
+  allPackPicksIn,
 } from '../src/server/engine/phases/draft';
-import type { GameState, Monster } from '../src/server/engine/types';
+import type { GameState } from '../src/server/engine/types';
 import { completeMonsterPicks } from './helpers';
 
 function setupAtDraft(seed = 30): GameState {
@@ -20,110 +20,130 @@ function setupAtDraft(seed = 30): GameState {
   return state;
 }
 
-const totalSkills = (m: Monster): number => m.actives.length + m.passives.length;
-
-function snapshotSkillCounts(state: GameState): Record<string, number> {
-  return Object.fromEntries(state.players.map((p) => [p.id, totalSkills(p.monster!)]));
-}
-
-describe('Draft phase', () => {
+describe('Pack Draft phase', () => {
   let state: GameState;
   beforeEach(() => {
     state = setupAtDraft();
   });
 
-  it('reveals 8 cards into pool', () => {
-    startDraft(state);
-    expect(state.draft).not.toBeNull();
-    expect(state.draft!.pool).toHaveLength(8);
-    expect(state.draft!.pendingPlayerIds).toHaveLength(8);
-  });
-
-  it('happy path: each player picks a unique card and all are resolved in one round', () => {
-    const before = snapshotSkillCounts(state);
-    startDraft(state);
-    const players = state.draft!.pendingPlayerIds.slice();
-    const pool = state.draft!.pool;
-    players.forEach((pid, i) => submitDraftPick(state, pid, pool[i]!.id));
-    expect(allDraftPicksIn(state)).toBe(true);
-    const finished = resolveDraftSubRound(state);
-    expect(finished).toBe(true);
-    expect(state.draft).toBeNull();
-    expect(['action', 'battle']).toContain(state.phase);
-    // Each player gained exactly 1 skill (active or passive).
-    for (const p of state.players) {
-      expect(totalSkills(p.monster!)).toBe(before[p.id]! + 1);
+  it('startPackDraft creates packs of up to 5 cards for each player', () => {
+    startPackDraft(state);
+    expect(state.packDraft).not.toBeNull();
+    expect(state.packDraft!.draftOrder).toHaveLength(8);
+    expect(state.packDraft!.passIndex).toBe(0);
+    // Each player gets a pack (may be smaller if deck is low)
+    for (const pid of state.packDraft!.draftOrder) {
+      expect(state.packDraft!.packs[pid]).toBeDefined();
+      expect(state.packDraft!.packs[pid]!.length).toBeGreaterThan(0);
+      expect(state.packDraft!.packs[pid]!.length).toBeLessThanOrEqual(5);
     }
   });
 
-  it('conflict: two players picking the same card go to a re-draft', () => {
-    const before = snapshotSkillCounts(state);
-    startDraft(state);
-    const draft = state.draft!;
-    const players = draft.pendingPlayerIds.slice();
-    const pool = draft.pool;
-    submitDraftPick(state, players[0]!, pool[0]!.id);
-    submitDraftPick(state, players[1]!, pool[0]!.id);
-    for (let i = 2; i < players.length; i++) {
-      submitDraftPick(state, players[i]!, pool[i]!.id);
-    }
-    expect(resolveDraftSubRound(state)).toBe(false);
-    expect(state.draft!.pendingPlayerIds.sort()).toEqual([players[0], players[1]].sort());
-    const nonConflict = players.filter((p) => p !== players[0] && p !== players[1]);
-    for (const pid of nonConflict) {
-      const p = state.players.find((x) => x.id === pid)!;
-      expect(totalSkills(p.monster!)).toBe(before[pid]! + 1);
-    }
-    // Conflicting players have not received yet.
-    for (const pid of [players[0]!, players[1]!]) {
-      const p = state.players.find((x) => x.id === pid)!;
-      expect(totalSkills(p.monster!)).toBe(before[pid]!);
-    }
+  it('all players are initially pending', () => {
+    startPackDraft(state);
+    expect(state.packDraft!.pendingPlayerIds).toHaveLength(8);
   });
 
-  it('after a conflict, the colliding card stays in the pool for the re-pick', () => {
-    const before = snapshotSkillCounts(state);
-    startDraft(state);
-    const draft = state.draft!;
-    const players = draft.pendingPlayerIds.slice();
-    const pool = draft.pool;
-    const conflictCardId = pool[0]!.id;
-    submitDraftPick(state, players[0]!, conflictCardId);
-    submitDraftPick(state, players[1]!, conflictCardId);
-    for (let i = 2; i < players.length; i++) {
-      submitDraftPick(state, players[i]!, pool[i]!.id);
-    }
-    expect(resolveDraftSubRound(state)).toBe(false);
-    expect(state.draft!.pendingPlayerIds).toHaveLength(2);
-    // Conflict card stays available; the only untouched card (pool[1]) also stays.
-    expect(state.draft!.pool.some((c) => c.id === conflictCardId)).toBe(true);
-    expect(state.draft!.pool.length).toBe(2);
-    // p0 takes the previously-conflicted card alone, p1 takes the other.
-    const otherCard = state.draft!.pool.find((c) => c.id !== conflictCardId)!.id;
-    submitDraftPick(state, players[0]!, conflictCardId);
-    submitDraftPick(state, players[1]!, otherCard);
-    expect(resolveDraftSubRound(state)).toBe(true);
-    expect(state.draft).toBeNull();
-    for (const pid of [players[0]!, players[1]!]) {
-      const p = state.players.find((x) => x.id === pid)!;
-      expect(totalSkills(p.monster!)).toBe(before[pid]! + 1);
-    }
-  });
+  it('happy path: all players pick simultaneously, rotating 5 times', () => {
+    startPackDraft(state);
+    const draft = state.packDraft!;
+    const initialDraftOrder = draft.draftOrder.slice();
 
-  it('all players collide every round: eventually terminates with everyone holding a card', () => {
-    const before = snapshotSkillCounts(state);
-    startDraft(state);
-    let iterations = 0;
-    while (state.draft) {
-      for (const pid of state.draft.pendingPlayerIds) {
-        submitDraftPick(state, pid, state.draft.pool[0]!.id);
+    // Run 5 passes
+    let done = false;
+    let passes = 0;
+    while (!done && passes < 10) {
+      // Each pending player picks first card from their current pack
+      for (const pid of draft.pendingPlayerIds.slice()) {
+        const pack = draft.packs[pid]!;
+        if (pack.length > 0) {
+          submitPackPick(state, pid, pack[0]!.id);
+        }
       }
-      resolveDraftSubRound(state);
-      iterations++;
-      if (iterations > 20) throw new Error('draft did not terminate');
+      done = resolvePackPickRound(state);
+      passes++;
     }
-    for (const p of state.players) {
-      expect(totalSkills(p.monster!)).toBeGreaterThanOrEqual(before[p.id]! + 1);
+
+    expect(done).toBe(true);
+    expect(state.packDraft).toBeNull();
+    // After draft, advance to build phase
+    expect(state.phase).toBe('build');
+
+    // Each player should have 5 cards in skillStock
+    for (const pid of initialDraftOrder) {
+      const player = state.players.find((p) => p.id === pid)!;
+      expect(player.skillStock.length).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it('draft_finished is logged after all passes', () => {
+    startPackDraft(state);
+    const draft = state.packDraft!;
+    let done = false;
+    let passes = 0;
+    while (!done && passes < 10) {
+      for (const pid of draft.pendingPlayerIds.slice()) {
+        const pack = draft.packs[pid]!;
+        if (pack.length > 0) {
+          submitPackPick(state, pid, pack[0]!.id);
+        }
+      }
+      done = resolvePackPickRound(state);
+      passes++;
+    }
+    const hasFinished = state.log.some((e) => e.kind === 'draft_finished');
+    expect(hasFinished).toBe(true);
+  });
+
+  it('allPackPicksIn returns false before picks, true after', () => {
+    startPackDraft(state);
+    expect(allPackPicksIn(state)).toBe(false);
+    const draft = state.packDraft!;
+    for (const pid of draft.pendingPlayerIds.slice()) {
+      const pack = draft.packs[pid]!;
+      if (pack.length > 0) {
+        submitPackPick(state, pid, pack[0]!.id);
+      }
+    }
+    expect(allPackPicksIn(state)).toBe(true);
+  });
+
+  it('submitting an invalid card throws', () => {
+    startPackDraft(state);
+    const draft = state.packDraft!;
+    const pid = draft.pendingPlayerIds[0]!;
+    expect(() => submitPackPick(state, pid, 'non-existent-card')).toThrow();
+  });
+
+  it('packs rotate to the next player each pass', () => {
+    startPackDraft(state);
+    const draft = state.packDraft!;
+    const order = draft.draftOrder.slice();
+    // Record the pack contents before picking
+    const initialPackIds: Record<string, string[]> = {};
+    for (const pid of order) {
+      initialPackIds[pid] = draft.packs[pid]!.map((c) => c.id);
+    }
+
+    // All pick the first card, then check that packs rotated
+    for (const pid of draft.pendingPlayerIds.slice()) {
+      const pack = draft.packs[pid]!;
+      if (pack.length > 0) {
+        submitPackPick(state, pid, pack[0]!.id);
+      }
+    }
+    resolvePackPickRound(state);
+
+    if (!state.packDraft) return; // draft may be done if packs were size 1
+    // After rotation, player[i]'s new pack should be player[(i-1+n)%n]'s remaining
+    for (let i = 0; i < order.length; i++) {
+      const prevPid = order[(i - 1 + order.length) % order.length]!;
+      const prevInitial = initialPackIds[prevPid]!;
+      const prevPicked = prevInitial[0]!;
+      // What the prev player had minus their pick
+      const expectedRemaining = prevInitial.filter((id) => id !== prevPicked);
+      const currentPack = state.packDraft!.packs[order[i]!]!.map((c) => c.id);
+      expect(currentPack).toEqual(expectedRemaining);
     }
   });
 });

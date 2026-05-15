@@ -8,6 +8,7 @@ import {
   createInitialState,
   resolveMonsterPickSubRound,
   submitMonsterPick,
+  syncMonsterFromSlots,
 } from './state';
 import { resolveEventPhase } from './phases/event';
 import {
@@ -16,10 +17,15 @@ import {
   resolveActionPhase,
 } from './phases/action';
 import {
-  startDraft,
-  submitDraftPick,
-  resolveDraftSubRound,
+  startPackDraft,
+  submitPackPick,
+  resolvePackPickRound,
 } from './phases/draft';
+import {
+  startBuildPhase,
+  submitBuild,
+  resolveBuildPhase,
+} from './phases/build';
 import { runBattlePhase } from './phases/battle';
 import { resolveRewardPhase, submitReward } from './phases/reward';
 import { runTournament } from './phases/tournament';
@@ -48,16 +54,37 @@ function expectPhase(state: GameState, expected: GameState['phase']): void {
   }
 }
 
-function runDraftPhase(state: GameState, policy: Policy): void {
-  startDraft(state);
-  while (state.draft) {
-    const draft = state.draft;
+function runPackDraftPhase(state: GameState, policy: Policy): void {
+  startPackDraft(state);
+  let safety = 20;
+  while (state.packDraft && safety-- > 0) {
+    const draft = state.packDraft;
     for (const playerId of draft.pendingPlayerIds) {
-      const card = policy.pickDraftCard(state, playerId, draft.pool);
-      submitDraftPick(state, playerId, card.id);
+      const pack = draft.packs[playerId] ?? [];
+      if (pack.length === 0) continue;
+      const card = policy.pickDraftCard(state, playerId, pack);
+      submitPackPick(state, playerId, card.id);
     }
-    if (resolveDraftSubRound(state)) break;
+    resolvePackPickRound(state);
   }
+}
+
+function runBuildPhaseAll(state: GameState): void {
+  startBuildPhase(state);
+  if (!state.buildPhase) return;
+  for (const player of state.players) {
+    if (!player.monster) continue;
+    if (!state.buildPhase.pendingPlayerIds.includes(player.id)) continue;
+    // Greedy: slot all available cards (up to 9, sorted by rarity)
+    const allCards = [...player.skillStock, ...player.skillSlots];
+    const sorted = allCards.slice().sort((a, b) => {
+      const rank: Record<string, number> = { N: 1, R: 2, SR: 3, SSR: 4 };
+      return (rank[b.rarity] ?? 0) - (rank[a.rarity] ?? 0);
+    });
+    const slotIds = sorted.slice(0, 9).map((c) => c.id);
+    submitBuild(state, player.id, slotIds);
+  }
+  resolveBuildPhase(state);
 }
 
 /** Resolve a reward phase by letting the policy choose for every pending player. */
@@ -68,7 +95,12 @@ function runRewardPhase(state: GameState, policy: Policy): void {
   resolveRewardPhase(state);
 }
 
-export function runMiniRound(state: GameState, policy: Policy): void {
+/**
+ * Run one round: action → draft → build → event → battle.
+ * An `extra_battle` event card may insert an extra battle+reward cycle
+ * before the main end-of-round battle.
+ */
+export function runOneRound(state: GameState, policy: Policy): void {
   expectPhase(state, 'action');
   startActionPhase(state);
   for (const player of state.players) {
@@ -77,24 +109,25 @@ export function runMiniRound(state: GameState, policy: Policy): void {
     submitActionPlay(state, player.id, card.id, actionExtras(state, player.id, card));
   }
   resolveActionPhase(state);
+
+  expectPhase(state, 'draft');
+  runPackDraftPhase(state, policy);
+
+  expectPhase(state, 'build');
+  runBuildPhaseAll(state);
+
   expectPhase(state, 'event');
   resolveEventPhase(state);
+
   // An `extra_battle` event card detours through battle + reward before
-  // returning to this mini-round's draft phase.
-  if (state.phase === 'battle') {
+  // returning to the main end-of-round battle.
+  if (state.phase === 'battle' && state.returnToBattleAfterReward) {
     runBattlePhase(state);
     expectPhase(state, 'reward');
     runRewardPhase(state, policy);
   }
-  expectPhase(state, 'draft');
-  runDraftPhase(state, policy);
-}
 
-/** Run all 3 mini-rounds (action/event/draft) of a single big round. */
-export function runOneRound(state: GameState, policy: Policy = greedyPolicy): void {
-  for (let i = 0; i < 3; i++) {
-    runMiniRound(state, policy);
-  }
+  expectPhase(state, 'battle');
 }
 
 export function runMonsterPickPhase(state: GameState, policy: Policy): void {
@@ -113,7 +146,7 @@ export function runFullGame(state: GameState, policy: Policy = greedyPolicy): vo
 
   while (state.phase !== 'finished') {
     if (state.phase === 'action') {
-      runMiniRound(state, policy);
+      runOneRound(state, policy);
     } else if (state.phase === 'battle') {
       runBattlePhase(state);
     } else if (state.phase === 'reward') {

@@ -63,15 +63,17 @@ function formatEvent(
     case 'skill_acquired':
       return `${name(e.playerId)} got skill ${e.skillId} [${e.rarity}]`;
     case 'draft_revealed':
-      return `draft pool: ${e.cards.length} cards revealed`;
+      return `draft: ${e.cards.length} cards revealed`;
     case 'draft_pick_submitted':
       return `${name(e.playerId)} picked ${e.skillId}`;
-    case 'draft_resolved':
-      return `draft resolved: ${Object.keys(e.assignments).length} unique`;
-    case 'draft_conflict':
-      return `conflict: ${e.skillId} (${e.players.map(name).join(', ')})`;
-    case 'draft_fallback':
-      return `${name(e.playerId)} fallback ← ${e.skillId}`;
+    case 'draft_pass_resolved':
+      return `draft pass ${e.passIndex} resolved`;
+    case 'draft_finished':
+      return `draft finished`;
+    case 'build_submitted':
+      return `${name(e.playerId)} submitted build (${e.slotCount} slots)`;
+    case 'build_resolved':
+      return `build phase resolved`;
     case 'battle_match':
       return `battle: ${name(e.a)} vs ${name(e.b)} → ${e.winner}`;
     case 'reward_chosen':

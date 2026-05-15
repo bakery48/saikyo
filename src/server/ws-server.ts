@@ -216,6 +216,10 @@ export class GameWsServer {
         this.runGameAction(playerId, (game) => game.submitReward(playerId, msg.choice));
         return;
       }
+      case 'submit_build': {
+        this.runGameAction(playerId, (game) => game.submitBuild(playerId, msg.slotCardIds));
+        return;
+      }
       case 'reorder_slots': {
         this.runGameAction(playerId, (game) => game.reorderSlots(playerId, msg.order));
         return;
@@ -426,11 +430,11 @@ export class GameWsServer {
   private maybeAutoReveal(room: Room): boolean {
     const game = this.games.get(room.id);
     if (!game) return false;
-    const draft = game.state.draft;
+    const draft = game.state.packDraft;
     if (draft?.revealing) {
       this.broadcastGameState(room);
       setTimeout(() => {
-        const d = game.state.draft;
+        const d = game.state.packDraft;
         if (d) d.revealing = false;
         game.resolveDraftSubRoundNow();
         this.driveGame(room);

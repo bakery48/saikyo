@@ -64,3 +64,23 @@ export function extractPrefixTags(name: string, monster: Monster): string[] {
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
 }
+
+/**
+ * Strip any name prefix tags that are no longer available on the monster
+ * (e.g., after a skill is removed from skillSlots). Mutates monster.name.
+ */
+export function stripInvalidNameTags(monster: Monster): void {
+  const available = getAvailableTags(monster);
+  const currentTags = extractPrefixTags(monster.name, monster);
+  const validTags: string[] = [];
+  const pool = [...available];
+  for (const tag of currentTags) {
+    const idx = pool.indexOf(tag);
+    if (idx >= 0) {
+      validTags.push(tag);
+      pool.splice(idx, 1);
+    }
+    // else: tag no longer available, drop it
+  }
+  monster.name = composeMonsterName(validTags, monster);
+}

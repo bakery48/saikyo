@@ -8,7 +8,7 @@ import type {
   StatKey,
 } from '../types';
 import { drawTop } from '../deck';
-import { addSkillCardToMonster, makeRng, saveRng } from '../state';
+import { addSkillCardToMonster, makeRng, saveRng, syncMonsterFromSlots } from '../state';
 import { describeActionEffect } from '../../../lib/card-text';
 import { MONSTERS } from '../cards/monsters';
 
@@ -45,28 +45,30 @@ function applyActionEffect(
       break;
     }
     case 'discard_random_active': {
-      if (player.monster.actives.length === 0) break;
-      const idx = rng.int(0, player.monster.actives.length - 1);
-      player.monster.actives.splice(idx, 1);
-      player.monster.actives.forEach((s, i) => (s.order = i + 1));
+      // Remove a random active skill from skillSlots (only slotted active cards)
+      const activeSlots = player.skillSlots
+        .map((c, i) => ({ c, i }))
+        .filter(({ c }) => !c.isPassive && c.active);
+      if (activeSlots.length === 0) break;
+      const pick = rng.int(0, activeSlots.length - 1);
+      const { c: discarded, i: slotIdx } = activeSlots[pick]!;
+      player.skillSlots.splice(slotIdx, 1);
+      // Discarded card goes to skill graveyard
+      state.decks.skillGrave.push(discarded);
+      syncMonsterFromSlots(state, player);
       break;
     }
     case 'cleanse_sin': {
-      const sinActives = player.monster.actives
-        .map((s, i) => ({ s, i }))
-        .filter(({ s }) => s.tag === 'sin');
-      const sinPassives = player.monster.passives
-        .map((p, i) => ({ p, i }))
-        .filter(({ p }) => p.tag === 'sin');
-      const total = sinActives.length + sinPassives.length;
-      if (total === 0) break;
-      const pick = rng.int(0, total - 1);
-      if (pick < sinActives.length) {
-        player.monster.actives.splice(sinActives[pick]!.i, 1);
-        player.monster.actives.forEach((s, i) => (s.order = i + 1));
-      } else {
-        player.monster.passives.splice(sinPassives[pick - sinActives.length]!.i, 1);
-      }
+      // Remove a random sin-tagged skill from skillSlots
+      const sinSlots = player.skillSlots
+        .map((c, i) => ({ c, i }))
+        .filter(({ c }) => c.tag === 'sin');
+      if (sinSlots.length === 0) break;
+      const pick = rng.int(0, sinSlots.length - 1);
+      const { c: discarded, i: slotIdx } = sinSlots[pick]!;
+      player.skillSlots.splice(slotIdx, 1);
+      state.decks.skillGrave.push(discarded);
+      syncMonsterFromSlots(state, player);
       break;
     }
     case 'gain_passive': {
@@ -99,12 +101,18 @@ function applyActionEffect(
 function applySwapActives(state: GameState, swap: NonNullable<ActionPlay['swap']>): void {
   const target = state.players.find((p) => p.id === swap.targetPlayerId);
   if (!target?.monster) return;
-  const a = target.monster.actives.find((s) => s.id === swap.skillIdA);
-  const b = target.monster.actives.find((s) => s.id === swap.skillIdB);
-  if (!a || !b || a.id === b.id) return;
-  const tmp = a.order;
-  a.order = b.order;
-  b.order = tmp;
+  // Swap is based on monster.actives IDs; map back to skillSlots positions.
+  // skillSlot cards have the same id as monster.actives (set by syncMonsterFromSlots).
+  const slots = target.skillSlots;
+  const idxA = slots.findIndex((c) => c.id === swap.skillIdA);
+  const idxB = slots.findIndex((c) => c.id === swap.skillIdB);
+  if (idxA < 0 || idxB < 0 || idxA === idxB) return;
+  // Swap the two slots
+  const tmp = slots[idxA]!;
+  slots[idxA] = slots[idxB]!;
+  slots[idxB] = tmp;
+  // Re-sync monster from slots after the swap
+  syncMonsterFromSlots(state, target);
 }
 
 /**
@@ -118,10 +126,10 @@ export function startActionPhase(state: GameState): void {
 
   if (state.skipNextActionPhase) {
     state.skipNextActionPhase = false;
-    state.phase = 'event';
+    state.phase = 'draft';
     state.log.push({
       kind: 'phase_change',
-      phase: 'event',
+      phase: 'draft',
       round: state.round,
       miniRound: state.miniRound,
     });
@@ -181,8 +189,11 @@ export function submitActionPlay(
     }
     const target = state.players.find((p) => p.id === swap.targetPlayerId);
     if (!target?.monster) throw new Error('swap target has no monster');
-    const hasA = target.monster.actives.some((s) => s.id === swap.skillIdA);
-    const hasB = target.monster.actives.some((s) => s.id === swap.skillIdB);
+    // Validate against skillSlots (which are reflected in monster.actives after sync)
+    const hasA = target.skillSlots.some((s) => s.id === swap.skillIdA) ||
+                 target.monster.actives.some((s) => s.id === swap.skillIdA);
+    const hasB = target.skillSlots.some((s) => s.id === swap.skillIdB) ||
+                 target.monster.actives.some((s) => s.id === swap.skillIdB);
     if (!hasA || !hasB) throw new Error('swap skills not found on target');
   }
   phase.submittedPlays[playerId] = { cardId, chosenStat, swap };
@@ -236,10 +247,10 @@ export function resolveActionPhase(state: GameState): void {
   }
   state.actionPhase = null;
   state.actionPhaseSummary = summary.plays.length > 0 ? summary : null;
-  state.phase = 'event';
+  state.phase = 'draft';
   state.log.push({
     kind: 'phase_change',
-    phase: 'event',
+    phase: 'draft',
     round: state.round,
     miniRound: state.miniRound,
   });

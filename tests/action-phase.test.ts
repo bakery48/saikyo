@@ -76,7 +76,7 @@ describe('Action phase', () => {
       play(state, p.id, p.actionHand[0]!.id);
     }
     resolveActionPhase(state);
-    expect(state.phase).toBe('event');
+    expect(state.phase).toBe('draft');
     // Action card pool size (deck + grave + hands) is conserved.
     const handsAfter = state.players.reduce((n, p) => n + p.actionHand.length, 0);
     expect(state.decks.action.length + state.decks.actionGrave.length + handsAfter).toBe(
@@ -95,13 +95,13 @@ describe('Action phase', () => {
     expect(target.monster!.stats.atk).toBe(beforeAtk + 2);
   });
 
-  it('draw_skill_top adds a skill to the player monster', () => {
+  it('draw_skill_top adds a skill to the player skillStock', () => {
     const target = state.players[0]!;
     startActionPhase(state);
     forceCardInHand(state, target, 'ac-010'); // 探索 = draw skill top
-    const before = target.monster!.actives.length + target.monster!.passives.length;
+    const before = target.skillStock.length;
     playAll(state, target.id, 'ac-010');
-    const after = target.monster!.actives.length + target.monster!.passives.length;
+    const after = target.skillStock.length;
     expect(after).toBe(before + 1);
   });
 

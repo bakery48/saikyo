@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createInitialState, addSkillCardToMonster } from '../src/server/engine/state';
+import { createInitialState, addSkillCardToMonster, syncMonsterFromSlots } from '../src/server/engine/state';
 import { GameRunner } from '../src/server/game-runner';
 import {
   composeMonsterName,
@@ -9,8 +9,21 @@ import {
   validateMonsterName,
 } from '../src/server/engine/naming';
 import { SKILLS } from '../src/server/engine/cards/skills';
-import type { GameState, SkillCard } from '../src/server/engine/types';
+import type { GameState, Player, SkillCard } from '../src/server/engine/types';
 import { completeMonsterPicks } from './helpers';
+
+/**
+ * Helper: add a card to a player's skillSlots (bypassing build phase)
+ * and sync the monster. Used in tests that need skills reflected in naming.
+ */
+function slotCard(state: GameState, player: Player, card: SkillCard): SkillCard {
+  const stockCard = addSkillCardToMonster(state, player, card);
+  // Move from stock to slots immediately for test purposes
+  player.skillStock = player.skillStock.filter((c) => c.id !== stockCard.id);
+  player.skillSlots.push(stockCard);
+  syncMonsterFromSlots(state, player);
+  return stockCard;
+}
 
 function setupReady(): GameState {
   const state = createInitialState({
@@ -42,21 +55,21 @@ describe('Skill name tags', () => {
     }
   });
 
-  it('addSkillCardToMonster propagates nameTag onto active and passive instances', () => {
+  it('addSkillCardToMonster propagates nameTag onto skillStock cards', () => {
     const state = setupReady();
     const player = state.players.find((p) => p.id === 'p1')!;
-    const active = addSkillCardToMonster(state, player, findCard('sk-r-001')); // パワー
-    const passive = addSkillCardToMonster(state, player, findCard('sk-rp-043')); // タンク
-    expect(active.nameTag).toBe('パワー');
-    expect(passive.nameTag).toBe('タンク');
+    const stockCard1 = addSkillCardToMonster(state, player, findCard('sk-r-001')); // パワー
+    const stockCard2 = addSkillCardToMonster(state, player, findCard('sk-rp-043')); // タンク
+    expect(stockCard1.nameTag).toBe('パワー');
+    expect(stockCard2.nameTag).toBe('タンク');
   });
 
-  it('getAvailableTags reflects all nameTag-bearing skills', () => {
+  it('getAvailableTags reflects all nameTag-bearing slotted skills', () => {
     const state = setupReady();
     const player = state.players.find((p) => p.id === 'p1')!;
-    addSkillCardToMonster(state, player, findCard('sk-r-001')); // パワー
-    addSkillCardToMonster(state, player, findCard('sk-r-012')); // ウィザード
-    addSkillCardToMonster(state, player, findCard('sk-ssr-001')); // ドラゴン
+    slotCard(state, player, findCard('sk-r-001')); // パワー
+    slotCard(state, player, findCard('sk-r-012')); // ウィザード
+    slotCard(state, player, findCard('sk-ssr-001')); // ドラゴン
     const tags = getAvailableTags(player.monster!);
     expect(tags.sort()).toEqual(['ウィザード', 'ドラゴン', 'パワー'].sort());
   });
@@ -67,9 +80,9 @@ describe('validateMonsterName', () => {
   beforeEach(() => {
     state = setupReady();
     const p = state.players.find((p) => p.id === 'p1')!;
-    addSkillCardToMonster(state, p, findCard('sk-r-001')); // パワー
-    addSkillCardToMonster(state, p, findCard('sk-r-012')); // ウィザード
-    addSkillCardToMonster(state, p, findCard('sk-ssr-001')); // ドラゴン
+    slotCard(state, p, findCard('sk-r-001')); // パワー
+    slotCard(state, p, findCard('sk-r-012')); // ウィザード
+    slotCard(state, p, findCard('sk-ssr-001')); // ドラゴン
   });
 
   it('accepts the bare base monster name (no prefix)', () => {
@@ -118,9 +131,10 @@ describe('validateMonsterName', () => {
   });
 
   it('allows duplicate tags up to multiplicity', () => {
-    const monster = state.players[0]!.monster!;
+    const player = state.players[0]!;
+    const monster = player.monster!;
     const base = getBaseName(monster);
-    addSkillCardToMonster(state, state.players[0]!, findCard('sk-r-001')); // 2nd パワー
+    slotCard(state, player, findCard('sk-r-001')); // 2nd パワー
     expect(validateMonsterName(`パワー・パワー・${base}`, monster)).toBe(true);
   });
 });
@@ -175,17 +189,20 @@ describe('GameRunner.renameMonster', () => {
       if (runner.state.phase === 'pick_monster') break;
     }
     if (runner.state.phase !== 'draft') return; // Game flow drifted; skip body.
-    const draft = runner.state.draft!;
-    const used = new Set(Object.values(draft.submittedPicks));
-    const taggedCards = draft.pool.filter((c) => !!c.nameTag);
-    const card = taggedCards.find((c) => !used.has(c.id)) ?? draft.pool.find((c) => !used.has(c.id))!;
+    const draft = runner.state.packDraft!;
+    const myPack = draft.packs['h1'] ?? [];
+    const taggedCards = myPack.filter((c) => !!c.nameTag);
+    const card = taggedCards[0] ?? myPack[0];
+    if (!card) return; // No cards in pack; skip.
     runner.submitDraft('h1', card.id);
     runner.advance();
     const player = runner.state.players.find((p) => p.id === 'h1')!;
+    // After the draft, the player will go through build phase.
+    // Tags come from slotted skills (monster.actives/passives via syncMonsterFromSlots).
     const tag =
       player.monster!.actives.find((a) => a.nameTag)?.nameTag ??
       player.monster!.passives.find((p) => p.nameTag)?.nameTag;
-    if (!tag) return; // Drew an N-rarity skill (no tag); nothing to rename with.
+    if (!tag) return; // No tagged skill slotted; nothing to rename with.
     const newName = composeMonsterName([tag], player.monster!);
     runner.renameMonster('h1', newName);
     expect(player.monster!.name).toBe(newName);
