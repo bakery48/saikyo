@@ -54,13 +54,13 @@ export class RoomManager {
     return room;
   }
 
-  joinRoom(roomId: string, player: RoomPlayer): Room {
+  joinRoom(roomId: string, player: RoomPlayer, opts: { allowInGame?: boolean } = {}): Room {
     if (this.playerToRoom.has(player.id)) {
       throw new Error('player already in a room');
     }
     const room = this.rooms.get(roomId);
     if (!room) throw new Error('room not found');
-    if (room.inGame) throw new Error('game already started');
+    if (room.inGame && !opts.allowInGame) throw new Error('game already started');
     if (room.players.length >= MAX_PLAYERS) throw new Error('room is full');
     if (room.players.some((p) => p.id === player.id)) {
       throw new Error('already in room');

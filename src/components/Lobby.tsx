@@ -114,9 +114,9 @@ export function Lobby({ socket }: { socket: GameSocket }) {
                       playerName: trimmed || 'Player',
                     })
                   }
-                  disabled={r.inGame || r.playerCount >= 8 || !socket.connected}
+                  disabled={r.playerCount >= 8 || !socket.connected}
                 >
-                  Join
+                  {r.inGame ? '復帰' : 'Join'}
                 </button>
               </li>
             ))}

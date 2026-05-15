@@ -106,6 +106,20 @@ export class GameRunner {
     if (p) p.isCPU = true;
   }
 
+  /** Take a CPU-controlled seat back over with a human player. */
+  reclaimSeat(playerId: string): boolean {
+    const p = this.state.players.find((pl) => pl.id === playerId);
+    if (!p) return false;
+    p.isCPU = false;
+    this.humanIds.add(playerId);
+    return true;
+  }
+
+  /** True if the given player id has a seat in this game (human or CPU-converted). */
+  hasSeat(playerId: string): boolean {
+    return this.state.players.some((pl) => pl.id === playerId);
+  }
+
   /**
    * Returns true exactly once after the game enters the 'finished' phase
    * with a champion. Used by the WS layer so the champion is saved to the

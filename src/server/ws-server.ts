@@ -139,11 +139,16 @@ export class GameWsServer {
       }
       case 'join_room': {
         this.playerNames.set(playerId, msg.playerName);
-        const room = this.roomManager.joinRoom(msg.roomId, {
-          id: playerId,
-          name: msg.playerName,
-          isReady: false,
-        });
+        // Rejoin path: if this player has a seat in the room's running game,
+        // reclaim it from the CPU instead of failing on the inGame check.
+        const existingGame = this.games.get(msg.roomId);
+        const canRejoin = !!existingGame && existingGame.hasSeat(playerId);
+        const room = this.roomManager.joinRoom(
+          msg.roomId,
+          { id: playerId, name: msg.playerName, isReady: false },
+          { allowInGame: canRejoin },
+        );
+        if (canRejoin) existingGame!.reclaimSeat(playerId);
         this.broadcastRoomState(room.id);
         this.broadcastRoomsList();
         // If a game is already running in this room (rejoiner), send state.
@@ -153,16 +158,23 @@ export class GameWsServer {
       }
       case 'leave_room':
       case 'leave_game': {
+        const roomBefore = this.roomManager.getRoomByPlayer(playerId);
+        const gameBefore = roomBefore ? this.games.get(roomBefore.id) : null;
+        const gameInProgress =
+          !!gameBefore && gameBefore.state.phase !== 'finished';
+        // Mid-game leave: hand the seat to CPU so the game can continue.
+        if (gameInProgress && gameBefore!.isHuman(playerId)) {
+          gameBefore!.convertToCpu(playerId);
+        }
         const { room, destroyed } = this.roomManager.leavePlayer(playerId);
         this.send(ws, { type: 'left_room' });
         if (room && !destroyed) {
           this.broadcastRoomState(room.id);
+          if (gameInProgress) this.driveGame(room);
           // If everyone left, drop the game.
           if (room.players.length === 0) this.games.delete(room.id);
         }
         if (destroyed) {
-          // Was the only player; drop game if any.
-          // Find the destroyed room id by iterating games.
           for (const [rid] of this.games) {
             if (this.roomManager.getRoom(rid) === null) this.games.delete(rid);
           }
