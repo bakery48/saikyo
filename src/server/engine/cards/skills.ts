@@ -207,6 +207,20 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'steal_stat', stat: 'atk', amount: 2 } },
   },
   {
+    id: 'sk-sr-060',
+    name: '剛力奪い',
+    rarity: 'SR',
+    nameTag: 'ハイスナッチ',
+    active: { effect: { kind: 'steal_stat', stat: 'atk', amount: 3 } },
+  },
+  {
+    id: 'sk-ssr-030',
+    name: '覇力奪い',
+    rarity: 'SSR',
+    nameTag: 'グランドスナッチ',
+    active: { effect: { kind: 'steal_stat', stat: 'atk', amount: 4 } },
+  },
+  {
     id: 'sk-n-030',
     name: '翳り',
     rarity: 'N',
@@ -249,11 +263,25 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'drain_hp', amount: 3 } },
   },
   {
+    id: 'sk-r-070',
+    name: '鎧削り',
+    rarity: 'R',
+    nameTag: 'スクラッチ',
+    active: { effect: { kind: 'steal_stat', stat: 'def', amount: 2 } },
+  },
+  {
     id: 'sk-sr-022',
     name: '鎧剥ぎ',
     rarity: 'SR',
     nameTag: 'アーマーブレイク',
     active: { effect: { kind: 'steal_stat', stat: 'def', amount: 3 } },
+  },
+  {
+    id: 'sk-ssr-031',
+    name: '鎧剥奪',
+    rarity: 'SSR',
+    nameTag: 'グランドアーマーブレイク',
+    active: { effect: { kind: 'steal_stat', stat: 'def', amount: 4 } },
   },
   {
     id: 'sk-r-067',
