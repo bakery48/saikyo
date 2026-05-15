@@ -398,7 +398,11 @@ export type PassiveEffect =
    */
   | { kind: 'absolute_zero' }
   /** At battle start, all this side's attacks bypass the opponent's shields (regular / reflect / ghost / threshold). DEF is still applied normally. */
-  | { kind: 'pierce_all_shields' };
+  | { kind: 'pierce_all_shields' }
+  /** Any normal shield gained by this side is converted to reflect shield instead. */
+  | { kind: 'shield_to_reflect' }
+  /** Any normal shield or reflect shield gained by this side is converted to ghost shield instead. */
+  | { kind: 'shield_reflect_to_ghost' };
 
 export type PassiveSkill = {
   id: string;

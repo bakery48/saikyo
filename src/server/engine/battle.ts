@@ -99,6 +99,10 @@ type CombatStats = Stats & {
   totalActives: number;
   /** Multiplier applied to every shield gain (1 = normal, 2 = double_shield). */
   shieldMultiplier: number;
+  /** Normal shield gains are redirected to reflectShield. */
+  shieldToReflect: boolean;
+  /** Normal shield and reflectShield gains are redirected to ghostShield. */
+  shieldReflectToGhost: boolean;
   /** False once revenge_burst has fired this battle. */
   revengeBurstAvailable: boolean;
   /** False once last_breath has fired this battle. */
@@ -165,6 +169,8 @@ function initCombat(m: Monster): CombatStats {
     cannotDodge: false,
     totalActives: m.actives.length,
     shieldMultiplier: m.passives.some((p) => p.effect.kind === 'double_shield') ? 2 : 1,
+    shieldToReflect: m.passives.some((p) => p.effect.kind === 'shield_to_reflect'),
+    shieldReflectToGhost: m.passives.some((p) => p.effect.kind === 'shield_reflect_to_ghost'),
     revengeBurstAvailable: m.passives.some((p) => p.effect.kind === 'revenge_burst'),
     lastBreathAvailable: m.passives.some((p) => p.effect.kind === 'last_breath'),
     incomingIgnoresDef: false,
@@ -179,6 +185,28 @@ function initCombat(m: Monster): CombatStats {
     hexDefFiredThisActive: false,
   };
   return c;
+}
+
+/** Grant normal shield respecting shield_to_reflect / shield_reflect_to_ghost conversions. */
+function grantShield(mon: CombatStats, amount: number, log: BattleEvent[], side: Side): void {
+  if (mon.shieldReflectToGhost) {
+    mon.ghostShield += amount;
+  } else if (mon.shieldToReflect) {
+    mon.reflectShield += amount;
+  } else {
+    mon.shield += amount;
+  }
+  log.push({ kind: 'shield', player: side, amount });
+}
+
+/** Grant reflect shield respecting shield_reflect_to_ghost conversion. */
+function grantReflectShield(mon: CombatStats, amount: number, log: BattleEvent[], side: Side): void {
+  if (mon.shieldReflectToGhost) {
+    mon.ghostShield += amount;
+  } else {
+    mon.reflectShield += amount;
+  }
+  log.push({ kind: 'shield', player: side, amount });
 }
 
 /** Flip every active skill's `order` so the highest-ordered skill goes first. */
@@ -247,8 +275,7 @@ function applyBattleStartPassives(
       case 'grant_shield':
         if (p.trigger.kind === 'battle_start') {
           const gain = p.effect.amount * self.shieldMultiplier;
-          self.shield += gain;
-          log.push({ kind: 'shield', player: side, amount: gain });
+          grantShield(self, gain, log, side);
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
@@ -336,6 +363,16 @@ function applyBattleStartPassives(
       case 'pierce_all_shields':
         if (p.trigger.kind === 'battle_start') {
           self.alwaysPierceShield = true;
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      case 'shield_to_reflect':
+        if (p.trigger.kind === 'battle_start') {
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      case 'shield_reflect_to_ghost':
+        if (p.trigger.kind === 'battle_start') {
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
@@ -478,9 +515,8 @@ function takeDamage(
       const converted = Math.floor((dmg * p.effect.percent) / 100);
       if (converted > 0) {
         const gain = converted * target.shieldMultiplier;
-        target.shield += gain;
+        grantShield(target, gain, log, side);
         dmg = Math.max(0, dmg - converted);
-        log.push({ kind: 'shield', player: side, amount: gain });
         log.push({ kind: 'passive', player: side, passiveId: p.id });
       }
     }
@@ -1351,13 +1387,11 @@ function applySkill(args: {
     }
     case 'shield': {
       const gain = e.amount * user.shieldMultiplier;
-      user.shield += gain;
-      log.push({ kind: 'shield', player: userSide, amount: gain });
+      grantShield(user, gain, log, userSide);
       break;
     }
     case 'reflect_shield': {
-      user.reflectShield += e.amount;
-      log.push({ kind: 'shield', player: userSide, amount: e.amount });
+      grantReflectShield(user, e.amount, log, userSide);
       break;
     }
     case 'threshold_shield': {
@@ -1436,8 +1470,7 @@ function applySkill(args: {
       user.hp -= e.hpCost;
       log.push({ kind: 'damage', from: userSide, to: userSide, amount: e.hpCost, hpAfter: user.hp });
       const gain = e.shieldAmount * user.shieldMultiplier;
-      user.shield += gain;
-      log.push({ kind: 'shield', player: userSide, amount: gain });
+      grantShield(user, gain, log, userSide);
       break;
     }
     case 'pay_hp_debuff_all': {
@@ -2033,8 +2066,7 @@ function applyOnActiveUsedPassives(
         break;
       case 'shield_on_active': {
         const gain = p.effect.amount * user.shieldMultiplier;
-        user.shield += gain;
-        log.push({ kind: 'shield', player: side, amount: gain });
+        grantShield(user, gain, log, side);
         log.push({ kind: 'passive', player: side, passiveId: p.id });
         break;
       }
@@ -2054,8 +2086,7 @@ function applyOnActiveUsedPassives(
       if (p.trigger.kind !== 'on_last_active_used') continue;
       switch (p.effect.kind) {
         case 'grant_reflect_shield_on_last_active': {
-          user.reflectShield += p.effect.amount;
-          log.push({ kind: 'shield', player: side, amount: p.effect.amount });
+          grantReflectShield(user, p.effect.amount, log, side);
           log.push({ kind: 'passive', player: side, passiveId: p.id });
           break;
         }

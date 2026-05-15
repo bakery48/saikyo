@@ -279,6 +279,10 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `攻撃を回避したとき相手に${e.amount}DEF無視ダメージ`;
     case 'shield_thorns':
       return `シールドのある状態で被ダメ時、相手に${e.amount}DEF無視ダメージ`;
+    case 'shield_to_reflect':
+      return `シールドを得るとき、代わりに反射シールドになる`;
+    case 'shield_reflect_to_ghost':
+      return `シールド/反射シールドを得るとき、代わりに幽霊シールドになる`;
     case 'opportunist':
       return `相手に能力低下があるとき与ダメ+${e.amount}（DEF無視）`;
     case 'mirror_stats':
@@ -389,7 +393,9 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
     p.effect.kind === 'swap_atk_def_after_first_attack' ||
     p.effect.kind === 'first_strike_steal_atk' ||
     p.effect.kind === 'regen_shield' ||
-    p.effect.kind === 'growth_heal'
+    p.effect.kind === 'growth_heal' ||
+    p.effect.kind === 'shield_to_reflect' ||
+    p.effect.kind === 'shield_reflect_to_ghost'
   ) {
     return describePassiveEffect(p.effect);
   }

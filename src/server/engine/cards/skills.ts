@@ -735,6 +735,17 @@ export const SKILLS: SkillCard[] = [
     },
   },
   {
+    id: 'sk-srp-026',
+    name: '幽霊の鎧 (passive)',
+    rarity: 'SR',
+    nameTag: 'ゴーストアーマー',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'shield_reflect_to_ghost' },
+    },
+  },
+  {
     id: 'sk-ssrp-011',
     name: '終焉の輝き (passive)',
     rarity: 'SSR',
@@ -785,8 +796,8 @@ export const SKILLS: SkillCard[] = [
     nameTag: 'ソーンズ',
     isPassive: true,
     passive: {
-      trigger: { kind: 'on_take_damage' },
-      effect: { kind: 'shield_thorns', amount: 2 },
+      trigger: { kind: 'battle_start' },
+      effect: { kind: 'shield_to_reflect' },
     },
   },
   {
