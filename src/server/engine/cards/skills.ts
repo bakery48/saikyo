@@ -504,13 +504,6 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'execute', threshold: 10 } },
   },
   {
-    id: 'sk-ssr-014',
-    name: '神槍',
-    rarity: 'SSR',
-    nameTag: 'ロンギヌス',
-    active: { effect: { kind: 'attack', mult: 4.0, useStat: 'atk', attackKind: 'sword' } },
-  },
-  {
     id: 'sk-ssr-015',
     name: '魂喰い',
     rarity: 'SSR',
