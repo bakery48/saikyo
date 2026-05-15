@@ -72,7 +72,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-025', name: '神風返し', rarity: 'SSR', nameTag: 'オーバーゲイル', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 1.8 } } },
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
-  { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.5, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.6, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-003', name: '貫通の理', rarity: 'SSR', nameTag: 'バニッシャー', active: { effect: { kind: 'true_damage', amount: 8 } } },
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
   { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 7 } } },
@@ -95,7 +95,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-017', name: 'フラッシュバック', rarity: 'SR', nameTag: 'フラッシュバック', active: { effect: { kind: 'rewind_skill', rewindBy: 2, selfDamagePercent: 25 } } },
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
-  { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'ドラゴン', active: { effect: { kind: 'attack', mult: 3.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'ドラゴン', active: { effect: { kind: 'attack', mult: 2.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-ssr-003', name: '聖なる盾', rarity: 'SSR', nameTag: 'セレスチャル', active: { effect: { kind: 'shield', amount: 12 } } },
   { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッドソーン', active: { effect: { kind: 'reflect_shield', amount: 10 } } },
   { id: 'sk-ssr-019', name: 'マキシム・オーラ', rarity: 'SSR', nameTag: 'マキシム', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.5, threshold: 7 } } },
@@ -290,6 +290,13 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'attack', mult: 1.3, useStat: 'spd', attackKind: 'sword' } },
   },
   {
+    id: 'sk-ssr-027',
+    name: '真・神速斬',
+    rarity: 'SSR',
+    nameTag: 'グランドソニック',
+    active: { effect: { kind: 'attack', mult: 1.6, useStat: 'spd', attackKind: 'sword' } },
+  },
+  {
     id: 'sk-sr-026',
     name: '覚醒',
     rarity: 'SR',
@@ -448,6 +455,13 @@ export const SKILLS: SkillCard[] = [
     rarity: 'SR',
     nameTag: 'バースト',
     active: { effect: { kind: 'attack', mult: 1.4, useStat: 'def', attackKind: 'strike' } },
+  },
+  {
+    id: 'sk-ssr-026',
+    name: '真・ガードバースト',
+    rarity: 'SSR',
+    nameTag: 'グランドバースト',
+    active: { effect: { kind: 'attack', mult: 1.8, useStat: 'def', attackKind: 'strike' } },
   },
   {
     id: 'sk-sr-033',
