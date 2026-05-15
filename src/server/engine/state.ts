@@ -104,7 +104,11 @@ export function createInitialState(opts: {
         const skillDeck: SkillCard[] = [];
         for (const card of SKILLS) {
           const count = opts.skillCardCounts?.[card.id] ?? defaultSkillCount(card);
-          for (let i = 0; i < count; i++) skillDeck.push(card);
+          for (let i = 0; i < count; i++) {
+            // Each deck instance needs a unique id so multi-copy cards (e.g. N rarity)
+            // don't collide in the draft pool / conflict resolution.
+            skillDeck.push(count > 1 ? { ...card, id: `${card.id}@${i}` } : card);
+          }
         }
         return shuffle(skillDeck, rng);
       })(),
