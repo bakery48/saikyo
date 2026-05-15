@@ -1711,6 +1711,8 @@ function applySkill(args: {
     }
     case 'break_shield': {
       target.shield = 0;
+      target.reflectShield = 0;
+      target.ghostShield = 0;
       break;
     }
     case 'reckless_attack': {
