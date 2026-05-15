@@ -696,6 +696,28 @@ export const SKILLS: SkillCard[] = [
     isPassive: true,
     passive: {
       trigger: { kind: 'on_deal_damage' },
+      effect: { kind: 'tail_fury', amount: 2, threshold: 2 },
+    },
+  },
+  {
+    id: 'sk-srp-025',
+    name: '断末魔の輝き (passive)',
+    rarity: 'SR',
+    nameTag: 'ハイテイル',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_deal_damage' },
+      effect: { kind: 'tail_fury', amount: 3, threshold: 2 },
+    },
+  },
+  {
+    id: 'sk-ssrp-011',
+    name: '終焉の輝き (passive)',
+    rarity: 'SSR',
+    nameTag: 'グランドテイル',
+    isPassive: true,
+    passive: {
+      trigger: { kind: 'on_deal_damage' },
       effect: { kind: 'tail_fury', amount: 4, threshold: 2 },
     },
   },
