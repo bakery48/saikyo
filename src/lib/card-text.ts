@@ -90,5 +90,25 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       return `対象のATK/DEFをそれぞれ-${e.amount}（永続）`;
     case 'draw_passive_top':
       return 'スキルデッキからパッシブカードを1枚獲得';
+    case 'steal_stat':
+      return `最高${e.stat.toUpperCase()}の相手から${e.stat.toUpperCase()}-${e.amount}を奪う`;
+    case 'copy_stat_from_leader':
+      return `自分の${e.stat.toUpperCase()}を全員の最高値に揃える`;
+    case 'trade_stat':
+      return `${e.from.toUpperCase()}-${e.fromAmount}して${e.to.toUpperCase()}+${e.toAmount}`;
+    case 'slot_top_skill':
+      return 'スキルデッキ先頭を直接スロットに装備（空きなければストックへ）';
+    case 'upgrade_skill':
+      return 'ストックのカードをランダムに1枚ランクアップ（N→R→SR→SSR）';
+    case 'copy_skill_from_player':
+      return 'ランダムな相手のストックからスキルカードを1枚コピー';
+    case 'hp_to_atk':
+      return `現在HPの${Math.round(e.fraction * 100)}%分ATKを永続強化`;
+    case 'all_stats_mod':
+      return `全ステータス${e.amount > 0 ? '+' : ''}${e.amount}`;
+    case 'swap_all_stats':
+      return '最高ATKの相手と全ステータスを交換';
+    case 'round_scaled_stat_mod':
+      return `${e.stat.toUpperCase()}+（現在ラウンド×${e.perRound}）`;
   }
 }

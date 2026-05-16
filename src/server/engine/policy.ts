@@ -142,6 +142,26 @@ function scoreActionCard(card: ActionCard): number {
       return 5;
     case 'draw_passive_top':
       return 6;
+    case 'steal_stat':
+      return 3;
+    case 'copy_stat_from_leader':
+      return 2;
+    case 'trade_stat':
+      return 1;
+    case 'slot_top_skill':
+      return 2;
+    case 'upgrade_skill':
+      return 2;
+    case 'copy_skill_from_player':
+      return 2;
+    case 'hp_to_atk':
+      return 2;
+    case 'all_stats_mod':
+      return 3;
+    case 'swap_all_stats':
+      return -1;
+    case 'round_scaled_stat_mod':
+      return 2;
   }
 }
 

@@ -102,6 +102,97 @@ function applyActionEffect(
       player.monster.stats[chosenStat] += card.effect.amount;
       break;
     }
+    case 'steal_stat': {
+      const e = card.effect;
+      const others = state.players.filter((p) => p.id !== player.id && p.monster);
+      if (others.length > 0) {
+        const target = others.reduce((best, p) =>
+          p.monster!.stats[e.stat] > best.monster!.stats[e.stat] ? p : best
+        );
+        const steal = Math.min(e.amount, target.monster!.stats[e.stat]);
+        target.monster!.stats[e.stat] -= steal;
+        player.monster.stats[e.stat] += steal;
+      }
+      break;
+    }
+    case 'copy_stat_from_leader': {
+      const e = card.effect;
+      const allWithMonster = state.players.filter((p) => p.monster);
+      const max = Math.max(...allWithMonster.map((p) => p.monster!.stats[e.stat]));
+      player.monster.stats[e.stat] = max;
+      break;
+    }
+    case 'trade_stat': {
+      const eff = card.effect as { kind: 'trade_stat'; from: StatKey; to: StatKey; fromAmount: number; toAmount: number };
+      player.monster.stats[eff.from] = Math.max(0, player.monster.stats[eff.from] - eff.fromAmount);
+      player.monster.stats[eff.to] += eff.toAmount;
+      break;
+    }
+    case 'slot_top_skill': {
+      const card2 = drawTop(state.decks.skill, state.decks.skillGrave, rng);
+      if (card2) {
+        const slotIdx = player.skillSlots.findIndex((s, i) => s === null && i < player.activeSlotCount);
+        if (slotIdx >= 0) {
+          const seq = state.nextSkillInstanceSeq++;
+          const slotCard = { ...card2, id: `${card2.id}#${seq}` };
+          player.skillSlots[slotIdx] = slotCard;
+          syncMonsterFromSlots(state, player);
+        } else {
+          addSkillCardToMonster(state, player, card2);
+        }
+      }
+      break;
+    }
+    case 'upgrade_skill': {
+      if (player.skillStock.length > 0) {
+        const rarityMap: Record<string, string> = { N: 'R', R: 'SR', SR: 'SSR', SSR: 'SSR' };
+        const idx = rng.int(0, player.skillStock.length - 1);
+        const sc = player.skillStock[idx]!;
+        const newRarity = rarityMap[sc.rarity] as typeof sc.rarity;
+        player.skillStock[idx] = { ...sc, rarity: newRarity };
+      }
+      break;
+    }
+    case 'copy_skill_from_player': {
+      const others = state.players.filter((p) => p.id !== player.id && p.skillStock.length > 0);
+      if (others.length > 0) {
+        const target = others[rng.int(0, others.length - 1)]!;
+        const sc = target.skillStock[rng.int(0, target.skillStock.length - 1)]!;
+        addSkillCardToMonster(state, player, sc);
+      }
+      break;
+    }
+    case 'hp_to_atk': {
+      const gain = Math.floor(player.monster.stats.hp * (card.effect as { kind: 'hp_to_atk'; fraction: number }).fraction);
+      player.monster.stats.atk += gain;
+      break;
+    }
+    case 'all_stats_mod': {
+      const amt = (card.effect as { kind: 'all_stats_mod'; amount: number }).amount;
+      player.monster.stats.hp += amt;
+      player.monster.stats.atk += amt;
+      player.monster.stats.def = Math.max(0, player.monster.stats.def + amt);
+      player.monster.stats.spd = Math.max(0, player.monster.stats.spd + amt);
+      break;
+    }
+    case 'swap_all_stats': {
+      const others2 = state.players.filter((p) => p.id !== player.id && p.monster);
+      if (others2.length > 0) {
+        const target = others2.reduce((best, p) =>
+          p.monster!.stats.atk > best.monster!.stats.atk ? p : best
+        );
+        const myStats = { ...player.monster.stats };
+        player.monster.stats = { ...target.monster!.stats };
+        target.monster!.stats = myStats;
+      }
+      break;
+    }
+    case 'round_scaled_stat_mod': {
+      const eff2 = card.effect as { kind: 'round_scaled_stat_mod'; stat: StatKey; perRound: number };
+      const gain2 = state.round * eff2.perRound;
+      player.monster.stats[eff2.stat] += gain2;
+      break;
+    }
     case 'curse_player':
     case 'draw_passive_top':
       // Handled separately in resolveActionPhase via play extras.

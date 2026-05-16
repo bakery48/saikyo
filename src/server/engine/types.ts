@@ -507,7 +507,17 @@ export type ActionEffect =
   | { kind: 'become_bug' }
   | { kind: 'random_stat_up'; amount: number }
   | { kind: 'curse_player'; amount: number }
-  | { kind: 'draw_passive_top'; maxDraws: number };
+  | { kind: 'draw_passive_top'; maxDraws: number }
+  | { kind: 'steal_stat'; stat: StatKey; amount: number }
+  | { kind: 'copy_stat_from_leader'; stat: StatKey }
+  | { kind: 'trade_stat'; from: StatKey; to: StatKey; fromAmount: number; toAmount: number }
+  | { kind: 'slot_top_skill' }
+  | { kind: 'upgrade_skill' }
+  | { kind: 'copy_skill_from_player' }
+  | { kind: 'hp_to_atk'; fraction: number }
+  | { kind: 'all_stats_mod'; amount: number }
+  | { kind: 'swap_all_stats' }
+  | { kind: 'round_scaled_stat_mod'; stat: StatKey; perRound: number };
 
 export type ActionCard = {
   id: string;
