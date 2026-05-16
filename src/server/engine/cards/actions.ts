@@ -26,17 +26,17 @@ export const ACTIONS: ActionCard[] = [
 
   // ── ステータス変換 ───────────────────────────────────────────────────────────
   // ── 変換（ATK/DEF/SPD/HPの全12パターン） ─────────────────────────────────
-  { id: 'ac-atk2def', name: '矛から盾へ', effect: { kind: 'trade_stat', from: 'atk', to: 'def', fromAmount: 3, toAmount: 3  }, count: 1 },
+  { id: 'ac-atk2def', name: '防御特訓',         effect: { kind: 'trade_stat', from: 'atk', to: 'def', fromAmount: 3, toAmount: 3  }, count: 1 },
   { id: 'ac-atk2spd', name: '居合抜き',   effect: { kind: 'trade_stat', from: 'atk', to: 'spd', fromAmount: 3, toAmount: 3  }, count: 1 },
   { id: 'ac-atk2hp',  name: '根性注入',   effect: { kind: 'trade_stat', from: 'atk', to: 'hp',  fromAmount: 3, toAmount: 18 }, count: 1 },
-  { id: 'ac-def2atk', name: '鎧を脱ぐ',   effect: { kind: 'trade_stat', from: 'def', to: 'atk', fromAmount: 3, toAmount: 3  }, count: 1 },
+  { id: 'ac-def2atk', name: 'がむしゃら攻撃練習', effect: { kind: 'trade_stat', from: 'def', to: 'atk', fromAmount: 3, toAmount: 3  }, count: 1 },
   { id: 'ac-def2spd', name: '身軽稽古',   effect: { kind: 'trade_stat', from: 'def', to: 'spd', fromAmount: 3, toAmount: 3  }, count: 1 },
   { id: 'ac-def2hp',  name: '硬化訓練',   effect: { kind: 'trade_stat', from: 'def', to: 'hp',  fromAmount: 3, toAmount: 18 }, count: 1 },
   { id: 'ac-spd2atk', name: '踏み込み',   effect: { kind: 'trade_stat', from: 'spd', to: 'atk', fromAmount: 3, toAmount: 3  }, count: 1 },
-  { id: 'ac-spd2def', name: '重心修行',   effect: { kind: 'trade_stat', from: 'spd', to: 'def', fromAmount: 3, toAmount: 3  }, count: 1 },
+  { id: 'ac-spd2def', name: '増量修行',   effect: { kind: 'trade_stat', from: 'spd', to: 'def', fromAmount: 3, toAmount: 3  }, count: 1 },
   { id: 'ac-spd2hp',  name: '持久鍛錬',   effect: { kind: 'trade_stat', from: 'spd', to: 'hp',  fromAmount: 3, toAmount: 18 }, count: 1 },
   { id: 'ac-hp2atk',  name: '捨て身修行', effect: { kind: 'trade_stat', from: 'hp',  to: 'atk', fromAmount: 18, toAmount: 3 }, count: 1 },
-  { id: 'ac-hp2def',  name: '傷慣れ',     effect: { kind: 'trade_stat', from: 'hp',  to: 'def', fromAmount: 18, toAmount: 3 }, count: 1 },
+  { id: 'ac-hp2def',  name: '痛みに慣れる', effect: { kind: 'trade_stat', from: 'hp',  to: 'def', fromAmount: 18, toAmount: 3 }, count: 1 },
   { id: 'ac-hp2spd',  name: '減量修行',   effect: { kind: 'trade_stat', from: 'hp',  to: 'spd', fromAmount: 18, toAmount: 3 }, count: 1 },
 
   // ── 全能・スケール ───────────────────────────────────────────────────────────
