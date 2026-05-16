@@ -81,6 +81,8 @@ export type ClientGameState = {
   actionPhase: ActionPhaseState | null;
   /** This viewer's hand of action cards (always visible to its owner). Null for non-player viewers. */
   myActionHand: ActionCard[] | null;
+  /** Monster-specific action card — always available, never consumed. Null before pick phase. */
+  myUniqueActionCard: ActionCard | null;
   /** This viewer's skill stock (all owned cards not slotted). Null for non-player viewers. */
   mySkillStock: SkillCard[] | null;
   /** This viewer's skill slots (active in battle). Null for non-player viewers. */

@@ -19,6 +19,7 @@ export function ActionPhaseView({
   const phase = state.actionPhase;
   const summary = state.actionPhaseSummary;
   const myHand = state.myActionHand ?? [];
+  const uniqueCard = state.myUniqueActionCard ?? null;
   const iAmPending = !!phase && !!selfId && phase.pendingPlayerIds.includes(selfId);
   const myCommitted = phase && selfId ? phase.submittedPlays[selfId] : undefined;
   const submittedCount = phase ? Object.keys(phase.submittedPlays).length : 0;
@@ -46,7 +47,9 @@ export function ActionPhaseView({
     setSwapSkills([]);
   }, [swapTarget]);
 
-  const tentativeCard = tentative ? myHand.find((c) => c.id === tentative) : undefined;
+  const tentativeCard = tentative
+    ? (myHand.find((c) => c.id === tentative) ?? (uniqueCard?.id === tentative ? uniqueCard : undefined))
+    : undefined;
   const isChoiceCard = tentativeCard?.effect.kind === 'stat_mod_choice';
   const isSwapCard = tentativeCard?.effect.kind === 'swap_actives';
   const swapTargetPlayer = swapTarget
@@ -252,6 +255,35 @@ export function ActionPhaseView({
                 <p style={{ opacity: 0.7 }}>(手札なし)</p>
               )}
             </div>
+
+            {uniqueCard && (
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.7, marginBottom: 4 }}>
+                  ★ 固有アクションカード（何度でも使える）
+                </div>
+                <button
+                  onClick={() => setTentative(uniqueCard.id)}
+                  style={{
+                    border: `3px solid ${tentative === uniqueCard.id ? '#cc8800' : '#f0a000'}`,
+                    borderRadius: 8,
+                    padding: 10,
+                    background: tentative === uniqueCard.id ? '#fff8e1' : '#fffbf0',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    display: 'grid',
+                    gap: 4,
+                    width: '100%',
+                    maxWidth: 300,
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: '#cc8800', fontWeight: 700 }}>固有</div>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>{uniqueCard.name}</div>
+                  <div style={{ fontSize: 12, opacity: 0.85 }}>
+                    {describeActionEffect(uniqueCard)}
+                  </div>
+                </button>
+              </div>
+            )}
           </>
         )}
       </section>

@@ -15,6 +15,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'first_attack_damage_mult', mult: 2 },
       },
     ],
+    uniqueActionCard: { id: 'unique-demon', name: '悪の研鑽', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
   },
   {
     baseId: 'unicorn',
@@ -29,6 +30,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'turn_start_heal', amount: 2 },
       },
     ],
+    uniqueActionCard: { id: 'unique-unicorn', name: '聖なる意志', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
   },
   {
     baseId: 'golem',
@@ -43,6 +45,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'damage_reduction', amount: 2 },
       },
     ],
+    uniqueActionCard: { id: 'unique-golem', name: '岩盤鍛錬', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
   },
   {
     baseId: 'fenrir',
@@ -57,6 +60,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'spd_roll_bonus', amount: 3 },
       },
     ],
+    uniqueActionCard: { id: 'unique-fenrir', name: '疾風修行', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
   },
   {
     baseId: 'fairy',
@@ -71,6 +75,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'dodge_bonus', percent: 20 },
       },
     ],
+    uniqueActionCard: { id: 'unique-fairy', name: '軽業の稽古', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
   },
   {
     baseId: 'wyvern',
@@ -85,6 +90,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'first_attack_true' },
       },
     ],
+    uniqueActionCard: { id: 'unique-wyvern', name: '急降下訓練', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
   },
   {
     baseId: 'slime',
@@ -99,6 +105,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'pick_higher_buff_mult', mult: 1.5 },
       },
     ],
+    uniqueActionCard: { id: 'unique-slime', name: '形態適応', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
   },
   {
     baseId: 'ouroboros',
@@ -113,6 +120,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'atk_per_active', amount: 1 },
       },
     ],
+    uniqueActionCard: { id: 'unique-ouroboros', name: '輪廻の研鑽', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
   },
   {
     baseId: 'vampire',
@@ -127,6 +135,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'lifesteal', denominator: 2 },
       },
     ],
+    uniqueActionCard: { id: 'unique-vampire', name: '吸血の研鑽', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
   },
   {
     baseId: 'phoenix',
@@ -141,6 +150,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'endure_fatal', reviveDenominator: 4 },
       },
     ],
+    uniqueActionCard: { id: 'unique-phoenix', name: '不死の意志', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
   },
   {
     baseId: 'berserker',
@@ -155,6 +165,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'rage_atk', amount: 1 },
       },
     ],
+    uniqueActionCard: { id: 'unique-berserker', name: '怒りの修行', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
   },
   {
     baseId: 'wizard',
@@ -169,6 +180,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'hex_def', amount: 1 },
       },
     ],
+    uniqueActionCard: { id: 'unique-wizard', name: '装甲術の稽古', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
   },
   {
     baseId: 'cerberus',
@@ -183,6 +195,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'extra_attack_chance', percent: 10 },
       },
     ],
+    uniqueActionCard: { id: 'unique-cerberus', name: '三頭連携', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
   },
   {
     baseId: 'carbuncle',
@@ -197,6 +210,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'counter_damage', denominator: 3 },
       },
     ],
+    uniqueActionCard: { id: 'unique-carbuncle', name: '宝玉の守護', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
   },
   {
     baseId: 'scarab',
@@ -211,6 +225,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'absorb_first_hit' },
       },
     ],
+    uniqueActionCard: { id: 'unique-scarab', name: '聖甲虫の鍛錬', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
   },
   {
     baseId: 'dragon',
@@ -225,6 +240,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'mid_damage_immune', min: 4, max: 9 },
       },
     ],
+    uniqueActionCard: { id: 'unique-dragon', name: '龍翼の疾走', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
   },
   {
     baseId: 'goblin',
@@ -239,6 +255,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'low_damage_bonus', threshold: 2, bonus: 3 },
       },
     ],
+    uniqueActionCard: { id: 'unique-goblin', name: '群れの戦技', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
   },
   {
     baseId: 'griffon',
@@ -253,6 +270,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'pierce_all_shields' },
       },
     ],
+    uniqueActionCard: { id: 'unique-griffon', name: '天空の駆け抜け', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
   },
   {
     baseId: 'bug',
@@ -268,6 +286,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'self_decay', hp: 3, atk: 2, def: 2, spd: 2 },
       },
     ],
+    uniqueActionCard: { id: 'unique-bug', name: '崩壊への抵抗', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
   },
   {
     baseId: 'knight',
@@ -282,6 +301,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'low_hp_atk_mult', mult: 2, thresholdFraction: 0.5 },
       },
     ],
+    uniqueActionCard: { id: 'unique-knight', name: '背水の鍛錬', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
   },
   {
     baseId: 'ghost',
@@ -296,6 +316,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'grant_ghost_shield_on_last_active', amount: 99 },
       },
     ],
+    uniqueActionCard: { id: 'unique-ghost', name: '霊体の守り', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
   },
 ];
 

@@ -428,6 +428,8 @@ export type MonsterBase = {
   attackKind: Exclude<AttackKind, 'passthrough'>;
   /** If true, excluded from the initial monster pick pool. */
   hidden?: boolean;
+  /** Monster-specific action card: always present in the owner's hand. */
+  uniqueActionCard: ActionCard;
 };
 
 export type Monster = {
@@ -564,6 +566,11 @@ export type Player = {
    * Visible only to the owner over the wire.
    */
   actionHand: ActionCard[];
+  /**
+   * Monster-specific action card — always available, never consumed.
+   * Set when the player's monster is assigned. Null before pick phase.
+   */
+  uniqueActionCard: ActionCard | null;
   /** All skill cards the player owns but hasn't slotted. */
   skillStock: SkillCard[];
   /**

@@ -98,8 +98,12 @@ export function runOneRound(state: GameState, policy: Policy): void {
   expectPhase(state, 'action');
   startActionPhase(state);
   for (const player of state.players) {
-    if (!player.monster || player.actionHand.length === 0) continue;
-    const card = policy.pickActionCard(state, player.id, player.actionHand);
+    if (!player.monster) continue;
+    const allCards = player.uniqueActionCard
+      ? [...player.actionHand, player.uniqueActionCard]
+      : player.actionHand;
+    if (allCards.length === 0) continue;
+    const card = policy.pickActionCard(state, player.id, allCards);
     submitActionPlay(state, player.id, card.id, actionExtras(state, player.id, card));
   }
   resolveActionPhase(state);

@@ -63,6 +63,7 @@ export function createInitialState(opts: {
     isCPU: p.isCPU,
     monster: null,
     actionHand: [],
+    uniqueActionCard: null,
     skillStock: [],
     skillSlots: Array(9).fill(null) as (import('./types').SkillCard | null)[],
     activeSlotCount: 9,
@@ -75,6 +76,7 @@ export function createInitialState(opts: {
       isCPU: true,
       monster: null,
       actionHand: [],
+      uniqueActionCard: null,
       skillStock: [],
       skillSlots: Array(9).fill(null) as (import('./types').SkillCard | null)[],
       activeSlotCount: 9,
@@ -222,6 +224,7 @@ export function resolveMonsterPickSubRound(state: GameState): boolean {
     const base = draft.pool.splice(idx, 1)[0]!;
     const player = getPlayer(state, pid);
     player.monster = monsterFromBase(base, pid);
+    player.uniqueActionCard = base.uniqueActionCard;
     state.log.push({ kind: 'monster_picked', playerId: pid, baseId });
   }
   state.log.push({ kind: 'monster_pick_resolved', assignments });
@@ -256,6 +259,7 @@ function fallbackMonsterDistribute(state: GameState): void {
     const base = pool.shift() ?? MONSTERS[0]!;
     const player = getPlayer(state, pid);
     player.monster = monsterFromBase(base, pid);
+    player.uniqueActionCard = base.uniqueActionCard;
     state.log.push({ kind: 'monster_picked', playerId: pid, baseId: base.baseId });
   }
   draft.pool = pool;

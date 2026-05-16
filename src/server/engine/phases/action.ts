@@ -172,7 +172,9 @@ export function submitActionPlay(
   }
   const player = state.players.find((p) => p.id === playerId);
   if (!player) throw new Error(`player not found: ${playerId}`);
-  const card = player.actionHand.find((c) => c.id === cardId);
+  const card =
+    player.actionHand.find((c) => c.id === cardId) ??
+    (player.uniqueActionCard?.id === cardId ? player.uniqueActionCard : undefined);
   if (!card) throw new Error(`card ${cardId} not in player's hand`);
   const chosenStat = extras?.chosenStat;
   const swap = extras?.swap;
@@ -217,16 +219,20 @@ export function resolveActionPhase(state: GameState): void {
   for (const player of state.players) {
     const play = state.actionPhase.submittedPlays[player.id];
     if (!play) continue;
-    const idx = player.actionHand.findIndex((c) => c.id === play.cardId);
-    if (idx < 0) continue;
-    const card = player.actionHand.splice(idx, 1)[0]!;
+    const isUnique = player.uniqueActionCard?.id === play.cardId;
+    const handIdx = player.actionHand.findIndex((c) => c.id === play.cardId);
+    if (!isUnique && handIdx < 0) continue;
+    const card = isUnique
+      ? player.uniqueActionCard!
+      : player.actionHand.splice(handIdx, 1)[0]!;
     state.log.push({ kind: 'action_played', playerId: player.id, cardId: card.id });
     if (card.effect.kind === 'swap_actives' && play.swap) {
       applySwapActives(state, play.swap);
     } else {
       applyActionEffect(state, player, card, play.chosenStat);
     }
-    state.decks.actionGrave.push(card);
+    // Unique card stays in hand forever; regular cards go to the graveyard.
+    if (!isUnique) state.decks.actionGrave.push(card);
     // Build a summary string with the swap-target info if applicable.
     let effectDesc: string;
     if (card.effect.kind === 'swap_actives' && play.swap) {

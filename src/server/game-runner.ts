@@ -326,12 +326,18 @@ export class GameRunner {
         waiting = true;
       } else {
         const player = this.state.players.find((p) => p.id === pid);
-        if (!player || player.actionHand.length === 0) {
-          // No card to play (shouldn't happen) — skip the player.
+        if (!player) {
           phase.pendingPlayerIds = phase.pendingPlayerIds.filter((x) => x !== pid);
           continue;
         }
-        const card = greedyPolicy.pickActionCard(this.state, pid, player.actionHand);
+        const allCards = player.uniqueActionCard
+          ? [...player.actionHand, player.uniqueActionCard]
+          : player.actionHand;
+        if (allCards.length === 0) {
+          phase.pendingPlayerIds = phase.pendingPlayerIds.filter((x) => x !== pid);
+          continue;
+        }
+        const card = greedyPolicy.pickActionCard(this.state, pid, allCards);
         const chosenStat =
           card.effect.kind === 'stat_mod_choice' && player.monster
             ? chooseStatForActionCard(player.monster.stats)
@@ -515,6 +521,7 @@ export class GameRunner {
       eventPhaseSummary: s.eventPhaseSummary,
       actionPhaseSummary: s.actionPhaseSummary,
       myActionHand: me ? me.actionHand : null,
+      myUniqueActionCard: me ? me.uniqueActionCard : null,
       mySkillStock: me ? me.skillStock : null,
       mySkillSlots: me ? me.skillSlots : null,
       myActiveSlotCount: me ? me.activeSlotCount : null,
