@@ -1,5 +1,6 @@
 import type {
   ActiveSkill,
+  BoonPickState,
   GameState,
   Monster,
   MonsterBase,
@@ -57,7 +58,14 @@ export function createInitialState(opts: {
 
   // Pad with CPUs up to 8 first; colors are assigned after shuffling so that
   // the assignment is deterministic per seed but unrelated to seat order.
-  const seats: Omit<Player, 'color'>[] = opts.players.map((p) => ({
+  const makeInitialSlots = (pi: number): (import('./types').SkillCard | null)[] =>
+    Array.from({ length: 9 }, (_, si) => ({
+      id: `init-atk-${pi}-${si}`,
+      name: '攻撃',
+      rarity: 'N' as const,
+      active: { effect: { kind: 'attack' as const, mult: 1.0, useStat: 'atk' as const, attackKind: 'passthrough' as const } },
+    }));
+  const seats: Omit<Player, 'color'>[] = opts.players.map((p, pi) => ({
     id: p.id,
     name: p.name,
     isCPU: p.isCPU,
@@ -65,11 +73,12 @@ export function createInitialState(opts: {
     actionHand: [],
     uniqueActionCard: null,
     skillStock: [],
-    skillSlots: Array(9).fill(null) as (import('./types').SkillCard | null)[],
+    skillSlots: makeInitialSlots(pi),
     activeSlotCount: 9,
   }));
   let cpuIdx = 1;
   while (seats.length < 8) {
+    const pi = seats.length;
     seats.push({
       id: `cpu-${cpuIdx}`,
       name: `CPU ${cpuIdx}`,
@@ -78,7 +87,7 @@ export function createInitialState(opts: {
       actionHand: [],
       uniqueActionCard: null,
       skillStock: [],
-      skillSlots: Array(9).fill(null) as (import('./types').SkillCard | null)[],
+      skillSlots: makeInitialSlots(pi),
       activeSlotCount: 9,
     });
     cpuIdx++;
@@ -101,6 +110,7 @@ export function createInitialState(opts: {
     rngState: rng.snapshot(),
     players: fullPlayers,
     monsterPick,
+    boonPick: null,
     round: 1,
     miniRound: 1,
     totalRounds,
@@ -326,13 +336,7 @@ export function syncMonsterFromSlots(state: GameState, player: Player): void {
   for (let idx = 0; idx < player.activeSlotCount; idx++) {
     const card = player.skillSlots[idx] ?? null;
     if (card === null) {
-      // Default attack slot
-      actives.push({
-        id: `default_attack@${idx}`,
-        name: 'アタック',
-        order: idx + 1,
-        effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' },
-      });
+      // empty slot — inactive
     } else if (card.isPassive && card.passive) {
       acquiredPassives.push({
         id: card.id,

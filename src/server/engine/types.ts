@@ -419,6 +419,16 @@ export type PassiveSkill = {
   description?: string;
 };
 
+export type MonsterBoonEffect =
+  | { kind: 'stat_up'; stat: StatKey; amount: number }
+  | { kind: 'skill_card'; cardId: string };
+
+export type MonsterBoon = {
+  id: string;
+  name: string;
+  effect: MonsterBoonEffect;
+};
+
 export type MonsterBase = {
   baseId: string;
   name: string;
@@ -430,6 +440,7 @@ export type MonsterBase = {
   hidden?: boolean;
   /** Monster-specific action card: always present in the owner's hand. */
   uniqueActionCard: ActionCard;
+  boons: [MonsterBoon, MonsterBoon, MonsterBoon];
 };
 
 export type Monster = {
@@ -482,7 +493,8 @@ export type ActionEffect =
    * monster's current stats (sum). Base passives are replaced with バグ's;
    * passives gained from skill cards are preserved.
    */
-  | { kind: 'become_bug' };
+  | { kind: 'become_bug' }
+  | { kind: 'random_stat_up'; amount: number };
 
 export type ActionCard = {
   id: string;
@@ -574,7 +586,7 @@ export type Player = {
   /** All skill cards the player owns but hasn't slotted. */
   skillStock: SkillCard[];
   /**
-   * Exactly TOTAL_SKILL_SLOTS (9) entries. null = default attack (ATK×1.0).
+   * Exactly TOTAL_SKILL_SLOTS (9) entries. null = inactive (no skill for this slot).
    * Only indices 0..activeSlotCount-1 are active in battle; the rest are inactive.
    */
   skillSlots: (SkillCard | null)[];
@@ -588,6 +600,7 @@ export type Player = {
 export type Phase =
   | 'setup'
   | 'pick_monster'
+  | 'pick_boon'
   | 'event'
   | 'action'
   | 'draft'
@@ -621,10 +634,15 @@ export type BuildPhaseState = {
   pendingPlayerIds: string[];
   /**
    * Submitted build configs per player.
-   * slots: 9-entry array, each is a card ID or null (= default attack).
+   * slots: 9-entry array, each is a card ID or null (= inactive).
    * activeSlotCount: how many of those 9 slots are active in battle.
    */
   submittedSlots: Record<string, { slots: (string | null)[]; activeSlotCount: number }>;
+};
+
+export type BoonPickState = {
+  pendingPlayerIds: string[];
+  submittedChoices: Record<string, string>; // playerId -> boonId
 };
 
 /** Monster pick draft — analogous to skill DraftState but for monsters. */
@@ -767,6 +785,8 @@ export type GameState = {
   players: Player[];
   /** Monster pick draft state (null outside of pick_monster phase). */
   monsterPick: MonsterPickState | null;
+  /** Boon pick state (null outside of pick_boon phase). */
+  boonPick: BoonPickState | null;
   round: number; // 1..totalRounds
   miniRound: number; // 1..miniRoundsPerRound (kept for compatibility, not used in main flow)
   /** Configurable: how many big rounds the game runs for (default 3). */
