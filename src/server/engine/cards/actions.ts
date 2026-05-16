@@ -12,11 +12,8 @@ export const ACTIONS: ActionCard[] = [
 
   // ── スキル操作 ───────────────────────────────────────────────────────────────
   { id: 'ac-draw',    name: '探索',     effect: { kind: 'draw_skill_top_with_stat_loss', amount: 1 }, count: 6 },
-  { id: 'ac-grave',   name: '墓場あさり', effect: { kind: 'recover_skill_from_grave' }, count: 5 },
-  { id: 'ac-discard', name: 'スキル整理', effect: { kind: 'discard_random_active' },   count: 2 },
-  { id: 'ac-slot',    name: 'スキル直結', effect: { kind: 'slot_top_skill' },          count: 1 },
-  { id: 'ac-upgrade', name: 'スキル昇格', effect: { kind: 'upgrade_skill' },           count: 1 },
-  { id: 'ac-copy',    name: '技術盗用',  effect: { kind: 'copy_skill_from_player' },   count: 1 },
+  { id: 'ac-discard', name: 'スキル整理', effect: { kind: 'discard_actives_gain_stat', discardCount: 2, amount: 3, stats: ['atk', 'def', 'spd'] }, count: 2 },
+  { id: 'ac-copy',    name: '見よう見まね', effect: { kind: 'copy_skill_from_player' }, count: 1 },
 
   // ── 相手操作・強奪 ───────────────────────────────────────────────────────────
   { id: 'ac-steal-atk', name: 'ATK強奪', effect: { kind: 'steal_stat', stat: 'atk', amount: 2 }, count: 1 },
@@ -25,7 +22,6 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-steal-hp',  name: 'HP奪取',  effect: { kind: 'steal_stat', stat: 'hp',  amount: 4 }, count: 1 },
   { id: 'ac-copy-atk',  name: 'ATK模倣', effect: { kind: 'copy_stat_from_leader', stat: 'atk' }, count: 1 },
   { id: 'ac-copy-spd',  name: 'SPD模倣', effect: { kind: 'copy_stat_from_leader', stat: 'spd' }, count: 1 },
-  { id: 'ac-swap',      name: 'スキル順入れ替え', effect: { kind: 'swap_actives' }, count: 1 },
   { id: 'ac-swap-all',  name: '全能大交換', effect: { kind: 'swap_all_stats' }, count: 1 },
 
   // ── ステータス変換 ───────────────────────────────────────────────────────────
@@ -37,8 +33,7 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-hp2atk2', name: '体力変換',     effect: { kind: 'hp_to_atk', fraction: 0.2 }, count: 1 },
 
   // ── 全能・スケール ───────────────────────────────────────────────────────────
-  { id: 'ac-allmod1', name: '全能強化',   effect: { kind: 'all_stats_mod', amount: 1 }, count: 1 },
-  { id: 'ac-allmod2', name: '超全能強化', effect: { kind: 'all_stats_mod', amount: 2 }, count: 1 },
+  { id: 'ac-allmod1', name: '汎用特訓', effect: { kind: 'all_stats_mod', amount: 1 }, count: 1 },
   { id: 'ac-round',   name: '時の恩恵',   effect: { kind: 'round_scaled_stat_mod', stat: 'atk', perRound: 2 }, count: 1 },
 
   // ── その他 ──────────────────────────────────────────────────────────────────

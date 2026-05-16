@@ -53,7 +53,7 @@ export function ActionPhaseView({
   const tentativeCard = tentative
     ? (myHand.find((c) => c.id === tentative) ?? (uniqueCard?.id === tentative ? uniqueCard : undefined))
     : undefined;
-  const isChoiceCard = tentativeCard?.effect.kind === 'stat_mod_choice';
+  const isChoiceCard = tentativeCard?.effect.kind === 'stat_mod_choice' || tentativeCard?.effect.kind === 'discard_actives_gain_stat';
   const isSwapCard = tentativeCard?.effect.kind === 'swap_actives';
   const isCurseCard = tentativeCard?.effect.kind === 'curse_player';
   const swapTargetPlayer = swapTarget
@@ -135,7 +135,7 @@ export function ActionPhaseView({
                 <span style={{ fontSize: 13, fontWeight: 600 }}>
                   どのステータスを上げる？
                 </span>
-                {(tentativeCard?.effect.kind === 'stat_mod_choice' ? (tentativeCard.effect.stats ?? DEFAULT_CHOICE_STATS) : DEFAULT_CHOICE_STATS).map((s) => (
+                {(tentativeCard?.effect.kind === 'stat_mod_choice' || tentativeCard?.effect.kind === 'discard_actives_gain_stat' ? ((tentativeCard.effect as { stats?: StatKey[] }).stats ?? DEFAULT_CHOICE_STATS) : DEFAULT_CHOICE_STATS).map((s) => (
                   <button
                     key={s}
                     type="button"

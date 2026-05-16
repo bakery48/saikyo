@@ -81,6 +81,10 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       return `スキル山札から1枚追加（ATK/DEF/SPDのどれかランダムで-${e.amount}）`;
     case 'discard_random_active':
       return 'スロット1つをランダムに破棄';
+    case 'discard_actives_gain_stat': {
+      const labels = e.stats.map((s) => s.toUpperCase()).join('/');
+      return `スロットをランダムに${e.discardCount}つ破棄 → ${labels}から選んで+${e.amount}`;
+    }
     case 'cleanse_sin':
       return '自分の罪カードを1枚ランダムに破棄';
     case 'gain_passive':

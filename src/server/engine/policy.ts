@@ -127,6 +127,8 @@ function scoreActionCard(card: ActionCard): number {
       return 6;
     case 'discard_random_active':
       return -1;
+    case 'discard_actives_gain_stat':
+      return 2;
     case 'cleanse_sin':
       // Only useful if the monster carries a sin; CPUs treat it as low priority
       // and will play it when nothing better is in hand.

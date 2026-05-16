@@ -53,6 +53,24 @@ function applyActionEffect(
       if (player.monster) player.monster.stats[stat] = Math.max(0, player.monster.stats[stat] - card.effect.amount);
       break;
     }
+    case 'discard_actives_gain_stat': {
+      if (!player.monster) break;
+      const allCandidates: { card: SkillCard; idx: number }[] = [];
+      for (let i = 0; i < player.activeSlotCount; i++) {
+        const c = player.skillSlots[i] ?? null;
+        if (c !== null && !c.isPassive && c.active) allCandidates.push({ card: c, idx: i });
+      }
+      const toDiscard = Math.min(card.effect.discardCount, allCandidates.length);
+      for (let d = 0; d < toDiscard; d++) {
+        const pick = rng.int(0, allCandidates.length - 1);
+        const { card: discarded, idx } = allCandidates.splice(pick, 1)[0]!;
+        player.skillSlots[idx] = null;
+        state.decks.skillGrave.push(discarded);
+      }
+      syncMonsterFromSlots(state, player);
+      if (chosenStat) player.monster.stats[chosenStat] += card.effect.amount;
+      break;
+    }
     case 'discard_random_active': {
       // Find non-null active skill cards within the active slot range
       const candidates: { card: SkillCard; idx: number }[] = [];
@@ -287,7 +305,7 @@ export function submitActionPlay(
   if (!card) throw new Error(`card ${cardId} not in player's hand`);
   const chosenStat = extras?.chosenStat;
   const swap = extras?.swap;
-  if (card.effect.kind === 'stat_mod_choice') {
+  if (card.effect.kind === 'stat_mod_choice' || card.effect.kind === 'discard_actives_gain_stat') {
     const allowed = card.effect.stats ?? ALL_STATS;
     if (!chosenStat || !allowed.includes(chosenStat)) {
       throw new Error('chosenStat is required for this card');

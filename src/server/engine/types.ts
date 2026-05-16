@@ -501,6 +501,8 @@ export type ActionEffect =
   /** Draw a skill card from the top of the deck, then lose `amount` in a randomly chosen combat stat (atk/def/spd). */
   | { kind: 'draw_skill_top_with_stat_loss'; amount: number }
   | { kind: 'discard_random_active' }
+  /** Discard `discardCount` random active skills, then gain `amount` in a player-chosen stat. */
+  | { kind: 'discard_actives_gain_stat'; discardCount: number; amount: number; stats: StatKey[] }
   /** Discard one random sin-tagged skill from the user's monster. No-op if none. */
   | { kind: 'cleanse_sin' }
   | { kind: 'gain_passive'; passive: PassiveSkill }
