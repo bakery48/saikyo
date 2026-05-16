@@ -180,7 +180,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'hex_def', amount: 1 },
       },
     ],
-    uniqueActionCard: { id: 'unique-wizard', name: '装甲術の稽古', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
+    uniqueActionCard: { id: 'unique-wizard', name: '呪詛の研鑽', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
   },
   {
     baseId: 'cerberus',
@@ -240,7 +240,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'mid_damage_immune', min: 4, max: 9 },
       },
     ],
-    uniqueActionCard: { id: 'unique-dragon', name: '龍翼の疾走', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
+    uniqueActionCard: { id: 'unique-dragon', name: '龍の生命力', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
   },
   {
     baseId: 'goblin',
@@ -255,7 +255,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'low_damage_bonus', threshold: 2, bonus: 3 },
       },
     ],
-    uniqueActionCard: { id: 'unique-goblin', name: '群れの戦技', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+    uniqueActionCard: { id: 'unique-goblin', name: '群れの生命力', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
   },
   {
     baseId: 'griffon',
@@ -316,7 +316,7 @@ export const MONSTERS: MonsterBase[] = [
         effect: { kind: 'grant_ghost_shield_on_last_active', amount: 99 },
       },
     ],
-    uniqueActionCard: { id: 'unique-ghost', name: '霊体の守り', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
+    uniqueActionCard: { id: 'unique-ghost', name: '霊体の生命力', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
   },
 ];
 
