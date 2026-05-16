@@ -49,7 +49,7 @@ function applyActionEffect(
       // Find non-null active skill cards within the active slot range
       const candidates: { card: SkillCard; idx: number }[] = [];
       for (let i = 0; i < player.activeSlotCount; i++) {
-        const c = player.skillSlots[i];
+        const c = player.skillSlots[i] ?? null;
         if (c !== null && !c.isPassive && c.active) candidates.push({ card: c, idx: i });
       }
       if (candidates.length === 0) break;
@@ -63,7 +63,7 @@ function applyActionEffect(
       // Find sin-tagged cards in active slots
       const candidates: { card: SkillCard; idx: number }[] = [];
       for (let i = 0; i < player.activeSlotCount; i++) {
-        const c = player.skillSlots[i];
+        const c = player.skillSlots[i] ?? null;
         if (c !== null && c.tag === 'sin') candidates.push({ card: c, idx: i });
       }
       if (candidates.length === 0) break;
@@ -189,9 +189,9 @@ export function submitActionPlay(
     const target = state.players.find((p) => p.id === swap.targetPlayerId);
     if (!target?.monster) throw new Error('swap target has no monster');
     // Validate against skillSlots (which are reflected in monster.actives after sync)
-    const hasA = target.skillSlots.some((s) => s.id === swap.skillIdA) ||
+    const hasA = target.skillSlots.some((s) => s?.id === swap.skillIdA) ||
                  target.monster.actives.some((s) => s.id === swap.skillIdA);
-    const hasB = target.skillSlots.some((s) => s.id === swap.skillIdB) ||
+    const hasB = target.skillSlots.some((s) => s?.id === swap.skillIdB) ||
                  target.monster.actives.some((s) => s.id === swap.skillIdB);
     if (!hasA || !hasB) throw new Error('swap skills not found on target');
   }

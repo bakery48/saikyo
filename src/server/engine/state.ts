@@ -235,7 +235,7 @@ export function resolveMonsterPickSubRound(state: GameState): boolean {
     return true;
   }
   // Stuck: pool can't satisfy all pending. Raffle the remainder.
-  if (draft.pool.length < draft.pendingPlayerIds.length || draft.attempt >= 8) {
+  if (draft.pool.length < draft.pendingPlayerIds.length || draft.attempt >= 1) {
     fallbackMonsterDistribute(state);
     return true;
   }

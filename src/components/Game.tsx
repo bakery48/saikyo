@@ -8,6 +8,7 @@ import { BattleAnimationView } from './game/BattleAnimationView';
 import { EventPhaseView } from './game/EventPhaseView';
 import { ActionPhaseView } from './game/ActionPhaseView';
 import { RewardView } from './game/RewardView';
+import { BuildPhaseView } from './game/BuildPhaseView';
 import { ChampionView } from './game/ChampionView';
 import { PlayerPanel } from './game/PlayerPanel';
 import { MyMonsterPanel } from './game/MyMonsterPanel';
@@ -44,7 +45,8 @@ function formatPhaseTitle(state: ClientGameState): string {
     case 'event':
     case 'action':
     case 'draft':
-      return `ラウンド${state.round} ${label}${state.miniRound}`;
+    case 'build':
+      return `ラウンド${state.round} ${label}`;
     case 'battle':
     case 'reward':
       return `ラウンド${state.round} ${label}`;
@@ -146,7 +148,7 @@ function renderPhase(
     case 'draft':
       return <DraftView state={state} socket={socket} />;
     case 'build':
-      return <AutoPhaseView state={state} label={PHASE_LABEL['build'] ?? 'ビルドフェーズ'} />;
+      return <BuildPhaseView state={state} socket={socket} />;
     case 'battle':
       return <BattleAnimationView state={state} socket={socket} />;
     case 'tournament':
