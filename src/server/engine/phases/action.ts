@@ -102,6 +102,10 @@ function applyActionEffect(
       player.monster.stats[chosenStat] += card.effect.amount;
       break;
     }
+    case 'curse_player':
+    case 'draw_passive_top':
+      // Handled separately in resolveActionPhase via play extras.
+      break;
   }
   saveRng(state, rng);
 }
@@ -167,7 +171,7 @@ export function submitActionPlay(
   state: GameState,
   playerId: string,
   cardId: string,
-  extras?: { chosenStat?: StatKey; swap?: ActionPlay['swap'] },
+  extras?: { chosenStat?: StatKey; swap?: ActionPlay['swap']; curseTargetPlayerId?: string },
 ): void {
   if (state.phase !== 'action' || !state.actionPhase) {
     throw new Error('not in action phase');
@@ -203,7 +207,8 @@ export function submitActionPlay(
                  target.monster.actives.some((s) => s.id === swap.skillIdB);
     if (!hasA || !hasB) throw new Error('swap skills not found on target');
   }
-  phase.submittedPlays[playerId] = { cardId, chosenStat, swap };
+  const curseTargetPlayerId = extras?.curseTargetPlayerId;
+  phase.submittedPlays[playerId] = { cardId, chosenStat, swap, curseTargetPlayerId };
 }
 
 export function allActionPlaysIn(state: GameState): boolean {
@@ -234,6 +239,27 @@ export function resolveActionPhase(state: GameState): void {
     state.log.push({ kind: 'action_played', playerId: player.id, cardId: card.id });
     if (card.effect.kind === 'swap_actives' && play.swap) {
       applySwapActives(state, play.swap);
+    } else if (card.effect.kind === 'curse_player') {
+      const targetId = play.curseTargetPlayerId;
+      const target = targetId ? state.players.find((p) => p.id === targetId) : null;
+      if (target?.monster) {
+        target.monster.stats.atk = Math.max(0, target.monster.stats.atk - card.effect.amount);
+        target.monster.stats.def = Math.max(0, target.monster.stats.def - card.effect.amount);
+      }
+    } else if (card.effect.kind === 'draw_passive_top') {
+      const rng = makeRng(state);
+      let found = false;
+      for (let i = 0; i < card.effect.maxDraws && !found; i++) {
+        const drawn = drawTop(state.decks.skill, state.decks.skillGrave, rng);
+        if (!drawn) break;
+        if (drawn.isPassive) {
+          addSkillCardToMonster(state, player, drawn);
+          found = true;
+        } else {
+          state.decks.skillGrave.push(drawn);
+        }
+      }
+      saveRng(state, rng);
     } else {
       applyActionEffect(state, player, card, play.chosenStat);
     }
@@ -246,6 +272,13 @@ export function resolveActionPhase(state: GameState): void {
       const aSkill = target?.monster?.actives.find((s) => s.id === play.swap!.skillIdA);
       const bSkill = target?.monster?.actives.find((s) => s.id === play.swap!.skillIdB);
       effectDesc = `${target?.name ?? '?'}: ${aSkill?.name ?? '?'} ↔ ${bSkill?.name ?? '?'} の順序入れ替え`;
+    } else if (card.effect.kind === 'curse_player') {
+      const target = play.curseTargetPlayerId
+        ? state.players.find((p) => p.id === play.curseTargetPlayerId)
+        : null;
+      effectDesc = target?.monster
+        ? `${target.monster.name}にATK-${card.effect.amount}/DEF-${card.effect.amount}の呪い`
+        : '（対象なし）';
     } else {
       effectDesc = describeActionEffect(card, play.chosenStat);
     }

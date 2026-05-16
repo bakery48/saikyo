@@ -376,6 +376,13 @@ function applyBattleStartPassives(
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
+      case 'passive_count_atk_buff':
+        if (p.trigger.kind === 'battle_start') {
+          const passiveCount = passives.length;
+          self.atkMod += passiveCount * p.effect.perPassive;
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
     }
   }
 

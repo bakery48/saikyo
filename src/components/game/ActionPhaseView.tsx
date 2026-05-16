@@ -30,17 +30,20 @@ export function ActionPhaseView({
   const [tentativeStat, setTentativeStat] = useState<StatKey | null>(null);
   const [swapTarget, setSwapTarget] = useState<string | null>(null);
   const [swapSkills, setSwapSkills] = useState<string[]>([]);
+  const [curseTarget, setCurseTarget] = useState<string | null>(null);
   useEffect(() => {
     setTentative(null);
     setTentativeStat(null);
     setSwapTarget(null);
     setSwapSkills([]);
+    setCurseTarget(null);
   }, [!!myCommitted, iAmPending, !!phase]);
   // Reset all extras whenever the picked card changes.
   useEffect(() => {
     setTentativeStat(null);
     setSwapTarget(null);
     setSwapSkills([]);
+    setCurseTarget(null);
   }, [tentative]);
   // Reset skill picks if target changes.
   useEffect(() => {
@@ -52,13 +55,15 @@ export function ActionPhaseView({
     : undefined;
   const isChoiceCard = tentativeCard?.effect.kind === 'stat_mod_choice';
   const isSwapCard = tentativeCard?.effect.kind === 'swap_actives';
+  const isCurseCard = tentativeCard?.effect.kind === 'curse_player';
   const swapTargetPlayer = swapTarget
     ? state.players.find((p) => p.id === swapTarget)
     : null;
   const canConfirm =
     !!tentative &&
     (!isChoiceCard || !!tentativeStat) &&
-    (!isSwapCard || (!!swapTarget && swapSkills.length === 2));
+    (!isSwapCard || (!!swapTarget && swapSkills.length === 2)) &&
+    (!isCurseCard || !!curseTarget);
 
   const toggleSwapSkill = (skillId: string): void => {
     setSwapSkills((prev) => {
@@ -86,6 +91,7 @@ export function ActionPhaseView({
                 skillIdB: swapSkills[1]!,
               }
             : undefined,
+        curseTargetPlayerId: isCurseCard ? curseTarget ?? undefined : undefined,
       });
     };
 
@@ -218,6 +224,43 @@ export function ActionPhaseView({
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+            {isCurseCard && (
+              <div
+                style={{
+                  padding: 8,
+                  background: '#fff0f0',
+                  border: '1px solid #cc0000',
+                  borderRadius: 6,
+                  display: 'grid',
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontSize: 13, fontWeight: 600 }}>呪い対象を選ぶ</span>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {state.players.filter((p) => p.monster && p.id !== selfId).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setCurseTarget(p.id)}
+                      style={{
+                        padding: '4px 10px',
+                        border: `2px solid ${curseTarget === p.id ? '#cc0000' : '#aaa'}`,
+                        borderRadius: 4,
+                        background: curseTarget === p.id ? '#fff0f0' : '#fff',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      <span style={pieceStyle(p.color, { size: 12 })} />
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             <div

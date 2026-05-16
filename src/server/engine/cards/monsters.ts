@@ -363,6 +363,46 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
+    baseId: 'shaman',
+    name: 'シャーマン',
+    attackKind: 'magic',
+    stats: { hp: 11, atk: 5, def: 4, spd: 5 },
+    passives: [
+      {
+        id: 'shaman-p1',
+        name: '死霊の加護',
+        trigger: { kind: 'battle_start' },
+        effect: { kind: 'spd_roll_bonus', amount: 2 },
+      },
+    ],
+    uniqueActionCard: { id: 'unique-shaman', name: '呪い付与', effect: { kind: 'curse_player', amount: 2 } },
+    boons: [
+      { id: 'boon-shaman-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-shaman-2', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-shaman-3', name: '強攻撃を得る', effect: { kind: 'skill_card', cardId: 'sk-r-001' } },
+    ],
+  },
+  {
+    baseId: 'druid',
+    name: 'ドルイド',
+    attackKind: 'magic',
+    stats: { hp: 12, atk: 3, def: 5, spd: 4 },
+    passives: [
+      {
+        id: 'druid-p1',
+        name: '叡智の結晶',
+        trigger: { kind: 'battle_start' },
+        effect: { kind: 'passive_count_atk_buff', perPassive: 2 },
+      },
+    ],
+    uniqueActionCard: { id: 'unique-druid', name: '叡智の探求', effect: { kind: 'draw_passive_top', maxDraws: 10 } },
+    boons: [
+      { id: 'boon-druid-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-druid-2', name: 'DEF強化', effect: { kind: 'stat_up', stat: 'def', amount: 2 } },
+      { id: 'boon-druid-3', name: '鋼の体を得る', effect: { kind: 'skill_card', cardId: 'sk-rp-043' } },
+    ],
+  },
+  {
     baseId: 'bug',
     name: 'バグ',
     attackKind: 'magic',

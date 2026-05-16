@@ -138,6 +138,10 @@ function scoreActionCard(card: ActionCard): number {
       return 6;
     case 'random_stat_up':
       return card.effect.amount * 3;
+    case 'curse_player':
+      return 5;
+    case 'draw_passive_top':
+      return 6;
   }
 }
 

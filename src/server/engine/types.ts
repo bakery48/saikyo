@@ -402,7 +402,9 @@ export type PassiveEffect =
   /** Any normal shield gained by this side is converted to reflect shield instead. */
   | { kind: 'shield_to_reflect' }
   /** Any normal shield or reflect shield gained by this side is converted to ghost shield instead. */
-  | { kind: 'shield_reflect_to_ghost' };
+  | { kind: 'shield_reflect_to_ghost' }
+  /** At battle_start, buff ATK by (passiveCount × perPassive) for the battle. */
+  | { kind: 'passive_count_atk_buff'; perPassive: number };
 
 export type PassiveSkill = {
   id: string;
@@ -494,7 +496,9 @@ export type ActionEffect =
    * passives gained from skill cards are preserved.
    */
   | { kind: 'become_bug' }
-  | { kind: 'random_stat_up'; amount: number };
+  | { kind: 'random_stat_up'; amount: number }
+  | { kind: 'curse_player'; amount: number }
+  | { kind: 'draw_passive_top'; maxDraws: number };
 
 export type ActionCard = {
   id: string;
@@ -676,6 +680,8 @@ export type ActionPlay = {
     skillIdA: string;
     skillIdB: string;
   };
+  /** Required for curse_player cards; ignored otherwise. */
+  curseTargetPlayerId?: string;
 };
 
 export type BattleMatch = {

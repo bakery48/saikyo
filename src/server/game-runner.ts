@@ -375,6 +375,10 @@ export class GameRunner {
           card.effect.kind === 'swap_actives'
             ? cpuPickSwapTarget(this.state, pid)
             : undefined;
+        const curseTargetPlayerId =
+          card.effect.kind === 'curse_player'
+            ? cpuPickCurseTarget(this.state, pid)
+            : undefined;
         if (card.effect.kind === 'swap_actives' && !swap) {
           // No valid target with ≥2 actives — replace with the next-best card if any.
           const fallback = player.actionHand.find((c) => c.effect.kind !== 'swap_actives');
@@ -387,7 +391,7 @@ export class GameRunner {
             continue;
           }
         }
-        submitActionPlay(this.state, pid, card.id, { chosenStat, swap });
+        submitActionPlay(this.state, pid, card.id, { chosenStat, swap, curseTargetPlayerId });
       }
     }
     if (waiting) return true;
@@ -455,7 +459,7 @@ export class GameRunner {
   submitAction(
     playerId: string,
     cardId: string,
-    extras?: { chosenStat?: StatKey; swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string } },
+    extras?: { chosenStat?: StatKey; swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string }; curseTargetPlayerId?: string },
   ): void {
     if (this.state.phase !== 'action' || !this.state.actionPhase) {
       throw new Error('not in action phase');
@@ -617,6 +621,17 @@ export class GameRunner {
         : '-',
     ].join('|');
   }
+}
+
+/**
+ * For CPU-played curse_player cards: pick the opponent with the highest ATK
+ * as the curse target. Returns undefined if no valid target exists.
+ */
+function cpuPickCurseTarget(state: GameState, selfId: string): string | undefined {
+  const others = state.players.filter((p) => p.id !== selfId && p.monster);
+  if (others.length === 0) return undefined;
+  const target = others.sort((a, b) => (b.monster!.stats.atk) - (a.monster!.stats.atk))[0]!;
+  return target.id;
 }
 
 /**
