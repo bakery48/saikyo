@@ -2,7 +2,10 @@
 import { useMemo, useState } from 'react';
 import { SKILLS } from '../../../server/engine/cards/skills';
 import { MONSTERS } from '../../../server/engine/cards/monsters';
+import { EVENTS } from '../../../server/engine/cards/events';
+import { ACTIONS } from '../../../server/engine/cards/actions';
 import { describePassive, describeSkillCard, effectCategory, type EffectCategory } from '../../../lib/skill-text';
+import { describeEventEffect, describeActionEffect } from '../../../lib/card-text';
 import type { AttackKind, Rarity, SkillCard, SkillEffect } from '../../../server/engine/types';
 
 type SortCol = 'id' | 'rarity' | 'name' | 'tag' | 'category';
@@ -362,6 +365,8 @@ export default function DevSkillsPage() {
       )}
 
       <MonsterPassiveEditor />
+      <EventCardEditor />
+      <ActionCardEditor />
     </main>
   );
 }
@@ -482,6 +487,192 @@ function MonsterPassiveEditor() {
                       type="text"
                       value={currentDesc}
                       onChange={(ev) => setDesc(r.passive.id, ev.target.value)}
+                      style={{ ...cellInputStyle, color: currentDesc ? '#000' : '#999' }}
+                      placeholder={autoDesc}
+                    />
+                  </Td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+type SimpleDescEdits = Record<string, string>;
+
+function EventCardEditor() {
+  const [edits, setEdits] = useState<SimpleDescEdits>({});
+
+  const changedEntries = useMemo(() => {
+    const out: Array<{ id: string; description: string }> = [];
+    for (const c of EVENTS) {
+      const val = edits[c.id];
+      if (val === undefined) continue;
+      if (val !== (c.description ?? '')) out.push({ id: c.id, description: val });
+    }
+    return out;
+  }, [edits]);
+
+  const apply = async (): Promise<void> => {
+    if (changedEntries.length === 0) return;
+    try {
+      const res = await fetch('/api/dev/apply-event-edits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changedEntries),
+      });
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      const data = (await res.json()) as { count: number };
+      alert(`${data.count} 件を events.overrides.json に反映しました。Next.js がホットリロードします。`);
+      setEdits({});
+    } catch (err) {
+      alert(`反映に失敗しました: ${String(err)}`);
+    }
+  };
+
+  const reset = (): void => {
+    if (confirm('イベントカードの編集を破棄しますか？')) setEdits({});
+  };
+
+  return (
+    <section style={{ marginTop: 24 }}>
+      <h2 style={{ margin: '0 0 8px', fontSize: 18 }}>イベントカード説明文</h2>
+      <p style={{ fontSize: 12, opacity: 0.7, margin: '0 0 8px' }}>
+        各イベントカードの説明文を編集可能。空にすると effect から自動生成に戻ります。
+      </p>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ fontSize: 12, opacity: 0.7 }}>変更 {changedEntries.length} 件</span>
+        <button
+          type="button"
+          onClick={apply}
+          disabled={changedEntries.length === 0}
+          style={{ background: '#2a6', color: '#fff', border: 'none', borderRadius: 3, padding: '4px 10px', cursor: 'pointer' }}
+        >
+          反映（overrides.json に書き込み）
+        </button>
+        <button type="button" onClick={reset} disabled={Object.keys(edits).length === 0}>
+          編集を破棄
+        </button>
+      </div>
+      <div style={{ overflow: 'auto', border: '1px solid #ccc', borderRadius: 4 }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: '#eef', position: 'sticky', top: 0 }}>
+              <Th>ID</Th>
+              <Th>カード名</Th>
+              <Th>ターゲット</Th>
+              <Th>説明文（空=自動生成）</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {EVENTS.map((c) => {
+              const currentDesc = edits[c.id] !== undefined ? edits[c.id]! : c.description ?? '';
+              const autoDesc = describeEventEffect({ ...c, description: undefined });
+              const dirty = edits[c.id] !== undefined && edits[c.id] !== (c.description ?? '');
+              return (
+                <tr key={c.id} style={{ background: dirty ? '#fffbe6' : 'transparent', borderBottom: '1px solid #eee' }}>
+                  <Td><code style={{ fontSize: 11 }}>{c.id}</code></Td>
+                  <Td>{c.name}</Td>
+                  <Td><span style={{ fontSize: 11, opacity: 0.7 }}>{c.target}</span></Td>
+                  <Td style={{ minWidth: 320 }}>
+                    <input
+                      type="text"
+                      value={currentDesc}
+                      onChange={(ev) => setEdits((prev) => ({ ...prev, [c.id]: ev.target.value }))}
+                      style={{ ...cellInputStyle, color: currentDesc ? '#000' : '#999' }}
+                      placeholder={autoDesc}
+                    />
+                  </Td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function ActionCardEditor() {
+  const [edits, setEdits] = useState<SimpleDescEdits>({});
+
+  const changedEntries = useMemo(() => {
+    const out: Array<{ id: string; description: string }> = [];
+    for (const c of ACTIONS) {
+      const val = edits[c.id];
+      if (val === undefined) continue;
+      if (val !== (c.description ?? '')) out.push({ id: c.id, description: val });
+    }
+    return out;
+  }, [edits]);
+
+  const apply = async (): Promise<void> => {
+    if (changedEntries.length === 0) return;
+    try {
+      const res = await fetch('/api/dev/apply-action-edits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changedEntries),
+      });
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      const data = (await res.json()) as { count: number };
+      alert(`${data.count} 件を actions.overrides.json に反映しました。Next.js がホットリロードします。`);
+      setEdits({});
+    } catch (err) {
+      alert(`反映に失敗しました: ${String(err)}`);
+    }
+  };
+
+  const reset = (): void => {
+    if (confirm('アクションカードの編集を破棄しますか？')) setEdits({});
+  };
+
+  return (
+    <section style={{ marginTop: 24 }}>
+      <h2 style={{ margin: '0 0 8px', fontSize: 18 }}>アクションカード説明文</h2>
+      <p style={{ fontSize: 12, opacity: 0.7, margin: '0 0 8px' }}>
+        各アクションカードの説明文を編集可能。空にすると effect から自動生成に戻ります。
+      </p>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ fontSize: 12, opacity: 0.7 }}>変更 {changedEntries.length} 件</span>
+        <button
+          type="button"
+          onClick={apply}
+          disabled={changedEntries.length === 0}
+          style={{ background: '#2a6', color: '#fff', border: 'none', borderRadius: 3, padding: '4px 10px', cursor: 'pointer' }}
+        >
+          反映（overrides.json に書き込み）
+        </button>
+        <button type="button" onClick={reset} disabled={Object.keys(edits).length === 0}>
+          編集を破棄
+        </button>
+      </div>
+      <div style={{ overflow: 'auto', border: '1px solid #ccc', borderRadius: 4 }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: '#eef', position: 'sticky', top: 0 }}>
+              <Th>ID</Th>
+              <Th>カード名</Th>
+              <Th>説明文（空=自動生成）</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {ACTIONS.map((c) => {
+              const currentDesc = edits[c.id] !== undefined ? edits[c.id]! : c.description ?? '';
+              const autoDesc = describeActionEffect({ ...c, description: undefined });
+              const dirty = edits[c.id] !== undefined && edits[c.id] !== (c.description ?? '');
+              return (
+                <tr key={c.id} style={{ background: dirty ? '#fffbe6' : 'transparent', borderBottom: '1px solid #eee' }}>
+                  <Td><code style={{ fontSize: 11 }}>{c.id}</code></Td>
+                  <Td>{c.name}</Td>
+                  <Td style={{ minWidth: 320 }}>
+                    <input
+                      type="text"
+                      value={currentDesc}
+                      onChange={(ev) => setEdits((prev) => ({ ...prev, [c.id]: ev.target.value }))}
                       style={{ ...cellInputStyle, color: currentDesc ? '#000' : '#999' }}
                       placeholder={autoDesc}
                     />
