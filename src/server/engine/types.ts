@@ -498,6 +498,8 @@ export type ActionEffect =
   | { kind: 'stat_mod_choice'; amount: number; stats?: StatKey[] }
   | { kind: 'recover_skill_from_grave' }
   | { kind: 'draw_skill_top' }
+  /** Draw a skill card from the top of the deck, then lose `amount` in a randomly chosen combat stat (atk/def/spd). */
+  | { kind: 'draw_skill_top_with_stat_loss'; amount: number }
   | { kind: 'discard_random_active' }
   /** Discard one random sin-tagged skill from the user's monster. No-op if none. */
   | { kind: 'cleanse_sin' }

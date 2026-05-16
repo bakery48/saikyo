@@ -45,6 +45,14 @@ function applyActionEffect(
       if (top) addSkillCardToMonster(state, player, top);
       break;
     }
+    case 'draw_skill_top_with_stat_loss': {
+      const top = drawTop(state.decks.skill, state.decks.skillGrave, rng);
+      if (top) addSkillCardToMonster(state, player, top);
+      const combatStats: Array<'atk' | 'def' | 'spd'> = ['atk', 'def', 'spd'];
+      const stat = combatStats[rng.int(0, 2)]!;
+      if (player.monster) player.monster.stats[stat] = Math.max(0, player.monster.stats[stat] - card.effect.amount);
+      break;
+    }
     case 'discard_random_active': {
       // Find non-null active skill cards within the active slot range
       const candidates: { card: SkillCard; idx: number }[] = [];

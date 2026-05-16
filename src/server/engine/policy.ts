@@ -119,6 +119,8 @@ function scoreActionCard(card: ActionCard): number {
       return card.effect.amount * 4;
     case 'draw_skill_top':
       return 5;
+    case 'draw_skill_top_with_stat_loss':
+      return 4;
     case 'recover_skill_from_grave':
       return 4;
     case 'gain_passive':

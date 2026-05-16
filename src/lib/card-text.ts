@@ -77,6 +77,8 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       return 'スキル墓地から1枚回収';
     case 'draw_skill_top':
       return 'スキル山札から1枚追加';
+    case 'draw_skill_top_with_stat_loss':
+      return `スキル山札から1枚追加（ATK/DEF/SPDのどれかランダムで-${e.amount}）`;
     case 'discard_random_active':
       return 'スロット1つをランダムに破棄';
     case 'cleanse_sin':

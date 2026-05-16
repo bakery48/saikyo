@@ -3,15 +3,15 @@ import rawOverrides from './actions.overrides.json';
 
 export const ACTIONS: ActionCard[] = [
   // ── stat_mod ────────────────────────────────────────────────────────────────
-  { id: 'ac-atk2',  name: 'ATK強化',    effect: { kind: 'stat_mod', stat: 'atk', amount: 2 }, count: 6 },
-  { id: 'ac-def2',  name: 'DEF強化',    effect: { kind: 'stat_mod', stat: 'def', amount: 2 }, count: 6 },
-  { id: 'ac-spd2',  name: 'SPD強化',    effect: { kind: 'stat_mod', stat: 'spd', amount: 2 }, count: 6 },
-  { id: 'ac-hp3',   name: 'HP回復',     effect: { kind: 'stat_mod', stat: 'hp',  amount: 3 }, count: 6 },
+  { id: 'ac-atk2',  name: '瓦割り',       effect: { kind: 'stat_mod', stat: 'atk', amount: 2 }, count: 6 },
+  { id: 'ac-def2',  name: '滝行',         effect: { kind: 'stat_mod', stat: 'def', amount: 2 }, count: 6 },
+  { id: 'ac-spd2',  name: '坂道ダッシュ', effect: { kind: 'stat_mod', stat: 'spd', amount: 2 }, count: 6 },
+  { id: 'ac-hp3',   name: '走り込み',     effect: { kind: 'stat_mod', stat: 'hp',  amount: 3 }, count: 6 },
   // ── stat_mod_choice ─────────────────────────────────────────────────────────
   { id: 'ac-choice2', name: '汎用訓練', effect: { kind: 'stat_mod_choice', amount: 2, stats: ['atk', 'def', 'spd'] }, count: 10 },
 
   // ── スキル操作 ───────────────────────────────────────────────────────────────
-  { id: 'ac-draw',    name: '探索',     effect: { kind: 'draw_skill_top' },            count: 6 },
+  { id: 'ac-draw',    name: '探索',     effect: { kind: 'draw_skill_top_with_stat_loss', amount: 1 }, count: 6 },
   { id: 'ac-grave',   name: '墓場あさり', effect: { kind: 'recover_skill_from_grave' }, count: 5 },
   { id: 'ac-discard', name: 'スキル整理', effect: { kind: 'discard_random_active' },   count: 2 },
   { id: 'ac-slot',    name: 'スキル直結', effect: { kind: 'slot_top_skill' },          count: 1 },
