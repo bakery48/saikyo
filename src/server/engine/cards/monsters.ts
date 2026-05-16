@@ -34,7 +34,7 @@ export const MONSTERS: MonsterBase[] = [
     baseId: 'golem',
     name: 'ゴーレム',
     attackKind: 'strike',
-    stats: { hp: 20, atk: 5, def: 7, spd: 2 },
+    stats: { hp: 20, atk: 5, def: 7, spd: 0 },
     passives: [
       {
         id: 'golem-p1',
