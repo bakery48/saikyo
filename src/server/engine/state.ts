@@ -1,4 +1,5 @@
 import type {
+  ActionCard,
   ActiveSkill,
   BoonPickState,
   GameState,
@@ -118,7 +119,7 @@ export function createInitialState(opts: {
     phase: 'pick_monster',
     decks: {
       event: shuffle(EVENTS, rng),
-      action: shuffle(ACTIONS, rng),
+      action: shuffle(ACTIONS.flatMap(c => Array<ActionCard>(c.count ?? 1).fill(c)), rng),
       skill: (() => {
         const skillDeck: SkillCard[] = [];
         for (const card of SKILLS) {

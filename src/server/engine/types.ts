@@ -529,6 +529,8 @@ export type ActionCard = {
   name: string;
   effect: ActionEffect;
   description?: string;
+  /** Number of copies placed in the shared action deck. Defaults to 1. */
+  count?: number;
 };
 
 export type SkillCard = {
