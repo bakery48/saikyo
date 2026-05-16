@@ -94,8 +94,10 @@ function formatBattleEvent(e: BattleEvent, aName: string, bName: string): string
       return `  ${who(e.player)} 次ダメージ×${e.mult}`;
     case 'passive':
       return `  ${who(e.player)} パッシブ発動（${e.passiveId}）`;
+    case 'paralysis_applied':
+      return `  ${who(e.player)} に麻痺[${e.stacks}]付与`;
     case 'turn_skipped':
-      return `  ${who(e.player)} のターンをスキップ`;
+      return `  ${who(e.player)} のターンをスキップ（麻痺）`;
     case 'actives_shuffled':
       return `  ${who(e.player)} の残りスロット順をシャッフル`;
     case 'skill_fizzle':

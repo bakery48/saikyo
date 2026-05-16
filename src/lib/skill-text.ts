@@ -57,7 +57,9 @@ export function describeActiveEffect(e: SkillEffect): string {
     case 'self_nullify_next':
       return `自分の次のスロットを無効化（罪）`;
     case 'pause_opponent':
-      return `相手の次のターンをスキップ`;
+      return `相手に麻痺[${e.stacks ?? 1}]付与`;
+    case 'attack_and_paralyze':
+      return `ATK×${e.mult}攻撃 + 相手に麻痺[${e.stacks}]付与`;
     case 'shuffle_opponent_actives':
       return `相手の残りスロット順をランダムに入替え`;
     case 'next_multi_attack':

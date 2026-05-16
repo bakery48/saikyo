@@ -1443,8 +1443,26 @@ function applySkill(args: {
       break;
     }
     case 'pause_opponent': {
-      target.skipTurnsRemaining += 1;
-      // The actual skip is logged later when the opponent's turn is consumed.
+      const stacks = e.stacks ?? 1;
+      target.skipTurnsRemaining += stacks;
+      log.push({ kind: 'paralysis_applied', player: targetSide, stacks });
+      break;
+    }
+    case 'attack_and_paralyze': {
+      resolveAttack({
+        attacker: user,
+        defender: target,
+        attackerPassives: userPassives,
+        defenderPassives: targetPassives,
+        effect: { kind: 'attack', mult: e.mult, useStat: e.useStat, attackKind: e.attackKind },
+        attackerSide: userSide,
+        defenderSide: targetSide,
+        rng,
+        log,
+      });
+      user.firstAttackMade = true;
+      target.skipTurnsRemaining += e.stacks;
+      log.push({ kind: 'paralysis_applied', player: targetSide, stacks: e.stacks });
       break;
     }
     case 'shuffle_opponent_actives': {

@@ -87,8 +87,10 @@ export type SkillEffect =
   /** Heal the opponent by `amount` (capped at their max HP). Used for sin cards. */
   | { kind: 'heal_target'; amount: number }
   | { kind: 'heal_target_max_fraction'; fraction: number }
-  /** Cause the opponent to skip their next turn (no skill consumed, just delayed). */
-  | { kind: 'pause_opponent' }
+  /** Cause the opponent to skip their next `stacks` turns (default 1). Displays as 麻痺[stacks]. */
+  | { kind: 'pause_opponent'; stacks?: number }
+  /** Attack, then apply paralysis[stacks] to the opponent. */
+  | { kind: 'attack_and_paralyze'; mult: number; useStat: 'atk' | 'def' | 'spd'; attackKind?: AttackKind; stacks: number }
   /** Randomly shuffle the opponent's remaining (unused) active skills. */
   | { kind: 'shuffle_opponent_actives' }
   /**
@@ -569,6 +571,8 @@ export type BattleEvent =
   | { kind: 'amp_set'; player: 'a' | 'b'; mult: number }
   | { kind: 'shield'; player: 'a' | 'b'; amount: number }
   | { kind: 'passive'; player: 'a' | 'b'; passiveId: string }
+  /** Paralysis[N] was applied to a side. */
+  | { kind: 'paralysis_applied'; player: 'a' | 'b'; stacks: number }
   /** A side's turn was skipped (consumed a pending pause flag). */
   | { kind: 'turn_skipped'; player: 'a' | 'b' }
   /** A side's remaining actives were shuffled. */
