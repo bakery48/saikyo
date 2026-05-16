@@ -6,7 +6,7 @@ export const MONSTERS: MonsterBase[] = [
     baseId: 'demon',
     name: 'デーモン',
     attackKind: 'claw',
-    stats: { hp: 18, atk: 6, def: 6, spd: 2 },
+    stats: { hp: 15, atk: 6, def: 6, spd: 2 },
     passives: [
       {
         id: 'demon-p1',
@@ -46,7 +46,7 @@ export const MONSTERS: MonsterBase[] = [
     baseId: 'golem',
     name: 'ゴーレム',
     attackKind: 'strike',
-    stats: { hp: 20, atk: 5, def: 7, spd: 0 },
+    stats: { hp: 17, atk: 5, def: 7, spd: 0 },
     passives: [
       {
         id: 'golem-p1',
@@ -106,7 +106,7 @@ export const MONSTERS: MonsterBase[] = [
     baseId: 'wyvern',
     name: 'ワイバーン',
     attackKind: 'claw',
-    stats: { hp: 8, atk: 6, def: 3, spd: 7 },
+    stats: { hp: 10, atk: 6, def: 3, spd: 7 },
     passives: [
       {
         id: 'wyvern-p1',
@@ -166,7 +166,7 @@ export const MONSTERS: MonsterBase[] = [
     baseId: 'vampire',
     name: 'ヴァンパイア',
     attackKind: 'claw',
-    stats: { hp: 8, atk: 6, def: 3, spd: 5 },
+    stats: { hp: 10, atk: 6, def: 3, spd: 5 },
     passives: [
       {
         id: 'vampire-p1',
@@ -306,7 +306,7 @@ export const MONSTERS: MonsterBase[] = [
     baseId: 'dragon',
     name: 'ドラゴン',
     attackKind: 'claw',
-    stats: { hp: 9, atk: 5, def: 2, spd: 6 },
+    stats: { hp: 13, atk: 5, def: 2, spd: 6 },
     passives: [
       {
         id: 'dragon-p1',
@@ -447,7 +447,7 @@ export const MONSTERS: MonsterBase[] = [
     baseId: 'ghost',
     name: 'ゴースト',
     attackKind: 'strike',
-    stats: { hp: 16, atk: 4, def: 8, spd: 3 },
+    stats: { hp: 11, atk: 4, def: 8, spd: 3 },
     passives: [
       {
         id: 'ghost-p1',
