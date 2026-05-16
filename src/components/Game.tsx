@@ -18,6 +18,7 @@ import { DeckInspector } from './game/DeckInspector';
 import { DevTools } from './game/DevTools';
 import { PhaseProgress } from './game/PhaseProgress';
 import { RulesButton } from './game/RulesModal';
+import { MonsterCodexButton } from './game/MonsterCodexModal';
 import { BgmPlayer } from './BgmPlayer';
 
 const PHASE_LABEL: Record<string, string> = {
@@ -91,6 +92,7 @@ export function Game({ socket }: { socket: GameSocket }) {
           </button>
           <strong>{formatPhaseTitle(state)}</strong>
           <RulesButton />
+          <MonsterCodexButton />
           <BgmPlayer />
           <span style={{ marginLeft: 'auto', fontSize: 12, opacity: 0.6 }}>
             deck: event {state.deckCounts.event} · action {state.deckCounts.action} · skill{' '}
