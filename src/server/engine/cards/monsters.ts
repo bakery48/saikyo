@@ -472,7 +472,7 @@ export const MONSTERS: MonsterBase[] = [
       {
         id: 'okuninushi-p1',
         name: '迸る稲妻',
-        trigger: { kind: 'on_own_active_used' },
+        trigger: { kind: 'on_deal_damage' },
         effect: { kind: 'paralyze_on_active', percent: 30 },
       },
     ],
