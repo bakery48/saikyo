@@ -120,13 +120,9 @@ export function BuildPhaseView({
         </p>
       ) : null}
 
-      {/* Active slot count control */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <span style={{ fontWeight: 600, fontSize: 13 }}>アクティブスロット数:</span>
-        <button onClick={() => changeActiveCount(-1)} disabled={!iAmPending || submitted || activeSlotCount <= 0} style={{ padding: '2px 10px' }}>－</button>
-        <span style={{ fontSize: 18, fontWeight: 700, minWidth: 24, textAlign: 'center' }}>{activeSlotCount}</span>
-        <button onClick={() => changeActiveCount(1)} disabled={!iAmPending || submitted || activeSlotCount >= TOTAL_SLOTS} style={{ padding: '2px 10px' }}>＋</button>
-        <span style={{ fontSize: 12, opacity: 0.6 }}>（{activeSlotCount}スロット中nullはアタック）</span>
+      {/* Active slot count indicator */}
+      <div style={{ fontSize: 13, opacity: 0.7 }}>
+        有効スロット: <strong>{activeSlotCount}</strong> / {TOTAL_SLOTS}　—　アタック枠の「ここで止める」で以降を不活性化できます。
       </div>
 
       {/* Slot grid */}
@@ -154,7 +150,18 @@ export function BuildPhaseView({
               >
                 <div style={{ fontSize: 10, opacity: 0.5, marginBottom: 2 }}>スロット {idx + 1}{!isActive ? ' （不活性）' : ''}</div>
                 {!isActive ? (
-                  <span style={{ fontSize: 12, opacity: 0.4 }}>—</span>
+                  <>
+                    <span style={{ fontSize: 12, opacity: 0.4 }}>—</span>
+                    {iAmPending && !submitted && (
+                      <button
+                        onClick={() => setActiveSlotCount(idx + 1)}
+                        style={{ fontSize: 11, padding: '2px 6px', marginTop: 4, alignSelf: 'flex-start', cursor: 'pointer' }}
+                        title="このスロットまで有効にする"
+                      >
+                        ここまで有効化
+                      </button>
+                    )}
+                  </>
                 ) : card ? (
                   <>
                     <div style={{ fontSize: 10, color: RARITY_COLOR[card.rarity] ?? '#888' }}>{card.rarity}</div>
@@ -169,7 +176,19 @@ export function BuildPhaseView({
                     )}
                   </>
                 ) : (
-                  <span style={{ fontSize: 12, opacity: 0.5, fontStyle: 'italic' }}>アタック（デフォルト）</span>
+                  // Default attack slot (null within active range)
+                  <>
+                    <span style={{ fontSize: 12, opacity: 0.5, fontStyle: 'italic' }}>アタック（デフォルト）</span>
+                    {iAmPending && !submitted && (
+                      <button
+                        onClick={() => changeActiveCount(idx - activeSlotCount)}
+                        style={{ fontSize: 11, padding: '2px 6px', marginTop: 4, alignSelf: 'flex-start', color: '#c44', cursor: 'pointer' }}
+                        title="このスロット以降を不活性にする"
+                      >
+                        ここで止める
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             );
