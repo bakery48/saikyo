@@ -13,7 +13,7 @@ import { addSkillCardToMonster, makeRng, saveRng, syncMonsterFromSlots } from '.
 import { describeActionEffect } from '../../../lib/card-text';
 import { MONSTERS } from '../cards/monsters';
 
-const VALID_STATS: StatKey[] = ['hp', 'atk', 'def', 'spd'];
+const ALL_STATS: StatKey[] = ['hp', 'atk', 'def', 'spd'];
 
 function applyActionEffect(
   state: GameState,
@@ -280,7 +280,8 @@ export function submitActionPlay(
   const chosenStat = extras?.chosenStat;
   const swap = extras?.swap;
   if (card.effect.kind === 'stat_mod_choice') {
-    if (!chosenStat || !VALID_STATS.includes(chosenStat)) {
+    const allowed = card.effect.stats ?? ALL_STATS;
+    if (!chosenStat || !allowed.includes(chosenStat)) {
       throw new Error('chosenStat is required for this card');
     }
   }

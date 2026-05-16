@@ -7,18 +7,8 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-def2',  name: 'DEF強化',    effect: { kind: 'stat_mod', stat: 'def', amount: 2 }, count: 6 },
   { id: 'ac-spd2',  name: 'SPD強化',    effect: { kind: 'stat_mod', stat: 'spd', amount: 2 }, count: 6 },
   { id: 'ac-hp3',   name: 'HP回復',     effect: { kind: 'stat_mod', stat: 'hp',  amount: 3 }, count: 6 },
-  { id: 'ac-atk3',  name: '突撃修行',   effect: { kind: 'stat_mod', stat: 'atk', amount: 3 }, count: 2 },
-  { id: 'ac-def3',  name: '防御修行',   effect: { kind: 'stat_mod', stat: 'def', amount: 3 }, count: 2 },
-  { id: 'ac-spd3',  name: '加速修行',   effect: { kind: 'stat_mod', stat: 'spd', amount: 3 }, count: 2 },
-  { id: 'ac-hp4',   name: '深呼吸',     effect: { kind: 'stat_mod', stat: 'hp',  amount: 4 }, count: 1 },
-  { id: 'ac-atk4',  name: '攻撃の極意', effect: { kind: 'stat_mod', stat: 'atk', amount: 4 }, count: 1 },
-  { id: 'ac-def4',  name: '防御の極意', effect: { kind: 'stat_mod', stat: 'def', amount: 4 }, count: 1 },
-  { id: 'ac-spd4',  name: '迅雷の歩み', effect: { kind: 'stat_mod', stat: 'spd', amount: 4 }, count: 1 },
-  { id: 'ac-hp5',   name: '生命の泉',   effect: { kind: 'stat_mod', stat: 'hp',  amount: 5 }, count: 1 },
-
   // ── stat_mod_choice ─────────────────────────────────────────────────────────
-  { id: 'ac-choice1', name: '汎用訓練', effect: { kind: 'stat_mod_choice', amount: 1 }, count: 10 },
-  { id: 'ac-choice2', name: '大訓練',   effect: { kind: 'stat_mod_choice', amount: 2 }, count: 1 },
+  { id: 'ac-choice2', name: '汎用訓練', effect: { kind: 'stat_mod_choice', amount: 2, stats: ['atk', 'def', 'spd'] }, count: 10 },
 
   // ── スキル操作 ───────────────────────────────────────────────────────────────
   { id: 'ac-draw',    name: '探索',     effect: { kind: 'draw_skill_top' },            count: 6 },

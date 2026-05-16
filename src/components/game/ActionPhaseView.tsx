@@ -6,7 +6,7 @@ import type { StatKey } from '../../server/engine/types';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 import { describeActionEffect } from '../../lib/card-text';
 
-const CHOICE_STATS: StatKey[] = ['hp', 'atk', 'def', 'spd'];
+const DEFAULT_CHOICE_STATS: StatKey[] = ['hp', 'atk', 'def', 'spd'];
 
 export function ActionPhaseView({
   state,
@@ -135,7 +135,7 @@ export function ActionPhaseView({
                 <span style={{ fontSize: 13, fontWeight: 600 }}>
                   どのステータスを上げる？
                 </span>
-                {CHOICE_STATS.map((s) => (
+                {(tentativeCard?.effect.kind === 'stat_mod_choice' ? (tentativeCard.effect.stats ?? DEFAULT_CHOICE_STATS) : DEFAULT_CHOICE_STATS).map((s) => (
                   <button
                     key={s}
                     type="button"

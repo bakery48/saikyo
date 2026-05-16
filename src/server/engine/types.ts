@@ -495,7 +495,7 @@ export type EventCard = {
 export type ActionEffect =
   | { kind: 'stat_mod'; stat: StatKey; amount: number }
   /** Player picks one of HP/ATK/DEF/SPD to bump. Requires `chosenStat` on submission. */
-  | { kind: 'stat_mod_choice'; amount: number }
+  | { kind: 'stat_mod_choice'; amount: number; stats?: StatKey[] }
   | { kind: 'recover_skill_from_grave' }
   | { kind: 'draw_skill_top' }
   | { kind: 'discard_random_active' }

@@ -70,7 +70,8 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       if (chosenStat) {
         return `${chosenStat.toUpperCase()}+${e.amount}`;
       }
-      return `HP/ATK/DEF/SPDから1つ選んで+${e.amount}`;
+      const labels = (e.stats ?? ['hp', 'atk', 'def', 'spd']).map((s) => s.toUpperCase()).join('/');
+      return `${labels}から1つ選んで+${e.amount}`;
     }
     case 'recover_skill_from_grave':
       return 'スキル墓地から1枚回収';
