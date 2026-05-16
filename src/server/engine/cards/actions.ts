@@ -25,12 +25,23 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-swap-all',  name: '全能大交換', effect: { kind: 'swap_all_stats' }, count: 1 },
 
   // ── ステータス変換 ───────────────────────────────────────────────────────────
-  { id: 'ac-def2atk', name: 'DEF→ATK変換', effect: { kind: 'trade_stat', from: 'def', to: 'atk', fromAmount: 3, toAmount: 4 }, count: 1 },
-  { id: 'ac-atk2spd', name: 'ATK→SPD変換', effect: { kind: 'trade_stat', from: 'atk', to: 'spd', fromAmount: 2, toAmount: 3 }, count: 1 },
-  { id: 'ac-spd2atk', name: 'SPD→ATK変換', effect: { kind: 'trade_stat', from: 'spd', to: 'atk', fromAmount: 3, toAmount: 4 }, count: 1 },
-  { id: 'ac-hp2atk',  name: 'HP→ATK変換',  effect: { kind: 'trade_stat', from: 'hp',  to: 'atk', fromAmount: 6, toAmount: 4 }, count: 1 },
-  { id: 'ac-def2hp',  name: 'DEF→HP変換',  effect: { kind: 'trade_stat', from: 'def', to: 'hp',  fromAmount: 2, toAmount: 5 }, count: 1 },
-  { id: 'ac-hp2atk2', name: '体力変換',     effect: { kind: 'hp_to_atk', fraction: 0.2 }, count: 1 },
+  // ── 変換（ATK/DEF/SPD/HPの全12パターン） ─────────────────────────────────
+  // from ATK(-2) → to DEF/SPD(+3) / HP(+15)
+  { id: 'ac-atk2def', name: 'ATK→DEF変換', effect: { kind: 'trade_stat', from: 'atk', to: 'def', fromAmount: 2, toAmount: 3  }, count: 1 },
+  { id: 'ac-atk2spd', name: 'ATK→SPD変換', effect: { kind: 'trade_stat', from: 'atk', to: 'spd', fromAmount: 2, toAmount: 3  }, count: 1 },
+  { id: 'ac-atk2hp',  name: 'ATK→HP変換',  effect: { kind: 'trade_stat', from: 'atk', to: 'hp',  fromAmount: 2, toAmount: 15 }, count: 1 },
+  // from DEF(-2) → to ATK/SPD(+3) / HP(+15)
+  { id: 'ac-def2atk', name: 'DEF→ATK変換', effect: { kind: 'trade_stat', from: 'def', to: 'atk', fromAmount: 2, toAmount: 3  }, count: 1 },
+  { id: 'ac-def2spd', name: 'DEF→SPD変換', effect: { kind: 'trade_stat', from: 'def', to: 'spd', fromAmount: 2, toAmount: 3  }, count: 1 },
+  { id: 'ac-def2hp',  name: 'DEF→HP変換',  effect: { kind: 'trade_stat', from: 'def', to: 'hp',  fromAmount: 2, toAmount: 15 }, count: 1 },
+  // from SPD(-2) → to ATK/DEF(+3) / HP(+15)
+  { id: 'ac-spd2atk', name: 'SPD→ATK変換', effect: { kind: 'trade_stat', from: 'spd', to: 'atk', fromAmount: 2, toAmount: 3  }, count: 1 },
+  { id: 'ac-spd2def', name: 'SPD→DEF変換', effect: { kind: 'trade_stat', from: 'spd', to: 'def', fromAmount: 2, toAmount: 3  }, count: 1 },
+  { id: 'ac-spd2hp',  name: 'SPD→HP変換',  effect: { kind: 'trade_stat', from: 'spd', to: 'hp',  fromAmount: 2, toAmount: 15 }, count: 1 },
+  // from HP(-12) → to ATK/DEF/SPD(+3)
+  { id: 'ac-hp2atk',  name: 'HP→ATK変換',  effect: { kind: 'trade_stat', from: 'hp',  to: 'atk', fromAmount: 12, toAmount: 3 }, count: 1 },
+  { id: 'ac-hp2def',  name: 'HP→DEF変換',  effect: { kind: 'trade_stat', from: 'hp',  to: 'def', fromAmount: 12, toAmount: 3 }, count: 1 },
+  { id: 'ac-hp2spd',  name: 'HP→SPD変換',  effect: { kind: 'trade_stat', from: 'hp',  to: 'spd', fromAmount: 12, toAmount: 3 }, count: 1 },
 
   // ── 全能・スケール ───────────────────────────────────────────────────────────
   { id: 'ac-allmod1', name: '汎用特訓', effect: { kind: 'all_stats_mod', amount: 1 }, count: 1 },
