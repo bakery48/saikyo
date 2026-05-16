@@ -16,6 +16,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-demon', name: '悪の研鑽', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+    boons: [
+      { id: 'boon-demon-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-demon-2', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-demon-3', name: '強攻撃を得る', effect: { kind: 'skill_card', cardId: 'sk-r-001' } },
+    ],
   },
   {
     baseId: 'unicorn',
@@ -31,6 +36,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-unicorn', name: '聖なる意志', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
+    boons: [
+      { id: 'boon-unicorn-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-unicorn-2', name: 'DEF強化', effect: { kind: 'stat_up', stat: 'def', amount: 2 } },
+      { id: 'boon-unicorn-3', name: '癒しの風を得る', effect: { kind: 'skill_card', cardId: 'sk-r-015' } },
+    ],
   },
   {
     baseId: 'golem',
@@ -46,6 +56,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-golem', name: '岩盤鍛錬', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
+    boons: [
+      { id: 'boon-golem-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-golem-2', name: 'DEF強化', effect: { kind: 'stat_up', stat: 'def', amount: 2 } },
+      { id: 'boon-golem-3', name: '岩石防御を得る', effect: { kind: 'skill_card', cardId: 'sk-r-006' } },
+    ],
   },
   {
     baseId: 'fenrir',
@@ -61,6 +76,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-fenrir', name: '疾風修行', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
+    boons: [
+      { id: 'boon-fenrir-1', name: 'SPD強化', effect: { kind: 'stat_up', stat: 'spd', amount: 2 } },
+      { id: 'boon-fenrir-2', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-fenrir-3', name: '光速を得る', effect: { kind: 'skill_card', cardId: 'sk-r-007' } },
+    ],
   },
   {
     baseId: 'fairy',
@@ -76,6 +96,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-fairy', name: '軽業の稽古', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
+    boons: [
+      { id: 'boon-fairy-1', name: 'SPD強化', effect: { kind: 'stat_up', stat: 'spd', amount: 2 } },
+      { id: 'boon-fairy-2', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-fairy-3', name: '光速を得る', effect: { kind: 'skill_card', cardId: 'sk-r-007' } },
+    ],
   },
   {
     baseId: 'wyvern',
@@ -91,6 +116,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-wyvern', name: '急降下訓練', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+    boons: [
+      { id: 'boon-wyvern-1', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-wyvern-2', name: 'SPD強化', effect: { kind: 'stat_up', stat: 'spd', amount: 2 } },
+      { id: 'boon-wyvern-3', name: '影刺しを得る', effect: { kind: 'skill_card', cardId: 'sk-n-028' } },
+    ],
   },
   {
     baseId: 'slime',
@@ -106,6 +136,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-slime', name: '形態適応', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
+    boons: [
+      { id: 'boon-slime-1', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-slime-2', name: 'DEF強化', effect: { kind: 'stat_up', stat: 'def', amount: 2 } },
+      { id: 'boon-slime-3', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+    ],
   },
   {
     baseId: 'ouroboros',
@@ -121,6 +156,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-ouroboros', name: '輪廻の研鑽', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+    boons: [
+      { id: 'boon-ouroboros-1', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-ouroboros-2', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-ouroboros-3', name: '強攻撃を得る', effect: { kind: 'skill_card', cardId: 'sk-r-001' } },
+    ],
   },
   {
     baseId: 'vampire',
@@ -136,6 +176,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-vampire', name: '吸血の研鑽', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+    boons: [
+      { id: 'boon-vampire-1', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-vampire-2', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-vampire-3', name: '強攻撃を得る', effect: { kind: 'skill_card', cardId: 'sk-r-001' } },
+    ],
   },
   {
     baseId: 'phoenix',
@@ -151,6 +196,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-phoenix', name: '不死の意志', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
+    boons: [
+      { id: 'boon-phoenix-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-phoenix-2', name: 'DEF強化', effect: { kind: 'stat_up', stat: 'def', amount: 2 } },
+      { id: 'boon-phoenix-3', name: '癒しの風を得る', effect: { kind: 'skill_card', cardId: 'sk-r-015' } },
+    ],
   },
   {
     baseId: 'berserker',
@@ -166,6 +216,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-berserker', name: '怒りの修行', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+    boons: [
+      { id: 'boon-berserker-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-berserker-2', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-berserker-3', name: '気力解放を得る', effect: { kind: 'skill_card', cardId: 'sk-r-005' } },
+    ],
   },
   {
     baseId: 'wizard',
@@ -181,6 +236,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-wizard', name: '呪詛の研鑽', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+    boons: [
+      { id: 'boon-wizard-1', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-wizard-2', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-wizard-3', name: '剥離を得る', effect: { kind: 'skill_card', cardId: 'sk-r-009' } },
+    ],
   },
   {
     baseId: 'cerberus',
@@ -196,6 +256,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-cerberus', name: '三頭連携', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+    boons: [
+      { id: 'boon-cerberus-1', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-cerberus-2', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-cerberus-3', name: '強攻撃を得る', effect: { kind: 'skill_card', cardId: 'sk-r-001' } },
+    ],
   },
   {
     baseId: 'carbuncle',
@@ -211,6 +276,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-carbuncle', name: '宝玉の守護', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
+    boons: [
+      { id: 'boon-carbuncle-1', name: 'DEF強化', effect: { kind: 'stat_up', stat: 'def', amount: 2 } },
+      { id: 'boon-carbuncle-2', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-carbuncle-3', name: 'いばらの盾を得る', effect: { kind: 'skill_card', cardId: 'sk-r-004' } },
+    ],
   },
   {
     baseId: 'scarab',
@@ -226,6 +296,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-scarab', name: '聖甲虫の鍛錬', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
+    boons: [
+      { id: 'boon-scarab-1', name: 'DEF強化', effect: { kind: 'stat_up', stat: 'def', amount: 2 } },
+      { id: 'boon-scarab-2', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-scarab-3', name: '中盾を得る', effect: { kind: 'skill_card', cardId: 'sk-r-016' } },
+    ],
   },
   {
     baseId: 'dragon',
@@ -241,6 +316,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-dragon', name: '龍の生命力', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
+    boons: [
+      { id: 'boon-dragon-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-dragon-2', name: 'DEF強化', effect: { kind: 'stat_up', stat: 'def', amount: 2 } },
+      { id: 'boon-dragon-3', name: '要塞を得る', effect: { kind: 'skill_card', cardId: 'sk-r-017' } },
+    ],
   },
   {
     baseId: 'goblin',
@@ -256,6 +336,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-goblin', name: '群れの生命力', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
+    boons: [
+      { id: 'boon-goblin-1', name: 'SPD強化', effect: { kind: 'stat_up', stat: 'spd', amount: 2 } },
+      { id: 'boon-goblin-2', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-goblin-3', name: '速攻を得る', effect: { kind: 'skill_card', cardId: 'sk-r-018' } },
+    ],
   },
   {
     baseId: 'griffon',
@@ -271,6 +356,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-griffon', name: '天空の駆け抜け', effect: { kind: 'stat_mod', stat: 'spd', amount: 1 } },
+    boons: [
+      { id: 'boon-griffon-1', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-griffon-2', name: 'SPD強化', effect: { kind: 'stat_up', stat: 'spd', amount: 2 } },
+      { id: 'boon-griffon-3', name: '強攻撃を得る', effect: { kind: 'skill_card', cardId: 'sk-r-001' } },
+    ],
   },
   {
     baseId: 'bug',
@@ -287,6 +377,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-bug', name: '崩壊への抵抗', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
+    boons: [
+      { id: 'boon-bug-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-bug-2', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-bug-3', name: '癒しの風を得る', effect: { kind: 'skill_card', cardId: 'sk-r-015' } },
+    ],
   },
   {
     baseId: 'knight',
@@ -302,6 +397,11 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-knight', name: '背水の鍛錬', effect: { kind: 'stat_mod', stat: 'def', amount: 1 } },
+    boons: [
+      { id: 'boon-knight-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-knight-2', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-knight-3', name: '中盾を得る', effect: { kind: 'skill_card', cardId: 'sk-r-016' } },
+    ],
   },
   {
     baseId: 'ghost',
@@ -317,6 +417,31 @@ export const MONSTERS: MonsterBase[] = [
       },
     ],
     uniqueActionCard: { id: 'unique-ghost', name: '霊体の生命力', effect: { kind: 'stat_mod', stat: 'hp', amount: 1 } },
+    boons: [
+      { id: 'boon-ghost-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-ghost-2', name: 'DEF強化', effect: { kind: 'stat_up', stat: 'def', amount: 2 } },
+      { id: 'boon-ghost-3', name: '中盾を得る', effect: { kind: 'skill_card', cardId: 'sk-r-016' } },
+    ],
+  },
+  {
+    baseId: 'joker',
+    name: 'ジョーカー',
+    attackKind: 'strike',
+    stats: { hp: 12, atk: 5, def: 4, spd: 5 },
+    passives: [
+      {
+        id: 'joker-p1',
+        name: '気まぐれな運命',
+        trigger: { kind: 'battle_start' },
+        effect: { kind: 'spd_roll_bonus', amount: 1 },
+      },
+    ],
+    uniqueActionCard: { id: 'unique-joker', name: '気まぐれな強化', effect: { kind: 'random_stat_up', amount: 4 } },
+    boons: [
+      { id: 'boon-joker-1', name: 'HP強化', effect: { kind: 'stat_up', stat: 'hp', amount: 2 } },
+      { id: 'boon-joker-2', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-joker-3', name: 'SPD強化', effect: { kind: 'stat_up', stat: 'spd', amount: 2 } },
+    ],
   },
 ];
 

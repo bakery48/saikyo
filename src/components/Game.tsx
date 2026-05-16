@@ -2,6 +2,7 @@
 import type { GameSocket } from '../lib/useGameSocket';
 import type { ClientGameState } from '../shared/messages';
 import { MonsterPickView } from './game/MonsterPickView';
+import { BoonPickView } from './game/BoonPickView';
 import { DraftView } from './game/DraftView';
 import { AutoPhaseView } from './game/AutoPhaseView';
 import { BattleAnimationView } from './game/BattleAnimationView';
@@ -22,6 +23,7 @@ import { BgmPlayer } from './BgmPlayer';
 const PHASE_LABEL: Record<string, string> = {
   setup: 'セットアップ',
   pick_monster: 'モンスター選択',
+  pick_boon: '恩恵選択',
   event: 'イベントフェーズ',
   action: 'アクションフェーズ',
   draft: 'ドラフトフェーズ',
@@ -141,6 +143,8 @@ function renderPhase(
   switch (phase) {
     case 'pick_monster':
       return <MonsterPickView state={state} socket={socket} />;
+    case 'pick_boon':
+      return <BoonPickView state={state} socket={socket} />;
     case 'event':
       return <EventPhaseView state={state} />;
     case 'action':

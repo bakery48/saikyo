@@ -96,6 +96,12 @@ function applyActionEffect(
       player.monster.attackKind = bug.attackKind;
       break;
     }
+    case 'random_stat_up': {
+      const stats: StatKey[] = ['hp', 'atk', 'def', 'spd'];
+      const chosenStat = stats[Math.floor(rng.next() * stats.length)]!;
+      player.monster.stats[chosenStat] += card.effect.amount;
+      break;
+    }
   }
   saveRng(state, rng);
 }

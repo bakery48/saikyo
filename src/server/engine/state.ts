@@ -279,13 +279,40 @@ function fallbackMonsterDistribute(state: GameState): void {
 
 function finalizeMonsterPick(state: GameState): void {
   state.monsterPick = null;
+  const pendingPlayerIds = state.players.map(p => p.id);
+  state.boonPick = { pendingPlayerIds, submittedChoices: {} };
+  state.phase = 'pick_boon';
+  state.log.push({ kind: 'phase_change', phase: 'pick_boon', round: state.round, miniRound: state.miniRound });
+}
+
+export function submitBoon(state: GameState, playerId: string, boonId: string): void {
+  if (state.phase !== 'pick_boon' || !state.boonPick) throw new Error('not in pick_boon phase');
+  const bp = state.boonPick;
+  if (!bp.pendingPlayerIds.includes(playerId)) throw new Error(`player ${playerId} not pending`);
+  bp.submittedChoices[playerId] = boonId;
+}
+
+export function resolveBoonPhase(state: GameState): void {
+  if (state.phase !== 'pick_boon' || !state.boonPick) throw new Error('not in pick_boon phase');
+  const bp = state.boonPick;
+  for (const player of state.players) {
+    const boonId = bp.submittedChoices[player.id];
+    if (!boonId || !player.monster) continue;
+    const base = MONSTERS_BY_ID[player.monster.baseId];
+    if (!base) continue;
+    const boon = base.boons.find(b => b.id === boonId);
+    if (!boon) continue;
+    const boonEffect = boon.effect;
+    if (boonEffect.kind === 'stat_up') {
+      player.monster.stats[boonEffect.stat] += boonEffect.amount;
+    } else if (boonEffect.kind === 'skill_card') {
+      const card = SKILLS.find(c => c.id === boonEffect.cardId);
+      if (card) addSkillCardToMonster(state, player, card);
+    }
+  }
+  state.boonPick = null;
   state.phase = 'action';
-  state.log.push({
-    kind: 'phase_change',
-    phase: 'action',
-    round: state.round,
-    miniRound: state.miniRound,
-  });
+  state.log.push({ kind: 'phase_change', phase: 'action', round: state.round, miniRound: state.miniRound });
 }
 
 export function monsterFromBase(base: MonsterBase, ownerId: string): Monster {

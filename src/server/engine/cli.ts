@@ -7,9 +7,13 @@
 import {
   createInitialState,
   resolveMonsterPickSubRound,
+  resolveBoonPhase,
+  submitBoon,
   submitMonsterPick,
   syncMonsterFromSlots,
 } from './state';
+import { MONSTERS_BY_ID } from './cards/monsters';
+import type { MonsterBoon } from './types';
 import { resolveEventPhase } from './phases/event';
 import {
   startActionPhase,
@@ -128,6 +132,19 @@ export function runOneRound(state: GameState, policy: Policy): void {
   expectPhase(state, 'battle');
 }
 
+export function runBoonPickPhase(state: GameState, policy: Policy): void {
+  if (state.phase !== 'pick_boon' || !state.boonPick) return;
+  const bp = state.boonPick;
+  for (const player of state.players) {
+    if (!bp.pendingPlayerIds.includes(player.id) || !player.monster) continue;
+    const base = MONSTERS_BY_ID[player.monster.baseId];
+    if (!base) continue;
+    const boon = policy.chooseBoon(state, player.id, base.boons as MonsterBoon[]);
+    bp.submittedChoices[player.id] = boon.id;
+  }
+  resolveBoonPhase(state);
+}
+
 export function runMonsterPickPhase(state: GameState, policy: Policy): void {
   while (state.phase === 'pick_monster' && state.monsterPick) {
     const draft = state.monsterPick;
@@ -141,6 +158,7 @@ export function runMonsterPickPhase(state: GameState, policy: Policy): void {
 
 export function runFullGame(state: GameState, policy: Policy = greedyPolicy): void {
   runMonsterPickPhase(state, policy);
+  runBoonPickPhase(state, policy);
 
   while (state.phase !== 'finished') {
     if (state.phase === 'action') {

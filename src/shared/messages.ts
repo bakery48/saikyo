@@ -10,6 +10,7 @@ import type {
   EventPhaseSummary,
   GameEvent,
   Monster,
+  MonsterBoon,
   MonsterPickState,
   PackDraftState,
   Phase,
@@ -66,6 +67,11 @@ export type ClientGameState = {
   roomId: string;
   players: ClientPlayer[];
   monsterPick: MonsterPickState | null;
+  boonPick: {
+    pendingPlayerIds: string[];
+    submittedCount: number;
+    myBoons: MonsterBoon[] | null;
+  } | null;
   round: number;
   miniRound: number;
   /** Number of big rounds for this game (1-3). */
@@ -158,6 +164,7 @@ export type ClientMessage =
   | { type: 'rename_monster'; name: string }
   | { type: 'leave_game' }
   /** Dev/test only: prepend a specific event card to the top of the event deck. */
+  | { type: 'submit_boon'; boonId: string }
   | { type: 'dev_inject_event'; cardId: string }
   /** Dev/test only: replace a card in the caller's action hand with a fresh copy of a chosen one. */
   | { type: 'dev_replace_hand'; oldCardId: string; newCardId: string };

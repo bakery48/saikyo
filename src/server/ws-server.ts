@@ -199,6 +199,10 @@ export class GameWsServer {
         this.runGameAction(playerId, (game) => game.submitPick(playerId, msg.baseId));
         return;
       }
+      case 'submit_boon': {
+        this.runGameAction(playerId, (game) => game.submitBoonChoice(playerId, msg.boonId));
+        return;
+      }
       case 'submit_draft': {
         this.runGameAction(playerId, (game) => game.submitDraft(playerId, msg.skillId));
         return;

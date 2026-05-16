@@ -1,4 +1,4 @@
-import type { ActionCard, GameState, MonsterBase, RewardChoice, SkillCard, StatKey } from './types';
+import type { ActionCard, GameState, MonsterBase, MonsterBoon, RewardChoice, SkillCard, StatKey } from './types';
 
 /**
  * A pluggable policy decides what a player does when input is required.
@@ -12,6 +12,8 @@ export type Policy = {
   chooseReward(state: GameState, playerId: string): RewardChoice;
   /** Choose which cards to slot during the build phase. */
   buildSlots(state: GameState, playerId: string): { slots: (string | null)[]; activeSlotCount: number };
+  /** Choose a boon from the monster's available boons. */
+  chooseBoon(state: GameState, playerId: string, boons: MonsterBoon[]): MonsterBoon;
 };
 
 /** Score a monster by total of its base stats — simple heuristic. */
@@ -104,6 +106,9 @@ export const greedyPolicy: Policy = {
     sorted.slice(0, 9).forEach((c, i) => { slots[i] = c.id; });
     return { slots, activeSlotCount: 9 };
   },
+  chooseBoon(_state, _playerId, boons) {
+    return boons[0]!;
+  },
 };
 
 function scoreActionCard(card: ActionCard): number {
@@ -131,6 +136,8 @@ function scoreActionCard(card: ActionCard): number {
       // Strong stat boost but adds the self-decay drawback. CPUs treat it as
       // moderately appealing.
       return 6;
+    case 'random_stat_up':
+      return card.effect.amount * 3;
   }
 }
 
@@ -165,6 +172,7 @@ export const firstOptionPolicy: Policy = {
   pickDraftCard: (_s, _p, pack) => pack[0]!,
   pickActionCard: (_s, _p, hand) => hand[0]!,
   chooseReward: () => ({ kind: 'skill_top' }),
+  chooseBoon: (_s, _p, boons) => boons[0]!,
   buildSlots: (state, playerId) => {
     const player = state.players.find((p) => p.id === playerId)!;
     const allCards = [

@@ -4,9 +4,12 @@ import {
   allMonsterPicksIn,
   createInitialState,
   resolveMonsterPickSubRound,
+  resolveBoonPhase,
+  submitBoon,
   submitMonsterPick,
   syncMonsterFromSlots,
 } from './engine/state';
+import { MONSTERS_BY_ID } from './engine/cards/monsters';
 import { resolveEventPhase } from './engine/phases/event';
 import {
   startActionPhase,
@@ -217,6 +220,8 @@ export class GameRunner {
     switch (this.state.phase) {
       case 'pick_monster':
         return this.stepMonsterPick();
+      case 'pick_boon':
+        return this.stepBoonPick();
       case 'event':
         resolveEventPhase(this.state);
         return false;
@@ -238,6 +243,30 @@ export class GameRunner {
       case 'setup':
         return true;
     }
+  }
+
+  private stepBoonPick(): boolean {
+    const bp = this.state.boonPick;
+    if (!bp) return true;
+    let waiting = false;
+    for (const pid of bp.pendingPlayerIds) {
+      if (bp.submittedChoices[pid]) continue;
+      if (this.isHuman(pid)) {
+        waiting = true;
+      } else {
+        const player = this.state.players.find((p) => p.id === pid);
+        if (!player?.monster) continue;
+        const base = MONSTERS_BY_ID[player.monster.baseId];
+        if (base?.boons?.[0]) {
+          submitBoon(this.state, pid, greedyPolicy.chooseBoon(this.state, pid, Array.from(base.boons)).id);
+        }
+      }
+    }
+    if (waiting) return true;
+    if (bp.pendingPlayerIds.every((id) => !!bp.submittedChoices[id])) {
+      resolveBoonPhase(this.state);
+    }
+    return false;
   }
 
   private stepMonsterPick(): boolean {
@@ -441,6 +470,10 @@ export class GameRunner {
     submitReward(this.state, playerId, choice);
   }
 
+  submitBoonChoice(playerId: string, boonId: string): void {
+    submitBoon(this.state, playerId, boonId);
+  }
+
   /**
    * Reorder the player's skill slots. The `order` array should contain all
    * current skillSlot card IDs in the desired new order. Allowed in reward phase.
@@ -502,10 +535,21 @@ export class GameRunner {
       actionHandCount: p.actionHand.length,
     }));
     const me = viewerId ? s.players.find((p) => p.id === viewerId) : null;
+    const myBoonPick = s.boonPick ? (() => {
+      const myBoons = me?.monster
+        ? (MONSTERS_BY_ID[me.monster.baseId]?.boons ?? null)
+        : null;
+      return {
+        pendingPlayerIds: s.boonPick.pendingPlayerIds,
+        submittedCount: Object.keys(s.boonPick.submittedChoices).length,
+        myBoons: myBoons ? Array.from(myBoons) : null,
+      };
+    })() : null;
     return {
       roomId: s.roomId,
       players,
       monsterPick: s.monsterPick,
+      boonPick: myBoonPick,
       round: s.round,
       miniRound: s.miniRound,
       totalRounds: s.totalRounds,
@@ -552,6 +596,9 @@ export class GameRunner {
       s.phase,
       s.round,
       s.miniRound,
+      s.boonPick
+        ? `bp:${s.boonPick.pendingPlayerIds.length}/${Object.keys(s.boonPick.submittedChoices).length}`
+        : '-',
       s.monsterPick
         ? `mp:${s.monsterPick.pool.length}/${Object.keys(s.monsterPick.submittedPicks).length}/${s.monsterPick.pendingPlayerIds.length}/a${s.monsterPick.attempt}`
         : '-',
