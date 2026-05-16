@@ -157,6 +157,8 @@ export type ClientMessage =
       chosenStat?: StatKey;
       /** Required when the card's effect is `swap_actives`. */
       swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string };
+      /** Required when the card's effect is `curse_player`. */
+      curseTargetPlayerId?: string;
     }
   | { type: 'submit_reward'; choice: RewardChoice }
   | { type: 'submit_build'; slots: (string | null)[]; activeSlotCount: number }

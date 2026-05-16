@@ -68,5 +68,9 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       return '自分のモンスターに変化が起こる';
     case 'random_stat_up':
       return `HP/ATK/DEF/SPDのいずれか+${e.amount}（ランダム）`;
+    case 'curse_player':
+      return `対象のATK/DEFをそれぞれ-${e.amount}（永続）`;
+    case 'draw_passive_top':
+      return 'スキルデッキからパッシブカードを1枚獲得';
   }
 }

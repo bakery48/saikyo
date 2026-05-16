@@ -212,6 +212,7 @@ export class GameWsServer {
           game.submitAction(playerId, msg.cardId, {
             chosenStat: msg.chosenStat,
             swap: msg.swap,
+            curseTargetPlayerId: msg.curseTargetPlayerId,
           }),
         );
         return;
