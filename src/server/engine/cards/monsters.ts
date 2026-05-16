@@ -464,6 +464,26 @@ export const MONSTERS: MonsterBase[] = [
     ],
   },
   {
+    baseId: 'okuninushi',
+    name: 'オオクニヌシ',
+    attackKind: 'strike',
+    stats: { hp: 13, atk: 5, def: 4, spd: 5 },
+    passives: [
+      {
+        id: 'okuninushi-p1',
+        name: '迸る稲妻',
+        trigger: { kind: 'on_own_active_used' },
+        effect: { kind: 'paralyze_on_active', percent: 30 },
+      },
+    ],
+    uniqueActionCard: { id: 'unique-okuninushi', name: '雷神の加護', effect: { kind: 'stat_mod', stat: 'spd', amount: 2 } },
+    boons: [
+      { id: 'boon-okuninushi-1', name: 'SPD強化', effect: { kind: 'stat_up', stat: 'spd', amount: 2 } },
+      { id: 'boon-okuninushi-2', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-okuninushi-3', name: '電撃を得る', effect: { kind: 'skill_card', cardId: 'sk-n-030' } },
+    ],
+  },
+  {
     baseId: 'joker',
     name: 'ジョーカー',
     attackKind: 'strike',

@@ -263,6 +263,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `相手がHP半分以下のとき与ダメ+${e.amount}（DEF無視）`;
     case 'paralyze_chance':
       return `攻撃時${e.percent}%で相手の次のターンをスキップ`;
+    case 'paralyze_on_active':
+      return `スロット実施後${e.percent}%で相手に麻痺[1]付与`;
     case 'first_received_damage_reduce':
       return `バトル最初の被ダメージを${e.remainPercent}%（切り捨て）にする`;
     case 'decay_atk_per_active':

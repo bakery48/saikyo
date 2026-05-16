@@ -323,6 +323,8 @@ export type PassiveEffect =
   | { kind: 'bonus_vs_low_hp'; amount: number }
   /** When this side deals damage, with `percent` chance the target loses their next turn. */
   | { kind: 'paralyze_chance'; percent: number }
+  /** After each own active skill resolves, with `percent` chance apply paralysis[1] to the opponent. */
+  | { kind: 'paralyze_on_active'; percent: number }
   /** The first time this side takes damage in a battle, keep only `remainPercent`% of the incoming amount (floor). */
   | { kind: 'first_received_damage_reduce'; remainPercent: number }
   /** Each time this side resolves an active skill, lose `amount` ATK (battle-long, accumulating). */

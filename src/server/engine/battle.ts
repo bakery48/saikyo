@@ -2067,13 +2067,16 @@ function applySkill(args: {
   // mimic_last itself doesn't update the slot — we shouldn't mimic a mimic.
   if (e.kind !== 'mimic_last') user.lastUsedEffect = e;
   applySelfDecay(user, userPassives, userSide, log);
-  applyOnActiveUsedPassives(user, userPassives, userSide, log);
+  applyOnActiveUsedPassives(user, target, userPassives, userSide, targetSide, rng, log);
 }
 
 function applyOnActiveUsedPassives(
   user: CombatStats,
+  opponent: CombatStats,
   passives: PassiveSkill[],
   side: Side,
+  oppSide: Side,
+  rng: RNG,
   log: BattleEvent[],
 ): void {
   for (const p of passives) {
@@ -2099,6 +2102,14 @@ function applyOnActiveUsedPassives(
         const applied = healCapped(user, p.effect.amount);
         if (applied > 0) {
           log.push({ kind: 'heal', player: side, amount: applied, hpAfter: user.hp });
+          log.push({ kind: 'passive', player: side, passiveId: p.id });
+        }
+        break;
+      }
+      case 'paralyze_on_active': {
+        if (rng.next() < p.effect.percent / 100) {
+          opponent.skipTurnsRemaining += 1;
+          log.push({ kind: 'paralysis_applied', player: oppSide, stacks: 1 });
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
