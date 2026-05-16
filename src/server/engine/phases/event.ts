@@ -48,6 +48,19 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
       return;
   }
 
+  // Special case: average_hp needs all targets at once, not per-player
+  if (card.effect.kind === 'average_hp') {
+    const playersWithMonster = targets.filter(p => p.monster);
+    if (playersWithMonster.length === 0) return;
+    const total = playersWithMonster.reduce((sum, p) => sum + p.monster!.stats.hp, 0);
+    const avg = Math.ceil(total / playersWithMonster.length);
+    for (const p of playersWithMonster) {
+      state.log.push({ kind: 'event_effect_applied', cardId: card.id, playerId: p.id });
+      p.monster!.stats.hp = avg;
+    }
+    return;
+  }
+
   const rng = makeRng(state);
   for (const t of targets) {
     if (!t.monster) continue;
@@ -78,6 +91,63 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
         if (top) {
           addSkillCardToMonster(state, t, top);
         }
+        break;
+      }
+      case 'swap_atk_def': {
+        const atk = t.monster.stats.atk;
+        t.monster.stats.atk = t.monster.stats.def;
+        t.monster.stats.def = atk;
+        break;
+      }
+      case 'shuffle_actives': {
+        const actives = t.monster.actives;
+        for (let i = actives.length - 1; i > 0; i--) {
+          const j = rng.int(0, i);
+          const tmp = actives[i]!;
+          actives[i] = actives[j]!;
+          actives[j] = tmp;
+        }
+        // Re-assign order values after shuffle
+        actives.forEach((a, i) => { a.order = i + 1; });
+        break;
+      }
+      case 'discard_action_card': {
+        if (t.actionHand.length === 0) break;
+        const idx = rng.int(0, t.actionHand.length - 1);
+        const discarded = t.actionHand.splice(idx, 1)[0]!;
+        state.decks.actionGrave.push(discarded);
+        break;
+      }
+      case 'draw_action_card': {
+        const actionCard = drawTop(state.decks.action, state.decks.actionGrave, rng);
+        if (actionCard) t.actionHand.push(actionCard);
+        break;
+      }
+      case 'all_stats_mod': {
+        t.monster.stats.hp += card.effect.amount;
+        t.monster.stats.atk += card.effect.amount;
+        t.monster.stats.def = Math.max(0, t.monster.stats.def + card.effect.amount);
+        t.monster.stats.spd = Math.max(0, t.monster.stats.spd + card.effect.amount);
+        break;
+      }
+      case 'set_stat': {
+        t.monster.stats[card.effect.stat] = card.effect.value;
+        break;
+      }
+      case 'pay_hp_draw_skill': {
+        t.monster.stats.hp = Math.max(1, t.monster.stats.hp - card.effect.hpCost);
+        const skillCard = drawTop(state.decks.skill, state.decks.skillGrave, rng);
+        if (skillCard) addSkillCardToMonster(state, t, skillCard);
+        break;
+      }
+      case 'steal_skill': {
+        if (t.skillStock.length === 0) break;
+        const others = state.players.filter((p) => p !== t && p.monster);
+        if (others.length === 0) break;
+        const cardIdx = rng.int(0, t.skillStock.length - 1);
+        const stolen = t.skillStock.splice(cardIdx, 1)[0]!;
+        const recipient = others[rng.int(0, others.length - 1)]!;
+        recipient.skillStock.push(stolen);
         break;
       }
     }

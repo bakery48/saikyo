@@ -469,7 +469,16 @@ export type EventEffect =
   /** Skip the action phase this round (advance directly to draft). */
   | { kind: 'skip_action_phase' }
   /** Run an extra battle immediately; after its reward phase, resume the normal end-of-round battle. */
-  | { kind: 'extra_battle' };
+  | { kind: 'extra_battle' }
+  | { kind: 'swap_atk_def' }
+  | { kind: 'shuffle_actives' }
+  | { kind: 'average_hp' }
+  | { kind: 'discard_action_card' }
+  | { kind: 'draw_action_card' }
+  | { kind: 'all_stats_mod'; amount: number }
+  | { kind: 'set_stat'; stat: StatKey; value: number }
+  | { kind: 'pay_hp_draw_skill'; hpCost: number }
+  | { kind: 'steal_skill' };
 
 export type EventCard = {
   id: string;

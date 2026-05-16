@@ -34,6 +34,24 @@ export function describeEventEffect(card: EventCard): string {
       return 'このアクションフェーズをスキップ';
     case 'extra_battle':
       return '今すぐ追加バトル → アクションフェーズへ';
+    case 'swap_atk_def':
+      return 'ATKとDEFが入れ替わる';
+    case 'shuffle_actives':
+      return 'アクティブスキルの順序がシャッフルされる';
+    case 'average_hp':
+      return '全員のHPが平均値（切り上げ）に揃う';
+    case 'discard_action_card':
+      return '手札からランダムに1枚捨てる';
+    case 'draw_action_card':
+      return 'アクションカードを1枚引く';
+    case 'all_stats_mod':
+      return `全ステータス${e.amount > 0 ? '+' : ''}${e.amount}`;
+    case 'set_stat':
+      return `${e.stat.toUpperCase()}が${e.value}になる`;
+    case 'pay_hp_draw_skill':
+      return `HP-${e.hpCost}してスキルカードを1枚獲得`;
+    case 'steal_skill':
+      return 'スキルカード1枚が他のプレイヤーへ渡る';
   }
 }
 
