@@ -16,6 +16,7 @@ export function describeEventTarget(target: EventTarget): string {
 
 /** Short description of an event card's effect. */
 export function describeEventEffect(card: EventCard): string {
+  if (card.description) return card.description;
   const e = card.effect;
   switch (e.kind) {
     case 'stat_mod':
@@ -60,6 +61,7 @@ export function describeEventEffect(card: EventCard): string {
  * pass `chosenStat` to render the picked stat in the summary.
  */
 export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): string {
+  if (card.description) return card.description;
   const e = card.effect;
   switch (e.kind) {
     case 'stat_mod':

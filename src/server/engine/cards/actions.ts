@@ -1,4 +1,5 @@
 import type { ActionCard } from '../types';
+import rawOverrides from './actions.overrides.json';
 
 export const ACTIONS: ActionCard[] = [
   { id: 'ac-001', name: '気合のかけ声', effect: { kind: 'stat_mod', stat: 'atk', amount: 2 } },
@@ -85,3 +86,12 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-081', name: '全能大交換', effect: { kind: 'swap_all_stats' } },
   { id: 'ac-082', name: '時の恩恵', effect: { kind: 'round_scaled_stat_mod', stat: 'atk', perRound: 2 } },
 ];
+
+type ActionOverride = { description?: string };
+const actionOverrides = rawOverrides as Record<string, ActionOverride>;
+if (Object.keys(actionOverrides).length > 0) {
+  for (const card of ACTIONS) {
+    const ov = actionOverrides[card.id];
+    if (ov?.description !== undefined) card.description = ov.description;
+  }
+}

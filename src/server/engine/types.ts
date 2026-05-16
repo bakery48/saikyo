@@ -485,6 +485,7 @@ export type EventCard = {
   name: string;
   target: EventTarget;
   effect: EventEffect;
+  description?: string;
 };
 
 export type ActionEffect =
@@ -523,6 +524,7 @@ export type ActionCard = {
   id: string;
   name: string;
   effect: ActionEffect;
+  description?: string;
 };
 
 export type SkillCard = {

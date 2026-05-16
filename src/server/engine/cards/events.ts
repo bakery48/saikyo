@@ -1,4 +1,5 @@
 import type { EventCard } from '../types';
+import rawOverrides from './events.overrides.json';
 
 export const EVENTS: EventCard[] = [
   { id: 'ev-001', name: '豊穣の雨', target: 'all', effect: { kind: 'heal', amount: 3 } },
@@ -51,3 +52,12 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-047', name: '弱者への贈り物', target: 'lowestHp', effect: { kind: 'add_skill_top' } },
   { id: 'ev-048', name: 'スキル強奪', target: 'random', effect: { kind: 'steal_skill' } },
 ];
+
+type EventOverride = { description?: string };
+const eventOverrides = rawOverrides as Record<string, EventOverride>;
+if (Object.keys(eventOverrides).length > 0) {
+  for (const card of EVENTS) {
+    const ov = eventOverrides[card.id];
+    if (ov?.description !== undefined) card.description = ov.description;
+  }
+}
