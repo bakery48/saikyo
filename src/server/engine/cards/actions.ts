@@ -41,7 +41,7 @@ export const ACTIONS: ActionCard[] = [
 
   // ── 全能・スケール ───────────────────────────────────────────────────────────
   { id: 'ac-allmod1', name: '汎用特訓', effect: { kind: 'all_stats_mod', amount: 1 }, count: 1 },
-  { id: 'ac-round',   name: '時の恩恵',   effect: { kind: 'round_scaled_stat_mod', stat: 'atk', perRound: 2 }, count: 1 },
+
 
   // ── その他 ──────────────────────────────────────────────────────────────────
   { id: 'ac-cleanse', name: '解呪',    effect: { kind: 'cleanse_sin' }, count: 2 },
