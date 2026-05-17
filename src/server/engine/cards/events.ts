@@ -12,8 +12,10 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-002', name: '荒野の風',     target: 'all',       effect: { kind: 'stat_mod', stat: 'spd', amount: 4  }, count: 3 },
   { id: 'ev-003', name: '武闘大会',     target: 'all',       effect: { kind: 'stat_mod', stat: 'atk', amount: 4  }, count: 2 },
   { id: 'ev-004', name: '砦の壁',       target: 'all',       effect: { kind: 'stat_mod', stat: 'def', amount: 4  }, count: 2 },
-  { id: 'ev-005', name: '滋養の地',     target: 'all',       effect: { kind: 'stat_mod', stat: 'hp',  amount: 20 }, count: 2 },
+  { id: 'ev-005', name: '滋養の地',     target: 'all',       effect: { kind: 'stat_mod', stat: 'hp',  amount: 24 }, count: 2 },
   { id: 'ev-028', name: '城壁の崩壊',   target: 'all',       effect: { kind: 'stat_mod', stat: 'def', amount: -4 }, count: 2 },
+  { id: 'ev-n01', name: '闘志の衰退',   target: 'all',       effect: { kind: 'stat_mod', stat: 'atk', amount: -4 } },
+  { id: 'ev-n02', name: '重力の呪い',   target: 'all',       effect: { kind: 'stat_mod', stat: 'spd', amount: -4 } },
 
   // ── stat_mod (targeted) ─────────────────────────────────────────────────────
   { id: 'ev-011', name: '嵐の使者',     target: 'random',     effect: { kind: 'stat_mod', stat: 'spd', amount: 2 } },
