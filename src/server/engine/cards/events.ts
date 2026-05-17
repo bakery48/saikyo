@@ -16,6 +16,7 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-028', name: '城壁の崩壊',   target: 'all',       effect: { kind: 'stat_mod', stat: 'def', amount: -4 }, count: 2 },
   { id: 'ev-n01', name: '闘志の衰退',   target: 'all',       effect: { kind: 'stat_mod', stat: 'atk', amount: -4 } },
   { id: 'ev-n02', name: '重力の呪い',   target: 'all',       effect: { kind: 'stat_mod', stat: 'spd', amount: -4 } },
+  { id: 'ev-n03', name: '大飢饉',       target: 'all',       effect: { kind: 'stat_mod', stat: 'hp',  amount: -24 } },
 
   // ── stat_mod (targeted) ─────────────────────────────────────────────────────
   { id: 'ev-011', name: '嵐の使者',     target: 'random',     effect: { kind: 'stat_mod', stat: 'spd', amount: 2 } },
