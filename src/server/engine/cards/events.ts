@@ -26,7 +26,7 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-l05', name: '弱者の縛り',   target: 'lowestSpd',  effect: { kind: 'stat_mod', stat: 'spd', amount: -1 } },
   // ── highest stat (8種) ──────────────────────────────────────────────────────
   { id: 'ev-h01', name: 'HP覇者の恵み', target: 'highestHp',  effect: { kind: 'stat_mod', stat: 'hp',  amount:  5 } },
-  { id: 'ev-h02', name: 'HP覇者の代償', target: 'highestHp',  effect: { kind: 'stat_mod', stat: 'hp',  amount: -5 } },
+  { id: 'ev-h02', name: 'HP覇者の代償', target: 'highestHp',  effect: { kind: 'stat_mod', stat: 'hp',  amount: -24 } },
   { id: 'ev-h03', name: 'ATK覇者の恵み', target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'atk', amount:  1 } },
   { id: 'ev-h04', name: 'ATK覇者の代償', target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'atk', amount: -2 } },
   { id: 'ev-h05', name: 'DEF覇者の恵み', target: 'highestDef', effect: { kind: 'stat_mod', stat: 'def', amount:  1 } },
