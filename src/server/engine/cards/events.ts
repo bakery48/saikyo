@@ -54,7 +54,8 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-a02', name: 'DEF平等の奇跡', target: 'all',       effect: { kind: 'average_stat', stat: 'def' } },
   { id: 'ev-a03', name: 'SPD平等の奇跡', target: 'all',       effect: { kind: 'average_stat', stat: 'spd' } },
   { id: 'ev-034', name: '閃きの時',     target: 'all',        effect: { kind: 'draw_action_card' } },
-  { id: 'ev-035', name: '世界侵食',     target: 'all',        effect: { kind: 'all_stats_mod', amount: -1 } },
+  { id: 'ev-035', name: '世界侵食',     target: 'all',        effect: { kind: 'all_stats_mod', amount: -2 } },
+  { id: 'ev-w01', name: '世界の祝福',   target: 'all',        effect: { kind: 'all_stats_mod', amount:  2 } },
 
   // ── targeted special ────────────────────────────────────────────────────────
   { id: 'ev-030', name: '旋風',         target: 'random',     effect: { kind: 'shuffle_actives' } },
