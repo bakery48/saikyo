@@ -229,6 +229,11 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
         if (skillCard) addSkillCardToMonster(state, t, skillCard);
         break;
       }
+      case 'clear_all_stocks': {
+        state.decks.skillGrave.push(...t.skillStock);
+        t.skillStock = [];
+        break;
+      }
       case 'steal_skill': {
         if (t.skillStock.length === 0) break;
         const others = state.players.filter((p) => p !== t && p.monster);

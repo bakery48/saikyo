@@ -487,7 +487,8 @@ export type EventEffect =
   | { kind: 'steal_skill' }
   | { kind: 'discard_skills'; count: number }
   | { kind: 'rotate_skill' }
-  | { kind: 'pool_and_redistribute_skills'; count: number };
+  | { kind: 'pool_and_redistribute_skills'; count: number }
+  | { kind: 'clear_all_stocks' };
 
 export type EventCard = {
   id: string;
