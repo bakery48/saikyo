@@ -126,8 +126,6 @@ type CombatStats = Stats & {
   sinCount: number;
   /** True once hex_def has fired during the current active skill. Reset before each active resolves. */
   hexDefFiredThisActive: boolean;
-  /** True once hex_atk has fired during the current active skill. Reset before each active resolves. */
-  hexAtkFiredThisActive: boolean;
 };
 
 function initCombat(m: Monster): CombatStats {
@@ -185,7 +183,6 @@ function initCombat(m: Monster): CombatStats {
     passiveIds: [],
     sinCount: 0,
     hexDefFiredThisActive: false,
-    hexAtkFiredThisActive: false,
   };
   return c;
 }
@@ -948,7 +945,6 @@ function resolveAttack(args: {
   }
   applyLifesteal(attacker, attackerPassives, actual, attackerSide, log);
   applyHexDef(attacker, attackerPassives, defender, attackerSide, defenderSide, actual, log);
-  applyHexAtk(attacker, attackerPassives, defender, attackerSide, defenderSide, actual, log);
   applyCounterDamage(
     defender,
     defenderPassives,
@@ -1048,34 +1044,6 @@ function applyHexDef(
         kind: 'debuff',
         player: defenderSide,
         stat: 'def',
-        amount: p.effect.amount,
-        duration: 'battle',
-      });
-      log.push({ kind: 'passive', player: attackerSide, passiveId: p.id });
-    }
-  }
-}
-
-/** インキュバス hex_atk: each successful hit shaves ATK off the target permanently (battle-only). */
-function applyHexAtk(
-  attacker: CombatStats,
-  attackerPassives: PassiveSkill[],
-  defender: CombatStats,
-  attackerSide: Side,
-  defenderSide: Side,
-  damageDealt: number,
-  log: BattleEvent[],
-): void {
-  if (damageDealt <= 0) return;
-  if (attacker.hexAtkFiredThisActive) return;
-  for (const p of attackerPassives) {
-    if (p.effect.kind === 'hex_atk' && damageDealt >= (p.effect.minDamage ?? 1)) {
-      attacker.hexAtkFiredThisActive = true;
-      defender.atkMod -= p.effect.amount;
-      log.push({
-        kind: 'debuff',
-        player: defenderSide,
-        stat: 'atk',
         amount: p.effect.amount,
         duration: 'battle',
       });
@@ -1200,7 +1168,6 @@ function applySkill(args: {
   const { user, target, userPassives, targetPassives, userMon, targetMon, skill, userSide, targetSide, rng, log } = args;
   // Reset per-active flags before this skill resolves.
   user.hexDefFiredThisActive = false;
-  user.hexAtkFiredThisActive = false;
   // Transfer any pending force_amp into the in-progress active (consumed unconditionally,
   // matching nextAmp semantics on nullify/fizzle).
   user.forceAmpActive = user.forceAmpNext;
@@ -1461,6 +1428,15 @@ function applySkill(args: {
     case 'debuff_target': {
       applyStatMod(target, e.stat, -e.amount, e.duration);
       log.push({ kind: 'debuff', player: targetSide, stat: e.stat, amount: e.amount, duration: e.duration });
+      for (const p of userPassives) {
+        if (p.effect.kind === 'debuff_amp') {
+          target.atkMod -= p.effect.amount;
+          target.defMod -= p.effect.amount;
+          log.push({ kind: 'debuff', player: targetSide, stat: 'atk', amount: p.effect.amount, duration: 'battle' });
+          log.push({ kind: 'debuff', player: targetSide, stat: 'def', amount: p.effect.amount, duration: 'battle' });
+          log.push({ kind: 'passive', player: userSide, passiveId: p.id });
+        }
+      }
       break;
     }
     case 'next_amp': {

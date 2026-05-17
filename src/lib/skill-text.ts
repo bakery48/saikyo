@@ -216,10 +216,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return e.minDamage
         ? `${e.minDamage}以上の与ダメ時に相手のDEF-${e.amount}（バトル中累積）`
         : `与ダメ時に相手のDEF-${e.amount}（バトル中累積）`;
-    case 'hex_atk':
-      return e.minDamage
-        ? `${e.minDamage}以上の与ダメ時に相手のATK-${e.amount}（バトル中累積）`
-        : `与ダメ時に相手のATK-${e.amount}（バトル中累積）`;
+    case 'debuff_amp':
+      return `デバフスキル発動時、追加で相手のATK/DEF-${e.amount}（バトル中累積）`;
     case 'extra_attack_chance':
       return `攻撃時${e.percent}%で2回発動`;
     case 'counter_damage':
