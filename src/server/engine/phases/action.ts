@@ -15,6 +15,13 @@ import { MONSTERS } from '../cards/monsters';
 
 const ALL_STATS: StatKey[] = ['hp', 'atk', 'def', 'spd'];
 
+/** Minimum allowed value for each stat. HP must stay ≥ 1; others ≥ 0. */
+const STAT_MIN: Record<StatKey, number> = { hp: 1, atk: 0, def: 0, spd: 0 };
+
+function clampStat(stat: StatKey, value: number): number {
+  return Math.max(STAT_MIN[stat], value);
+}
+
 function applyActionEffect(
   state: GameState,
   player: Player,
@@ -50,7 +57,7 @@ function applyActionEffect(
       if (top) addSkillCardToMonster(state, player, top);
       const combatStats: Array<'atk' | 'def' | 'spd'> = ['atk', 'def', 'spd'];
       const stat = combatStats[rng.int(0, 2)]!;
-      if (player.monster) player.monster.stats[stat] = Math.max(0, player.monster.stats[stat] - card.effect.amount);
+      if (player.monster) player.monster.stats[stat] = clampStat(stat, player.monster.stats[stat] - card.effect.amount);
       break;
     }
     case 'discard_actives_gain_stat': {
@@ -135,7 +142,8 @@ function applyActionEffect(
         const target = others.reduce((best, p) =>
           p.monster!.stats[e.stat] > best.monster!.stats[e.stat] ? p : best
         );
-        const steal = Math.min(e.amount, target.monster!.stats[e.stat]);
+        const available = target.monster!.stats[e.stat] - STAT_MIN[e.stat];
+        const steal = Math.min(e.amount, Math.max(0, available));
         target.monster!.stats[e.stat] -= steal;
         player.monster.stats[e.stat] += steal;
       }
@@ -150,7 +158,7 @@ function applyActionEffect(
     }
     case 'trade_stat': {
       const eff = card.effect as { kind: 'trade_stat'; from: StatKey; to: StatKey; fromAmount: number; toAmount: number };
-      player.monster.stats[eff.from] = Math.max(0, player.monster.stats[eff.from] - eff.fromAmount);
+      player.monster.stats[eff.from] = clampStat(eff.from, player.monster.stats[eff.from] - eff.fromAmount);
       player.monster.stats[eff.to] += eff.toAmount;
       break;
     }

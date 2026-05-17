@@ -19,7 +19,7 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-steal-atk', name: 'ATK強奪', effect: { kind: 'steal_stat', stat: 'atk', amount: 1 }, count: 1 },
   { id: 'ac-steal-spd', name: 'SPD強奪', effect: { kind: 'steal_stat', stat: 'spd', amount: 1 }, count: 1 },
   { id: 'ac-steal-def', name: 'DEF強奪', effect: { kind: 'steal_stat', stat: 'def', amount: 1 }, count: 1 },
-  { id: 'ac-steal-hp',  name: 'HP奪取',  effect: { kind: 'steal_stat', stat: 'hp',  amount: 4 }, count: 1 },
+  { id: 'ac-steal-hp',  name: 'HP奪取',  effect: { kind: 'steal_stat', stat: 'hp',  amount: 6 }, count: 1 },
   { id: 'ac-copy-atk',  name: 'ATK模倣', effect: { kind: 'copy_stat_from_leader', stat: 'atk' }, count: 1 },
   { id: 'ac-copy-spd',  name: 'SPD模倣', effect: { kind: 'copy_stat_from_leader', stat: 'spd' }, count: 1 },
   { id: 'ac-swap-all',  name: '全能大交換', effect: { kind: 'swap_all_stats' }, count: 1 },
