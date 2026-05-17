@@ -6,7 +6,7 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-001', name: '豊穣の雨',     target: 'all',       effect: { kind: 'heal', amount: 3 } },
   { id: 'ev-012', name: '太陽の祝福',   target: 'all',       effect: { kind: 'heal', amount: 5 } },
   { id: 'ev-022', name: '休息の宿屋',   target: 'all',       effect: { kind: 'heal', amount: 2 } },
-  { id: 'ev-019', name: '逆転の女神',   target: 'lowestHp',  effect: { kind: 'heal', amount: 6 } },
+  { id: 'ev-019', name: '逆転の女神',   target: 'lowestHp',  effect: { kind: 'stat_mod', stat: 'hp', amount: 18 } },
 
   // ── stat_mod (all) ──────────────────────────────────────────────────────────
   { id: 'ev-002', name: '荒野の風',     target: 'all',       effect: { kind: 'stat_mod', stat: 'spd', amount: 4  }, count: 3 },
@@ -20,11 +20,14 @@ export const EVENTS: EventCard[] = [
 
   // ── stat_mod (targeted) ─────────────────────────────────────────────────────
   { id: 'ev-011', name: '嵐の使者',     target: 'random',     effect: { kind: 'stat_mod', stat: 'spd', amount: 2 } },
-  { id: 'ev-013', name: '集中特訓',     target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'atk', amount: 2 } },
-  { id: 'ev-018', name: '天才教師',     target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'def', amount: 2 } },
-  { id: 'ev-040', name: '弱者の奮起',   target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'atk', amount: 5 } },
-  { id: 'ev-042', name: '弱者の盾',     target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'def', amount: 4 } },
+  { id: 'ev-013', name: '集中特訓',     target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'atk', amount: 6 } },
+  { id: 'ev-018', name: '天才教師',     target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'def', amount: 6 } },
   { id: 'ev-045', name: '才能の爆発',   target: 'random',     effect: { kind: 'stat_mod', stat: 'atk', amount: 6 } },
+  { id: 'ev-l01', name: '弱者の猛訓練', target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'spd', amount: 6 } },
+  { id: 'ev-l02', name: '弱者への追い打ち', target: 'lowestHp', effect: { kind: 'stat_mod', stat: 'hp',  amount: -18 } },
+  { id: 'ev-l03', name: '弱者の足枷',   target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'atk', amount: -6 } },
+  { id: 'ev-l04', name: '弱者の重荷',   target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'def', amount: -6 } },
+  { id: 'ev-l05', name: '弱者の縛り',   target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'spd', amount: -6 } },
   // ── highest stat (8種) ──────────────────────────────────────────────────────
   { id: 'ev-h01', name: 'HP覇者の恵み', target: 'highestHp',  effect: { kind: 'stat_mod', stat: 'hp',  amount:  5 } },
   { id: 'ev-h02', name: 'HP覇者の代償', target: 'highestHp',  effect: { kind: 'stat_mod', stat: 'hp',  amount: -5 } },
@@ -37,7 +40,7 @@ export const EVENTS: EventCard[] = [
 
   // ── damage ──────────────────────────────────────────────────────────────────
   { id: 'ev-006', name: '災厄の流星',   target: 'all',        effect: { kind: 'damage', amount: 3 } },
-  { id: 'ev-007', name: '弱者狩り',     target: 'lowestHp',   effect: { kind: 'damage', amount: 4 } },
+
   { id: 'ev-010', name: '稲妻の試練',   target: 'random',     effect: { kind: 'damage', amount: 5 } },
   { id: 'ev-017', name: '沼地の毒霧',   target: 'all',        effect: { kind: 'damage', amount: 2 } },
 
