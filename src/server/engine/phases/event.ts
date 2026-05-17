@@ -124,6 +124,12 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
         t.monster.stats.def = atk;
         break;
       }
+      case 'halve_stat': {
+        const stat = (card.effect as { kind: 'halve_stat'; stat: StatKey }).stat;
+        const STAT_MIN: Record<StatKey, number> = { hp: 1, atk: 0, def: 0, spd: 0 };
+        t.monster.stats[stat] = Math.max(STAT_MIN[stat], Math.floor(t.monster.stats[stat] / 2));
+        break;
+      }
       case 'swap_two_stats': {
         const sa = (card.effect as { kind: 'swap_two_stats'; statA: StatKey; statB: StatKey }).statA;
         const sb = (card.effect as { kind: 'swap_two_stats'; statA: StatKey; statB: StatKey }).statB;

@@ -45,6 +45,8 @@ export function describeEventEffect(card: EventCard): string {
       return 'ATKとDEFが入れ替わる';
     case 'swap_two_stats':
       return `${e.statA.toUpperCase()}と${e.statB.toUpperCase()}が入れ替わる`;
+    case 'halve_stat':
+      return `全員の${e.stat.toUpperCase()}が半減（切り捨て）`;
     case 'shuffle_actives':
       return 'アクティブスキルの順序がシャッフルされる';
     case 'average_hp':
