@@ -48,7 +48,10 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-026', name: '休戦命令',     target: 'all',        effect: { kind: 'skip_action_phase' } },
   { id: 'ev-027', name: '飛び入り決闘', target: 'all',        effect: { kind: 'extra_battle' } },
   { id: 'ev-029', name: '鏡の法則',     target: 'all',        effect: { kind: 'swap_atk_def' } },
-  { id: 'ev-031', name: '平等の奇跡',   target: 'all',        effect: { kind: 'average_hp' } },
+  { id: 'ev-031', name: 'HP平等の奇跡',  target: 'all',        effect: { kind: 'average_hp' } },
+  { id: 'ev-a01', name: 'ATK平等の奇跡', target: 'all',       effect: { kind: 'average_stat', stat: 'atk' } },
+  { id: 'ev-a02', name: 'DEF平等の奇跡', target: 'all',       effect: { kind: 'average_stat', stat: 'def' } },
+  { id: 'ev-a03', name: 'SPD平等の奇跡', target: 'all',       effect: { kind: 'average_stat', stat: 'spd' } },
   { id: 'ev-034', name: '閃きの時',     target: 'all',        effect: { kind: 'draw_action_card' } },
   { id: 'ev-035', name: '世界侵食',     target: 'all',        effect: { kind: 'all_stats_mod', amount: -1 } },
 

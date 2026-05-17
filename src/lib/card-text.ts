@@ -47,6 +47,8 @@ export function describeEventEffect(card: EventCard): string {
       return 'アクティブスキルの順序がシャッフルされる';
     case 'average_hp':
       return '全員のHPが平均値（切り上げ）に揃う';
+    case 'average_stat':
+      return `全員の${e.stat.toUpperCase()}が平均値（切り上げ）に揃う`;
     case 'discard_action_card':
       return '手札からランダムに1枚捨てる';
     case 'draw_action_card':

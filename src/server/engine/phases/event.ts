@@ -72,15 +72,16 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
       return;
   }
 
-  // Special case: average_hp needs all targets at once, not per-player
-  if (card.effect.kind === 'average_hp') {
+  // Special case: average_hp / average_stat need all targets at once, not per-player
+  if (card.effect.kind === 'average_hp' || card.effect.kind === 'average_stat') {
+    const stat = card.effect.kind === 'average_stat' ? card.effect.stat : 'hp';
     const playersWithMonster = targets.filter(p => p.monster);
     if (playersWithMonster.length === 0) return;
-    const total = playersWithMonster.reduce((sum, p) => sum + p.monster!.stats.hp, 0);
+    const total = playersWithMonster.reduce((sum, p) => sum + p.monster!.stats[stat], 0);
     const avg = Math.ceil(total / playersWithMonster.length);
     for (const p of playersWithMonster) {
       state.log.push({ kind: 'event_effect_applied', cardId: card.id, playerId: p.id });
-      p.monster!.stats.hp = avg;
+      p.monster!.stats[stat] = avg;
     }
     return;
   }

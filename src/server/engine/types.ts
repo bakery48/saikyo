@@ -477,6 +477,7 @@ export type EventEffect =
   | { kind: 'swap_atk_def' }
   | { kind: 'shuffle_actives' }
   | { kind: 'average_hp' }
+  | { kind: 'average_stat'; stat: StatKey }
   | { kind: 'discard_action_card' }
   | { kind: 'draw_action_card' }
   | { kind: 'all_stats_mod'; amount: number }
