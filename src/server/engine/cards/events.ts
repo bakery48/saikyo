@@ -3,9 +3,6 @@ import rawOverrides from './events.overrides.json';
 
 export const EVENTS: EventCard[] = [
   // ── heal ────────────────────────────────────────────────────────────────────
-  { id: 'ev-001', name: '豊穣の雨',     target: 'all',       effect: { kind: 'heal', amount: 3 } },
-  { id: 'ev-012', name: '太陽の祝福',   target: 'all',       effect: { kind: 'heal', amount: 5 } },
-  { id: 'ev-022', name: '休息の宿屋',   target: 'all',       effect: { kind: 'heal', amount: 2 } },
   { id: 'ev-019', name: '逆転の女神',   target: 'lowestHp',  effect: { kind: 'stat_mod', stat: 'hp', amount: 18 } },
 
   // ── stat_mod (all) ──────────────────────────────────────────────────────────
