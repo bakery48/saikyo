@@ -490,6 +490,7 @@ export type EventCard = {
   target: EventTarget;
   effect: EventEffect;
   description?: string;
+  count?: number;
 };
 
 export type ActionEffect =

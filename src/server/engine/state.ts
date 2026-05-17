@@ -2,6 +2,7 @@ import type {
   ActionCard,
   ActiveSkill,
   BoonPickState,
+  EventCard,
   GameState,
   Monster,
   MonsterBase,
@@ -118,7 +119,7 @@ export function createInitialState(opts: {
     miniRoundsPerRound,
     phase: 'pick_monster',
     decks: {
-      event: shuffle(EVENTS, rng),
+      event: shuffle(EVENTS.flatMap(c => Array<EventCard>(c.count ?? 1).fill(c)), rng),
       action: shuffle(ACTIONS.flatMap(c => Array<ActionCard>(c.count ?? 1).fill(c)), rng),
       skill: (() => {
         const skillDeck: SkillCard[] = [];
