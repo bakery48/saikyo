@@ -9,14 +9,11 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-019', name: '逆転の女神',   target: 'lowestHp',  effect: { kind: 'heal', amount: 6 } },
 
   // ── stat_mod (all) ──────────────────────────────────────────────────────────
-  { id: 'ev-002', name: '荒野の風',     target: 'all',       effect: { kind: 'stat_mod', stat: 'spd', amount: 1 }, count: 2 },
-  { id: 'ev-003', name: '武闘大会',     target: 'all',       effect: { kind: 'stat_mod', stat: 'atk', amount: 1 }, count: 2 },
-  { id: 'ev-004', name: '砦の壁',       target: 'all',       effect: { kind: 'stat_mod', stat: 'def', amount: 1 }, count: 2 },
-  { id: 'ev-005', name: '滋養の地',     target: 'all',       effect: { kind: 'stat_mod', stat: 'hp',  amount: 2 } },
-  { id: 'ev-024', name: '世界樹の恵み', target: 'all',       effect: { kind: 'stat_mod', stat: 'hp',  amount: 3 } },
-  { id: 'ev-028', name: '城壁の崩壊',   target: 'all',       effect: { kind: 'stat_mod', stat: 'def', amount: -1 } },
-  { id: 'ev-043', name: '大崩落',       target: 'all',       effect: { kind: 'stat_mod', stat: 'def', amount: -3 } },
-  { id: 'ev-044', name: '嵐の訪れ',     target: 'all',       effect: { kind: 'stat_mod', stat: 'spd', amount: 4 } },
+  { id: 'ev-002', name: '荒野の風',     target: 'all',       effect: { kind: 'stat_mod', stat: 'spd', amount: 4  }, count: 3 },
+  { id: 'ev-003', name: '武闘大会',     target: 'all',       effect: { kind: 'stat_mod', stat: 'atk', amount: 4  }, count: 2 },
+  { id: 'ev-004', name: '砦の壁',       target: 'all',       effect: { kind: 'stat_mod', stat: 'def', amount: 4  }, count: 2 },
+  { id: 'ev-005', name: '滋養の地',     target: 'all',       effect: { kind: 'stat_mod', stat: 'hp',  amount: 20 }, count: 2 },
+  { id: 'ev-028', name: '城壁の崩壊',   target: 'all',       effect: { kind: 'stat_mod', stat: 'def', amount: -4 }, count: 2 },
 
   // ── stat_mod (targeted) ─────────────────────────────────────────────────────
   { id: 'ev-008', name: '凱旋の盾',     target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'def', amount: 2 } },
