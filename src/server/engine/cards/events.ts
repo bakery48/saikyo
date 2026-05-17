@@ -61,6 +61,7 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-030', name: '旋風',         target: 'random',     effect: { kind: 'shuffle_actives' } },
   { id: 'ev-032', name: '大徴収',       target: 'all',        effect: { kind: 'discard_action_card' } },
   { id: 'ev-048', name: 'スキル強奪',   target: 'random',     effect: { kind: 'steal_skill' } },
+  { id: 'ev-p01', name: 'スキル市場',   target: 'all',        effect: { kind: 'pool_and_redistribute_skills', count: 2 } },
 
 ];
 

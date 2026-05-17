@@ -65,6 +65,8 @@ export function describeEventEffect(card: EventCard): string {
       return 'スキルカード1枚が他のプレイヤーへ渡る';
     case 'rotate_skill':
       return '全員がスロットのスキル1枚をランダムな誰かへ渡し、誰かから1枚もらう';
+    case 'pool_and_redistribute_skills':
+      return `全員がストックからランダムに${e.count}枚ずつ供出し、まとめてシャッフルして再配布`;
     case 'discard_skills':
       return `スロットのスキルカードをランダムに${e.count}枚捨てる`;
   }

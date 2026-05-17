@@ -486,7 +486,8 @@ export type EventEffect =
   | { kind: 'pay_hp_draw_skill'; hpCost: number }
   | { kind: 'steal_skill' }
   | { kind: 'discard_skills'; count: number }
-  | { kind: 'rotate_skill' };
+  | { kind: 'rotate_skill' }
+  | { kind: 'pool_and_redistribute_skills'; count: number };
 
 export type EventCard = {
   id: string;

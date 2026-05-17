@@ -121,6 +121,33 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
     return;
   }
 
+  // Special case: pool_and_redistribute_skills — everyone contributes from stock, pool is reshuffled and dealt back
+  if (card.effect.kind === 'pool_and_redistribute_skills') {
+    const participants = targets.filter(p => p.monster && p.skillStock.length > 0);
+    if (participants.length < 2) return;
+    const contribute = (card.effect as { kind: 'pool_and_redistribute_skills'; count: number }).count;
+    const pool: import('../types').SkillCard[] = [];
+    for (const p of participants) {
+      const take = Math.min(contribute, p.skillStock.length);
+      for (let i = 0; i < take; i++) {
+        const idx = rng.int(0, p.skillStock.length - 1);
+        pool.push(p.skillStock.splice(idx, 1)[0]!);
+      }
+      state.log.push({ kind: 'event_effect_applied', cardId: card.id, playerId: p.id });
+    }
+    // Shuffle pool
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = rng.int(0, i);
+      [pool[i], pool[j]] = [pool[j]!, pool[i]!];
+    }
+    // Deal round-robin
+    pool.forEach((skill, i) => {
+      participants[i % participants.length]!.skillStock.push(skill);
+    });
+    saveRng(state, rng);
+    return;
+  }
+
   for (const t of targets) {
     if (!t.monster) continue;
     state.log.push({ kind: 'event_effect_applied', cardId: card.id, playerId: t.id });
