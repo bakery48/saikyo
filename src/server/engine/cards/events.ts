@@ -62,6 +62,7 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-037', name: 'SPD封印',      target: 'random',     effect: { kind: 'set_stat', stat: 'spd', value: 0 } },
   { id: 'ev-038', name: '生贄の祭壇',   target: 'random',     effect: { kind: 'pay_hp_draw_skill', hpCost: 5 } },
   { id: 'ev-048', name: 'スキル強奪',   target: 'random',     effect: { kind: 'steal_skill' } },
+  { id: 'ev-r01', name: 'スキル流通',   target: 'all',        effect: { kind: 'rotate_skill' } },
   { id: 'ev-d01', name: 'スキル消失',   target: 'random',     effect: { kind: 'discard_skills', count: 2 } },
 ];
 

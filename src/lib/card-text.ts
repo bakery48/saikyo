@@ -63,6 +63,8 @@ export function describeEventEffect(card: EventCard): string {
       return `HP-${e.hpCost}してスキルカードを1枚獲得`;
     case 'steal_skill':
       return 'スキルカード1枚が他のプレイヤーへ渡る';
+    case 'rotate_skill':
+      return '全員がスロットのスキル1枚をランダムな誰かへ渡し、誰かから1枚もらう';
     case 'discard_skills':
       return `スロットのスキルカードをランダムに${e.count}枚捨てる`;
   }

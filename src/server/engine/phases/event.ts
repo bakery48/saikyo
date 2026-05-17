@@ -87,6 +87,40 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
   }
 
   const rng = makeRng(state);
+
+  // Special case: rotate_skill — everyone gives 1 random slot skill, receives 1 via circular shift
+  if (card.effect.kind === 'rotate_skill') {
+    const participants = targets.filter(p => p.monster);
+    if (participants.length < 2) return;
+    type Pick = { player: Player; card: import('../types').SkillCard; idx: number };
+    const picks: Pick[] = [];
+    for (const p of participants) {
+      const candidates: { card: import('../types').SkillCard; idx: number }[] = [];
+      for (let i = 0; i < p.activeSlotCount; i++) {
+        const s = p.skillSlots[i];
+        if (s) candidates.push({ card: s, idx: i });
+      }
+      if (candidates.length === 0) continue;
+      const pick = candidates[rng.int(0, candidates.length - 1)]!;
+      picks.push({ player: p, card: pick.card, idx: pick.idx });
+    }
+    if (picks.length < 2) return;
+    const n = picks.length;
+    const offset = rng.int(1, n - 1);
+    // Remove all picked skills from their slots first (simultaneous)
+    for (const pick of picks) pick.player.skillSlots[pick.idx] = null;
+    // Distribute: player[i] receives skill from player[(i + offset) % n]
+    for (let i = 0; i < n; i++) {
+      const recipient = picks[i]!.player;
+      const donor = picks[(i + offset) % n]!;
+      recipient.skillStock.push(donor.card);
+      state.log.push({ kind: 'event_effect_applied', cardId: card.id, playerId: recipient.id });
+    }
+    for (const { player } of picks) syncMonsterFromSlots(state, player);
+    saveRng(state, rng);
+    return;
+  }
+
   for (const t of targets) {
     if (!t.monster) continue;
     state.log.push({ kind: 'event_effect_applied', cardId: card.id, playerId: t.id });
