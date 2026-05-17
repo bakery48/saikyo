@@ -22,6 +22,30 @@ function selectTargets(target: EventTarget, state: GameState, rng = makeRng(stat
       }
       return [lowest];
     }
+    case 'lowestAtk': {
+      if (alive.length === 0) return [];
+      let lowest = alive[0]!;
+      for (const p of alive) {
+        if (p.monster!.stats.atk < lowest.monster!.stats.atk) lowest = p;
+      }
+      return [lowest];
+    }
+    case 'lowestDef': {
+      if (alive.length === 0) return [];
+      let lowest = alive[0]!;
+      for (const p of alive) {
+        if (p.monster!.stats.def < lowest.monster!.stats.def) lowest = p;
+      }
+      return [lowest];
+    }
+    case 'lowestSpd': {
+      if (alive.length === 0) return [];
+      let lowest = alive[0]!;
+      for (const p of alive) {
+        if (p.monster!.stats.spd < lowest.monster!.stats.spd) lowest = p;
+      }
+      return [lowest];
+    }
     case 'highestAtk': {
       if (alive.length === 0) return [];
       let highest = alive[0]!;

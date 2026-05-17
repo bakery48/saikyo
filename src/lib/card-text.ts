@@ -9,6 +9,12 @@ export function describeEventTarget(target: EventTarget): string {
       return 'ランダム1人';
     case 'lowestHp':
       return 'HP最少';
+    case 'lowestAtk':
+      return 'ATK最少';
+    case 'lowestDef':
+      return 'DEF最少';
+    case 'lowestSpd':
+      return 'SPD最少';
     case 'highestAtk':
       return 'ATK最高';
     case 'highestHp':
