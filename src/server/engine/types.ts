@@ -476,7 +476,6 @@ export type EventEffect =
   | { kind: 'extra_battle' }
   | { kind: 'swap_atk_def' }
   | { kind: 'swap_two_stats'; statA: StatKey; statB: StatKey }
-  | { kind: 'halve_stat'; stat: StatKey }
   | { kind: 'shuffle_actives' }
   | { kind: 'average_hp' }
   | { kind: 'average_stat'; stat: StatKey }
