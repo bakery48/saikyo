@@ -14,6 +14,7 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-draw',    name: '探索',     effect: { kind: 'draw_skill_top_with_stat_loss', amount: 1 }, count: 6 },
   { id: 'ac-discard', name: 'スキル整理', effect: { kind: 'discard_actives_gain_stat', discardCount: 2, amount: 3, stats: ['atk', 'def', 'spd'] }, count: 2 },
   { id: 'ac-copy',    name: '見よう見まね', effect: { kind: 'copy_skill_from_player' }, count: 1 },
+  { id: 'ac-mutate',  name: 'スキル変異',   effect: { kind: 'mutate_skill' }, count: 2 },
 
   // ── 相手操作・強奪 ───────────────────────────────────────────────────────────
   { id: 'ac-steal-atk', name: 'ATK強奪', effect: { kind: 'steal_stat', stat: 'atk', amount: 1 }, count: 1 },

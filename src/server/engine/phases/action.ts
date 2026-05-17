@@ -27,6 +27,7 @@ function applyActionEffect(
   player: Player,
   card: ActionCard,
   chosenStat?: StatKey,
+  mutateSkillId?: string,
 ): void {
   if (!player.monster) return;
   const rng = makeRng(state);
@@ -233,6 +234,33 @@ function applyActionEffect(
       }
       break;
     }
+    case 'mutate_skill': {
+      if (!mutateSkillId) break;
+      const slotIdx = player.skillSlots.findIndex((s) => s?.id === mutateSkillId);
+      if (slotIdx < 0) break;
+      const original = player.skillSlots[slotIdx]!;
+      const targetRarity = original.rarity;
+      // Draw up to 20 cards to find one of the same rarity (others go to grave)
+      const rejected: SkillCard[] = [];
+      let found: SkillCard | null = null;
+      for (let i = 0; i < 20 && !found; i++) {
+        const drawn = drawTop(state.decks.skill, state.decks.skillGrave, rng);
+        if (!drawn) break;
+        if (drawn.rarity === targetRarity) {
+          found = drawn;
+        } else {
+          rejected.push(drawn);
+        }
+      }
+      state.decks.skillGrave.push(...rejected);
+      if (found) {
+        const seq = state.nextSkillInstanceSeq++;
+        player.skillSlots[slotIdx] = { ...found, id: `${found.id}#${seq}` };
+        state.decks.skillGrave.push(original);
+        syncMonsterFromSlots(state, player);
+      }
+      break;
+    }
     case 'round_scaled_stat_mod': {
       const eff2 = card.effect as { kind: 'round_scaled_stat_mod'; stat: StatKey; perRound: number };
       const gain2 = state.round * eff2.perRound;
@@ -308,7 +336,7 @@ export function submitActionPlay(
   state: GameState,
   playerId: string,
   cardId: string,
-  extras?: { chosenStat?: StatKey; swap?: ActionPlay['swap']; curseTargetPlayerId?: string },
+  extras?: { chosenStat?: StatKey; swap?: ActionPlay['swap']; curseTargetPlayerId?: string; mutateSkillId?: string },
 ): void {
   if (state.phase !== 'action' || !state.actionPhase) {
     throw new Error('not in action phase');
@@ -346,7 +374,13 @@ export function submitActionPlay(
     if (!hasA || !hasB) throw new Error('swap skills not found on target');
   }
   const curseTargetPlayerId = extras?.curseTargetPlayerId;
-  phase.submittedPlays[playerId] = { cardId, chosenStat, swap, curseTargetPlayerId };
+  const mutateSkillId = extras?.mutateSkillId;
+  if (card.effect.kind === 'mutate_skill') {
+    if (!mutateSkillId) throw new Error('mutateSkillId is required for mutate_skill');
+    const hasSkill = player.skillSlots.some((s) => s?.id === mutateSkillId);
+    if (!hasSkill) throw new Error('mutateSkillId not found in player slots');
+  }
+  phase.submittedPlays[playerId] = { cardId, chosenStat, swap, curseTargetPlayerId, mutateSkillId };
 }
 
 export function allActionPlaysIn(state: GameState): boolean {
@@ -399,7 +433,7 @@ export function resolveActionPhase(state: GameState): void {
       }
       saveRng(state, rng);
     } else {
-      applyActionEffect(state, player, card, play.chosenStat);
+      applyActionEffect(state, player, card, play.chosenStat, play.mutateSkillId);
     }
     // Unique card stays in hand forever; regular cards go to the graveyard.
     if (!isUnique) state.decks.actionGrave.push(card);

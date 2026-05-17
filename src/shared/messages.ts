@@ -159,6 +159,8 @@ export type ClientMessage =
       swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string };
       /** Required when the card's effect is `curse_player`. */
       curseTargetPlayerId?: string;
+      /** Required when the card's effect is `mutate_skill`. */
+      mutateSkillId?: string;
     }
   | { type: 'submit_reward'; choice: RewardChoice }
   | { type: 'submit_build'; slots: (string | null)[]; activeSlotCount: number }

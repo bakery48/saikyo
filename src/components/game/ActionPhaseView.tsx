@@ -31,12 +31,14 @@ export function ActionPhaseView({
   const [swapTarget, setSwapTarget] = useState<string | null>(null);
   const [swapSkills, setSwapSkills] = useState<string[]>([]);
   const [curseTarget, setCurseTarget] = useState<string | null>(null);
+  const [mutateSkillId, setMutateSkillId] = useState<string | null>(null);
   useEffect(() => {
     setTentative(null);
     setTentativeStat(null);
     setSwapTarget(null);
     setSwapSkills([]);
     setCurseTarget(null);
+    setMutateSkillId(null);
   }, [!!myCommitted, iAmPending, !!phase]);
   // Reset all extras whenever the picked card changes.
   useEffect(() => {
@@ -44,6 +46,7 @@ export function ActionPhaseView({
     setSwapTarget(null);
     setSwapSkills([]);
     setCurseTarget(null);
+    setMutateSkillId(null);
   }, [tentative]);
   // Reset skill picks if target changes.
   useEffect(() => {
@@ -56,6 +59,7 @@ export function ActionPhaseView({
   const isChoiceCard = tentativeCard?.effect.kind === 'stat_mod_choice' || tentativeCard?.effect.kind === 'discard_actives_gain_stat';
   const isSwapCard = tentativeCard?.effect.kind === 'swap_actives';
   const isCurseCard = tentativeCard?.effect.kind === 'curse_player';
+  const isMutateCard = tentativeCard?.effect.kind === 'mutate_skill';
   const swapTargetPlayer = swapTarget
     ? state.players.find((p) => p.id === swapTarget)
     : null;
@@ -63,7 +67,8 @@ export function ActionPhaseView({
     !!tentative &&
     (!isChoiceCard || !!tentativeStat) &&
     (!isSwapCard || (!!swapTarget && swapSkills.length === 2)) &&
-    (!isCurseCard || !!curseTarget);
+    (!isCurseCard || !!curseTarget) &&
+    (!isMutateCard || !!mutateSkillId);
 
   const toggleSwapSkill = (skillId: string): void => {
     setSwapSkills((prev) => {
@@ -92,6 +97,7 @@ export function ActionPhaseView({
               }
             : undefined,
         curseTargetPlayerId: isCurseCard ? curseTarget ?? undefined : undefined,
+        mutateSkillId: isMutateCard ? mutateSkillId ?? undefined : undefined,
       });
     };
 
@@ -263,6 +269,47 @@ export function ActionPhaseView({
                 </div>
               </div>
             )}
+            {isMutateCard && (() => {
+              const self = state.players.find((p) => p.id === selfId);
+              const actives = self?.monster?.actives.slice().sort((a, b) => a.order - b.order) ?? [];
+              return (
+                <div
+                  style={{
+                    padding: 8,
+                    background: '#f0fff4',
+                    border: '1px solid #00aa44',
+                    borderRadius: 6,
+                    display: 'grid',
+                    gap: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>変異させるスキルを1つ選ぶ</span>
+                  {actives.length === 0 ? (
+                    <span style={{ fontSize: 12, opacity: 0.7 }}>（盛っているスキルなし）</span>
+                  ) : (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {actives.map((a) => (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() => setMutateSkillId(a.id)}
+                          style={{
+                            padding: '4px 8px',
+                            border: `2px solid ${mutateSkillId === a.id ? '#00aa44' : '#aaa'}`,
+                            borderRadius: 4,
+                            background: mutateSkillId === a.id ? '#e6ffed' : '#fff',
+                            cursor: 'pointer',
+                            fontSize: 12,
+                          }}
+                        >
+                          スロット{a.order} {a.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
             <div
               style={{
                 display: 'grid',

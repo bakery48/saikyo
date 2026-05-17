@@ -213,6 +213,7 @@ export class GameWsServer {
             chosenStat: msg.chosenStat,
             swap: msg.swap,
             curseTargetPlayerId: msg.curseTargetPlayerId,
+            mutateSkillId: msg.mutateSkillId,
           }),
         );
         return;

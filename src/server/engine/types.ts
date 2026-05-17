@@ -528,6 +528,7 @@ export type ActionEffect =
   | { kind: 'all_stats_mod'; amount: number }
   | { kind: 'swap_all_stats' }
   | { kind: 'average_stat_with_random'; stat: StatKey }
+  | { kind: 'mutate_skill' }
   | { kind: 'round_scaled_stat_mod'; stat: StatKey; perRound: number };
 
 export type ActionCard = {
@@ -717,6 +718,8 @@ export type ActionPlay = {
   };
   /** Required for curse_player cards; ignored otherwise. */
   curseTargetPlayerId?: string;
+  /** Required for mutate_skill cards; ignored otherwise. */
+  mutateSkillId?: string;
 };
 
 export type BattleMatch = {

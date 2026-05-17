@@ -379,6 +379,17 @@ export class GameRunner {
           card.effect.kind === 'curse_player'
             ? cpuPickCurseTarget(this.state, pid)
             : undefined;
+        const mutateSkillId =
+          card.effect.kind === 'mutate_skill'
+            ? cpuPickMutateSkill(player)
+            : undefined;
+        if (card.effect.kind === 'mutate_skill' && !mutateSkillId) {
+          const fallback = player.actionHand.find((c) => c.effect.kind !== 'mutate_skill');
+          if (fallback) {
+            submitActionPlay(this.state, pid, fallback.id, {});
+            continue;
+          }
+        }
         if (card.effect.kind === 'swap_actives' && !swap) {
           // No valid target with ≥2 actives — replace with the next-best card if any.
           const fallback = player.actionHand.find((c) => c.effect.kind !== 'swap_actives');
@@ -391,7 +402,7 @@ export class GameRunner {
             continue;
           }
         }
-        submitActionPlay(this.state, pid, card.id, { chosenStat, swap, curseTargetPlayerId });
+        submitActionPlay(this.state, pid, card.id, { chosenStat, swap, curseTargetPlayerId, mutateSkillId });
       }
     }
     if (waiting) return true;
@@ -459,7 +470,7 @@ export class GameRunner {
   submitAction(
     playerId: string,
     cardId: string,
-    extras?: { chosenStat?: StatKey; swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string }; curseTargetPlayerId?: string },
+    extras?: { chosenStat?: StatKey; swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string }; curseTargetPlayerId?: string; mutateSkillId?: string },
   ): void {
     if (this.state.phase !== 'action' || !this.state.actionPhase) {
       throw new Error('not in action phase');
@@ -627,6 +638,14 @@ export class GameRunner {
  * For CPU-played curse_player cards: pick the opponent with the highest ATK
  * as the curse target. Returns undefined if no valid target exists.
  */
+function cpuPickMutateSkill(player: import('./engine/types').Player): string | undefined {
+  for (let i = 0; i < (player.activeSlotCount ?? 0); i++) {
+    const s = player.skillSlots[i];
+    if (s && !s.isPassive && s.active) return s.id;
+  }
+  return undefined;
+}
+
 function cpuPickCurseTarget(state: GameState, selfId: string): string | undefined {
   const others = state.players.filter((p) => p.id !== selfId && p.monster);
   if (others.length === 0) return undefined;
