@@ -3,7 +3,7 @@ import rawOverrides from './events.overrides.json';
 
 export const EVENTS: EventCard[] = [
   // ── heal ────────────────────────────────────────────────────────────────────
-  { id: 'ev-019', name: '逆転の女神',   target: 'lowestHp',  effect: { kind: 'stat_mod', stat: 'hp', amount: 18 } },
+  { id: 'ev-019', name: '逆転の女神',   target: 'lowestHp',  effect: { kind: 'stat_mod', stat: 'hp', amount: 12 } },
 
   // ── stat_mod (all) ──────────────────────────────────────────────────────────
   { id: 'ev-002', name: '荒野の風',     target: 'all',       effect: { kind: 'stat_mod', stat: 'spd', amount: 4  }, count: 3 },
@@ -38,10 +38,7 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-h08', name: 'SPD覇者の代償', target: 'highestSpd', effect: { kind: 'stat_mod', stat: 'spd', amount: -2 } },
 
   // ── damage ──────────────────────────────────────────────────────────────────
-  { id: 'ev-006', name: '災厄の流星',   target: 'all',        effect: { kind: 'damage', amount: 3 } },
-
   { id: 'ev-010', name: '稲妻の試練',   target: 'random',     effect: { kind: 'damage', amount: 5 } },
-  { id: 'ev-017', name: '沼地の毒霧',   target: 'all',        effect: { kind: 'damage', amount: 2 } },
 
   // ── add_skill_top ───────────────────────────────────────────────────────────
   { id: 'ev-009', name: '気まぐれな神', target: 'random',     effect: { kind: 'add_skill_top' }, count: 3 },
