@@ -1,4 +1,4 @@
-import type { EventCard, EventTarget, GameState, Player } from '../types';
+import type { EventCard, EventTarget, GameState, Player, StatKey } from '../types';
 import { drawTop } from '../deck';
 import { addSkillCardToMonster, makeRng, saveRng } from '../state';
 import { describeEventEffect, describeEventTarget } from '../../../lib/card-text';
@@ -122,6 +122,14 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
         const atk = t.monster.stats.atk;
         t.monster.stats.atk = t.monster.stats.def;
         t.monster.stats.def = atk;
+        break;
+      }
+      case 'swap_two_stats': {
+        const sa = (card.effect as { kind: 'swap_two_stats'; statA: StatKey; statB: StatKey }).statA;
+        const sb = (card.effect as { kind: 'swap_two_stats'; statA: StatKey; statB: StatKey }).statB;
+        const tmp = t.monster.stats[sa];
+        t.monster.stats[sa] = t.monster.stats[sb];
+        t.monster.stats[sb] = tmp;
         break;
       }
       case 'shuffle_actives': {

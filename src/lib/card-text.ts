@@ -43,6 +43,8 @@ export function describeEventEffect(card: EventCard): string {
       return '今すぐ追加バトル → アクションフェーズへ';
     case 'swap_atk_def':
       return 'ATKとDEFが入れ替わる';
+    case 'swap_two_stats':
+      return `${e.statA.toUpperCase()}と${e.statB.toUpperCase()}が入れ替わる`;
     case 'shuffle_actives':
       return 'アクティブスキルの順序がシャッフルされる';
     case 'average_hp':

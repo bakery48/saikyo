@@ -475,6 +475,7 @@ export type EventEffect =
   /** Run an extra battle immediately; after its reward phase, resume the normal end-of-round battle. */
   | { kind: 'extra_battle' }
   | { kind: 'swap_atk_def' }
+  | { kind: 'swap_two_stats'; statA: StatKey; statB: StatKey }
   | { kind: 'shuffle_actives' }
   | { kind: 'average_hp' }
   | { kind: 'average_stat'; stat: StatKey }
