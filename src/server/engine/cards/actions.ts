@@ -16,9 +16,9 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-copy',    name: '見よう見まね', effect: { kind: 'copy_skill_from_player' }, count: 1 },
 
   // ── 相手操作・強奪 ───────────────────────────────────────────────────────────
-  { id: 'ac-steal-atk', name: 'ATK強奪', effect: { kind: 'steal_stat', stat: 'atk', amount: 2 }, count: 1 },
-  { id: 'ac-steal-spd', name: 'SPD強奪', effect: { kind: 'steal_stat', stat: 'spd', amount: 2 }, count: 1 },
-  { id: 'ac-steal-def', name: 'DEF強奪', effect: { kind: 'steal_stat', stat: 'def', amount: 2 }, count: 1 },
+  { id: 'ac-steal-atk', name: 'ATK強奪', effect: { kind: 'steal_stat', stat: 'atk', amount: 1 }, count: 1 },
+  { id: 'ac-steal-spd', name: 'SPD強奪', effect: { kind: 'steal_stat', stat: 'spd', amount: 1 }, count: 1 },
+  { id: 'ac-steal-def', name: 'DEF強奪', effect: { kind: 'steal_stat', stat: 'def', amount: 1 }, count: 1 },
   { id: 'ac-steal-hp',  name: 'HP奪取',  effect: { kind: 'steal_stat', stat: 'hp',  amount: 4 }, count: 1 },
   { id: 'ac-copy-atk',  name: 'ATK模倣', effect: { kind: 'copy_stat_from_leader', stat: 'atk' }, count: 1 },
   { id: 'ac-copy-spd',  name: 'SPD模倣', effect: { kind: 'copy_stat_from_leader', stat: 'spd' }, count: 1 },
