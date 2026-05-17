@@ -44,7 +44,7 @@ export const EVENTS: EventCard[] = [
 
   // ── global effects ──────────────────────────────────────────────────────────
   { id: 'ev-025', name: '時逆の風',     target: 'all',        effect: { kind: 'reverse_actives_next_battle' } },
-  { id: 'ev-026', name: '休戦命令',     target: 'all',        effect: { kind: 'skip_action_phase' } },
+
 
   { id: 'ev-s01', name: '矛と盾の逆転', target: 'all',        effect: { kind: 'swap_two_stats', statA: 'atk', statB: 'def' } },
   { id: 'ev-s02', name: '速攻の皮肉',   target: 'all',        effect: { kind: 'swap_two_stats', statA: 'atk', statB: 'spd' } },
