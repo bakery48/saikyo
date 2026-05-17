@@ -1,6 +1,6 @@
 import type { EventCard, EventTarget, GameState, Player, StatKey } from '../types';
 import { drawTop } from '../deck';
-import { addSkillCardToMonster, makeRng, saveRng } from '../state';
+import { addSkillCardToMonster, makeRng, saveRng, syncMonsterFromSlots } from '../state';
 import { describeEventEffect, describeEventTarget } from '../../../lib/card-text';
 
 /** Pick which players an event card targets. Returns alive players only. */
@@ -181,6 +181,22 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
         const stolen = t.skillStock.splice(cardIdx, 1)[0]!;
         const recipient = others[rng.int(0, others.length - 1)]!;
         recipient.skillStock.push(stolen);
+        break;
+      }
+      case 'discard_skills': {
+        const candidates: { card: import('../types').SkillCard; idx: number }[] = [];
+        for (let i = 0; i < t.activeSlotCount; i++) {
+          const s = t.skillSlots[i];
+          if (s) candidates.push({ card: s, idx: i });
+        }
+        const toDiscard = Math.min(card.effect.count, candidates.length);
+        for (let d = 0; d < toDiscard; d++) {
+          const pick = rng.int(0, candidates.length - 1);
+          const { card: discarded, idx } = candidates.splice(pick, 1)[0]!;
+          t.skillSlots[idx] = null;
+          state.decks.skillGrave.push(discarded);
+        }
+        if (toDiscard > 0) syncMonsterFromSlots(state, t);
         break;
       }
     }
