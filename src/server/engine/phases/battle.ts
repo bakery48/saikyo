@@ -26,6 +26,15 @@ function reverseActiveOrder(m: import('../types').Monster): void {
   for (const a of m.actives) a.order = max + 1 - a.order;
 }
 
+function shuffleActiveOrder(m: import('../types').Monster, rng: ReturnType<typeof makeRng>): void {
+  const orders = m.actives.map((_, i) => i + 1);
+  for (let i = orders.length - 1; i > 0; i--) {
+    const j = rng.int(0, i);
+    [orders[i], orders[j]] = [orders[j]!, orders[i]!];
+  }
+  m.actives.forEach((a, i) => { a.order = orders[i]!; });
+}
+
 /** Random pairing of all players with monsters into pairs. Odd one gets a bye. */
 function makePairs(state: GameState): [string, string | null][] {
   const rng = makeRng(state);
@@ -75,6 +84,8 @@ export function runBattlePhase(state: GameState): void {
       reverseActiveOrder(monB);
     }
     const rng = makeRng(state);
+    if (state.nextBattleShufflePlayerIds.includes(aId)) shuffleActiveOrder(monA, rng);
+    if (state.nextBattleShufflePlayerIds.includes(bId)) shuffleActiveOrder(monB, rng);
     const matchSeed = rng.int(1, 0x7fffffff);
     saveRng(state, rng);
     const result = runBattle(monA, monB, matchSeed);
@@ -96,6 +107,7 @@ export function runBattlePhase(state: GameState): void {
 
   // Per-battle effect flags are consumed once the entire battle phase resolves.
   state.nextBattleReverseActives = false;
+  state.nextBattleShufflePlayerIds = [];
 
   const battleState: BattlePhaseState = { matches };
   state.battle = battleState;

@@ -874,6 +874,8 @@ export type GameState = {
   actionPhaseSummary: ActionPhaseSummary | null;
   /** When true, the next battle reverses every monster's active-skill order. Cleared after the battle phase resolves. */
   nextBattleReverseActives: boolean;
+  /** Player IDs whose active-skill order should be shuffled at the start of the next battle. Cleared after the battle phase resolves. */
+  nextBattleShufflePlayerIds: string[];
   /** When true, the upcoming `advanceFromEvent` skips action and goes straight to draft. Cleared on use. */
   skipNextActionPhase: boolean;
   /** When true, the upcoming `advanceFromEvent` transitions to battle (extra battle). Cleared on use. */

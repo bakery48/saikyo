@@ -149,6 +149,7 @@ export function createInitialState(opts: {
     eventPhaseSummary: null,
     actionPhaseSummary: null,
     nextBattleReverseActives: false,
+    nextBattleShufflePlayerIds: [],
     skipNextActionPhase: false,
     extraBattlePending: false,
     returnToBattleAfterReward: false,

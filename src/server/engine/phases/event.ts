@@ -167,15 +167,10 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
         break;
       }
       case 'shuffle_actives': {
-        const actives = t.monster.actives;
-        for (let i = actives.length - 1; i > 0; i--) {
-          const j = rng.int(0, i);
-          const tmp = actives[i]!;
-          actives[i] = actives[j]!;
-          actives[j] = tmp;
+        // Deferred: apply just before the next battle starts
+        if (!state.nextBattleShufflePlayerIds.includes(t.id)) {
+          state.nextBattleShufflePlayerIds.push(t.id);
         }
-        // Re-assign order values after shuffle
-        actives.forEach((a, i) => { a.order = i + 1; });
         break;
       }
       case 'discard_action_card': {
