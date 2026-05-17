@@ -37,9 +37,6 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-h07', name: 'SPD覇者の恵み', target: 'highestSpd', effect: { kind: 'stat_mod', stat: 'spd', amount:  1 } },
   { id: 'ev-h08', name: 'SPD覇者の代償', target: 'highestSpd', effect: { kind: 'stat_mod', stat: 'spd', amount: -2 } },
 
-  // ── damage ──────────────────────────────────────────────────────────────────
-  { id: 'ev-010', name: '稲妻の試練',   target: 'random',     effect: { kind: 'damage', amount: 5 } },
-
   // ── add_skill_top ───────────────────────────────────────────────────────────
   { id: 'ev-009', name: '気まぐれな神', target: 'random',     effect: { kind: 'add_skill_top' }, count: 3 },
   { id: 'ev-033', name: '技術の共有',   target: 'all',        effect: { kind: 'add_skill_top' } },
