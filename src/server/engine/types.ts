@@ -526,6 +526,7 @@ export type ActionEffect =
   | { kind: 'hp_to_atk'; fraction: number }
   | { kind: 'all_stats_mod'; amount: number }
   | { kind: 'swap_all_stats' }
+  | { kind: 'average_stat_with_random'; stat: StatKey }
   | { kind: 'round_scaled_stat_mod'; stat: StatKey; perRound: number };
 
 export type ActionCard = {

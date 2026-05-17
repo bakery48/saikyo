@@ -120,6 +120,8 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       return `全ステータス${e.amount > 0 ? '+' : ''}${e.amount}`;
     case 'swap_all_stats':
       return '最高ATKの相手と全ステータスを交換';
+    case 'average_stat_with_random':
+      return `ランダムな相手と${e.stat.toUpperCase()}を平均化（切り上げ）`;
     case 'round_scaled_stat_mod':
       return `${e.stat.toUpperCase()}+（現在ラウンド×${e.perRound}）`;
   }

@@ -222,6 +222,17 @@ function applyActionEffect(
       }
       break;
     }
+    case 'average_stat_with_random': {
+      const e = card.effect as { kind: 'average_stat_with_random'; stat: StatKey };
+      const others = state.players.filter((p) => p.id !== player.id && p.monster);
+      if (others.length > 0) {
+        const target = others[rng.int(0, others.length - 1)]!;
+        const avg = Math.ceil((player.monster.stats[e.stat] + target.monster!.stats[e.stat]) / 2);
+        player.monster.stats[e.stat] = clampStat(e.stat, avg);
+        target.monster!.stats[e.stat] = clampStat(e.stat, avg);
+      }
+      break;
+    }
     case 'round_scaled_stat_mod': {
       const eff2 = card.effect as { kind: 'round_scaled_stat_mod'; stat: StatKey; perRound: number };
       const gain2 = state.round * eff2.perRound;

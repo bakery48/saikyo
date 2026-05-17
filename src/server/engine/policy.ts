@@ -164,6 +164,8 @@ function scoreActionCard(card: ActionCard): number {
       return 3;
     case 'swap_all_stats':
       return -1;
+    case 'average_stat_with_random':
+      return 1;
     case 'round_scaled_stat_mod':
       return 2;
   }

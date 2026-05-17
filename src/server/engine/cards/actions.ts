@@ -25,6 +25,10 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-copy-def',  name: 'DEF模倣', effect: { kind: 'copy_stat_from_leader', stat: 'def', penalty: 2 }, count: 1 },
   { id: 'ac-copy-hp',   name: 'HP模倣',  effect: { kind: 'copy_stat_from_leader', stat: 'hp',  penalty: 12 }, count: 1 },
   { id: 'ac-swap-all',  name: '全能大交換', effect: { kind: 'swap_all_stats' }, count: 1 },
+  { id: 'ac-avg-atk',  name: 'ATK革命', effect: { kind: 'average_stat_with_random', stat: 'atk' }, count: 1 },
+  { id: 'ac-avg-def',  name: 'DEF革命', effect: { kind: 'average_stat_with_random', stat: 'def' }, count: 1 },
+  { id: 'ac-avg-spd',  name: 'SPD革命', effect: { kind: 'average_stat_with_random', stat: 'spd' }, count: 1 },
+  { id: 'ac-avg-hp',   name: 'HP革命',  effect: { kind: 'average_stat_with_random', stat: 'hp'  }, count: 1 },
 
   // ── ステータス変換 ───────────────────────────────────────────────────────────
   // ── 変換（ATK/DEF/SPD/HPの全12パターン） ─────────────────────────────────
