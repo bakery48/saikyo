@@ -28,11 +28,11 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-h01', name: 'HP覇者の恵み', target: 'highestHp',  effect: { kind: 'stat_mod', stat: 'hp',  amount:  5 } },
   { id: 'ev-h02', name: 'HP覇者の代償', target: 'highestHp',  effect: { kind: 'stat_mod', stat: 'hp',  amount: -5 } },
   { id: 'ev-h03', name: 'ATK覇者の恵み', target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'atk', amount:  1 } },
-  { id: 'ev-h04', name: 'ATK覇者の代償', target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'atk', amount: -1 } },
+  { id: 'ev-h04', name: 'ATK覇者の代償', target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'atk', amount: -2 } },
   { id: 'ev-h05', name: 'DEF覇者の恵み', target: 'highestDef', effect: { kind: 'stat_mod', stat: 'def', amount:  1 } },
-  { id: 'ev-h06', name: 'DEF覇者の代償', target: 'highestDef', effect: { kind: 'stat_mod', stat: 'def', amount: -1 } },
+  { id: 'ev-h06', name: 'DEF覇者の代償', target: 'highestDef', effect: { kind: 'stat_mod', stat: 'def', amount: -2 } },
   { id: 'ev-h07', name: 'SPD覇者の恵み', target: 'highestSpd', effect: { kind: 'stat_mod', stat: 'spd', amount:  1 } },
-  { id: 'ev-h08', name: 'SPD覇者の代償', target: 'highestSpd', effect: { kind: 'stat_mod', stat: 'spd', amount: -1 } },
+  { id: 'ev-h08', name: 'SPD覇者の代償', target: 'highestSpd', effect: { kind: 'stat_mod', stat: 'spd', amount: -2 } },
 
   // ── damage ──────────────────────────────────────────────────────────────────
   { id: 'ev-006', name: '災厄の流星',   target: 'all',        effect: { kind: 'damage', amount: 3 } },
