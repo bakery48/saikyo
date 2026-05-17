@@ -19,7 +19,7 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-011', name: '嵐の使者',     target: 'random',     effect: { kind: 'stat_mod', stat: 'spd', amount: 2 } },
   { id: 'ev-r01', name: '戦火の使者',   target: 'random',     effect: { kind: 'stat_mod', stat: 'atk', amount: 2 } },
   { id: 'ev-r02', name: '鉄壁の使者',   target: 'random',     effect: { kind: 'stat_mod', stat: 'def', amount: 2 } },
-  { id: 'ev-r03', name: '稲妻の使者',   target: 'random',     effect: { kind: 'stat_mod', stat: 'hp',  amount: 6 } },
+  { id: 'ev-r03', name: '稲妻の使者',   target: 'random',     effect: { kind: 'stat_mod', stat: 'hp',  amount: 12 } },
   { id: 'ev-013', name: '集中特訓',     target: 'lowestAtk',  effect: { kind: 'stat_mod', stat: 'atk', amount: 3 } },
   { id: 'ev-018', name: '天才教師',     target: 'lowestDef',  effect: { kind: 'stat_mod', stat: 'def', amount: 3 } },
   { id: 'ev-l01', name: '弱者の猛訓練', target: 'lowestSpd',  effect: { kind: 'stat_mod', stat: 'spd', amount: 3 } },
