@@ -153,7 +153,8 @@ function applyActionEffect(
       const e = card.effect;
       const allWithMonster = state.players.filter((p) => p.monster);
       const max = Math.max(...allWithMonster.map((p) => p.monster!.stats[e.stat]));
-      player.monster.stats[e.stat] = max;
+      const penalty = e.penalty ?? 0;
+      player.monster.stats[e.stat] = clampStat(e.stat, max - penalty);
       break;
     }
     case 'trade_stat': {

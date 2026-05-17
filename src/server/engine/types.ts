@@ -518,7 +518,7 @@ export type ActionEffect =
   | { kind: 'curse_player'; amount: number }
   | { kind: 'draw_passive_top'; maxDraws: number }
   | { kind: 'steal_stat'; stat: StatKey; amount: number }
-  | { kind: 'copy_stat_from_leader'; stat: StatKey }
+  | { kind: 'copy_stat_from_leader'; stat: StatKey; penalty?: number }
   | { kind: 'trade_stat'; from: StatKey; to: StatKey; fromAmount: number; toAmount: number }
   | { kind: 'slot_top_skill' }
   | { kind: 'upgrade_skill' }

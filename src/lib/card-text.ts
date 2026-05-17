@@ -101,8 +101,11 @@ export function describeActionEffect(card: ActionCard, chosenStat?: StatKey): st
       return 'スキルデッキからパッシブカードを1枚獲得';
     case 'steal_stat':
       return `最高${e.stat.toUpperCase()}の相手から${e.stat.toUpperCase()}-${e.amount}を奪う`;
-    case 'copy_stat_from_leader':
-      return `自分の${e.stat.toUpperCase()}を全員の最高値に揃える`;
+    case 'copy_stat_from_leader': {
+      const pen = e.penalty ?? 0;
+      const suffix = pen > 0 ? `-${pen}` : '';
+      return `自分の${e.stat.toUpperCase()}を全員の最高値${suffix}に揃える`;
+    }
     case 'trade_stat':
       return `${e.from.toUpperCase()}-${e.fromAmount}して${e.to.toUpperCase()}+${e.toAmount}`;
     case 'slot_top_skill':
