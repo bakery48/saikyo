@@ -41,7 +41,6 @@ export const EVENTS: EventCard[] = [
   // ── add_skill_top ───────────────────────────────────────────────────────────
   { id: 'ev-009', name: '気まぐれな神', target: 'random',     effect: { kind: 'add_skill_top' }, count: 3 },
   { id: 'ev-033', name: '技術の共有',   target: 'all',        effect: { kind: 'add_skill_top' } },
-  { id: 'ev-047', name: '弱者への贈り物', target: 'lowestHp', effect: { kind: 'add_skill_top' } },
 
   // ── global effects ──────────────────────────────────────────────────────────
   { id: 'ev-025', name: '時逆の風',     target: 'all',        effect: { kind: 'reverse_actives_next_battle' } },
