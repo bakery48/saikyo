@@ -11,6 +11,12 @@ export function describeEventTarget(target: EventTarget): string {
       return 'HP最少';
     case 'highestAtk':
       return 'ATK最高';
+    case 'highestHp':
+      return 'HP最高';
+    case 'highestDef':
+      return 'DEF最高';
+    case 'highestSpd':
+      return 'SPD最高';
   }
 }
 

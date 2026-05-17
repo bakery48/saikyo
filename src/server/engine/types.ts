@@ -460,7 +460,7 @@ export type Monster = {
 };
 
 /** Event card target selectors. */
-export type EventTarget = 'all' | 'random' | 'lowestHp' | 'highestAtk';
+export type EventTarget = 'all' | 'random' | 'lowestHp' | 'highestAtk' | 'highestHp' | 'highestDef' | 'highestSpd';
 
 export type EventEffect =
   | { kind: 'stat_mod'; stat: StatKey; amount: number }

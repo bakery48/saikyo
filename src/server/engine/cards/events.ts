@@ -16,22 +16,27 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-028', name: '城壁の崩壊',   target: 'all',       effect: { kind: 'stat_mod', stat: 'def', amount: -4 }, count: 2 },
 
   // ── stat_mod (targeted) ─────────────────────────────────────────────────────
-  { id: 'ev-008', name: '凱旋の盾',     target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'def', amount: 2 } },
   { id: 'ev-011', name: '嵐の使者',     target: 'random',     effect: { kind: 'stat_mod', stat: 'spd', amount: 2 } },
   { id: 'ev-013', name: '集中特訓',     target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'atk', amount: 2 } },
   { id: 'ev-018', name: '天才教師',     target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'def', amount: 2 } },
-  { id: 'ev-039', name: '勝者の驕り',   target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'atk', amount: -4 } },
   { id: 'ev-040', name: '弱者の奮起',   target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'atk', amount: 5 } },
   { id: 'ev-042', name: '弱者の盾',     target: 'lowestHp',   effect: { kind: 'stat_mod', stat: 'def', amount: 4 } },
   { id: 'ev-045', name: '才能の爆発',   target: 'random',     effect: { kind: 'stat_mod', stat: 'atk', amount: 6 } },
+  // ── highest stat (8種) ──────────────────────────────────────────────────────
+  { id: 'ev-h01', name: 'HP覇者の恵み', target: 'highestHp',  effect: { kind: 'stat_mod', stat: 'hp',  amount:  5 } },
+  { id: 'ev-h02', name: 'HP覇者の代償', target: 'highestHp',  effect: { kind: 'stat_mod', stat: 'hp',  amount: -5 } },
+  { id: 'ev-h03', name: 'ATK覇者の恵み', target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'atk', amount:  1 } },
+  { id: 'ev-h04', name: 'ATK覇者の代償', target: 'highestAtk', effect: { kind: 'stat_mod', stat: 'atk', amount: -1 } },
+  { id: 'ev-h05', name: 'DEF覇者の恵み', target: 'highestDef', effect: { kind: 'stat_mod', stat: 'def', amount:  1 } },
+  { id: 'ev-h06', name: 'DEF覇者の代償', target: 'highestDef', effect: { kind: 'stat_mod', stat: 'def', amount: -1 } },
+  { id: 'ev-h07', name: 'SPD覇者の恵み', target: 'highestSpd', effect: { kind: 'stat_mod', stat: 'spd', amount:  1 } },
+  { id: 'ev-h08', name: 'SPD覇者の代償', target: 'highestSpd', effect: { kind: 'stat_mod', stat: 'spd', amount: -1 } },
 
   // ── damage ──────────────────────────────────────────────────────────────────
   { id: 'ev-006', name: '災厄の流星',   target: 'all',        effect: { kind: 'damage', amount: 3 } },
   { id: 'ev-007', name: '弱者狩り',     target: 'lowestHp',   effect: { kind: 'damage', amount: 4 } },
   { id: 'ev-010', name: '稲妻の試練',   target: 'random',     effect: { kind: 'damage', amount: 5 } },
   { id: 'ev-017', name: '沼地の毒霧',   target: 'all',        effect: { kind: 'damage', amount: 2 } },
-  { id: 'ev-020', name: '英雄の試練',   target: 'highestAtk', effect: { kind: 'damage', amount: 4 } },
-  { id: 'ev-041', name: '因果の刃',     target: 'highestAtk', effect: { kind: 'damage', amount: 5 } },
 
   // ── add_skill_top ───────────────────────────────────────────────────────────
   { id: 'ev-009', name: '気まぐれな神', target: 'random',     effect: { kind: 'add_skill_top' }, count: 3 },
@@ -50,10 +55,8 @@ export const EVENTS: EventCard[] = [
   // ── targeted special ────────────────────────────────────────────────────────
   { id: 'ev-030', name: '旋風',         target: 'random',     effect: { kind: 'shuffle_actives' } },
   { id: 'ev-032', name: '大徴収',       target: 'all',        effect: { kind: 'discard_action_card' } },
-  { id: 'ev-036', name: '英雄の呪い',   target: 'highestAtk', effect: { kind: 'all_stats_mod', amount: -3 } },
   { id: 'ev-037', name: 'SPD封印',      target: 'random',     effect: { kind: 'set_stat', stat: 'spd', value: 0 } },
   { id: 'ev-038', name: '生贄の祭壇',   target: 'random',     effect: { kind: 'pay_hp_draw_skill', hpCost: 5 } },
-  { id: 'ev-046', name: '強者への試練', target: 'highestAtk', effect: { kind: 'shuffle_actives' } },
   { id: 'ev-048', name: 'スキル強奪',   target: 'random',     effect: { kind: 'steal_skill' } },
 ];
 

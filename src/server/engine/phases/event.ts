@@ -30,6 +30,30 @@ function selectTargets(target: EventTarget, state: GameState, rng = makeRng(stat
       }
       return [highest];
     }
+    case 'highestHp': {
+      if (alive.length === 0) return [];
+      let highest = alive[0]!;
+      for (const p of alive) {
+        if (p.monster!.stats.hp > highest.monster!.stats.hp) highest = p;
+      }
+      return [highest];
+    }
+    case 'highestDef': {
+      if (alive.length === 0) return [];
+      let highest = alive[0]!;
+      for (const p of alive) {
+        if (p.monster!.stats.def > highest.monster!.stats.def) highest = p;
+      }
+      return [highest];
+    }
+    case 'highestSpd': {
+      if (alive.length === 0) return [];
+      let highest = alive[0]!;
+      for (const p of alive) {
+        if (p.monster!.stats.spd > highest.monster!.stats.spd) highest = p;
+      }
+      return [highest];
+    }
   }
 }
 
