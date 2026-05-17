@@ -1434,6 +1434,11 @@ function applySkill(args: {
           target.defMod -= p.effect.amount;
           log.push({ kind: 'debuff', player: targetSide, stat: 'atk', amount: p.effect.amount, duration: 'battle' });
           log.push({ kind: 'debuff', player: targetSide, stat: 'def', amount: p.effect.amount, duration: 'battle' });
+          if (p.effect.trueDamage) {
+            const td = p.effect.trueDamage;
+            target.hp -= td;
+            log.push({ kind: 'damage', from: userSide, to: targetSide, amount: td, hpAfter: target.hp });
+          }
           log.push({ kind: 'passive', player: userSide, passiveId: p.id });
         }
       }

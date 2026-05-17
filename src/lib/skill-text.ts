@@ -217,7 +217,9 @@ export function describePassiveEffect(e: PassiveEffect): string {
         ? `${e.minDamage}以上の与ダメ時に相手のDEF-${e.amount}（バトル中累積）`
         : `与ダメ時に相手のDEF-${e.amount}（バトル中累積）`;
     case 'debuff_amp':
-      return `デバフスキル発動時、追加で相手のATK/DEF-${e.amount}（バトル中累積）`;
+      return e.trueDamage
+        ? `デバフスキル発動時、追加で相手のATK/DEF-${e.amount}＋${e.trueDamage}の真ダメージ（バトル中累積）`
+        : `デバフスキル発動時、追加で相手のATK/DEF-${e.amount}（バトル中累積）`;
     case 'extra_attack_chance':
       return `攻撃時${e.percent}%で2回発動`;
     case 'counter_damage':

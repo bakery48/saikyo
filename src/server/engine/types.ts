@@ -273,7 +273,7 @@ export type PassiveEffect =
   /** Each time this side deals damage, reduce target's DEF by `amount` (battle-long, accumulating). */
   | { kind: 'hex_def'; amount: number; minDamage?: number }
   /** When this side uses a debuff_target skill, additionally reduce target's ATK and DEF by `amount`. */
-  | { kind: 'debuff_amp'; amount: number }
+  | { kind: 'debuff_amp'; amount: number; trueDamage?: number }
   /** Each active skill use has a `percent` chance to fire a second time. */
   | { kind: 'extra_attack_chance'; percent: number }
   /** When taking damage, reflect floor(damage / denominator) back to the attacker. */

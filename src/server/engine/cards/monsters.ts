@@ -513,7 +513,7 @@ export const MONSTERS: MonsterBase[] = [
         id: 'incubus-p1',
         name: '夢魔の囁き',
         trigger: { kind: 'on_own_active_used' },
-        effect: { kind: 'debuff_amp', amount: 1 },
+        effect: { kind: 'debuff_amp', amount: 1, trueDamage: 4 },
       },
     ],
     uniqueActionCard: { id: 'unique-incubus', name: '夢魔の誘惑', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
