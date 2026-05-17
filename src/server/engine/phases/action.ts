@@ -28,6 +28,8 @@ function applyActionEffect(
   card: ActionCard,
   chosenStat?: StatKey,
   mutateSkillId?: string,
+  replayGraveCardId?: string,
+  replayChosenStat?: StatKey,
 ): void {
   if (!player.monster) return;
   const rng = makeRng(state);
@@ -261,6 +263,14 @@ function applyActionEffect(
       }
       break;
     }
+    case 'replay_from_grave': {
+      if (!replayGraveCardId) break;
+      const graveCard = state.decks.actionGrave.find((c) => c.id === replayGraveCardId);
+      if (!graveCard) break;
+      // Apply the grave card's effect (grave card stays in grave)
+      applyActionEffect(state, player, graveCard, replayChosenStat);
+      break;
+    }
     case 'round_scaled_stat_mod': {
       const eff2 = card.effect as { kind: 'round_scaled_stat_mod'; stat: StatKey; perRound: number };
       const gain2 = state.round * eff2.perRound;
@@ -336,7 +346,7 @@ export function submitActionPlay(
   state: GameState,
   playerId: string,
   cardId: string,
-  extras?: { chosenStat?: StatKey; swap?: ActionPlay['swap']; curseTargetPlayerId?: string; mutateSkillId?: string },
+  extras?: { chosenStat?: StatKey; swap?: ActionPlay['swap']; curseTargetPlayerId?: string; mutateSkillId?: string; replayGraveCardId?: string; replayChosenStat?: StatKey },
 ): void {
   if (state.phase !== 'action' || !state.actionPhase) {
     throw new Error('not in action phase');
@@ -375,12 +385,26 @@ export function submitActionPlay(
   }
   const curseTargetPlayerId = extras?.curseTargetPlayerId;
   const mutateSkillId = extras?.mutateSkillId;
+  const replayGraveCardId = extras?.replayGraveCardId;
+  const replayChosenStat = extras?.replayChosenStat;
+  if (card.effect.kind === 'replay_from_grave') {
+    if (!replayGraveCardId) throw new Error('replayGraveCardId is required for replay_from_grave');
+    const graveCard = state.decks.actionGrave.find((c) => c.id === replayGraveCardId);
+    if (!graveCard) throw new Error('replayGraveCardId not found in action graveyard');
+    const k = graveCard.effect.kind;
+    if (k === 'replay_from_grave' || k === 'swap_actives' || k === 'curse_player' || k === 'draw_passive_top' || k === 'mutate_skill') {
+      throw new Error(`cannot replay card of kind: ${k}`);
+    }
+    if ((k === 'stat_mod_choice' || k === 'discard_actives_gain_stat') && !replayChosenStat) {
+      throw new Error('replayChosenStat is required for this grave card');
+    }
+  }
   if (card.effect.kind === 'mutate_skill') {
     if (!mutateSkillId) throw new Error('mutateSkillId is required for mutate_skill');
     const hasSkill = player.skillSlots.some((s) => s?.id === mutateSkillId);
     if (!hasSkill) throw new Error('mutateSkillId not found in player slots');
   }
-  phase.submittedPlays[playerId] = { cardId, chosenStat, swap, curseTargetPlayerId, mutateSkillId };
+  phase.submittedPlays[playerId] = { cardId, chosenStat, swap, curseTargetPlayerId, mutateSkillId, replayGraveCardId, replayChosenStat };
 }
 
 export function allActionPlaysIn(state: GameState): boolean {
@@ -433,7 +457,7 @@ export function resolveActionPhase(state: GameState): void {
       }
       saveRng(state, rng);
     } else {
-      applyActionEffect(state, player, card, play.chosenStat, play.mutateSkillId);
+      applyActionEffect(state, player, card, play.chosenStat, play.mutateSkillId, play.replayGraveCardId, play.replayChosenStat);
     }
     // Unique card stays in hand forever; regular cards go to the graveyard.
     if (!isUnique) state.decks.actionGrave.push(card);

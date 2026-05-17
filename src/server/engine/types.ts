@@ -529,6 +529,7 @@ export type ActionEffect =
   | { kind: 'swap_all_stats' }
   | { kind: 'average_stat_with_random'; stat: StatKey }
   | { kind: 'mutate_skill' }
+  | { kind: 'replay_from_grave' }
   | { kind: 'round_scaled_stat_mod'; stat: StatKey; perRound: number };
 
 export type ActionCard = {
@@ -720,6 +721,10 @@ export type ActionPlay = {
   curseTargetPlayerId?: string;
   /** Required for mutate_skill cards; ignored otherwise. */
   mutateSkillId?: string;
+  /** Required for replay_from_grave cards; ignored otherwise. */
+  replayGraveCardId?: string;
+  /** Required when the replayed grave card is stat_mod_choice / discard_actives_gain_stat. */
+  replayChosenStat?: StatKey;
 };
 
 export type BattleMatch = {

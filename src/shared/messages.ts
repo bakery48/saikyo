@@ -161,6 +161,10 @@ export type ClientMessage =
       curseTargetPlayerId?: string;
       /** Required when the card's effect is `mutate_skill`. */
       mutateSkillId?: string;
+      /** Required when the card's effect is `replay_from_grave`. */
+      replayGraveCardId?: string;
+      /** Required when the replayed grave card needs a stat choice. */
+      replayChosenStat?: StatKey;
     }
   | { type: 'submit_reward'; choice: RewardChoice }
   | { type: 'submit_build'; slots: (string | null)[]; activeSlotCount: number }

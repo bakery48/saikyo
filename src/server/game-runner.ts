@@ -383,6 +383,14 @@ export class GameRunner {
           card.effect.kind === 'mutate_skill'
             ? cpuPickMutateSkill(player)
             : undefined;
+        const { replayGraveCardId, replayChosenStat } =
+          card.effect.kind === 'replay_from_grave'
+            ? cpuPickReplayGraveCard(this.state, player)
+            : { replayGraveCardId: undefined, replayChosenStat: undefined };
+        if (card.effect.kind === 'replay_from_grave' && !replayGraveCardId) {
+          const fallback = player.actionHand.find((c) => c.effect.kind !== 'replay_from_grave');
+          if (fallback) { submitActionPlay(this.state, pid, fallback.id, {}); continue; }
+        }
         if (card.effect.kind === 'mutate_skill' && !mutateSkillId) {
           const fallback = player.actionHand.find((c) => c.effect.kind !== 'mutate_skill');
           if (fallback) {
@@ -402,7 +410,7 @@ export class GameRunner {
             continue;
           }
         }
-        submitActionPlay(this.state, pid, card.id, { chosenStat, swap, curseTargetPlayerId, mutateSkillId });
+        submitActionPlay(this.state, pid, card.id, { chosenStat, swap, curseTargetPlayerId, mutateSkillId, replayGraveCardId, replayChosenStat });
       }
     }
     if (waiting) return true;
@@ -470,7 +478,7 @@ export class GameRunner {
   submitAction(
     playerId: string,
     cardId: string,
-    extras?: { chosenStat?: StatKey; swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string }; curseTargetPlayerId?: string; mutateSkillId?: string },
+    extras?: { chosenStat?: StatKey; swap?: { targetPlayerId: string; skillIdA: string; skillIdB: string }; curseTargetPlayerId?: string; mutateSkillId?: string; replayGraveCardId?: string; replayChosenStat?: StatKey },
   ): void {
     if (this.state.phase !== 'action' || !this.state.actionPhase) {
       throw new Error('not in action phase');
@@ -638,6 +646,37 @@ export class GameRunner {
  * For CPU-played curse_player cards: pick the opponent with the highest ATK
  * as the curse target. Returns undefined if no valid target exists.
  */
+const REPLAY_EXCLUDED = new Set(['replay_from_grave', 'swap_actives', 'curse_player', 'draw_passive_top', 'mutate_skill']);
+
+function cpuPickReplayGraveCard(
+  state: GameState,
+  player: import('./engine/types').Player,
+): { replayGraveCardId?: string; replayChosenStat?: StatKey } {
+  const candidates = state.decks.actionGrave.filter((c) => !REPLAY_EXCLUDED.has(c.effect.kind));
+  if (candidates.length === 0) return {};
+  // Pick the highest-scoring card
+  let best = candidates[0]!;
+  for (const c of candidates) {
+    if (scoreActionCardForReplay(c) > scoreActionCardForReplay(best)) best = c;
+  }
+  const k = best.effect.kind;
+  const replayChosenStat: StatKey | undefined =
+    (k === 'stat_mod_choice' || k === 'discard_actives_gain_stat') && player.monster
+      ? chooseStatForActionCard(player.monster.stats)
+      : undefined;
+  return { replayGraveCardId: best.id, replayChosenStat };
+}
+
+function scoreActionCardForReplay(card: import('./engine/types').ActionCard): number {
+  const e = card.effect;
+  if (e.kind === 'stat_mod') return e.amount * 4;
+  if (e.kind === 'stat_mod_choice') return e.amount * 4;
+  if (e.kind === 'all_stats_mod') return e.amount > 0 ? 12 : -1;
+  if (e.kind === 'steal_stat') return 3;
+  if (e.kind === 'draw_skill_top' || e.kind === 'draw_skill_top_with_stat_loss') return 4;
+  return 1;
+}
+
 function cpuPickMutateSkill(player: import('./engine/types').Player): string | undefined {
   for (let i = 0; i < (player.activeSlotCount ?? 0); i++) {
     const s = player.skillSlots[i];

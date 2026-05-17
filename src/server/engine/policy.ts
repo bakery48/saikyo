@@ -168,6 +168,8 @@ function scoreActionCard(card: ActionCard): number {
       return 1;
     case 'mutate_skill':
       return 2;
+    case 'replay_from_grave':
+      return 3;
     case 'round_scaled_stat_mod':
       return 2;
   }

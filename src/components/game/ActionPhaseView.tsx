@@ -32,6 +32,8 @@ export function ActionPhaseView({
   const [swapSkills, setSwapSkills] = useState<string[]>([]);
   const [curseTarget, setCurseTarget] = useState<string | null>(null);
   const [mutateSkillId, setMutateSkillId] = useState<string | null>(null);
+  const [replayGraveCardId, setReplayGraveCardId] = useState<string | null>(null);
+  const [replayChosenStat, setReplayChosenStat] = useState<StatKey | null>(null);
   useEffect(() => {
     setTentative(null);
     setTentativeStat(null);
@@ -39,6 +41,8 @@ export function ActionPhaseView({
     setSwapSkills([]);
     setCurseTarget(null);
     setMutateSkillId(null);
+    setReplayGraveCardId(null);
+    setReplayChosenStat(null);
   }, [!!myCommitted, iAmPending, !!phase]);
   // Reset all extras whenever the picked card changes.
   useEffect(() => {
@@ -47,6 +51,8 @@ export function ActionPhaseView({
     setSwapSkills([]);
     setCurseTarget(null);
     setMutateSkillId(null);
+    setReplayGraveCardId(null);
+    setReplayChosenStat(null);
   }, [tentative]);
   // Reset skill picks if target changes.
   useEffect(() => {
@@ -60,6 +66,11 @@ export function ActionPhaseView({
   const isSwapCard = tentativeCard?.effect.kind === 'swap_actives';
   const isCurseCard = tentativeCard?.effect.kind === 'curse_player';
   const isMutateCard = tentativeCard?.effect.kind === 'mutate_skill';
+  const isReplayCard = tentativeCard?.effect.kind === 'replay_from_grave';
+  const REPLAY_EXCLUDED = new Set(['replay_from_grave', 'swap_actives', 'curse_player', 'draw_passive_top', 'mutate_skill']);
+  const replayableGrave = (state.publicDecks?.actionGrave ?? []).filter((c) => !REPLAY_EXCLUDED.has(c.effect.kind));
+  const selectedGraveCard = replayGraveCardId ? replayableGrave.find((c) => c.id === replayGraveCardId) : undefined;
+  const replayNeedsStat = selectedGraveCard?.effect.kind === 'stat_mod_choice' || selectedGraveCard?.effect.kind === 'discard_actives_gain_stat';
   const swapTargetPlayer = swapTarget
     ? state.players.find((p) => p.id === swapTarget)
     : null;
@@ -68,7 +79,8 @@ export function ActionPhaseView({
     (!isChoiceCard || !!tentativeStat) &&
     (!isSwapCard || (!!swapTarget && swapSkills.length === 2)) &&
     (!isCurseCard || !!curseTarget) &&
-    (!isMutateCard || !!mutateSkillId);
+    (!isMutateCard || !!mutateSkillId) &&
+    (!isReplayCard || (!!replayGraveCardId && (!replayNeedsStat || !!replayChosenStat)));
 
   const toggleSwapSkill = (skillId: string): void => {
     setSwapSkills((prev) => {
@@ -98,6 +110,8 @@ export function ActionPhaseView({
             : undefined,
         curseTargetPlayerId: isCurseCard ? curseTarget ?? undefined : undefined,
         mutateSkillId: isMutateCard ? mutateSkillId ?? undefined : undefined,
+        replayGraveCardId: isReplayCard ? replayGraveCardId ?? undefined : undefined,
+        replayChosenStat: isReplayCard && replayNeedsStat ? replayChosenStat ?? undefined : undefined,
       });
     };
 
@@ -267,6 +281,58 @@ export function ActionPhaseView({
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+            {isReplayCard && (
+              <div style={{ padding: 8, background: '#fff0f8', border: '1px solid #cc44aa', borderRadius: 6, display: 'grid', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>アクション墓地から1枚選ぶ</span>
+                {replayableGrave.length === 0 ? (
+                  <span style={{ fontSize: 12, opacity: 0.7 }}>（墓地にカードなし）</span>
+                ) : (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {replayableGrave.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => { setReplayGraveCardId(c.id); setReplayChosenStat(null); }}
+                        style={{
+                          padding: '4px 8px',
+                          border: `2px solid ${replayGraveCardId === c.id ? '#cc44aa' : '#aaa'}`,
+                          borderRadius: 4,
+                          background: replayGraveCardId === c.id ? '#fff0f8' : '#fff',
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          textAlign: 'left',
+                        }}
+                      >
+                        <div style={{ fontWeight: 600 }}>{c.name}</div>
+                        <div style={{ opacity: 0.75 }}>{describeActionEffect(c)}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {replayNeedsStat && (
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>どのステータスを選ぶ？</span>
+                    {(['atk', 'def', 'spd'] as StatKey[]).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setReplayChosenStat(s)}
+                        style={{
+                          padding: '4px 10px',
+                          border: `2px solid ${replayChosenStat === s ? '#cc44aa' : '#aaa'}`,
+                          borderRadius: 4,
+                          background: replayChosenStat === s ? '#fff0f8' : '#fff',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {s.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             {isMutateCard && (() => {

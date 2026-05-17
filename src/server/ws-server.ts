@@ -214,6 +214,8 @@ export class GameWsServer {
             swap: msg.swap,
             curseTargetPlayerId: msg.curseTargetPlayerId,
             mutateSkillId: msg.mutateSkillId,
+            replayGraveCardId: msg.replayGraveCardId,
+            replayChosenStat: msg.replayChosenStat,
           }),
         );
         return;
