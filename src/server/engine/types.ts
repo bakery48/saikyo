@@ -272,6 +272,8 @@ export type PassiveEffect =
   | { kind: 'rage_atk'; amount: number; minDamage?: number }
   /** Each time this side deals damage, reduce target's DEF by `amount` (battle-long, accumulating). */
   | { kind: 'hex_def'; amount: number; minDamage?: number }
+  /** Each time this side deals damage, reduce target's ATK by `amount` (battle-long, accumulating). */
+  | { kind: 'hex_atk'; amount: number; minDamage?: number }
   /** Each active skill use has a `percent` chance to fire a second time. */
   | { kind: 'extra_attack_chance'; percent: number }
   /** When taking damage, reflect floor(damage / denominator) back to the attacker. */

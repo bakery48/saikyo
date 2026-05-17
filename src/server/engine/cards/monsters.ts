@@ -503,6 +503,26 @@ export const MONSTERS: MonsterBase[] = [
       { id: 'boon-joker-3', name: 'SPD強化', effect: { kind: 'stat_up', stat: 'spd', amount: 2 } },
     ],
   },
+  {
+    baseId: 'incubus',
+    name: 'インキュバス',
+    attackKind: 'magic',
+    stats: { hp: 30, atk: 5, def: 2, spd: 7 },
+    passives: [
+      {
+        id: 'incubus-p1',
+        name: '夢魔の囁き',
+        trigger: { kind: 'on_deal_damage' },
+        effect: { kind: 'hex_atk', amount: 1 },
+      },
+    ],
+    uniqueActionCard: { id: 'unique-incubus', name: '夢魔の誘惑', effect: { kind: 'stat_mod', stat: 'atk', amount: 1 } },
+    boons: [
+      { id: 'boon-incubus-1', name: 'SPD強化', effect: { kind: 'stat_up', stat: 'spd', amount: 2 } },
+      { id: 'boon-incubus-2', name: 'ATK強化', effect: { kind: 'stat_up', stat: 'atk', amount: 2 } },
+      { id: 'boon-incubus-3', name: '影刺しを得る', effect: { kind: 'skill_card', cardId: 'sk-n-028' } },
+    ],
+  },
 ];
 
 type PassiveOverride = { description?: string };
