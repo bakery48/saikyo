@@ -22,6 +22,8 @@ export const ACTIONS: ActionCard[] = [
   { id: 'ac-steal-hp',  name: 'HP奪取',  effect: { kind: 'steal_stat', stat: 'hp',  amount: 6 }, count: 1 },
   { id: 'ac-copy-atk',  name: 'ATK模倣', effect: { kind: 'copy_stat_from_leader', stat: 'atk', penalty: 2 }, count: 1 },
   { id: 'ac-copy-spd',  name: 'SPD模倣', effect: { kind: 'copy_stat_from_leader', stat: 'spd', penalty: 2 }, count: 1 },
+  { id: 'ac-copy-def',  name: 'DEF模倣', effect: { kind: 'copy_stat_from_leader', stat: 'def', penalty: 2 }, count: 1 },
+  { id: 'ac-copy-hp',   name: 'HP模倣',  effect: { kind: 'copy_stat_from_leader', stat: 'hp',  penalty: 12 }, count: 1 },
   { id: 'ac-swap-all',  name: '全能大交換', effect: { kind: 'swap_all_stats' }, count: 1 },
 
   // ── ステータス変換 ───────────────────────────────────────────────────────────
