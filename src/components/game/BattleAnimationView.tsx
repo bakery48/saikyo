@@ -443,6 +443,7 @@ function MonsterColumn({
   const colorHex = COLOR_HEX[player.color] ?? '#888';
 
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
 
   // Shake on hit.
   useEffect(() => {
@@ -464,18 +465,18 @@ function MonsterColumn({
     );
   }, [slashKey]);
 
-  // Lunge toward opponent when attacking.
+  // Lunge toward opponent when attacking — image only.
   useEffect(() => {
     if (!lungeKey) return;
-    const el = wrapperRef.current;
+    const el = imageRef.current;
     if (!el) return;
     const dir = mirror ? -1 : 1;
     el.animate(
       [
-        { transform: 'translateX(0)',           offset: 0 },
+        { transform: 'translateX(0)',             offset: 0 },
         { transform: `translateX(${dir * 48}px)`, offset: 0.22, easing: 'ease-out' },
         { transform: `translateX(${dir * 44}px)`, offset: 0.42 },
-        { transform: 'translateX(0)',           offset: 1,    easing: 'ease-in' },
+        { transform: 'translateX(0)',             offset: 1,    easing: 'ease-in' },
       ],
       { duration: 480 },
     );
@@ -503,6 +504,7 @@ function MonsterColumn({
         }}
       >
         <div
+          ref={imageRef}
           style={{
             position: 'relative',
             width: 184,
