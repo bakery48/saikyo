@@ -129,6 +129,7 @@ export function BuildPhaseView({
             return (
               <div
                 key={idx}
+                className={card?.rarity === 'SSR' ? 'ssr-card' : undefined}
                 style={{
                   border: `2px solid ${isActive ? (card ? SKILL_CATEGORY_COLOR[getSkillCategory(card)] : '#bbb') : '#ddd'}`,
                   borderRadius: 8,
@@ -224,6 +225,7 @@ export function BuildPhaseView({
                   key={card.id}
                   onClick={() => addToSlot(card)}
                   disabled={!canAdd}
+                  className={card.rarity === 'SSR' ? 'ssr-card' : undefined}
                   style={{
                     border: `2px solid ${SKILL_CATEGORY_COLOR[getSkillCategory(card)]}`,
                     borderRadius: 8,
@@ -234,6 +236,7 @@ export function BuildPhaseView({
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 2,
+                    position: 'relative',
                   }}
                 >
                   <div style={{ fontSize: 10, color: SKILL_CATEGORY_COLOR[getSkillCategory(card)] }}>{card.rarity}</div>

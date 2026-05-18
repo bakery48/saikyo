@@ -83,6 +83,7 @@ export function DraftView({
               key={c.id}
               disabled={!canClick}
               onClick={() => placeOrCommit(c.id)}
+              className={c.rarity === 'SSR' ? 'ssr-card' : undefined}
               style={{
                 border: `2px solid ${isSelected ? '#0066cc' : SKILL_CATEGORY_COLOR[getSkillCategory(c)]}`,
                 borderRadius: 8,
@@ -93,6 +94,7 @@ export function DraftView({
                 minHeight: 110,
                 display: 'flex',
                 flexDirection: 'column',
+                position: 'relative',
               }}
             >
               <div style={{ fontSize: 11, color: SKILL_CATEGORY_COLOR[getSkillCategory(c)] }}>{c.rarity}</div>
