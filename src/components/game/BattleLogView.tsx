@@ -84,6 +84,8 @@ function formatBattleEvent(e: BattleEvent, aName: string, bName: string): string
       return `  ${who(e.player)} HP+${e.amount} → ${e.hpAfter}`;
     case 'shield':
       return `  ${who(e.player)} シールド+${e.amount}`;
+    case 'shield_absorb':
+      return `  ${who(e.player)} シールドが${e.absorbed}ダメージを吸収`;
     case 'buff':
       return `  ${who(e.player)} ${e.stat.toUpperCase()}+${e.amount}（${durLabel(e.duration)}）`;
     case 'debuff':

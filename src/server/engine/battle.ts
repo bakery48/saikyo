@@ -543,19 +543,23 @@ function takeDamage(
     const absorbed = Math.min(target.shield, dmg);
     target.shield -= absorbed;
     dmg -= absorbed;
+    if (absorbed > 0) log.push({ kind: 'shield_absorb', player: side, absorbed });
   }
   if (!ignoreShield && target.reflectShield > 0) {
     const absorbed = Math.min(target.reflectShield, dmg);
     target.reflectShield -= absorbed;
     dmg -= absorbed;
+    if (absorbed > 0) log.push({ kind: 'shield_absorb', player: side, absorbed });
   }
   if (!ignoreShield && target.ghostShield > 0) {
     const absorbed = Math.min(target.ghostShield, dmg);
     target.ghostShield -= absorbed;
     dmg -= absorbed;
+    if (absorbed > 0) log.push({ kind: 'shield_absorb', player: side, absorbed });
   }
   if (!ignoreShield && target.thresholdShield > 0) {
     if (dmg < target.thresholdShield) {
+      log.push({ kind: 'shield_absorb', player: side, absorbed: dmg });
       dmg = 0; // hit too small — fully blocked, shield stays
     } else {
       target.thresholdShield = 0; // shield broken by a large hit

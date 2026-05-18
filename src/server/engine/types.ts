@@ -596,6 +596,7 @@ export type BattleEvent =
   | { kind: 'nullified'; player: 'a' | 'b'; skillId: string }
   | { kind: 'amp_set'; player: 'a' | 'b'; mult: number }
   | { kind: 'shield'; player: 'a' | 'b'; amount: number }
+  | { kind: 'shield_absorb'; player: 'a' | 'b'; absorbed: number }
   | { kind: 'passive'; player: 'a' | 'b'; passiveId: string }
   /** Paralysis[N] was applied to a side. */
   | { kind: 'paralysis_applied'; player: 'a' | 'b'; stacks: number }

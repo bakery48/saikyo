@@ -214,6 +214,12 @@ export function BattleStage({
   const shieldToB = currentSkillEventRange.some(
     (e) => e.kind === 'shield' && e.player === 'b' && e.amount > 0,
   );
+  const shieldAbsorbA = currentSkillEventRange.some(
+    (e) => e.kind === 'shield_absorb' && e.player === 'a',
+  );
+  const shieldAbsorbB = currentSkillEventRange.some(
+    (e) => e.kind === 'shield_absorb' && e.player === 'b',
+  );
 
   // Summed amounts for floating numbers.
   const damageAmountA = currentSkillEventRange
@@ -326,6 +332,7 @@ export function BattleStage({
           healKey={healToA ? `heal-a-${stepIdx}` : null}
           lungeKey={currentSide === 'a' ? `lunge-a-${stepIdx}` : null}
           shieldKey={shieldToA ? `shield-a-${stepIdx}` : null}
+          shieldAbsorbKey={shieldAbsorbA ? `absorb-a-${stepIdx}` : null}
           damageAmount={damageAmountA > 0 ? damageAmountA : null}
           shieldAmount={shieldAmountA > 0 ? shieldAmountA : null}
           healAmount={healAmountA > 0 ? healAmountA : null}
@@ -374,6 +381,7 @@ export function BattleStage({
             healKey={healToB ? `heal-b-${stepIdx}` : null}
             lungeKey={currentSide === 'b' ? `lunge-b-${stepIdx}` : null}
             shieldKey={shieldToB ? `shield-b-${stepIdx}` : null}
+            shieldAbsorbKey={shieldAbsorbB ? `absorb-b-${stepIdx}` : null}
             damageAmount={damageAmountB > 0 ? damageAmountB : null}
             shieldAmount={shieldAmountB > 0 ? shieldAmountB : null}
             healAmount={healAmountB > 0 ? healAmountB : null}
@@ -402,6 +410,7 @@ function MonsterColumn({
   healKey,
   lungeKey,
   shieldKey,
+  shieldAbsorbKey,
   damageAmount,
   shieldAmount,
   healAmount,
@@ -430,6 +439,8 @@ function MonsterColumn({
   lungeKey: string | null;
   /** Non-null + unique key when this side just gained a shield. */
   shieldKey: string | null;
+  /** Non-null + unique key when this side's shield absorbed damage this step. */
+  shieldAbsorbKey: string | null;
   /** Total damage received this step (null = none). */
   damageAmount: number | null;
   /** Total shield gained this step (null = none). */
@@ -544,6 +555,7 @@ function MonsterColumn({
           {debuffKey && <DebuffEffect key={debuffKey} />}
           {healKey && <HealEffect key={healKey} />}
           {shieldKey && <ShieldEffect key={shieldKey} />}
+          {shieldAbsorbKey && <ShieldAbsorbEffect key={shieldAbsorbKey} />}
           {missKey && <MissBadge key={missKey} />}
           {damageAmount !== null && (
             <FloatingNumber key={`dmg-${floatKey}`} value={-damageAmount} color="#ff4444" />
@@ -1398,6 +1410,91 @@ function ShieldEffect() {
         <circle key={i} className="shield-dot" cx="50" cy="14" r="3.5"
           fill={i % 2 === 0 ? '#ffffff' : '#88ddff'} opacity={0.95} />
       ))}
+    </svg>
+  );
+}
+
+/** シールド弾き：六角形が衝撃で広がってひびが入り、破片が外に飛び散る。 */
+function ShieldAbsorbEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    // Whole SVG: flash in fast, hold, fade
+    svg.animate(
+      [
+        { opacity: 0, transform: 'scale(0.85)' },
+        { opacity: 1, transform: 'scale(1.12)', offset: 0.15, easing: 'ease-out' },
+        { opacity: 1, transform: 'scale(1.05)', offset: 0.45 },
+        { opacity: 0, transform: 'scale(1.2)' },
+      ],
+      { duration: 650, fill: 'forwards' },
+    );
+    // Hex ring expands outward
+    const ring = svg.querySelector<SVGElement>('.absorb-ring');
+    if (ring) {
+      ring.animate(
+        [
+          { transform: 'scale(1)',   opacity: 1,   strokeWidth: '4' },
+          { transform: 'scale(1.5)', opacity: 0,   strokeWidth: '1' },
+        ],
+        { duration: 550, fill: 'forwards', easing: 'ease-out' },
+      );
+    }
+    // Shards fly outward
+    svg.querySelectorAll<SVGElement>('.absorb-shard').forEach((el, i) => {
+      const angle = (i / 8) * Math.PI * 2;
+      const dist = 28 + (i % 2) * 10;
+      el.animate(
+        [
+          { transform: 'translate(0,0) scale(1)',   opacity: 1 },
+          { transform: `translate(${Math.cos(angle) * dist}px,${Math.sin(angle) * dist}px) scale(0.3)`, opacity: 0 },
+        ],
+        { duration: 500, delay: 60, fill: 'forwards', easing: 'ease-out' },
+      );
+    });
+    // Impact flash at centre
+    const flash = svg.querySelector<SVGElement>('.absorb-flash');
+    if (flash) {
+      flash.animate(
+        [{ opacity: 0.9 }, { opacity: 0 }],
+        { duration: 250, fill: 'forwards', easing: 'ease-out' },
+      );
+    }
+  }, []);
+
+  const hex = Array.from({ length: 6 }, (_, i) => {
+    const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    return `${50 + 36 * Math.cos(a)},${50 + 36 * Math.sin(a)}`;
+  }).join(' ');
+
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 8px rgba(120,200,255,0.9))',
+               transformOrigin: 'center' }}>
+      {/* Hex body */}
+      <polygon points={hex} fill="rgba(160,220,255,0.25)" stroke="#88ccff" strokeWidth="3" />
+      {/* Expanding ring */}
+      <polygon className="absorb-ring" points={hex} fill="none" stroke="#ffffff" strokeWidth="4"
+        style={{ transformOrigin: '50px 50px' }} />
+      {/* Crack lines */}
+      <line x1="50" y1="50" x2="50" y2="14"  stroke="#cceeff" strokeWidth="1.5" opacity={0.7} />
+      <line x1="50" y1="50" x2="82" y2="68"  stroke="#cceeff" strokeWidth="1.5" opacity={0.7} />
+      <line x1="50" y1="50" x2="18" y2="68"  stroke="#cceeff" strokeWidth="1.5" opacity={0.7} />
+      {/* Flying shards */}
+      {Array.from({ length: 8 }, (_, i) => {
+        const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+        const r = 28;
+        return (
+          <polygon key={i} className="absorb-shard"
+            points={`${50 + Math.cos(a) * r},${50 + Math.sin(a) * r} ${50 + Math.cos(a) * r + 5},${50 + Math.sin(a) * r + 3} ${50 + Math.cos(a) * r + 2},${50 + Math.sin(a) * r - 4}`}
+            fill={i % 2 === 0 ? '#aaddff' : '#ffffff'} opacity={0.9}
+            style={{ transformOrigin: `${50 + Math.cos(a) * r}px ${50 + Math.sin(a) * r}px` }} />
+        );
+      })}
+      {/* Centre impact flash */}
+      <circle className="absorb-flash" cx="50" cy="50" r="14" fill="white" opacity={0} />
     </svg>
   );
 }
