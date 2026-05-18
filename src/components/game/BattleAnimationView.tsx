@@ -342,6 +342,12 @@ export function BattleStage({
 
   const battleDone = !preroll && stepIdx >= stepLogIndices.length;
   const finalEvent = match.log.find((e) => e.kind === 'end');
+  const winnerSide =
+    battleDone && finalEvent && finalEvent.kind === 'end' ? finalEvent.winner : null;
+  const winnerName =
+    winnerSide === 'a' ? (aPlayer?.name ?? 'A')
+    : winnerSide === 'b' ? (bPlayer?.name ?? 'B')
+    : null;
   const verdict =
     !battleDone || !finalEvent
       ? null
@@ -383,6 +389,7 @@ export function BattleStage({
           gridTemplateColumns: '1fr auto 1fr',
           gap: 12,
           alignItems: 'flex-start',
+          position: 'relative',
         }}
       >
         <MonsterColumn
@@ -458,8 +465,63 @@ export function BattleStage({
             mirror
           />
         )}
+        {verdict && <VictoryBanner key={verdict} winner={winnerName} isDraw={winnerSide === 'draw'} />}
       </div>
     </section>
+  );
+}
+
+function VictoryBanner({ winner, isDraw }: { winner: string | null; isDraw: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.animate(
+      [
+        { opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' },
+        { opacity: 1, transform: 'translate(-50%, -50%) scale(1.08)', offset: 0.25, easing: 'ease-out' },
+        { opacity: 1, transform: 'translate(-50%, -50%) scale(1.0)',  offset: 0.5 },
+        { opacity: 1, transform: 'translate(-50%, -50%) scale(1.0)',  offset: 0.75 },
+        { opacity: 0, transform: 'translate(-50%, -50%) scale(1.05)' },
+      ],
+      { duration: 2400, fill: 'forwards' },
+    );
+  }, []);
+
+  const text = isDraw ? '引き分け' : `${winner} の勝利！`;
+  const color = isDraw ? '#888' : '#cc8800';
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        pointerEvents: 'none',
+        zIndex: 10,
+        textAlign: 'center',
+        opacity: 0,
+      }}
+    >
+      <div
+        style={{
+          background: 'rgba(0,0,0,0.72)',
+          border: `3px solid ${color}`,
+          borderRadius: 12,
+          padding: '18px 36px',
+          color,
+          fontSize: 28,
+          fontWeight: 900,
+          letterSpacing: 2,
+          textShadow: `0 0 12px ${color}`,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {text}
+      </div>
+    </div>
   );
 }
 
