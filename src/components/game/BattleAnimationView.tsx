@@ -215,6 +215,20 @@ export function BattleStage({
     (e) => e.kind === 'shield' && e.player === 'b' && e.amount > 0,
   );
 
+  // Summed amounts for floating numbers.
+  const damageAmountA = currentSkillEventRange
+    .filter((e) => e.kind === 'damage' && e.to === 'a' && e.amount > 0)
+    .reduce((s, e) => s + (e as { amount: number }).amount, 0);
+  const damageAmountB = currentSkillEventRange
+    .filter((e) => e.kind === 'damage' && e.to === 'b' && e.amount > 0)
+    .reduce((s, e) => s + (e as { amount: number }).amount, 0);
+  const shieldAmountA = currentSkillEventRange
+    .filter((e) => e.kind === 'shield' && e.player === 'a' && e.amount > 0)
+    .reduce((s, e) => s + (e as { amount: number }).amount, 0);
+  const shieldAmountB = currentSkillEventRange
+    .filter((e) => e.kind === 'shield' && e.player === 'b' && e.amount > 0)
+    .reduce((s, e) => s + (e as { amount: number }).amount, 0);
+
   // Play SE whenever a step fires.
   useEffect(() => {
     if (preroll || stepIdx >= stepLogIndices.length) return;
@@ -306,6 +320,9 @@ export function BattleStage({
           healKey={healToA ? `heal-a-${stepIdx}` : null}
           lungeKey={currentSide === 'a' ? `lunge-a-${stepIdx}` : null}
           shieldKey={shieldToA ? `shield-a-${stepIdx}` : null}
+          damageAmount={damageAmountA > 0 ? damageAmountA : null}
+          shieldAmount={shieldAmountA > 0 ? shieldAmountA : null}
+          floatKey={`float-a-${stepIdx}`}
           hitKind={currentAttackKind}
         />
         <div
@@ -350,6 +367,9 @@ export function BattleStage({
             healKey={healToB ? `heal-b-${stepIdx}` : null}
             lungeKey={currentSide === 'b' ? `lunge-b-${stepIdx}` : null}
             shieldKey={shieldToB ? `shield-b-${stepIdx}` : null}
+            damageAmount={damageAmountB > 0 ? damageAmountB : null}
+            shieldAmount={shieldAmountB > 0 ? shieldAmountB : null}
+            floatKey={`float-b-${stepIdx}`}
             hitKind={currentAttackKind}
             mirror
           />
@@ -374,6 +394,9 @@ function MonsterColumn({
   healKey,
   lungeKey,
   shieldKey,
+  damageAmount,
+  shieldAmount,
+  floatKey,
   hitKind,
   mirror = false,
 }: {
@@ -398,6 +421,12 @@ function MonsterColumn({
   lungeKey: string | null;
   /** Non-null + unique key when this side just gained a shield. */
   shieldKey: string | null;
+  /** Total damage received this step (null = none). */
+  damageAmount: number | null;
+  /** Total shield gained this step (null = none). */
+  shieldAmount: number | null;
+  /** Changes every step; re-triggers floating number renders. */
+  floatKey: string;
   /** Visual category of the incoming attack. */
   hitKind: Exclude<AttackKind, 'passthrough'>;
   /** Mirror the monster art horizontally (used for the right-hand side). */
@@ -503,6 +532,12 @@ function MonsterColumn({
           {healKey && <HealEffect key={healKey} />}
           {shieldKey && <ShieldEffect key={shieldKey} />}
           {missKey && <MissBadge key={missKey} />}
+          {damageAmount !== null && (
+            <FloatingNumber key={`dmg-${floatKey}`} value={-damageAmount} color="#ff4444" />
+          )}
+          {shieldAmount !== null && (
+            <FloatingNumber key={`shd-${floatKey}`} value={shieldAmount} color="#55aaff" prefix="🛡" />
+          )}
         </div>
         <div style={{ fontSize: 14, fontWeight: 600 }}>
           {player.name}（{COLOR_LABEL[player.color]}）
@@ -720,6 +755,44 @@ function RollSide({
       <div style={{ fontSize: 13 }}>
         SPD {roll.spd} + 🎲{roll.die} = <strong>{roll.total}</strong>
       </div>
+    </div>
+  );
+}
+
+/** Floating number that rises from the top of the avatar and fades out. */
+function FloatingNumber({ value, color, prefix = '' }: { value: number; color: string; prefix?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.animate(
+      [
+        { transform: 'translate(-50%, 0)',    opacity: 1 },
+        { transform: 'translate(-50%, -38px)', opacity: 1, offset: 0.6 },
+        { transform: 'translate(-50%, -52px)', opacity: 0 },
+      ],
+      { duration: 900, fill: 'forwards', easing: 'ease-out' },
+    );
+  }, []);
+  const label = value < 0 ? `${value}` : `+${value}`;
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        top: 8,
+        left: '50%',
+        transform: 'translate(-50%, 0)',
+        pointerEvents: 'none',
+        fontWeight: 800,
+        fontSize: 20,
+        color,
+        textShadow: '0 0 3px #000, 1px 1px 0 #000',
+        whiteSpace: 'nowrap',
+        letterSpacing: 0.5,
+      }}
+    >
+      {prefix}{label}
     </div>
   );
 }
