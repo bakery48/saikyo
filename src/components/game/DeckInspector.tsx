@@ -1,15 +1,8 @@
 'use client';
 import type { ClientGameState } from '../../shared/messages';
 import type { ActionCard, EventCard, SkillCard } from '../../server/engine/types';
-import { describeActionEffect, describeEventEffect, describeEventTarget } from '../../lib/card-text';
+import { describeActionEffect, describeEventEffect, describeEventTarget, getSkillCategory, SKILL_CATEGORY_COLOR } from '../../lib/card-text';
 import { activeTooltip, passiveTooltip } from '../../lib/skill-text';
-
-const RARITY_COLOR: Record<string, string> = {
-  N: '#888',
-  R: '#3a78ff',
-  SR: '#a050ff',
-  SSR: '#ffa033',
-};
 
 /**
  * Debug panel that lists every card still in each shared deck and graveyard.
@@ -175,7 +168,7 @@ function SkillRow({ card, index }: { card: SkillCard; index: number }) {
       title={tooltip}
     >
       <span style={{ opacity: 0.5, marginRight: 4 }}>{index + 1}.</span>
-      <span style={{ color: RARITY_COLOR[card.rarity] ?? '#888', marginRight: 4 }}>
+      <span style={{ color: SKILL_CATEGORY_COLOR[getSkillCategory(card)], marginRight: 4 }}>
         [{card.rarity}{kindLabel}]
       </span>
       <strong>{card.name}</strong>

@@ -2,6 +2,7 @@
 import type { Monster } from '../../server/engine/types';
 import { activeTooltip, passiveTooltip } from '../../lib/skill-text';
 import { SkillNameHover } from './SkillNameHover';
+import { getActiveEffectCategory, SKILL_CATEGORY_COLOR } from '../../lib/card-text';
 
 const RARITY_COLOR: Record<string, string> = {
   N: '#888',
@@ -58,7 +59,7 @@ export function MonsterDetails({ monster }: { monster: Monster }) {
             >
               <SkillNameHover label={`スロット${a.order} ${a.name}`} tooltip={activeTooltip(a)}>
                 {a.rarity && (
-                  <span style={{ color: RARITY_COLOR[a.rarity] ?? '#888', marginLeft: 4 }}>
+                  <span style={{ color: SKILL_CATEGORY_COLOR[getActiveEffectCategory(a.effect.kind)], marginLeft: 4 }}>
                     [{a.rarity}]
                   </span>
                 )}

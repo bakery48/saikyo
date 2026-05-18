@@ -4,13 +4,7 @@ import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 import { describeSkillCard } from '../../lib/skill-text';
-
-const RARITY_COLOR: Record<string, string> = {
-  N: '#888',
-  R: '#3a78ff',
-  SR: '#a050ff',
-  SSR: '#ffa033',
-};
+import { getSkillCategory, SKILL_CATEGORY_COLOR } from '../../lib/card-text';
 
 export function DraftView({
   state,
@@ -90,7 +84,7 @@ export function DraftView({
               disabled={!canClick}
               onClick={() => placeOrCommit(c.id)}
               style={{
-                border: `2px solid ${isSelected ? '#0066cc' : RARITY_COLOR[c.rarity] ?? '#aaa'}`,
+                border: `2px solid ${isSelected ? '#0066cc' : SKILL_CATEGORY_COLOR[getSkillCategory(c)]}`,
                 borderRadius: 8,
                 padding: 12,
                 background: isSelected ? '#e6f0ff' : '#fff',
@@ -101,7 +95,7 @@ export function DraftView({
                 flexDirection: 'column',
               }}
             >
-              <div style={{ fontSize: 11, color: RARITY_COLOR[c.rarity] ?? '#888' }}>{c.rarity}</div>
+              <div style={{ fontSize: 11, color: SKILL_CATEGORY_COLOR[getSkillCategory(c)] }}>{c.rarity}</div>
               <div style={{ fontWeight: 600 }}>{c.name}</div>
               <div style={{ fontSize: 11, opacity: 0.8, marginTop: 4 }}>
                 {describeSkillCard(c)}
@@ -172,7 +166,7 @@ function AcquiredStrip({
           key={c.id}
           style={{
             padding: '2px 8px',
-            background: RARITY_COLOR[c.rarity] ?? '#888',
+            background: SKILL_CATEGORY_COLOR[getSkillCategory(c)],
             color: '#fff',
             borderRadius: 12,
             fontSize: 12,

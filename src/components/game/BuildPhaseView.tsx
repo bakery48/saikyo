@@ -4,13 +4,7 @@ import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import type { SkillCard } from '../../server/engine/types';
 import { describeSkillCard } from '../../lib/skill-text';
-
-const RARITY_COLOR: Record<string, string> = {
-  N: '#888',
-  R: '#3a78ff',
-  SR: '#a050ff',
-  SSR: '#ffa033',
-};
+import { getSkillCategory, SKILL_CATEGORY_COLOR } from '../../lib/card-text';
 
 const TOTAL_SLOTS = 9;
 
@@ -136,7 +130,7 @@ export function BuildPhaseView({
               <div
                 key={idx}
                 style={{
-                  border: `2px solid ${isActive ? (card ? (RARITY_COLOR[card.rarity] ?? '#aaa') : '#bbb') : '#ddd'}`,
+                  border: `2px solid ${isActive ? (card ? SKILL_CATEGORY_COLOR[getSkillCategory(card)] : '#bbb') : '#ddd'}`,
                   borderRadius: 8,
                   padding: 8,
                   background: !isActive ? '#f5f5f5' : isDefault ? '#fafafa' : '#fff',
@@ -164,7 +158,7 @@ export function BuildPhaseView({
                   </>
                 ) : card ? (
                   <>
-                    <div style={{ fontSize: 10, color: RARITY_COLOR[card.rarity] ?? '#888' }}>{card.rarity}</div>
+                    <div style={{ fontSize: 10, color: SKILL_CATEGORY_COLOR[getSkillCategory(card)] }}>{card.rarity}</div>
                     <div style={{ fontWeight: 600, fontSize: 13 }}>{card.name}</div>
                     <div style={{ fontSize: 11, opacity: 0.7 }}>{describeSkillCard(card)}</div>
                     {iAmPending && !submitted && (
@@ -231,7 +225,7 @@ export function BuildPhaseView({
                   onClick={() => addToSlot(card)}
                   disabled={!canAdd}
                   style={{
-                    border: `2px solid ${RARITY_COLOR[card.rarity] ?? '#aaa'}`,
+                    border: `2px solid ${SKILL_CATEGORY_COLOR[getSkillCategory(card)]}`,
                     borderRadius: 8,
                     padding: 10,
                     background: '#fff',
@@ -242,7 +236,7 @@ export function BuildPhaseView({
                     gap: 2,
                   }}
                 >
-                  <div style={{ fontSize: 10, color: RARITY_COLOR[card.rarity] ?? '#888' }}>{card.rarity}</div>
+                  <div style={{ fontSize: 10, color: SKILL_CATEGORY_COLOR[getSkillCategory(card)] }}>{card.rarity}</div>
                   <div style={{ fontWeight: 600, fontSize: 13 }}>{card.name}</div>
                   <div style={{ fontSize: 11, opacity: 0.7 }}>{describeSkillCard(card)}</div>
                   {card.nameTag && (
