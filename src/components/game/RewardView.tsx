@@ -70,76 +70,8 @@ export function RewardView({
         </p>
       )}
 
-      <SlotReorderSection state={state} socket={socket} />
-
       <BattleResultsSection state={state} />
     </section>
-  );
-}
-
-function SlotReorderSection({
-  state,
-  socket,
-}: {
-  state: ClientGameState;
-  socket: GameSocket;
-}) {
-  const me = state.players.find((p) => p.id === socket.playerId);
-  const monster = me?.monster;
-  const [order, setOrder] = useState<string[] | null>(null);
-  if (!monster || monster.actives.length === 0) return null;
-  const current = order ?? monster.actives.map((a) => a.id);
-  const swap = (i: number, j: number): void => {
-    if (j < 0 || j >= current.length) return;
-    const next = current.slice();
-    [next[i], next[j]] = [next[j]!, next[i]!];
-    setOrder(next);
-  };
-  const apply = (): void => {
-    if (!order) return;
-    socket.send({ type: 'reorder_slots', order });
-    setOrder(null);
-  };
-  const reset = (): void => setOrder(null);
-  const dirty = order !== null;
-  return (
-    <div style={{ border: '1px solid #aaa', borderRadius: 8, padding: 12, background: '#fafafa' }}>
-      <h4 style={{ margin: '0 0 6px' }}>スロット順を並び替え</h4>
-      <p style={{ fontSize: 11, opacity: 0.7, margin: '0 0 8px' }}>
-        ↑↓ で発動順を入れ替えできます。確定するとサーバーに送信されます。
-      </p>
-      <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 4 }}>
-        {current.map((id, i) => {
-          const a = monster.actives.find((x) => x.id === id);
-          if (!a) return null;
-          return (
-            <li key={id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
-              <span style={{ fontWeight: 600, minWidth: 24 }}>{i + 1}.</span>
-              <span style={{ flex: 1 }}>
-                {a.name}
-                {a.rarity && <span style={{ opacity: 0.6, marginLeft: 6 }}>[{a.rarity}]</span>}
-              </span>
-              <button onClick={() => swap(i, i - 1)} disabled={i === 0} style={{ padding: '2px 6px' }}>↑</button>
-              <button
-                onClick={() => swap(i, i + 1)}
-                disabled={i === current.length - 1}
-                style={{ padding: '2px 6px' }}
-              >
-                ↓
-              </button>
-            </li>
-          );
-        })}
-      </ol>
-      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-        <button onClick={apply} disabled={!dirty}>
-          並び順を確定
-        </button>
-        <button onClick={reset} disabled={!dirty} type="button">
-          戻す
-        </button>
-      </div>
-    </div>
   );
 }
 

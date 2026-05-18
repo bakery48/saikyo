@@ -507,16 +507,17 @@ function VictoryBanner({ winner, isDraw }: { winner: string | null; isDraw: bool
     >
       <div
         style={{
-          background: 'rgba(0,0,0,0.72)',
-          border: `3px solid ${color}`,
-          borderRadius: 12,
-          padding: '18px 36px',
+          background: 'rgba(0,0,0,0.78)',
+          border: `5px solid ${color}`,
+          borderRadius: 18,
+          padding: '36px 72px',
           color,
-          fontSize: 28,
+          fontSize: 56,
           fontWeight: 900,
-          letterSpacing: 2,
-          textShadow: `0 0 12px ${color}`,
+          letterSpacing: 4,
+          textShadow: `0 0 20px ${color}, 0 0 40px ${color}`,
           whiteSpace: 'nowrap',
+          boxShadow: `0 0 60px rgba(0,0,0,0.7)`,
         }}
       >
         {text}
