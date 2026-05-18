@@ -1,4 +1,54 @@
-import type { ActionCard, EventCard, EventTarget, StatKey } from '../server/engine/types';
+import type { ActionCard, EventCard, EventTarget, SkillCard, StatKey } from '../server/engine/types';
+
+export type SkillCategory = 'attack' | 'buff' | 'debuff' | 'passive' | 'sin';
+
+export const SKILL_CATEGORY_COLOR: Record<SkillCategory, string> = {
+  attack:  '#d94f4f',
+  buff:    '#4a9e4a',
+  debuff:  '#8844cc',
+  passive: '#777777',
+  sin:     '#b02020',
+};
+
+const ATTACK_KINDS = new Set([
+  'attack', 'true_damage', 'shield_break_attack', 'attack_and_paralyze',
+  'multi_hit_attack', 'gamble_true_damage', 'deja_vu_attack', 'drain_hp',
+  'shield_bash', 'sacrifice_attack', 'execute', 'percent_max_hp_true',
+  'reckless_attack', 'def_attack', 'swat_attack', 'coup_de_grace',
+  'pin_attack', 'target_stat_damage', 'conditional_attack_if_target_higher',
+  'stat_diff_damage', 'target_higher_stat_attack', 'risky_attack',
+  'counter_strike', 'attack_then_dispel', 'attack_then_cleanse', 'steal_stat',
+]);
+
+const BUFF_KINDS = new Set([
+  'buff_self', 'heal', 'shield', 'reflect_shield', 'threshold_shield',
+  'pay_hp_threshold_shield', 'pay_hp_shield', 'buff_self_all', 'heal_max_fraction',
+  'cleanse_self', 'next_amp', 'next_multi_attack', 'hp_to_atk', 'share_damage_next',
+  'rewind_skill', 'swap_atk_def', 'swap_hp',
+]);
+
+const DEBUFF_KINDS = new Set([
+  'debuff_target', 'nullify_next', 'self_nullify_next', 'pause_opponent',
+  'shuffle_opponent_actives', 'pay_hp_debuff_all', 'debuff_all',
+  'dispel', 'break_shield', 'swap_target_atk_def', 'mimic_last',
+]);
+
+export function getSkillCategory(card: SkillCard): SkillCategory {
+  if (card.tag === 'sin') return 'sin';
+  const kind = card.active?.effect.kind;
+  if (!kind) return 'passive';
+  if (ATTACK_KINDS.has(kind)) return 'attack';
+  if (BUFF_KINDS.has(kind)) return 'buff';
+  if (DEBUFF_KINDS.has(kind)) return 'debuff';
+  return 'buff';
+}
+
+export function getActiveEffectCategory(kind: string): SkillCategory {
+  if (ATTACK_KINDS.has(kind)) return 'attack';
+  if (BUFF_KINDS.has(kind)) return 'buff';
+  if (DEBUFF_KINDS.has(kind)) return 'debuff';
+  return 'buff';
+}
 
 /** Human-readable target label for an event card. */
 export function describeEventTarget(target: EventTarget): string {
