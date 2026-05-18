@@ -208,6 +208,12 @@ export function BattleStage({
   const healToB = currentSkillEventRange.some(
     (e) => e.kind === 'heal' && e.player === 'b' && e.amount > 0,
   );
+  const shieldToA = currentSkillEventRange.some(
+    (e) => e.kind === 'shield' && e.player === 'a' && e.amount > 0,
+  );
+  const shieldToB = currentSkillEventRange.some(
+    (e) => e.kind === 'shield' && e.player === 'b' && e.amount > 0,
+  );
 
   // Play SE whenever a step fires.
   useEffect(() => {
@@ -299,6 +305,7 @@ export function BattleStage({
           debuffKey={debuffToA ? `debuff-a-${stepIdx}` : null}
           healKey={healToA ? `heal-a-${stepIdx}` : null}
           lungeKey={currentSide === 'a' ? `lunge-a-${stepIdx}` : null}
+          shieldKey={shieldToA ? `shield-a-${stepIdx}` : null}
           hitKind={currentAttackKind}
         />
         <div
@@ -342,6 +349,7 @@ export function BattleStage({
             debuffKey={debuffToB ? `debuff-b-${stepIdx}` : null}
             healKey={healToB ? `heal-b-${stepIdx}` : null}
             lungeKey={currentSide === 'b' ? `lunge-b-${stepIdx}` : null}
+            shieldKey={shieldToB ? `shield-b-${stepIdx}` : null}
             hitKind={currentAttackKind}
             mirror
           />
@@ -365,6 +373,7 @@ function MonsterColumn({
   debuffKey,
   healKey,
   lungeKey,
+  shieldKey,
   hitKind,
   mirror = false,
 }: {
@@ -387,6 +396,8 @@ function MonsterColumn({
   healKey: string | null;
   /** Non-null + unique key when this side is the current attacker; triggers the lunge animation. */
   lungeKey: string | null;
+  /** Non-null + unique key when this side just gained a shield. */
+  shieldKey: string | null;
   /** Visual category of the incoming attack. */
   hitKind: Exclude<AttackKind, 'passthrough'>;
   /** Mirror the monster art horizontally (used for the right-hand side). */
@@ -490,6 +501,7 @@ function MonsterColumn({
           {buffKey && <BuffEffect key={buffKey} />}
           {debuffKey && <DebuffEffect key={debuffKey} />}
           {healKey && <HealEffect key={healKey} />}
+          {shieldKey && <ShieldEffect key={shieldKey} />}
           {missKey && <MissBadge key={missKey} />}
         </div>
         <div style={{ fontSize: 14, fontWeight: 600 }}>
@@ -1221,6 +1233,81 @@ function DebuffEffect() {
           fill={i % 3 === 0 ? '#8800cc' : i % 3 === 1 ? '#aa44dd' : '#660099'}
           opacity={0.8}
           style={{ transformOrigin: '50px 25px' }} />
+      ))}
+    </svg>
+  );
+}
+
+/** シールド：青白い六角形の盾が前面に広がり、縁がパルスする。 */
+function ShieldEffect() {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    // Whole SVG: expand from centre then fade
+    svg.animate(
+      [
+        { opacity: 0, transform: 'scale(0.5)' },
+        { opacity: 1, transform: 'scale(1.05)', offset: 0.2, easing: 'ease-out' },
+        { opacity: 1, transform: 'scale(1.0)',  offset: 0.55 },
+        { opacity: 0, transform: 'scale(1.15)' },
+      ],
+      { duration: 900, fill: 'forwards' },
+    );
+    // Hex ring pulse
+    const ring = svg.querySelector<SVGElement>('.shield-ring');
+    if (ring) {
+      ring.animate(
+        [
+          { strokeWidth: '3', opacity: 0.9 },
+          { strokeWidth: '6', opacity: 0.5, offset: 0.45 },
+          { strokeWidth: '2', opacity: 0.9, offset: 0.7 },
+          { strokeWidth: '1', opacity: 0 },
+        ],
+        { duration: 900, fill: 'forwards', easing: 'ease-out' },
+      );
+    }
+    // Sparkle dots around the hex
+    svg.querySelectorAll<SVGElement>('.shield-dot').forEach((el, i) => {
+      const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+      const r = 36;
+      const tx = Math.cos(angle) * 10;
+      const ty = Math.sin(angle) * 10;
+      el.animate(
+        [
+          { transform: 'translate(0,0) scale(0.3)', opacity: 0 },
+          { transform: `translate(${tx}px,${ty}px) scale(1)`, opacity: 1, offset: 0.35 },
+          { transform: `translate(${tx * 1.6}px,${ty * 1.6}px) scale(0.4)`, opacity: 0 },
+        ],
+        { duration: 700, delay: i * 40, fill: 'forwards', easing: 'ease-out' },
+      );
+      // position the dot on the hex edge
+      (el as SVGCircleElement).setAttribute('cx', String(50 + Math.cos(angle) * r));
+      (el as SVGCircleElement).setAttribute('cy', String(50 + Math.sin(angle) * r));
+    });
+  }, []);
+
+  // Hexagon points
+  const hex = Array.from({ length: 6 }, (_, i) => {
+    const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    return `${50 + 38 * Math.cos(a)},${50 + 38 * Math.sin(a)}`;
+  }).join(' ');
+
+  return (
+    <svg ref={ref} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+      style={{ position: 'absolute', inset: -8, pointerEvents: 'none', opacity: 0,
+               filter: 'drop-shadow(0 0 10px rgba(80,180,255,0.95))',
+               transformOrigin: 'center' }}>
+      {/* Hex fill */}
+      <polygon points={hex} fill="rgba(120,200,255,0.18)" stroke="#88ccff" strokeWidth="3" />
+      {/* Pulse ring */}
+      <polygon className="shield-ring" points={hex} fill="none" stroke="#aaddff" strokeWidth="3" />
+      {/* Centre glow */}
+      <circle cx="50" cy="50" r="10" fill="rgba(200,240,255,0.7)" />
+      {/* Edge sparkles */}
+      {Array.from({ length: 6 }, (_, i) => (
+        <circle key={i} className="shield-dot" cx="50" cy="14" r="3.5"
+          fill={i % 2 === 0 ? '#ffffff' : '#88ddff'} opacity={0.95} />
       ))}
     </svg>
   );
