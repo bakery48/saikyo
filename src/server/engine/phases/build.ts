@@ -54,6 +54,16 @@ export function submitBuild(
   }
   if (new Set(usedIds).size !== usedIds.length) throw new Error('duplicate card IDs in slots');
 
+  // Sin cards must be slotted if there are any empty active slots available.
+  const usedIdSet = new Set(usedIds);
+  const sinInStock = allCards.filter((c) => c.tag === 'sin' && !usedIdSet.has(c.id));
+  if (sinInStock.length > 0) {
+    const emptyActiveSlots = slots.slice(0, activeSlotCount).filter((id) => id === null).length;
+    if (emptyActiveSlots > 0) {
+      throw new Error('sin cards must be placed in slots before confirming build');
+    }
+  }
+
   state.buildPhase.submittedSlots[playerId] = { slots, activeSlotCount };
   state.buildPhase.pendingPlayerIds = state.buildPhase.pendingPlayerIds.filter((id) => id !== playerId);
   state.log.push({ kind: 'build_submitted', playerId, slotCount: activeSlotCount });
