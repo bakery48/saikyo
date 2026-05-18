@@ -298,6 +298,7 @@ export function BattleStage({
           buffKey={buffToA ? `buff-a-${stepIdx}` : null}
           debuffKey={debuffToA ? `debuff-a-${stepIdx}` : null}
           healKey={healToA ? `heal-a-${stepIdx}` : null}
+          lungeKey={currentSide === 'a' ? `lunge-a-${stepIdx}` : null}
           hitKind={currentAttackKind}
         />
         <div
@@ -340,6 +341,7 @@ export function BattleStage({
             buffKey={buffToB ? `buff-b-${stepIdx}` : null}
             debuffKey={debuffToB ? `debuff-b-${stepIdx}` : null}
             healKey={healToB ? `heal-b-${stepIdx}` : null}
+            lungeKey={currentSide === 'b' ? `lunge-b-${stepIdx}` : null}
             hitKind={currentAttackKind}
             mirror
           />
@@ -362,6 +364,7 @@ function MonsterColumn({
   buffKey,
   debuffKey,
   healKey,
+  lungeKey,
   hitKind,
   mirror = false,
 }: {
@@ -382,6 +385,8 @@ function MonsterColumn({
   debuffKey: string | null;
   /** Non-null + unique key when this side was healed this step. */
   healKey: string | null;
+  /** Non-null + unique key when this side is the current attacker; triggers the lunge animation. */
+  lungeKey: string | null;
   /** Visual category of the incoming attack. */
   hitKind: Exclude<AttackKind, 'passthrough'>;
   /** Mirror the monster art horizontally (used for the right-hand side). */
@@ -397,9 +402,9 @@ function MonsterColumn({
   const hpPct = Math.max(0, Math.min(100, Math.round((hp / Math.max(1, maxHp)) * 100)));
   const colorHex = COLOR_HEX[player.color] ?? '#888';
 
-  // Shake on hit. Re-runs whenever slashKey changes (i.e. a new damage event
-  // landed on this side).
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Shake on hit.
   useEffect(() => {
     if (!slashKey) return;
     const el = wrapperRef.current;
@@ -418,6 +423,23 @@ function MonsterColumn({
       { duration: 520, easing: 'ease-out' },
     );
   }, [slashKey]);
+
+  // Lunge toward opponent when attacking.
+  useEffect(() => {
+    if (!lungeKey) return;
+    const el = wrapperRef.current;
+    if (!el) return;
+    const dir = mirror ? -1 : 1;
+    el.animate(
+      [
+        { transform: 'translateX(0)',           offset: 0 },
+        { transform: `translateX(${dir * 48}px)`, offset: 0.22, easing: 'ease-out' },
+        { transform: `translateX(${dir * 44}px)`, offset: 0.42 },
+        { transform: 'translateX(0)',           offset: 1,    easing: 'ease-in' },
+      ],
+      { duration: 480 },
+    );
+  }, [lungeKey, mirror]);
 
   return (
     <div
