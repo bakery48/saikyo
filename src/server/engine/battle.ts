@@ -2258,7 +2258,7 @@ export function runBattle(a: Monster, b: Monster, seed: number): BattleResult {
     return sides[s].state.skillIdx < sides[s].mon.actives.length;
   };
   let current: Side = first;
-  while (hasWork('a') || hasWork('b')) {
+  while ((hasWork('a') || hasWork('b')) && sides.a.state.hp > 0 && sides.b.state.hp > 0) {
     const cur = sides[current];
     const opp = sides[other(current)];
     // 一時停止: opponent imposed a skip on us — consume it instead of using a skill.
