@@ -20,9 +20,11 @@ export function BuildPhaseView({
   const iAmPending = !!myId && !!buildPhase && buildPhase.pendingPlayerIds.includes(myId);
   const submitted = !!myId && !!buildPhase && !buildPhase.pendingPlayerIds.includes(myId);
 
-  // Local slot state: 9-element array of SkillCard | null
+  // Local slot state: 9-element array of SkillCard | null (passives excluded)
   const [slots, setSlots] = useState<(SkillCard | null)[]>(() =>
-    (state.mySkillSlots ?? Array(TOTAL_SLOTS).fill(null)).slice(0, TOTAL_SLOTS),
+    (state.mySkillSlots ?? Array(TOTAL_SLOTS).fill(null))
+      .slice(0, TOTAL_SLOTS)
+      .map((c) => (c && c.active ? c : null)),
   );
   const [activeSlotCount, setActiveSlotCount] = useState<number>(
     state.myActiveSlotCount ?? TOTAL_SLOTS,
@@ -30,7 +32,11 @@ export function BuildPhaseView({
 
   // Reset local state when build phase starts fresh or player changes
   useEffect(() => {
-    setSlots((state.mySkillSlots ?? Array(TOTAL_SLOTS).fill(null)).slice(0, TOTAL_SLOTS));
+    setSlots(
+      (state.mySkillSlots ?? Array(TOTAL_SLOTS).fill(null))
+        .slice(0, TOTAL_SLOTS)
+        .map((c) => (c && c.active ? c : null)),
+    );
     setActiveSlotCount(state.myActiveSlotCount ?? TOTAL_SLOTS);
   }, [state.buildPhase !== null]);
 
@@ -43,6 +49,11 @@ export function BuildPhaseView({
   const originalInSlots = originalSlots.filter((c): c is SkillCard => c !== null && !slottedIds.has(c.id));
   const allStock = [...stock, ...originalInSlots];
 
+  // Separate passives (no active effect) — they cannot be slotted
+  const isPassive = (c: SkillCard) => !c.active;
+  const activeStock = allStock.filter((c) => !isPassive(c));
+  const passiveStock = allStock.filter(isPassive);
+
   const removeFromSlot = (idx: number): void => {
     if (!iAmPending || submitted) return;
     const next = slots.slice();
@@ -52,6 +63,7 @@ export function BuildPhaseView({
 
   const addToSlot = (card: SkillCard): void => {
     if (!iAmPending || submitted) return;
+    if (isPassive(card)) return;
     // Find first null slot within activeSlotCount
     const targetIdx = slots.findIndex((s, i) => s === null && i < activeSlotCount);
     if (targetIdx < 0) return;
@@ -211,14 +223,14 @@ export function BuildPhaseView({
         </button>
       )}
 
-      {/* Skill stock */}
+      {/* Active skill stock */}
       <div>
         <h3 style={{ margin: '0 0 8px' }}>スキルストック（クリックでスロットに追加）</h3>
-        {allStock.length === 0 ? (
-          <p style={{ opacity: 0.5, fontSize: 13 }}>（ストックにカードがありません）</p>
+        {activeStock.length === 0 ? (
+          <p style={{ opacity: 0.5, fontSize: 13 }}>（スロットに追加できるカードがありません）</p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 8 }}>
-            {allStock.map((card) => {
+            {activeStock.map((card) => {
               const canAdd = iAmPending && !submitted && slots.some((s, i) => s === null && i < activeSlotCount);
               return (
                 <button
@@ -251,6 +263,36 @@ export function BuildPhaseView({
           </div>
         )}
       </div>
+
+      {/* Passive stock — display only, cannot be slotted */}
+      {passiveStock.length > 0 && (
+        <div>
+          <h3 style={{ margin: '0 0 8px' }}>パッシブスキル（常時発動・スロット不要）</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 8 }}>
+            {passiveStock.map((card) => (
+              <div
+                key={card.id}
+                style={{
+                  border: `2px solid ${SKILL_CATEGORY_COLOR['passive']}`,
+                  borderRadius: 8,
+                  padding: 10,
+                  background: '#f9f9f9',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2,
+                }}
+              >
+                <div style={{ fontSize: 10, color: SKILL_CATEGORY_COLOR['passive'] }}>{card.rarity} passive</div>
+                <div style={{ fontWeight: 600, fontSize: 13 }}>{card.name}</div>
+                <div style={{ fontSize: 11, opacity: 0.7 }}>{describeSkillCard(card)}</div>
+                {card.nameTag && (
+                  <div style={{ fontSize: 10, opacity: 0.5 }}>tag: {card.nameTag}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
