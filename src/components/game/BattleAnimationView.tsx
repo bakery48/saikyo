@@ -50,17 +50,7 @@ export function BattleAnimationView({
 }) {
   const myId = socket.playerId;
   if (state.phase === 'tournament') {
-    const bracket = state.tournament?.bracket ?? [];
-    const latest = bracket[bracket.length - 1];
-    if (!latest) {
-      return (
-        <section style={{ display: 'grid', gap: 12 }}>
-          <h2 style={{ margin: 0 }}>トーナメント</h2>
-          <p>準備中...</p>
-        </section>
-      );
-    }
-    return <BattleStage state={state} match={latest as unknown as BattleMatch} title={`トーナメント R${latest.round}`} />;
+    return <TournamentBattleView state={state} myId={myId} />;
   }
   const matches = state.battle?.matches ?? [];
   const myMatch =
@@ -76,6 +66,84 @@ export function BattleAnimationView({
   }
 
   return <BattleStage state={state} match={myMatch} />;
+}
+
+function TournamentBattleView({
+  state,
+  myId,
+}: {
+  state: ClientGameState;
+  myId: string | null;
+}) {
+  const bracket = state.tournament?.bracket ?? [];
+  const currentRound = state.tournament?.currentRound ?? 1;
+
+  // All matches resolved so far in the current round.
+  const roundMatches = bracket.filter((m) => m.round === currentRound);
+
+  const [selectedIdx, setSelectedIdx] = useState<number>(() => Math.max(0, roundMatches.length - 1));
+
+  // Auto-advance to the newest match when a new one is added.
+  const prevLen = useRef(roundMatches.length);
+  useEffect(() => {
+    if (roundMatches.length > prevLen.current) {
+      setSelectedIdx(roundMatches.length - 1);
+    }
+    prevLen.current = roundMatches.length;
+  }, [roundMatches.length]);
+
+  if (roundMatches.length === 0) {
+    return (
+      <section style={{ display: 'grid', gap: 12 }}>
+        <h2 style={{ margin: 0 }}>トーナメント</h2>
+        <p>準備中...</p>
+      </section>
+    );
+  }
+
+  const match = roundMatches[Math.min(selectedIdx, roundMatches.length - 1)]!;
+  const getName = (id: string) => state.players.find((p) => p.id === id)?.name ?? id;
+
+  return (
+    <section style={{ display: 'grid', gap: 12 }}>
+      <h2 style={{ margin: 0 }}>トーナメント R{currentRound}</h2>
+
+      {/* Match selector — only shown when there are multiple matches in this round */}
+      {roundMatches.length > 1 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {roundMatches.map((m, i) => {
+            const isMe = m.a === myId || m.b === myId;
+            const active = i === Math.min(selectedIdx, roundMatches.length - 1);
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedIdx(i)}
+                style={{
+                  padding: '4px 10px',
+                  fontSize: 12,
+                  fontWeight: active ? 700 : 400,
+                  background: active ? '#0066cc' : '#eee',
+                  color: active ? '#fff' : '#333',
+                  border: isMe ? '2px solid #f90' : '2px solid transparent',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                }}
+              >
+                {getName(m.a)} vs {getName(m.b)}
+                {isMe ? ' ★' : ''}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <BattleStage
+        state={state}
+        match={match as unknown as BattleMatch}
+        title={`試合 ${Math.min(selectedIdx, roundMatches.length - 1) + 1} / ${roundMatches.length}`}
+      />
+    </section>
+  );
 }
 
 export function BattleStage({
