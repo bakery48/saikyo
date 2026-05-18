@@ -43,6 +43,9 @@ export const EVENTS: EventCard[] = [
 
   // ── global effects ──────────────────────────────────────────────────────────
   { id: 'ev-025', name: '時逆の風',     target: 'all',        effect: { kind: 'reverse_actives_next_battle' } },
+  { id: 'ev-b01', name: '混沌の嵐',    target: 'all',        effect: { kind: 'shuffle_all_actives_next_battle' } },
+  { id: 'ev-b02', name: '重力転換',    target: 'all',        effect: { kind: 'swap_atk_def_next_battle' } },
+  { id: 'ev-b03', name: '魂の入れ替え', target: 'all',       effect: { kind: 'swap_monsters_next_battle' } },
 
 
   { id: 'ev-s01', name: '矛と盾の逆転', target: 'all',        effect: { kind: 'swap_two_stats', statA: 'atk', statB: 'def' } },

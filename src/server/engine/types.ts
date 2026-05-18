@@ -472,6 +472,12 @@ export type EventEffect =
   | { kind: 'add_skill_top' }
   /** Reverse every monster's active-skill order for the next battle. */
   | { kind: 'reverse_actives_next_battle' }
+  /** Shuffle every monster's active-skill order for the next battle (all players). */
+  | { kind: 'shuffle_all_actives_next_battle' }
+  /** Swap ATK and DEF for all monsters in the next battle. */
+  | { kind: 'swap_atk_def_next_battle' }
+  /** Each matched pair fights using the opponent's monster (swap snapshots). */
+  | { kind: 'swap_monsters_next_battle' }
   /** Skip the action phase this round (advance directly to draft). */
   | { kind: 'skip_action_phase' }
   /** Run an extra battle immediately; after its reward phase, resume the normal end-of-round battle. */
@@ -880,6 +886,10 @@ export type GameState = {
   nextBattleReverseActives: boolean;
   /** Player IDs whose active-skill order should be shuffled at the start of the next battle. Cleared after the battle phase resolves. */
   nextBattleShufflePlayerIds: string[];
+  /** When true, ATK and DEF are swapped for all monsters in the next battle. Cleared after the battle phase resolves. */
+  nextBattleSwapAtkDef: boolean;
+  /** When true, each matched pair swaps monsters (fights with opponent's stats/skills). Cleared after the battle phase resolves. */
+  nextBattleSwapMonsters: boolean;
   /** When true, the upcoming `advanceFromEvent` skips action and goes straight to draft. Cleared on use. */
   skipNextActionPhase: boolean;
   /** When true, the upcoming `advanceFromEvent` transitions to battle (extra battle). Cleared on use. */

@@ -77,8 +77,15 @@ export function runBattlePhase(state: GameState): void {
     }
     const a = state.players.find((p) => p.id === aId)!;
     const b = state.players.find((p) => p.id === bId)!;
-    const monA = snapshotMonsterForBattle(a);
-    const monB = snapshotMonsterForBattle(b);
+    let monA = snapshotMonsterForBattle(a);
+    let monB = snapshotMonsterForBattle(b);
+    if (state.nextBattleSwapMonsters) {
+      [monA, monB] = [monB, monA];
+    }
+    if (state.nextBattleSwapAtkDef) {
+      const tmpA = monA.stats.atk; monA.stats.atk = monA.stats.def; monA.stats.def = tmpA;
+      const tmpB = monB.stats.atk; monB.stats.atk = monB.stats.def; monB.stats.def = tmpB;
+    }
     if (state.nextBattleReverseActives) {
       reverseActiveOrder(monA);
       reverseActiveOrder(monB);
@@ -108,6 +115,8 @@ export function runBattlePhase(state: GameState): void {
   // Per-battle effect flags are consumed once the entire battle phase resolves.
   state.nextBattleReverseActives = false;
   state.nextBattleShufflePlayerIds = [];
+  state.nextBattleSwapAtkDef = false;
+  state.nextBattleSwapMonsters = false;
 
   const battleState: BattlePhaseState = { matches };
   state.battle = battleState;

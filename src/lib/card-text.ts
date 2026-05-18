@@ -43,6 +43,12 @@ export function describeEventEffect(card: EventCard): string {
       return `スキル山札から1枚追加`;
     case 'reverse_actives_next_battle':
       return '次戦は全員のスロット順を逆転';
+    case 'shuffle_all_actives_next_battle':
+      return '次戦は全員のスロット順をランダムにシャッフル';
+    case 'swap_atk_def_next_battle':
+      return '次戦は全員のATKとDEFが入れ替わる';
+    case 'swap_monsters_next_battle':
+      return '次戦は対戦相手のモンスターで戦う';
     case 'skip_action_phase':
       return 'このアクションフェーズをスキップ';
     case 'extra_battle':

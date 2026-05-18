@@ -88,6 +88,19 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
     case 'reverse_actives_next_battle':
       state.nextBattleReverseActives = true;
       return;
+    case 'shuffle_all_actives_next_battle':
+      for (const p of state.players.filter(p => p.monster)) {
+        if (!state.nextBattleShufflePlayerIds.includes(p.id)) {
+          state.nextBattleShufflePlayerIds.push(p.id);
+        }
+      }
+      return;
+    case 'swap_atk_def_next_battle':
+      state.nextBattleSwapAtkDef = true;
+      return;
+    case 'swap_monsters_next_battle':
+      state.nextBattleSwapMonsters = true;
+      return;
     case 'skip_action_phase':
       state.skipNextActionPhase = true;
       return;
