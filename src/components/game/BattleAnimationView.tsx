@@ -228,6 +228,12 @@ export function BattleStage({
   const shieldAmountB = currentSkillEventRange
     .filter((e) => e.kind === 'shield' && e.player === 'b' && e.amount > 0)
     .reduce((s, e) => s + (e as { amount: number }).amount, 0);
+  const healAmountA = currentSkillEventRange
+    .filter((e) => e.kind === 'heal' && e.player === 'a' && e.amount > 0)
+    .reduce((s, e) => s + (e as { amount: number }).amount, 0);
+  const healAmountB = currentSkillEventRange
+    .filter((e) => e.kind === 'heal' && e.player === 'b' && e.amount > 0)
+    .reduce((s, e) => s + (e as { amount: number }).amount, 0);
 
   // Play SE whenever a step fires.
   useEffect(() => {
@@ -322,6 +328,7 @@ export function BattleStage({
           shieldKey={shieldToA ? `shield-a-${stepIdx}` : null}
           damageAmount={damageAmountA > 0 ? damageAmountA : null}
           shieldAmount={shieldAmountA > 0 ? shieldAmountA : null}
+          healAmount={healAmountA > 0 ? healAmountA : null}
           floatKey={`float-a-${stepIdx}`}
           hitKind={currentAttackKind}
         />
@@ -369,6 +376,7 @@ export function BattleStage({
             shieldKey={shieldToB ? `shield-b-${stepIdx}` : null}
             damageAmount={damageAmountB > 0 ? damageAmountB : null}
             shieldAmount={shieldAmountB > 0 ? shieldAmountB : null}
+            healAmount={healAmountB > 0 ? healAmountB : null}
             floatKey={`float-b-${stepIdx}`}
             hitKind={currentAttackKind}
             mirror
@@ -396,6 +404,7 @@ function MonsterColumn({
   shieldKey,
   damageAmount,
   shieldAmount,
+  healAmount,
   floatKey,
   hitKind,
   mirror = false,
@@ -425,6 +434,8 @@ function MonsterColumn({
   damageAmount: number | null;
   /** Total shield gained this step (null = none). */
   shieldAmount: number | null;
+  /** Total HP healed this step (null = none). */
+  healAmount: number | null;
   /** Changes every step; re-triggers floating number renders. */
   floatKey: string;
   /** Visual category of the incoming attack. */
@@ -539,6 +550,9 @@ function MonsterColumn({
           )}
           {shieldAmount !== null && (
             <FloatingNumber key={`shd-${floatKey}`} value={shieldAmount} color="#55aaff" prefix="🛡" />
+          )}
+          {healAmount !== null && (
+            <FloatingNumber key={`heal-${floatKey}`} value={healAmount} color="#33cc55" prefix="♥" />
           )}
         </div>
         <div style={{ fontSize: 14, fontWeight: 600 }}>
