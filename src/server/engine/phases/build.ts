@@ -58,8 +58,11 @@ export function submitBuild(
   const usedIdSet = new Set(usedIds);
   const sinInStock = allCards.filter((c) => c.tag === 'sin' && !usedIdSet.has(c.id));
   if (sinInStock.length > 0) {
-    const emptyActiveSlots = slots.slice(0, activeSlotCount).filter((id) => id === null).length;
-    if (emptyActiveSlots > 0) {
+    const cardById = new Map(allCards.map((c) => [c.id, c]));
+    const activeSlotCards = slots.slice(0, activeSlotCount).map((id) => (id ? cardById.get(id) ?? null : null));
+    const allFilled = activeSlotCards.every((c) => c !== null);
+    const allSin = activeSlotCards.every((c) => c?.tag === 'sin');
+    if (!(allFilled && allSin)) {
       throw new Error('sin cards must be placed in slots before confirming build');
     }
   }
