@@ -189,7 +189,7 @@ export const SKILLS: SkillCard[] = [
   },
   // ── R actives (new) ─────────────────────────────────────────────────────
   {
-    id: 'sk-r-069',
+    id: 'sk-r-071',
     name: '吸命術',
     rarity: 'R',
     nameTag: 'ドレイン',
@@ -217,7 +217,7 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'steal_stat', stat: 'atk', amount: 4 } },
   },
   {
-    id: 'sk-n-030',
+    id: 'sk-n-031',
     name: '翳り',
     rarity: 'N',
     active: { effect: { kind: 'debuff_all', amount: 1 } },
@@ -259,7 +259,7 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'drain_hp', amount: 3 } },
   },
   {
-    id: 'sk-r-070',
+    id: 'sk-r-072',
     name: '鎧削り',
     rarity: 'R',
     nameTag: 'スクラッチ',
@@ -344,7 +344,7 @@ export const SKILLS: SkillCard[] = [
   },
   // ── SSR actives (new) ───────────────────────────────────────────────────
   {
-    id: 'sk-sr-058',
+    id: 'sk-sr-061',
     name: '命懸け',
     rarity: 'SR',
     nameTag: 'サクリファイス',
@@ -596,7 +596,7 @@ export const SKILLS: SkillCard[] = [
     active: { effect: { kind: 'swat_attack', mult: 1.0, useStat: 'atk', attackKind: 'strike' } },
   },
   {
-    id: 'sk-ssr-029',
+    id: 'sk-ssr-034',
     name: '真・ハエたたき',
     rarity: 'SSR',
     nameTag: 'グランドスワッター',

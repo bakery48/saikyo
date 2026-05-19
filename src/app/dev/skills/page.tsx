@@ -247,7 +247,7 @@ export default function DevSkillsPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((c) => {
+            {rows.map((c, rowIdx) => {
               const e = edits[c.id] ?? {};
               const origAtk = effectAttackKind(c.active?.effect);
               const curAtk = e.attackKind ?? origAtk;
@@ -261,7 +261,7 @@ export default function DevSkillsPage() {
                 (e.description !== undefined && e.description !== (c.description ?? ''));
               return (
                 <tr
-                  key={c.id}
+                  key={`${rowIdx}-${c.id}`}
                   style={{
                     background: dirty ? '#fffbe6' : 'transparent',
                     borderBottom: '1px solid #eee',
