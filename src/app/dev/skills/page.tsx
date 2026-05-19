@@ -54,7 +54,6 @@ function cardEffectKind(c: SkillCard): string {
 export default function DevSkillsPage() {
   const [edits, setEdits] = useState<Edits>({});
   const [filter, setFilter] = useState('');
-  const [effectFilter, setEffectFilter] = useState('');
   const [sortCol, setSortCol] = useState<SortCol>('id');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
@@ -79,8 +78,9 @@ export default function DevSkillsPage() {
   const rows = useMemo(() => {
     const f = filter.trim().toLowerCase();
     const filtered = SKILLS.filter((c) => {
-      if (effectFilter && cardEffectKind(c) !== effectFilter) return false;
       if (!f) return true;
+      // exact effect kind match (e.g. user picked from datalist)
+      if (cardEffectKind(c) === f) return true;
       const blob = `${c.id} ${c.name} ${c.nameTag ?? ''} ${cardEffectKind(c)} ${describeSkillCard(c)}`.toLowerCase();
       return blob.includes(f);
     });
@@ -106,7 +106,7 @@ export default function DevSkillsPage() {
       if (va > vb) return sign;
       return 0;
     });
-  }, [filter, effectFilter, sortCol, sortDir]);
+  }, [filter, sortCol, sortDir]);
 
   const setField = <K extends keyof Edits[string]>(
     id: string,
@@ -202,24 +202,22 @@ export default function DevSkillsPage() {
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
         <input
           type="text"
-          placeholder="検索（名前・タグ・説明・効果・ID）"
+          list="effect-kind-list"
+          placeholder="検索（名前・タグ・説明・効果ID） — 効果種別はサジェストから選択可"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          style={{ padding: '4px 8px', minWidth: 240 }}
+          style={{ padding: '4px 8px', minWidth: 320 }}
         />
-        <select
-          value={effectFilter}
-          onChange={(e) => setEffectFilter(e.target.value)}
-          style={{ padding: '4px 8px' }}
-          title="効果の種類で絞り込み"
-        >
-          <option value="">効果すべて</option>
+        <datalist id="effect-kind-list">
           {effectKindOptions.map(([kind, count]) => (
-            <option key={kind} value={kind}>
-              {kind} ({count})
-            </option>
+            <option key={kind} value={kind}>{kind} ({count}件)</option>
           ))}
-        </select>
+        </datalist>
+        {filter && (
+          <button type="button" onClick={() => setFilter('')} style={{ padding: '4px 8px', cursor: 'pointer' }}>
+            ✕ クリア
+          </button>
+        )}
         <span style={{ fontSize: 12, opacity: 0.7 }}>
           {rows.length} / {SKILLS.length} 件 — 変更 {changedEntries.length} 件
         </span>
