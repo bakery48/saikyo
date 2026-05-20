@@ -101,14 +101,14 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-017', name: 'フラッシュバック', rarity: 'SR', nameTag: 'フラッシュバック', active: { effect: { kind: 'rewind_skill', rewindBy: 2, selfDamagePercent: 25 } } },
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
-  { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'ドラゴン', active: { effect: { kind: 'attack', mult: 2.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'アルティメット', active: { effect: { kind: 'attack', mult: 2.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-ssr-003', name: '聖なる盾', rarity: 'SSR', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 12 } } },
   { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッドソーン', active: { effect: { kind: 'reflect_shield', amount: 10 } } },
   { id: 'sk-ssr-019', name: 'マキシム・オーラ', rarity: 'SSR', nameTag: 'マキシム', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.5, threshold: 7 } } },
   { id: 'sk-ssr-020', name: '絶壁砕き', rarity: 'SSR', nameTag: 'ウォールブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.5, multShield: 4.0, attackKind: 'strike' } } },
   { id: 'sk-ssr-004', name: '集中砲火', rarity: 'SSR', nameTag: 'クロノス', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
   { id: 'sk-ssr-005', name: '三重起動', rarity: 'SSR', nameTag: 'トリプル', active: { effect: { kind: 'next_multi_attack', extraCount: 2, failurePenalty: 6 } } },
-  { id: 'sk-ssr-007', name: 'エターナル', rarity: 'SSR', nameTag: 'エターナル', active: { effect: { kind: 'rewind_skill', rewindBy: 3, selfDamagePercent: 40 } } },
+  { id: 'sk-ssr-007', name: '無限回帰', rarity: 'SSR', nameTag: 'インフィニティ', active: { effect: { kind: 'rewind_skill', rewindBy: 3, selfDamagePercent: 40 } } },
 
   // ─── Passive skill cards ───────────────────────────────────────────────────
   {
@@ -288,9 +288,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-sr-055',
-    name: '暗転',
+    name: '邪術',
     rarity: 'SR',
-    nameTag: 'ヘクス',
+    nameTag: 'イービル',
     active: { effect: { kind: 'debuff_all', amount: 3 } },
   },
   {
@@ -330,9 +330,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-ssr-022',
-    name: '限界突破',
+    name: '完全解放',
     rarity: 'SSR',
-    nameTag: 'リミットブレイク',
+    nameTag: 'パーフェクト',
     active: { effect: { kind: 'buff_self_all', amount: 4, duration: 'battle' } },
   },
   {
@@ -387,9 +387,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-r-040',
-    name: '浄化呪',
+    name: '聖浄化',
     rarity: 'R',
-    nameTag: 'ピュリファイ',
+    nameTag: 'ホーリー',
     active: { effect: { kind: 'cleanse_self' } },
   },
   {
