@@ -323,9 +323,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-sr-026',
-    name: '覚醒',
+    name: '古の力の目醒め',
     rarity: 'SR',
-    nameTag: 'アウェイクン',
+    nameTag: 'エンシェント',
     active: { effect: { kind: 'buff_self_all', amount: 3, duration: 'battle' } },
   },
   {
