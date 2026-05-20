@@ -86,7 +86,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-010', name: '一挙集中', rarity: 'SR', nameTag: 'オーバードライブ', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
   { id: 'sk-sr-012', name: '装甲の粉砕', rarity: 'SR', nameTag: 'クラッシャー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-018', name: '時空の束縛', rarity: 'SR', nameTag: 'タイムストップ', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 6, duration: 'battle' } } },
-  { id: 'sk-sr-020', name: '豪鬼咆哮', rarity: 'SR', nameTag: 'オーバーロード', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 9, duration: 'once' } } },
+  { id: 'sk-sr-020', name: '豪鬼咆哮', rarity: 'SR', nameTag: 'ストロング', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 9, duration: 'once' } } },
   { id: 'sk-sr-035', name: '絶対防壁', rarity: 'SR', nameTag: 'バリア', active: { effect: { kind: 'buff_self', stat: 'def', amount: 9, duration: 'once' } } },
   { id: 'sk-sr-013', name: '一時停止', rarity: 'SR', nameTag: 'ポーズ', active: { effect: { kind: 'pause_opponent', stacks: 1 } } },
   // ─── 麻痺系 ────────────────────────────────────────────────────────────────
@@ -248,7 +248,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-sr-019',
     name: '浄化',
     rarity: 'SR',
-    nameTag: 'クレンズ',
+    nameTag: 'ビューティフル',
     active: { effect: { kind: 'dispel' } },
   },
   {
@@ -382,7 +382,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-r-039',
     name: '奈落の呪い',
     rarity: 'R',
-    nameTag: 'グラインダー',
+    nameTag: 'アビス',
     active: { effect: { kind: 'percent_max_hp_true', percent: 15 } },
   },
   {
