@@ -35,7 +35,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-010', name: '束縛', rarity: 'R', nameTag: 'フリーザー', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-029', name: '闘気', rarity: 'R', nameTag: 'フォース', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-012', name: '見切り', rarity: 'SR', nameTag: 'ウィザード', active: { effect: { kind: 'nullify_next' } } },
-  { id: 'sk-r-015', name: '癒しの風', rarity: 'R', nameTag: 'ヒーリング', active: { effect: { kind: 'heal', amount: 5 } } },
+  { id: 'sk-r-015', name: '癒しの一滴', rarity: 'R', nameTag: 'リトル', active: { effect: { kind: 'heal', amount: 5 } } },
   { id: 'sk-r-016', name: '中盾', rarity: 'R', nameTag: 'シルバー', active: { effect: { kind: 'shield', amount: 4 } } },
   { id: 'sk-r-055', name: '盾割り', rarity: 'R', nameTag: 'シールドブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.0, multShield: 2.0, attackKind: 'strike' } } },
   // ─── 七つの大罪 (Sin cards) ──────────────────────────────────────────────
@@ -75,7 +75,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.6, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-003', name: '貫通の理', rarity: 'SSR', nameTag: 'バニッシャー', active: { effect: { kind: 'true_damage', amount: 8 } } },
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
-  { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 7 } } },
+  { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ジャイアント', active: { effect: { kind: 'shield', amount: 7 } } },
   { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 5 } } },
   { id: 'sk-sr-046', name: 'ハイ・オーラ', rarity: 'SR', nameTag: 'ハイオーラ', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.25, threshold: 5 } } },
   { id: 'sk-sr-047', name: '鎧砕き', rarity: 'SR', nameTag: 'アーマークラッシャー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.2, multShield: 3.0, attackKind: 'strike' } } },
@@ -102,7 +102,7 @@ export const SKILLS: SkillCard[] = [
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
   { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'ドラゴン', active: { effect: { kind: 'attack', mult: 2.0, useStat: 'atk', attackKind: 'passthrough' } } },
-  { id: 'sk-ssr-003', name: '聖なる盾', rarity: 'SSR', nameTag: 'セレスチャル', active: { effect: { kind: 'shield', amount: 12 } } },
+  { id: 'sk-ssr-003', name: '聖なる盾', rarity: 'SSR', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 12 } } },
   { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッドソーン', active: { effect: { kind: 'reflect_shield', amount: 10 } } },
   { id: 'sk-ssr-019', name: 'マキシム・オーラ', rarity: 'SSR', nameTag: 'マキシム', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.5, threshold: 7 } } },
   { id: 'sk-ssr-020', name: '絶壁砕き', rarity: 'SSR', nameTag: 'ウォールブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.5, multShield: 4.0, attackKind: 'strike' } } },
@@ -437,9 +437,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-sr-029',
-    name: '命削りの呪縛',
+    name: '終末の呪縛',
     rarity: 'SR',
-    nameTag: 'エロード',
+    nameTag: 'エンド',
     active: { effect: { kind: 'percent_max_hp_true', percent: 25 } },
   },
   {
