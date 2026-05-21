@@ -73,7 +73,7 @@ export const SKILLS: SkillCard[] = [
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
   { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.6, useStat: 'atk', attackKind: 'passthrough' } } },
-  { id: 'sk-sr-003', name: '貫通の理', rarity: 'SSR', nameTag: 'バニッシャー', active: { effect: { kind: 'true_damage', amount: 8 } } },
+  { id: 'sk-sr-003', name: '青眼の滅光', rarity: 'SSR', nameTag: 'ブルーアイズ', active: { effect: { kind: 'true_damage', amount: 8 } } },
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
   { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ジャイアント', active: { effect: { kind: 'shield', amount: 7 } } },
   { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 5 } } },
@@ -479,9 +479,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-sr-034',
-    name: '怒りの覚醒',
+    name: '紅眼の業火',
     rarity: 'SR',
-    nameTag: 'バーサーク',
+    nameTag: 'レッドアイズ',
     active: { effect: { kind: 'hp_to_atk', divisor: 2 } },
   },
   // ── SSR actives (batch 3) ───────────────────────────────────────────────
