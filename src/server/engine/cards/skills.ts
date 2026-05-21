@@ -72,7 +72,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-025', name: '神風返し', rarity: 'SSR', nameTag: 'テンペスト', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 1.3 } } },
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
-  { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.6, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'インペリアル', active: { effect: { kind: 'attack', mult: 1.6, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-003', name: '青眼の滅光', rarity: 'SSR', nameTag: 'ブルーアイズ', active: { effect: { kind: 'true_damage', amount: 8 } } },
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
   { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ジャイアント', active: { effect: { kind: 'shield', amount: 7 } } },
@@ -85,7 +85,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-009', name: '威圧の咆哮', rarity: 'SR', nameTag: 'デモン', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-010', name: '一挙集中', rarity: 'SR', nameTag: 'プロミネンス', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
   { id: 'sk-sr-012', name: '装甲の粉砕', rarity: 'SR', nameTag: 'クラッシャー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 6, duration: 'battle' } } },
-  { id: 'sk-sr-018', name: '時空の束縛', rarity: 'SR', nameTag: 'タイムストップ', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 6, duration: 'battle' } } },
+  { id: 'sk-sr-018', name: '覇王の束縛', rarity: 'SR', nameTag: 'キング', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-020', name: '豪鬼咆哮', rarity: 'SR', nameTag: 'ストロング', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 9, duration: 'once' } } },
   { id: 'sk-sr-035', name: '絶対防御', rarity: 'SR', nameTag: 'サンクチュアリ', active: { effect: { kind: 'buff_self', stat: 'def', amount: 9, duration: 'once' } } },
   { id: 'sk-sr-013', name: '一時停止', rarity: 'SR', nameTag: 'ポーズ', active: { effect: { kind: 'pause_opponent', stacks: 1 } } },
@@ -624,7 +624,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-sr-038',
     name: '影縫い',
     rarity: 'SR',
-    nameTag: 'シャドウバインド',
+    nameTag: 'ダークネス',
     active: { effect: { kind: 'pin_attack', mult: 1.0, useStat: 'atk', flat: -1, attackKind: 'sword' } },
   },
   {
