@@ -1185,6 +1185,9 @@ export const SKILLS: SkillCard[] = [
   },
 ];
 
+/** override適用前の生の値（/dev/merge での比較用） */
+export const RAW_SKILLS = SKILLS.map((s) => ({ ...s }));
+
 type SkillOverride = Partial<Pick<SkillCard, 'name' | 'rarity' | 'nameTag' | 'description'>>;
 const overrides = rawOverrides as Record<string, SkillOverride>;
 

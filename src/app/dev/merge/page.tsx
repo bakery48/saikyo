@@ -1,6 +1,6 @@
 'use client';
 import { useMemo, useState } from 'react';
-import { SKILLS } from '../../../server/engine/cards/skills';
+import { RAW_SKILLS } from '../../../server/engine/cards/skills';
 import rawOverrides from '../../../server/engine/cards/skills.overrides.json';
 
 type OvEntry = {
@@ -23,7 +23,7 @@ interface Conflict {
   overridesValue: string;
 }
 
-const skillMap = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
+const skillMap = Object.fromEntries(RAW_SKILLS.map((s) => [s.id, s]));
 
 function getSkillField(id: string, field: Field): string {
   const s = skillMap[id];
