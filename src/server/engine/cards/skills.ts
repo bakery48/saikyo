@@ -432,7 +432,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-sr-028',
     name: '死刑宣告',
     rarity: 'SR',
-    nameTag: 'エクスキューショナー',
+    nameTag: 'エクスキューション',
     active: { effect: { kind: 'execute', threshold: 6 } },
   },
   {
