@@ -121,9 +121,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-srp-024',
-    name: '大再生 (passive)',
+    name: '月明かりの癒し (passive)',
     rarity: 'SR',
-    nameTag: 'ハイリジェネ',
+    nameTag: 'ムーンライト',
     isPassive: true,
     passive: { trigger: { kind: 'on_own_turn_start' }, effect: { kind: 'turn_start_heal_even', amount: 2 } },
   },
@@ -645,7 +645,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-sr-040',
     name: '諸行無常の刃',
     rarity: 'SR',
-    nameTag: 'ヴァニッシュ',
+    nameTag: 'トワイライト',
     active: { effect: { kind: 'attack_then_dispel', mult: 0.8, useStat: 'atk', flat: 0, attackKind: 'sword' } },
   },
   {
@@ -696,9 +696,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-rp-015',
-    name: '末期の輝き (passive)',
+    name: '星屑の輝き (passive)',
     rarity: 'R',
-    nameTag: 'テイル',
+    nameTag: 'スターライト',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_deal_damage' },
@@ -707,9 +707,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-srp-025',
-    name: '断末魔の輝き (passive)',
+    name: '流星の輝き (passive)',
     rarity: 'SR',
-    nameTag: 'ハイテイル',
+    nameTag: 'メテオ',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_deal_damage' },
