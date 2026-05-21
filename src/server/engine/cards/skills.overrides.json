@@ -1,1 +1,951 @@
-{}
+{
+  "sk-n-001": {
+    "name": "体当たり",
+    "rarity": "N",
+    "attackKind": "passthrough",
+    "description": "ATKで攻撃する。"
+  },
+  "sk-n-002": {
+    "name": "殴打",
+    "rarity": "N",
+    "attackKind": "strike",
+    "description": "ATKで攻撃する"
+  },
+  "sk-n-004": {
+    "name": "蹴り",
+    "rarity": "N",
+    "attackKind": "strike",
+    "description": "ATKで攻撃する"
+  },
+  "sk-n-005": {
+    "name": "ひっかき",
+    "rarity": "N",
+    "attackKind": "claw",
+    "description": "ATKで攻撃する"
+  },
+  "sk-n-006": {
+    "name": "噛みつき",
+    "rarity": "N",
+    "attackKind": "claw",
+    "description": "ATKで攻撃する"
+  },
+  "sk-n-007": {
+    "name": "突進",
+    "rarity": "N",
+    "attackKind": "strike",
+    "description": "SPDで攻撃する"
+  },
+  "sk-n-008": {
+    "name": "速攻",
+    "rarity": "N",
+    "attackKind": "strike",
+    "description": "SPDで攻撃する"
+  },
+  "sk-n-009": {
+    "name": "小回復",
+    "rarity": "N",
+    "description": "自分のHPを3回復する。"
+  },
+  "sk-n-010": {
+    "name": "小盾",
+    "rarity": "N",
+    "description": "シールド[2]を得る。"
+  },
+  "sk-n-013": {
+    "name": "威嚇",
+    "rarity": "N",
+    "description": "相手のATKを-1する。"
+  },
+  "sk-n-014": {
+    "name": "砂かけ",
+    "rarity": "N",
+    "description": "相手のDEFを-1する。"
+  },
+  "sk-n-015": {
+    "name": "叫び",
+    "rarity": "N",
+    "description": "相手のSPDを-1する。"
+  },
+  "sk-n-016": {
+    "name": "小傷",
+    "rarity": "N",
+    "description": "相手のDEFを無視して2ダメージ与える。"
+  },
+  "sk-n-017": {
+    "name": "足払い",
+    "rarity": "N",
+    "attackKind": "strike",
+    "description": "SPDで攻撃する"
+  },
+  "sk-n-018": {
+    "name": "低空タックル",
+    "rarity": "N",
+    "attackKind": "strike",
+    "description": "ATKで攻撃する"
+  },
+  "sk-n-019": {
+    "name": "雑な一撃",
+    "rarity": "N",
+    "attackKind": "strike",
+    "description": "ATKで攻撃する"
+  },
+  "sk-r-001": {
+    "name": "強攻撃",
+    "rarity": "R",
+    "nameTag": "パワー",
+    "attackKind": "passthrough",
+    "description": "ATK×1.3で攻撃する。"
+  },
+  "sk-sr-006": {
+    "name": "剛力解放",
+    "rarity": "SR",
+    "nameTag": "タイタン",
+    "description": "自分のATKを+3する。"
+  },
+  "sk-sr-017": {
+    "name": "フラッシュバック",
+    "rarity": "SR",
+    "nameTag": "フラッシュバック",
+    "description": "スロットを2つ戻す。自分は4ダメージを受ける。廃棄."
+  },
+  "sk-ssr-007": {
+    "name": "エターナル",
+    "rarity": "SSR",
+    "nameTag": "エターナル",
+    "description": "スロットを3つ戻す。自分は7ダメージを受ける。廃棄。"
+  },
+  "sk-r-030": {
+    "name": "力奪い",
+    "rarity": "R",
+    "nameTag": "スナッチ",
+    "description": "相手のATKを2奪う。"
+  },
+  "sk-n-011": {
+    "name": "気合溜め",
+    "rarity": "N",
+    "description": "自分のATKを+3する（一度のみ）。"
+  },
+  "sk-n-012": {
+    "name": "構え",
+    "rarity": "N",
+    "description": "自分のDEFを+3する（一度のみ）。"
+  },
+  "sk-n-020": {
+    "name": "硬化",
+    "rarity": "N",
+    "description": "自分のDEFを+2する。"
+  },
+  "sk-n-021": {
+    "name": "集中",
+    "rarity": "N",
+    "description": "自分のATKを+2する。"
+  },
+  "sk-n-022": {
+    "name": "加速",
+    "rarity": "N",
+    "description": "自分のSPDを+2する。"
+  },
+  "sk-r-054": {
+    "name": "オーラ",
+    "rarity": "R",
+    "nameTag": "オーラ",
+    "description": "オーラ[2]を得る。"
+  },
+  "sk-sr-046": {
+    "name": "ハイ・オーラ",
+    "rarity": "SR",
+    "nameTag": "ハイオーラ",
+    "description": "最大HPの25%のダメージを受ける、オーラ[4]を得る。"
+  },
+  "sk-ssr-019": {
+    "name": "マキシム・オーラ",
+    "rarity": "SSR",
+    "nameTag": "マキシム",
+    "description": "最大HPの25%のダメージを受ける、オーラ[6]を得る。"
+  },
+  "sk-r-004": {
+    "name": "いばらの盾",
+    "rarity": "R",
+    "nameTag": "ソーン",
+    "description": "反射シールド[3]を得る。"
+  },
+  "sk-r-015": {
+    "name": "癒しの風",
+    "rarity": "R",
+    "nameTag": "ヒーリング",
+    "description": "自分のHPを5回復する。"
+  },
+  "sk-r-016": {
+    "name": "中盾",
+    "rarity": "R",
+    "nameTag": "シルバー",
+    "description": "シールド[4]を得る。"
+  },
+  "sk-r-055": {
+    "name": "盾割り",
+    "rarity": "R",
+    "nameTag": "シールドブレイカー",
+    "description": "ATKで攻撃する。ただし、相手がシールド/反射シールド/オーラを持っているとき、それを破壊しATK×2で攻撃する。"
+  },
+  "sk-sr-004": {
+    "name": "大回復",
+    "rarity": "SR",
+    "nameTag": "セイント",
+    "description": "自分のHPを8回復する。"
+  },
+  "sk-sr-005": {
+    "name": "大盾",
+    "rarity": "SR",
+    "nameTag": "ガーディアン",
+    "description": "シールド[7]を得る。"
+  },
+  "sk-sr-044": {
+    "name": "鉄棘の盾",
+    "rarity": "SR",
+    "nameTag": "アイアンソーン",
+    "description": "反射シールド[5]を得る。"
+  },
+  "sk-sr-047": {
+    "name": "鎧砕き",
+    "rarity": "SR",
+    "nameTag": "アーマークラッシャー",
+    "description": "ATK×1.2で攻撃する。ただし、相手がシールド/反射シールド/オーラを持っているとき、それを破壊しATK×3で攻撃する。"
+  },
+  "sk-ssr-003": {
+    "name": "聖なる盾",
+    "rarity": "SSR",
+    "nameTag": "セレスチャル",
+    "description": "シールド[12]を得る。"
+  },
+  "sk-ssr-018": {
+    "name": "返り血の盾",
+    "rarity": "SSR",
+    "nameTag": "ブラッドソーン",
+    "description": "反射シールド[10]を得る。"
+  },
+  "sk-ssr-020": {
+    "name": "絶壁砕き",
+    "rarity": "SSR",
+    "nameTag": "ウォールブレイカー",
+    "description": "ATK×1.5で攻撃する。ただし、相手がシールド/反射シールド/オーラを持っているとき、それを破壊しATK×4で攻撃する。"
+  },
+  "sk-r-056": {
+    "name": "虚栄の罪",
+    "rarity": "R",
+    "nameTag": "プライド",
+    "description": "相手にシールド[1]を与える。罪。"
+  },
+  "sk-r-057": {
+    "name": "嫉妬の罪",
+    "rarity": "R",
+    "nameTag": "エンヴィ",
+    "description": "相手にATK+2を与える。罪。"
+  },
+  "sk-r-058": {
+    "name": "怠惰の罪",
+    "rarity": "R",
+    "nameTag": "スロウス",
+    "description": "自分の次のスロットを無効にする。罪。"
+  },
+  "sk-r-060": {
+    "name": "強欲の罪",
+    "rarity": "R",
+    "nameTag": "グリード",
+    "description": "自分のDEFを-2する。罪。"
+  },
+  "sk-r-061": {
+    "name": "暴食の罪",
+    "rarity": "R",
+    "nameTag": "グラトニー",
+    "description": "自分のSPDを-4する。罪。"
+  },
+  "sk-r-062": {
+    "name": "色欲の罪",
+    "rarity": "R",
+    "nameTag": "ラスト",
+    "description": "相手を最大HPの20%を回復する。罪。"
+  },
+  "sk-r-017": {
+    "name": "要塞",
+    "rarity": "R",
+    "nameTag": "フォートレス",
+    "description": "自分のDEFを+4する。"
+  },
+  "sk-r-018": {
+    "name": "速攻",
+    "rarity": "R",
+    "nameTag": "ラピッド",
+    "attackKind": "passthrough",
+    "description": "SPD×1.1で攻撃する。"
+  },
+  "sk-r-019": {
+    "name": "シールドバッシュ",
+    "rarity": "R",
+    "nameTag": "バッシュ",
+    "attackKind": "strike",
+    "description": "DEF×1.2で攻撃する。"
+  },
+  "sk-r-059": {
+    "name": "憤怒の罪",
+    "rarity": "R",
+    "nameTag": "ラース",
+    "description": "自分に最大HPの30%のダメージを与える。罪。"
+  },
+  "sk-sr-007": {
+    "name": "鋼鉄の肉体",
+    "rarity": "SR",
+    "nameTag": "アイアン",
+    "description": "自分のDEFを+6する。"
+  },
+  "sk-sr-008": {
+    "name": "神速の波動",
+    "rarity": "SR",
+    "nameTag": "ゴッドスピード",
+    "description": "自分のSPDを+6する。"
+  },
+  "sk-sr-009": {
+    "name": "威圧の咆哮",
+    "rarity": "SR",
+    "nameTag": "デモン",
+    "description": "相手のATKを-6する。"
+  },
+  "sk-sr-012": {
+    "name": "装甲の粉砕",
+    "rarity": "SR",
+    "nameTag": "クラッシャー",
+    "description": "相手のDEFを-6する。"
+  },
+  "sk-sr-018": {
+    "name": "理外の咆哮",
+    "rarity": "SR",
+    "nameTag": "フォース",
+    "description": "自分の次のアクティブスキルのダメージを3倍にし、すべての軽減・上限を貫通する。"
+  },
+  "sk-sr-020": {
+    "name": "豪鬼咆哮",
+    "rarity": "SR",
+    "nameTag": "オーバーロード",
+    "description": "自分のATKを+9する（一度のみ）。"
+  },
+  "sk-sr-035": {
+    "name": "絶対防壁",
+    "rarity": "SR",
+    "nameTag": "バリア",
+    "description": "自分のDEFを+9する（一度のみ）。"
+  },
+  "sk-sr-014": {
+    "name": "ハリケーン",
+    "rarity": "SR",
+    "nameTag": "ハリケーン",
+    "description": "相手の残りスロット順をランダムに入れ替える。"
+  },
+  "sk-sr-031": {
+    "name": "ガードバースト",
+    "rarity": "SR",
+    "nameTag": "バースト",
+    "attackKind": "strike",
+    "description": "DEF×1.4で攻撃する。"
+  },
+  "sk-n-028": {
+    "name": "影刺し",
+    "rarity": "R",
+    "nameTag": "シャドウ",
+    "description": "相手のDEFを無視して4ダメージ与える。"
+  },
+  "sk-r-002": {
+    "name": "貫通刺突",
+    "rarity": "SR",
+    "nameTag": "ピアサー",
+    "description": "相手のDEFを無視して6ダメージ与える。"
+  },
+  "sk-r-005": {
+    "name": "気力解放",
+    "rarity": "R",
+    "nameTag": "レイジ",
+    "description": "自分のATKを+6する（一度のみ）。"
+  },
+  "sk-r-006": {
+    "name": "岩石防御",
+    "rarity": "R",
+    "nameTag": "ロックアーマー",
+    "description": "自分のDEFを+6する（一度のみ）。"
+  },
+  "sk-r-007": {
+    "name": "光速",
+    "rarity": "R",
+    "nameTag": "ライト",
+    "description": "自分のSPDを+4する。"
+  },
+  "sk-r-008": {
+    "name": "威圧",
+    "rarity": "R",
+    "nameTag": "タイラント",
+    "description": "相手のATKを-4する。"
+  },
+  "sk-r-009": {
+    "name": "剥離",
+    "rarity": "R",
+    "nameTag": "ブレイカー",
+    "description": "相手のDEFを-4する。"
+  },
+  "sk-r-010": {
+    "name": "束縛",
+    "rarity": "R",
+    "nameTag": "フリーザー",
+    "description": "相手のSPDを-4する。"
+  },
+  "sk-r-029": {
+    "name": "吸命術",
+    "rarity": "R",
+    "nameTag": "ドレイン",
+    "description": "自分のATKを+4する。"
+  },
+  "sk-sr-021": {
+    "name": "吸命波",
+    "rarity": "SR",
+    "nameTag": "ライフドレイン",
+    "description": "相手からHPを3奪う。"
+  },
+  "sk-ssr-008": {
+    "name": "永劫の刃",
+    "rarity": "SSR",
+    "nameTag": "エタニティ",
+    "description": "ATK-1で自分と相手のSPDの差の回数だけ攻撃する。"
+  },
+  "sk-ssr-011": {
+    "name": "完全吸命",
+    "rarity": "SSR",
+    "nameTag": "ソウルイーター",
+    "description": "相手からHPを5奪う。"
+  },
+  "sk-srp-001": {
+    "name": "鋼の体 (passive)",
+    "rarity": "SR",
+    "nameTag": "タンク",
+    "description": "パッシブ：被ダメージ時、受けるダメージを-1する。"
+  },
+  "sk-srp-003": {
+    "name": "食いしばり (passive)",
+    "rarity": "SR",
+    "nameTag": "サバイバー",
+    "description": "パッシブ：被ダメージ時、HPが0になる攻撃を一度だけHP1で耐える。"
+  },
+  "sk-sr-016": {
+    "name": "百花繚乱",
+    "rarity": "SSR",
+    "nameTag": "バリスタ",
+    "attackKind": "passthrough",
+    "description": "ATK×0.7で4回攻撃する。"
+  },
+  "sk-r-032": {
+    "name": "連撃",
+    "rarity": "R",
+    "nameTag": "クロー",
+    "attackKind": "passthrough",
+    "description": "ATK×0.9で2回攻撃する。"
+  },
+  "sk-sr-025": {
+    "name": "音速斬",
+    "rarity": "SR",
+    "nameTag": "ソニック",
+    "attackKind": "sword",
+    "description": "SPD×1.3で攻撃する。"
+  },
+  "sk-ssr-013": {
+    "name": "終焉宣告",
+    "rarity": "SSR",
+    "nameTag": "ジ・エンド",
+    "description": "相手のHPが10以下なら即死ダメージを与える。必中。"
+  },
+  "sk-r-012": {
+    "name": "見切り",
+    "rarity": "SR",
+    "nameTag": "ウィザード",
+    "description": "相手の次スロットを無効にする。"
+  },
+  "sk-sr-001": {
+    "name": "必殺攻撃",
+    "rarity": "SR",
+    "nameTag": "スレイヤー",
+    "attackKind": "passthrough",
+    "description": "ATK×1.5で攻撃する。"
+  },
+  "sk-sr-003": {
+    "name": "貫通の理",
+    "rarity": "SSR",
+    "nameTag": "バニッシャー",
+    "description": "相手のDEFを無視して8ダメージ与える。"
+  },
+  "sk-sr-015": {
+    "name": "二重起動",
+    "rarity": "SR",
+    "nameTag": "ダブル",
+    "description": "自分の次スロットの攻撃を2回行う。次スロットが攻撃でない場合、2ダメージ受ける。"
+  },
+  "sk-ssr-005": {
+    "name": "三重起動",
+    "rarity": "SSR",
+    "nameTag": "トリプル",
+    "description": "自分の次スロットの攻撃を3回行う。次スロットが攻撃でない場合、6ダメージ受ける。"
+  },
+  "sk-srp-002": {
+    "name": "見切りの構え (passive)",
+    "rarity": "SR",
+    "nameTag": "ファントム",
+    "description": "パッシブ：ダメージを受けるとき、17%でダメージを0にする。"
+  },
+  "sk-srp-005": {
+    "name": "逆転する世界 (passive)",
+    "rarity": "SR",
+    "nameTag": "リバース",
+    "description": "パッシブ：自分と相手のスロットが逆順になる。"
+  },
+  "sk-r-049": {
+    "name": "捨て身攻撃",
+    "rarity": "R",
+    "nameTag": "リックレス",
+    "description": "ATK×2で攻撃する。自分の次のスロットをスキップする。"
+  },
+  "sk-rp-010": {
+    "name": "甲虫の加護 (passive)",
+    "rarity": "R",
+    "nameTag": "プルーデント",
+    "description": "パッシブ：バトル最初にダメージを受けるとき、ダメージを50%にする。"
+  },
+  "sk-rp-011": {
+    "name": "ダンスステップ (passive)",
+    "rarity": "R",
+    "nameTag": "ダンサー",
+    "description": "パッシブ：回避率を+10%する。"
+  },
+  "sk-sr-039": {
+    "name": "カウンター",
+    "rarity": "SR",
+    "nameTag": "カウンター",
+    "description": "直前に受けたダメージ×2で攻撃する。"
+  },
+  "sk-sr-042": {
+    "name": "最後の抵抗",
+    "rarity": "SR",
+    "nameTag": "ファイナル",
+    "description": "自分の末尾のスロットに「悪あがき(1で攻撃)」を3スロット追加する。"
+  },
+  "sk-sr-043": {
+    "name": "君臨",
+    "rarity": "SR",
+    "nameTag": "キング",
+    "description": "相手の末尾のスロットに「悪あがき(1で攻撃)」を3スロット追加する。"
+  },
+  "sk-sr-037": {
+    "name": "とどめの一撃",
+    "rarity": "SR",
+    "nameTag": "フィニッシャー",
+    "description": "10スロット目以降で発動したとき、99ダメージを与える。"
+  },
+  "sk-r-025": {
+    "name": "リフレイン",
+    "rarity": "R",
+    "nameTag": "リフレイン",
+    "description": "スロットを1つ戻す。自分は2ダメージを受ける。廃棄."
+  },
+  "sk-rp-043": {
+    "name": "鋼の体 (passive)",
+    "rarity": "R",
+    "nameTag": "タンク",
+    "description": "パッシブ：ダメージを受けるとき、ダメージを-1する。"
+  },
+  "sk-rp-045": {
+    "name": "食いしばり (passive)",
+    "rarity": "R",
+    "nameTag": "サバイバー",
+    "description": "ダメージを受けてHPが0になるとき、一度だけHP1で耐える。"
+  },
+  "sk-rp-044": {
+    "name": "煌めく舞踊 (passive)",
+    "rarity": "R",
+    "nameTag": "イリュージョン",
+    "description": "パッシブ：回避率を+10%する。"
+  },
+  "sk-np-001": {
+    "name": "軽やかな舞踊 (passive)",
+    "rarity": "N",
+    "description": "パッシブ：回避率を+5%する。"
+  },
+  "sk-rp-035": {
+    "name": "虹彩の鱗 (passive)",
+    "rarity": "R",
+    "nameTag": "プリズム",
+    "description": "パッシブ：4～9のダメージを受けるとき、それを50%にする。"
+  },
+  "sk-rp-036": {
+    "name": "光霧の鱗 (passive)",
+    "rarity": "SR",
+    "nameTag": "ミラージュ",
+    "description": "パッシブ：4～9のダメージを受けるとき、それを25%にする。"
+  },
+  "sk-n-029": {
+    "name": "エネルギーチャージ",
+    "rarity": "N",
+    "description": "自分のATK/DEF/SPDを+1する。"
+  },
+  "sk-sr-026": {
+    "name": "覚醒",
+    "rarity": "SR",
+    "nameTag": "アウェイクン",
+    "description": "自分のATK/DEF/SPDを+3する。"
+  },
+  "sk-ssr-022": {
+    "name": "限界突破",
+    "rarity": "SSR",
+    "nameTag": "リミットブレイク",
+    "description": "自分のATK/DEF/SPDを+4する。"
+  },
+  "sk-r-046": {
+    "name": "大気合",
+    "rarity": "R",
+    "nameTag": "ヒロイック",
+    "description": "自分のATK/DEF/SPDを+2する。"
+  },
+  "sk-n-030": {
+    "name": "痺れ",
+    "rarity": "N",
+    "description": "相手に麻痺[1]を付与する。"
+  },
+  "sk-r-067": {
+    "name": "暗夜",
+    "rarity": "R",
+    "nameTag": "ダーク",
+    "description": "自分のATK/DEF/SPDを-2する。"
+  },
+  "sk-sr-055": {
+    "name": "暗転",
+    "rarity": "SR",
+    "nameTag": "ヘクス",
+    "description": "自分のATK/DEF/SPDを-3する。"
+  },
+  "sk-ssr-023": {
+    "name": "皆既",
+    "rarity": "SSR",
+    "nameTag": "カタストロフ",
+    "description": "自分のATK/DEF/SPDを-4する。"
+  },
+  "sk-srp-023": {
+    "name": "守護者 (passive)",
+    "rarity": "SR",
+    "nameTag": "ガーディアン",
+    "description": "パッシブ：シールドの獲得量が2倍になる。"
+  },
+  "sk-np-002": {
+    "name": "幼虫の加護 (passive)",
+    "rarity": "N",
+    "description": "パッシブ：バトル最初にダメージを受けるとき、ダメージを75%にする。"
+  },
+  "sk-sr-022": {
+    "name": "鎧剥ぎ",
+    "rarity": "SR",
+    "nameTag": "アーマーブレイク",
+    "description": "相手のDEFを3奪う。"
+  },
+  "sk-sr-024": {
+    "name": "スワップ",
+    "rarity": "SR",
+    "nameTag": "スワップ",
+    "description": "自分と相手の現在HPを入れ替える。"
+  },
+  "sk-rp-016": {
+    "name": "瘴気 (passive)",
+    "rarity": "R",
+    "nameTag": "ポイズン",
+    "description": "パッシブ：瘴気[1]を得る。"
+  },
+  "sk-srp-015": {
+    "name": "反転の構え (passive)",
+    "rarity": "SR",
+    "nameTag": "インバート",
+    "description": "パッシブ：バトル最初のダメージを与えた後、自分のATKとDEFを入れ替える。"
+  },
+  "sk-sr-048": {
+    "name": "怒りの代償",
+    "rarity": "SR",
+    "nameTag": "リトリビューション",
+    "description": "自分と相手のATKの差分×2のダメージを与える。"
+  },
+  "sk-sr-058": {
+    "name": "命懸け",
+    "rarity": "SR",
+    "nameTag": "サクリファイス",
+    "description": "ATK×1.2で攻撃する。相手に麻痺[2]を付与する。"
+  },
+  "sk-ssr-012": {
+    "name": "極魂の一撃",
+    "rarity": "SSR",
+    "nameTag": "ソウル",
+    "description": "自分は現在HPの80%のダメージを受け、相手に同じだけダメージを与える。"
+  },
+  "sk-r-052": {
+    "name": "魔神斬り",
+    "rarity": "R",
+    "nameTag": "デモンスラッシュ",
+    "description": "ATK×2で攻撃する。65%で回避される。"
+  },
+  "sk-r-063": {
+    "name": "剣返し",
+    "rarity": "R",
+    "nameTag": "カウンターブレード",
+    "description": "相手のATK×0.9分のダメージを与える。"
+  },
+  "sk-r-064": {
+    "name": "盾返し",
+    "rarity": "R",
+    "nameTag": "カウンターシールド",
+    "description": "相手のDEF×0.8分のダメージを与える。"
+  },
+  "sk-r-068": {
+    "name": "疾風返し",
+    "rarity": "R",
+    "nameTag": "カウンターゲイル",
+    "description": "相手のSPD×0.7分のダメージを与える。"
+  },
+  "sk-sr-050": {
+    "name": "反転の刃",
+    "rarity": "SR",
+    "nameTag": "ミラーブレイド",
+    "description": "相手のATK/DEF高い方分のダメージを与える。"
+  },
+  "sk-ssr-028": {
+    "name": "真・反転の刃",
+    "rarity": "SSR",
+    "nameTag": "グランドミラー",
+    "description": "相手のATK/DEF高い方×1.3分のダメージを与える。"
+  },
+  "sk-sr-051": {
+    "name": "剛剣返し",
+    "rarity": "SR",
+    "nameTag": "レイジングブレード",
+    "description": "相手のATK×1.2分のダメージを与える。"
+  },
+  "sk-sr-052": {
+    "name": "剛盾返し",
+    "rarity": "SR",
+    "nameTag": "レイジングシールド",
+    "description": "相手のDEF×1.1分のダメージを与える。"
+  },
+  "sk-sr-054": {
+    "name": "烈風返し",
+    "rarity": "SR",
+    "nameTag": "レイジングゲイル",
+    "description": "相手のSPD分のダメージを与える。"
+  },
+  "sk-ssr-021": {
+    "name": "覇盾返し",
+    "rarity": "SSR",
+    "nameTag": "オーバーシールド",
+    "description": "相手のDEF×1.4分のダメージを与える。"
+  },
+  "sk-ssr-024": {
+    "name": "覇剣返し",
+    "rarity": "SSR",
+    "nameTag": "オーバーブレード",
+    "description": "相手のATK×1.5分のダメージを与える。"
+  },
+  "sk-ssr-025": {
+    "name": "神風返し",
+    "rarity": "SSR",
+    "nameTag": "オーバーゲイル",
+    "description": "相手のSPD×1.3分のダメージを与える。"
+  },
+  "sk-ssr-001": {
+    "name": "天変地異",
+    "rarity": "SSR",
+    "nameTag": "テンペスト",
+    "attackKind": "passthrough",
+    "description": "ATK×2で攻撃する。"
+  },
+  "sk-rp-002": {
+    "name": "再生 (passive)",
+    "rarity": "R",
+    "nameTag": "リジェネ",
+    "description": "パッシブ：自分の偶数スロットを使う前にHP+1する。"
+  },
+  "sk-srp-024": {
+    "name": "大再生 (passive)",
+    "rarity": "SR",
+    "nameTag": "ハイリジェネ",
+    "description": "パッシブ：自分の偶数スロットを使う前にHP+2する。"
+  },
+  "sk-sr-060": {
+    "name": "剛力奪い",
+    "rarity": "SR",
+    "nameTag": "ハイスナッチ",
+    "description": "相手のATKを3奪う。"
+  },
+  "sk-ssr-030": {
+    "name": "覇力奪い",
+    "rarity": "SSR",
+    "nameTag": "グランドスナッチ",
+    "description": "相手のATKを4奪う。"
+  },
+  "sk-r-070": {
+    "name": "鎧削り",
+    "rarity": "R",
+    "nameTag": "スクラッチ",
+    "description": "相手のDEFを2奪う。"
+  },
+  "sk-ssr-031": {
+    "name": "鎧剥奪",
+    "rarity": "SSR",
+    "nameTag": "グランドアーマーブレイク",
+    "description": "相手のDEFを4奪う。"
+  },
+  "sk-ssr-027": {
+    "name": "光速斬",
+    "rarity": "SSR",
+    "nameTag": "ライトニング",
+    "attackKind": "sword",
+    "description": "SPD×1.6で攻撃する。"
+  },
+  "sk-ssr-026": {
+    "name": "真・ガードバースト",
+    "rarity": "SSR",
+    "nameTag": "グランドバースト",
+    "attackKind": "strike",
+    "description": "DEF×1.8で攻撃する。"
+  },
+  "sk-sr-033": {
+    "name": "鎧変換",
+    "rarity": "R",
+    "nameTag": "メタモル",
+    "description": "自分のATKとDEFを入れ替える。"
+  },
+  "sk-sr-059": {
+    "name": "ハエたたき",
+    "rarity": "SR",
+    "nameTag": "スワッター",
+    "description": "ATKで攻撃する。回避された場合、相手のSPD分のダメージを与える。"
+  },
+  "sk-ssr-029": {
+    "name": "ハエたたき・極",
+    "rarity": "SSR",
+    "nameTag": "グランドスワッター",
+    "description": "ATKで攻撃する。回避された場合、相手のSPD×1.5分のダメージを与える。"
+  },
+  "sk-rp-015": {
+    "name": "末期の輝き (passive)",
+    "rarity": "R",
+    "nameTag": "テイル",
+    "description": "パッシブ：残りスロット2以下でダメージを与えるとき、ダメージを+2する。"
+  },
+  "sk-srp-025": {
+    "name": "断末魔の輝き (passive)",
+    "rarity": "SR",
+    "nameTag": "ハイテイル",
+    "description": "パッシブ：残りスロット2以下でダメージを与えるとき、ダメージを+3する。"
+  },
+  "sk-ssrp-011": {
+    "name": "終焉の輝き (passive)",
+    "rarity": "SSR",
+    "nameTag": "グランドテイル",
+    "description": "パッシブ：残りスロット2以下でダメージを与えるとき、ダメージを+4する。"
+  },
+  "sk-rp-022": {
+    "name": "攻防転換 (passive)",
+    "rarity": "SR",
+    "nameTag": "リバース",
+    "description": "パッシブ：バトル開始時、自分のATKとDEFを入れ替える。"
+  },
+  "sk-rp-026": {
+    "name": "駿足 (passive)",
+    "rarity": "R",
+    "nameTag": "スプリンター",
+    "description": "パッシブ：バトル開始時、先攻後攻判定のダイスの出目に+2する。"
+  },
+  "sk-srp-022": {
+    "name": "スロースターター (passive)",
+    "rarity": "SR",
+    "nameTag": "スロー",
+    "description": "パッシブ：ダメージを与えるとき、自分の3スロット目までダメージを-2、自分の4スロット目以降ダメージを+4する。"
+  },
+  "sk-ssrp-010": {
+    "name": "絶対零度 (passive)",
+    "rarity": "SSR",
+    "nameTag": "ブリザード",
+    "description": "パッシブ：相手は回避ができなくなる。自分のすべての攻撃が相手のDEFを無視する。自分のSPDが0に固定される。自分のATKを-2する。"
+  },
+  "sk-r-065": {
+    "name": "格上狩り",
+    "rarity": "R",
+    "nameTag": "ジャイアントキラー",
+    "description": "相手のATKが自分より高ければATK×1.5、そうでなければATKで攻撃する。"
+  },
+  "sk-sr-019": {
+    "name": "浄化",
+    "rarity": "SR",
+    "nameTag": "クレンズ",
+    "description": "相手の能力上昇を解除する。"
+  },
+  "sk-r-048": {
+    "name": "盾割り",
+    "rarity": "R",
+    "nameTag": "シールドブレイク",
+    "description": "相手のシールドを解除する。"
+  },
+  "sk-sr-028": {
+    "name": "死刑宣告",
+    "rarity": "SR",
+    "nameTag": "エクスキューショナー",
+    "description": "相手のHPが6以下なら即死ダメージを与える。必中。"
+  },
+  "sk-rp-008": {
+    "name": "弱者狩り (passive)",
+    "rarity": "R",
+    "nameTag": "ハンター",
+    "description": "パッシブ：ダメージを与えるとき、相手のHPが50%以下の場合、ダメージを+3する。"
+  },
+  "sk-sr-040": {
+    "name": "諸行無常の刃",
+    "rarity": "SR",
+    "nameTag": "ゼロ",
+    "description": "ATK×0.8で攻撃し、相手の能力上昇を解除する。"
+  },
+  "sk-sr-041": {
+    "name": "明鏡止水の刃",
+    "rarity": "SR",
+    "nameTag": "クリアー",
+    "description": "ATK×0.8で攻撃し、自分の能力低下を解除する。"
+  },
+  "sk-rp-033": {
+    "name": "棘返し (passive)",
+    "rarity": "R",
+    "nameTag": "カウンター",
+    "description": "パッシブ：ダメージを受けたとき、受けたダメージの25%を反射する。"
+  },
+  "sk-r-069": {
+    "name": "麻痺打ち",
+    "rarity": "R",
+    "nameTag": "スタン",
+    "description": "ATK×0.8で攻撃する。相手に麻痺[1]を付与する。"
+  },
+  "sk-r-066": {
+    "name": "守り崩し",
+    "rarity": "R",
+    "nameTag": "ウォールブレイク",
+    "description": "相手のDEFが自分より高ければATK×1.5、そうでなければATKで攻撃する。"
+  },
+  "sk-sr-049": {
+    "name": "防壁崩し",
+    "rarity": "SR",
+    "nameTag": "フォートレスブレイク",
+    "description": "相手のDEFが自分より高ければATK×1.8、そうでなければATKで攻撃する。"
+  },
+  "sk-sr-053": {
+    "name": "大物狩り",
+    "rarity": "SR",
+    "nameTag": "ジャイアント",
+    "description": "相手のATKが自分より高ければATK×1.8、そうでなければATKで攻撃する。"
+  },
+  "sk-n-031": {
+    "name": "翳り",
+    "rarity": "N",
+    "description": "自分のATK/DEF/SPDを-1する。"
+  }
+}

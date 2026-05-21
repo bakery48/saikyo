@@ -1,1 +1,137 @@
-{}
+{
+  "ev-002": {
+    "description": "全員のSPDを+4する。"
+  },
+  "ev-003": {
+    "description": "全員のATKを+4する。"
+  },
+  "ev-004": {
+    "description": "全員のDEFを+4する。"
+  },
+  "ev-028": {
+    "description": "全員のDEFを-4する。"
+  },
+  "ev-019": {
+    "description": "最もHPが低いプレイヤーのHPを+18する。"
+  },
+  "ev-005": {
+    "description": "全員のHPを+24する。"
+  },
+  "ev-n01": {
+    "description": "全員のATKを-4する。"
+  },
+  "ev-n02": {
+    "description": "全員のSPDを-4する。"
+  },
+  "ev-n03": {
+    "description": "全員のHPを-24する。"
+  },
+  "ev-s01": {
+    "description": "全員のATKとDEFが入れ替わる。"
+  },
+  "ev-s02": {
+    "description": "全員のATKとSPDが入れ替わる。"
+  },
+  "ev-s03": {
+    "description": "全員のDEFとDEFが入れ替わる。"
+  },
+  "ev-031": {
+    "description": "全員のHPが同じになる。"
+  },
+  "ev-a01": {
+    "description": "全員のATKが同じになる。"
+  },
+  "ev-a02": {
+    "description": "全員のDEFが同じになる。"
+  },
+  "ev-a03": {
+    "description": "全員のSPDが同じになる。"
+  },
+  "ev-034": {
+    "description": "全員アクションカードを1枚引く。"
+  },
+  "ev-035": {
+    "description": "全員のHP/ATK/DEF/SPDを-2する。"
+  },
+  "ev-w01": {
+    "description": "全員のHP/ATK/DEF/SPDを+2する。"
+  },
+  "ev-030": {
+    "description": "全員のスロット順がシャッフルされる。"
+  },
+  "ev-011": {
+    "description": "誰かのSPDを+2する。"
+  },
+  "ev-013": {
+    "description": "最もATKが低いプレイヤーのATKを+2する。"
+  },
+  "ev-018": {
+    "description": "最もDEFが低いプレイヤーのDEFを+2する。"
+  },
+  "ev-l01": {
+    "description": "最もSPDが低いプレイヤーのSPDを+2する。"
+  },
+  "ev-l02": {
+    "description": "最もHPが低いプレイヤーのHPを-6する。"
+  },
+  "ev-h03": {
+    "description": "最もATKが高いプレイヤーのATKを+1する。"
+  },
+  "ev-h05": {
+    "description": "最もDEFが高いプレイヤーのDEFを+1する。"
+  },
+  "ev-h07": {
+    "description": "最もSPDが高いプレイヤーのSPDを+1する。"
+  },
+  "ev-009": {
+    "description": "誰かはスキル山札からカードを1枚引く。"
+  },
+  "ev-033": {
+    "description": "全員スキル山札からカードを1枚引く。"
+  },
+  "ev-025": {
+    "description": "次のバトルは全員スキルスロット順が逆順になる。"
+  },
+  "ev-l03": {
+    "description": "最もATKが低いプレイヤーのATKを-1する。"
+  },
+  "ev-l04": {
+    "description": "最もDEFが低いプレイヤーのDEFを-1する。"
+  },
+  "ev-l05": {
+    "description": "最もSPDが低いプレイヤーのSPDを-1する。"
+  },
+  "ev-h04": {
+    "description": "最もATKが高いプレイヤーのATKを-2する。"
+  },
+  "ev-h06": {
+    "description": "最もDEFが高いプレイヤーのDEFを-2する。"
+  },
+  "ev-h08": {
+    "description": "最もSPDが高いプレイヤーのSPDを-2する。"
+  },
+  "ev-p01": {
+    "description": "全員がストックからスキルカードがランダムに2枚ずつ回収され、シャッフルして全員に2枚ずつ再配布する。"
+  },
+  "ev-c01": {
+    "description": "全員のストックが捨てられる。"
+  },
+  "ev-r01": {
+    "description": "誰かのATKを+2する。"
+  },
+  "ev-r02": {
+    "description": "誰かのDEFを+2する。"
+  },
+  "ev-h01": {
+    "description": "最もHPが高いプレイヤーのHPを-6する。"
+  },
+  "ev-h02": {
+    "description": "最もHPが高いプレイヤーのHPを-12する。"
+  },
+  "ev-r03": {
+    "description": "誰かのHPを+12する。"
+  },
+  "ev-032": {
+    "description": "全員の手札のアクションカードからランダムに1枚ずつ捨てられる。"
+  }
+}

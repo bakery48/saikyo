@@ -1,1 +1,71 @@
-{}
+{
+  "sentinel-p1": {
+    "description": "自分が最後のスロットを発動後、幽霊シールド[99]を得る。"
+  },
+  "phoenix-p1": {
+    "description": "ダメージを受けてHPが0になるとき、一度だけ最大HPの25%で耐える。"
+  },
+  "berserker-p1": {
+    "description": "ダメージを受けたとき、自分のATKを+1する。"
+  },
+  "wizard-p1": {
+    "description": "相手にダメージを与えたとき、相手のDEFを-1する。"
+  },
+  "scarab-p1": {
+    "description": "バトルで最初に受けるダメージを0にする。"
+  },
+  "dragon-p1": {
+    "description": "4～9のダメージを受けるとき、ダメージを0にする。"
+  },
+  "goblin-p1": {
+    "description": "攻撃で2以下のダメージを与えたとき、追加で3ダメージを与える。"
+  },
+  "griffon-p1": {
+    "description": "相手のシールドの影響を受けない。"
+  },
+  "bug-p1": {
+    "description": "自分がスロットを発動した後、自分のHPを-3、ATKを-2、DEFを-2、SPDを-2する。"
+  },
+  "golem-p1": {
+    "description": "ダメージを受けるとき、ダメージを-2する。"
+  },
+  "elf-p1": {
+    "description": "回避率を+20%する。"
+  },
+  "slime-p1": {
+    "description": "バトル開始時、自分のATKとDEFの高い方を×1.5する。"
+  },
+  "vampire-p1": {
+    "description": "ダメージを与えたとき、与えたダメージの50%を回復する。"
+  },
+  "demon-p1": {
+    "description": "バトルでの最初の自分の攻撃はダメージが2倍になる。"
+  },
+  "unicorn-p1": {
+    "description": "自分のスロット発動直前にHPを+2する。"
+  },
+  "fenrir-p1": {
+    "description": "バトル開始時、先攻後攻判定のダイスの出目に+3する。"
+  },
+  "wyvern-p1": {
+    "description": "バトルでの最初の自分の攻撃は相手のDEFを無視する。"
+  },
+  "ouroboros-p1": {
+    "description": "自分が攻撃した後に、ATKを+1する。"
+  },
+  "cerberus-p1": {
+    "description": "相手にダメージを与えたとき、10%の確率で同じスキルを発動する。"
+  },
+  "carbuncle-p1": {
+    "description": "ダメージを受けるとき、ダメージの33%を相手に反射する。"
+  },
+  "knight-p1": {
+    "description": "自分のHPが50%以下のとき、ATKを×2する。"
+  },
+  "fairy-p1": {
+    "description": "回避率を+20%する。"
+  },
+  "ghost-p1": {
+    "description": "自分の最後のスロットを発動後、幽霊シールド[99]を得る。"
+  }
+}

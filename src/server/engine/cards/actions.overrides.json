@@ -1,1 +1,20 @@
-{}
+{
+  "ac-atk2": {
+    "description": "自分のATKを+2する。"
+  },
+  "ac-def2": {
+    "description": "自分のDEFを+2する。"
+  },
+  "ac-spd2": {
+    "description": "自分のSPDを+2する。"
+  },
+  "ac-hp3": {
+    "description": "自分のHPを+12する。"
+  },
+  "ac-choice2": {
+    "description": "自分のATK/DEF/SPDから選んで+1する。"
+  },
+  "ac-bug": {
+    "description": "自分のモンスターに変化が起こる。"
+  }
+}
