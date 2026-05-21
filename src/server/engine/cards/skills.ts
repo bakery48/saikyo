@@ -59,7 +59,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-068', name: '疾風返し', rarity: 'R', nameTag: 'ウィンド', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 0.7 } } },
   { id: 'sk-r-065', name: '格上狩り', rarity: 'R', nameTag: 'ジャイアントキラー', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'atk', multIf: 1.5, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-r-066', name: '守り崩し', rarity: 'R', nameTag: 'ウォールブレイク', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'def', multIf: 1.5, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
-  { id: 'sk-sr-048', name: '怒りの代償', rarity: 'SR', nameTag: 'リトリビューション', active: { effect: { kind: 'stat_diff_damage', stat: 'atk', mult: 2.0 } } },
+  { id: 'sk-sr-048', name: '怒りの代償', rarity: 'SR', nameTag: 'パニッシュメント', active: { effect: { kind: 'stat_diff_damage', stat: 'atk', mult: 2.0 } } },
   { id: 'sk-sr-049', name: '防壁崩し', rarity: 'SR', nameTag: 'フォートレスブレイク', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'def', multIf: 1.8, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-050', name: '反転の刃', rarity: 'SR', nameTag: 'ミラーブレイド', active: { effect: { kind: 'target_higher_stat_attack', mult: 1.0, attackKind: 'sword' } } },
   { id: 'sk-ssr-028', name: '真・反転の刃', rarity: 'SSR', nameTag: 'グランドミラー', active: { effect: { kind: 'target_higher_stat_attack', mult: 1.3, attackKind: 'sword' } } },
@@ -83,11 +83,11 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-007', name: '鋼鉄の肉体', rarity: 'SR', nameTag: 'スチール', active: { effect: { kind: 'buff_self', stat: 'def', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-008', name: '大海の波濤', rarity: 'SR', nameTag: 'オーシャン', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-009', name: '威圧の咆哮', rarity: 'SR', nameTag: 'デモン', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 6, duration: 'battle' } } },
-  { id: 'sk-sr-010', name: '一挙集中', rarity: 'SR', nameTag: 'オーバードライブ', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
+  { id: 'sk-sr-010', name: '一挙集中', rarity: 'SR', nameTag: 'プロミネンス', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
   { id: 'sk-sr-012', name: '装甲の粉砕', rarity: 'SR', nameTag: 'クラッシャー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-018', name: '時空の束縛', rarity: 'SR', nameTag: 'タイムストップ', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-020', name: '豪鬼咆哮', rarity: 'SR', nameTag: 'ストロング', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 9, duration: 'once' } } },
-  { id: 'sk-sr-035', name: '絶対防壁', rarity: 'SR', nameTag: 'バリア', active: { effect: { kind: 'buff_self', stat: 'def', amount: 9, duration: 'once' } } },
+  { id: 'sk-sr-035', name: '絶対防御', rarity: 'SR', nameTag: 'サンクチュアリ', active: { effect: { kind: 'buff_self', stat: 'def', amount: 9, duration: 'once' } } },
   { id: 'sk-sr-013', name: '一時停止', rarity: 'SR', nameTag: 'ポーズ', active: { effect: { kind: 'pause_opponent', stacks: 1 } } },
   // ─── 麻痺系 ────────────────────────────────────────────────────────────────
   { id: 'sk-n-030', name: '電撃', rarity: 'N', nameTag: '電撃', active: { effect: { kind: 'pause_opponent', stacks: 1 } } },
@@ -555,9 +555,9 @@ export const SKILLS: SkillCard[] = [
   // ── batch 4: misc thematic cards ────────────────────────────────────────
   {
     id: 'sk-r-049',
-    name: '捨て身攻撃',
+    name: '捨て身の一撃',
     rarity: 'R',
-    nameTag: 'リックレス',
+    nameTag: 'デス',
     active: { effect: { kind: 'reckless_attack', mult: 2.0, useStat: 'atk', attackKind: 'strike' } },
   },
   {
@@ -607,7 +607,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-sr-037',
     name: 'とどめの一撃',
     rarity: 'SR',
-    nameTag: 'フィニッシャー',
+    nameTag: 'ビクトリー',
     active: { effect: { kind: 'coup_de_grace', threshold: 10, amount: 99, attackKind: 'passthrough' } },
   },
   {
@@ -718,9 +718,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-srp-026',
-    name: '幽霊の鎧 (passive)',
+    name: '幽玄の鎧 (passive)',
     rarity: 'SR',
-    nameTag: 'ゴーストアーマー',
+    nameTag: 'ブラック',
     isPassive: true,
     passive: {
       trigger: { kind: 'battle_start' },
@@ -751,9 +751,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-rp-017',
-    name: '逆鱗 (passive)',
+    name: '天罰 (passive)',
     rarity: 'R',
-    nameTag: 'リベンジ',
+    nameTag: 'ネメシス',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_take_damage' },
@@ -764,7 +764,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-rp-018',
     name: '反撃の舞 (passive)',
     rarity: 'R',
-    nameTag: 'カウンタダンス',
+    nameTag: 'リベリオン',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_take_damage' },
@@ -927,9 +927,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-rp-035',
-    name: '虹彩の鱗 (passive)',
+    name: '純白の鱗 (passive)',
     rarity: 'R',
-    nameTag: 'プリズム',
+    nameTag: 'ホワイト',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_take_damage' },
