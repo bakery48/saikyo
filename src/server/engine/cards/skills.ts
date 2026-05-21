@@ -139,7 +139,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-rp-045',
     name: '食いしばり (passive)',
     rarity: 'R',
-    nameTag: 'サバイバー',
+    nameTag: 'ミラクル',
     isPassive: true,
     passive: { trigger: { kind: 'on_take_damage' }, effect: { kind: 'endure_fatal' } },
   },
