@@ -224,7 +224,7 @@ export const MONSTERS: MonsterBase[] = [
   },
   {
     baseId: 'wizard',
-    name: 'ウィザード',
+    name: 'マジシャン',
     attackKind: 'magic',
     stats: { hp: 32, atk: 3, def: 5, spd: 5 },
     passives: [

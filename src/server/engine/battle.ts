@@ -1028,7 +1028,7 @@ function runExtraAttacks(
   }
 }
 
-/** ウィザード hex_def: each successful hit shaves DEF off the target permanently (battle-only). */
+/** マジシャン hex_def: each successful hit shaves DEF off the target permanently (battle-only). */
 function applyHexDef(
   attacker: CombatStats,
   attackerPassives: PassiveSkill[],
