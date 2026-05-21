@@ -29,7 +29,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-054', name: 'オーラ', rarity: 'R', nameTag: 'オーラ', active: { effect: { kind: 'threshold_shield', threshold: 3 } } },
   { id: 'sk-r-005', name: '気力解放', rarity: 'R', nameTag: 'レイジ', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'once' } } },
   { id: 'sk-r-006', name: '岩石防御', rarity: 'R', nameTag: 'ロックアーマー', active: { effect: { kind: 'buff_self', stat: 'def', amount: 6, duration: 'once' } } },
-  { id: 'sk-r-007', name: '光速', rarity: 'R', nameTag: 'ブースター', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 4, duration: 'battle' } } },
+  { id: 'sk-r-007', name: '光速', rarity: 'R', nameTag: 'スカイ', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-008', name: '威圧', rarity: 'R', nameTag: 'タイラント', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-009', name: '剥離', rarity: 'R', nameTag: 'ブレイカー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-010', name: '氷の束縛', rarity: 'R', nameTag: 'アイス', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 4, duration: 'battle' } } },
@@ -56,7 +56,7 @@ export const SKILLS: SkillCard[] = [
   // ─── 相手ステータス参照（カウンターメタ） ──────────────────────────────────
   { id: 'sk-r-063', name: '剣返し', rarity: 'R', nameTag: 'カウンターブレード', active: { effect: { kind: 'target_stat_damage', stat: 'atk', mult: 0.9 } } },
   { id: 'sk-r-064', name: '盾返し', rarity: 'R', nameTag: 'カウンターシールド', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 0.8 } } },
-  { id: 'sk-r-068', name: '疾風返し', rarity: 'R', nameTag: 'カウンターゲイル', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 0.7 } } },
+  { id: 'sk-r-068', name: '疾風返し', rarity: 'R', nameTag: 'ウィンド', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 0.7 } } },
   { id: 'sk-r-065', name: '格上狩り', rarity: 'R', nameTag: 'ジャイアントキラー', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'atk', multIf: 1.5, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-r-066', name: '守り崩し', rarity: 'R', nameTag: 'ウォールブレイク', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'def', multIf: 1.5, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-048', name: '怒りの代償', rarity: 'SR', nameTag: 'リトリビューション', active: { effect: { kind: 'stat_diff_damage', stat: 'atk', mult: 2.0 } } },
@@ -66,10 +66,10 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-051', name: '剛剣返し', rarity: 'SR', nameTag: 'レイジングブレード', active: { effect: { kind: 'target_stat_damage', stat: 'atk', mult: 1.2 } } },
   { id: 'sk-sr-052', name: '剛盾返し', rarity: 'SR', nameTag: 'レイジングシールド', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 1.1 } } },
   { id: 'sk-sr-053', name: '大物狩り', rarity: 'SR', nameTag: 'タイタンキラー', active: { effect: { kind: 'conditional_attack_if_target_higher', stat: 'atk', multIf: 1.8, multElse: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
-  { id: 'sk-sr-054', name: '烈風返し', rarity: 'SR', nameTag: 'レイジングゲイル', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 1.0 } } },
+  { id: 'sk-sr-054', name: '烈風返し', rarity: 'SR', nameTag: 'トルネード', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 1.0 } } },
   { id: 'sk-ssr-021', name: '覇盾返し', rarity: 'SSR', nameTag: 'オーバーシールド', active: { effect: { kind: 'target_stat_damage', stat: 'def', mult: 1.4 } } },
   { id: 'sk-ssr-024', name: '覇剣返し', rarity: 'SSR', nameTag: 'オーバーブレード', active: { effect: { kind: 'target_stat_damage', stat: 'atk', mult: 1.5 } } },
-  { id: 'sk-ssr-025', name: '神風返し', rarity: 'SSR', nameTag: 'オーバーゲイル', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 1.3 } } },
+  { id: 'sk-ssr-025', name: '神風返し', rarity: 'SSR', nameTag: 'テンペスト', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 1.3 } } },
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
   { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'スレイヤー', active: { effect: { kind: 'attack', mult: 1.6, useStat: 'atk', attackKind: 'passthrough' } } },
@@ -81,7 +81,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-047', name: '鎧砕き', rarity: 'SR', nameTag: 'アーマークラッシャー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.2, multShield: 3.0, attackKind: 'strike' } } },
   { id: 'sk-sr-006', name: '剛力の解放', rarity: 'SR', nameTag: 'グレイト', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-007', name: '鋼鉄の肉体', rarity: 'SR', nameTag: 'スチール', active: { effect: { kind: 'buff_self', stat: 'def', amount: 6, duration: 'battle' } } },
-  { id: 'sk-sr-008', name: '神速の波動', rarity: 'SR', nameTag: 'ゴッドスピード', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 6, duration: 'battle' } } },
+  { id: 'sk-sr-008', name: '大海の波濤', rarity: 'SR', nameTag: 'オーシャン', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-009', name: '威圧の咆哮', rarity: 'SR', nameTag: 'デモン', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 6, duration: 'battle' } } },
   { id: 'sk-sr-010', name: '一挙集中', rarity: 'SR', nameTag: 'オーバードライブ', active: { effect: { kind: 'next_amp', mult: 2.0 } } },
   { id: 'sk-sr-012', name: '装甲の粉砕', rarity: 'SR', nameTag: 'クラッシャー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 6, duration: 'battle' } } },
@@ -91,7 +91,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-013', name: '一時停止', rarity: 'SR', nameTag: 'ポーズ', active: { effect: { kind: 'pause_opponent', stacks: 1 } } },
   // ─── 麻痺系 ────────────────────────────────────────────────────────────────
   { id: 'sk-n-030', name: '電撃', rarity: 'N', nameTag: '電撃', active: { effect: { kind: 'pause_opponent', stacks: 1 } } },
-  { id: 'sk-r-069', name: '麻痺打ち', rarity: 'R', nameTag: 'スタン', active: { effect: { kind: 'attack_and_paralyze', mult: 0.8, useStat: 'atk', attackKind: 'passthrough', stacks: 1 } } },
+  { id: 'sk-r-069', name: '麻痺打ち', rarity: 'R', nameTag: 'ライトニング', active: { effect: { kind: 'attack_and_paralyze', mult: 0.8, useStat: 'atk', attackKind: 'passthrough', stacks: 1 } } },
   { id: 'sk-r-070', name: '強電撃', rarity: 'R', nameTag: 'サンダー', active: { effect: { kind: 'pause_opponent', stacks: 2 } } },
   { id: 'sk-sr-058', name: '雷鳴撃', rarity: 'SR', nameTag: 'サンダーストライク', active: { effect: { kind: 'attack_and_paralyze', mult: 1.2, useStat: 'atk', attackKind: 'passthrough', stacks: 2 } } },
   { id: 'sk-ssr-029', name: '時の枷', rarity: 'SSR', nameTag: 'テンポラルチェーン', active: { effect: { kind: 'pause_opponent', stacks: 3 } } },
@@ -106,7 +106,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッド', active: { effect: { kind: 'reflect_shield', amount: 10 } } },
   { id: 'sk-ssr-019', name: 'マキシマム・オーラ', rarity: 'SSR', nameTag: 'マキシマム', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.5, threshold: 7 } } },
   { id: 'sk-ssr-020', name: '絶壁砕き', rarity: 'SSR', nameTag: 'ウォールブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.5, multShield: 4.0, attackKind: 'strike' } } },
-  { id: 'sk-ssr-004', name: '集中砲火', rarity: 'SSR', nameTag: 'クロノス', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
+  { id: 'sk-ssr-004', name: '大噴火', rarity: 'SSR', nameTag: 'ボルケーノ', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
   { id: 'sk-ssr-005', name: '三重起動', rarity: 'SSR', nameTag: 'トリプル', active: { effect: { kind: 'next_multi_attack', extraCount: 2, failurePenalty: 6 } } },
   { id: 'sk-ssr-007', name: '無限回帰', rarity: 'SSR', nameTag: 'インフィニティ', active: { effect: { kind: 'rewind_skill', rewindBy: 3, selfDamagePercent: 40 } } },
 
@@ -213,7 +213,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-ssr-030',
     name: '覇力奪い',
     rarity: 'SSR',
-    nameTag: 'グランドスナッチ',
+    nameTag: 'グランド',
     active: { effect: { kind: 'steal_stat', stat: 'atk', amount: 4 } },
   },
   {
@@ -283,7 +283,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-r-067',
     name: '黒霧',
     rarity: 'R',
-    nameTag: 'ウィークン',
+    nameTag: 'ディザスター',
     active: { effect: { kind: 'debuff_all', amount: 2 } },
   },
   {
