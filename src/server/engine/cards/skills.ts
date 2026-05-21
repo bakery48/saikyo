@@ -32,7 +32,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-007', name: '光速', rarity: 'R', nameTag: 'ブースター', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-008', name: '威圧', rarity: 'R', nameTag: 'タイラント', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-009', name: '剥離', rarity: 'R', nameTag: 'ブレイカー', active: { effect: { kind: 'debuff_target', stat: 'def', amount: 4, duration: 'battle' } } },
-  { id: 'sk-r-010', name: '束縛', rarity: 'R', nameTag: 'フリーザー', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 4, duration: 'battle' } } },
+  { id: 'sk-r-010', name: '氷の束縛', rarity: 'R', nameTag: 'アイス', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-029', name: '闘気', rarity: 'R', nameTag: 'フォース', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-012', name: '見切り', rarity: 'SR', nameTag: 'ウィザード', active: { effect: { kind: 'nullify_next' } } },
   { id: 'sk-r-015', name: '癒しの一滴', rarity: 'R', nameTag: 'リトル', active: { effect: { kind: 'heal', amount: 5 } } },
@@ -410,14 +410,14 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-r-044',
     name: '怒火',
     rarity: 'R',
-    nameTag: 'フューリー',
+    nameTag: 'ファイア',
     active: { effect: { kind: 'hp_to_atk', divisor: 3 } },
   },
   {
     id: 'sk-r-046',
-    name: '大気合',
+    name: '元素の覚醒',
     rarity: 'R',
-    nameTag: 'ヒロイック',
+    nameTag: 'エレメンタル',
     active: { effect: { kind: 'buff_self_all', amount: 2, duration: 'battle' } },
   },
   {
@@ -650,9 +650,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-sr-041',
-    name: '明鏡止水の刃',
+    name: '明鏡止水',
     rarity: 'SR',
-    nameTag: 'クリアマインド',
+    nameTag: 'ウォーター',
     active: { effect: { kind: 'attack_then_cleanse', mult: 0.8, useStat: 'atk', flat: 0, attackKind: 'sword' } },
   },
   // ── batch 6: append-struggle pair ───────────────────────────────────────
@@ -742,7 +742,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-rp-016',
     name: '蝕む炎 (passive)',
     rarity: 'R',
-    nameTag: 'スコーチ',
+    nameTag: 'バーニング',
     isPassive: true,
     passive: {
       trigger: { kind: 'on_own_turn_start' },
@@ -1026,9 +1026,9 @@ export const SKILLS: SkillCard[] = [
   // SR passives
   {
     id: 'sk-srp-015',
-    name: '反転の構え (passive)',
+    name: '混沌の構え (passive)',
     rarity: 'SR',
-    nameTag: 'インバート',
+    nameTag: 'カオス',
     isPassive: true,
     passive: {
       trigger: { kind: 'first_attack' },
