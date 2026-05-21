@@ -394,9 +394,9 @@ export const SKILLS: SkillCard[] = [
   },
   {
     id: 'sk-r-042',
-    name: '集中連撃',
+    name: '嵐の連撃',
     rarity: 'SR',
-    nameTag: 'ラピッド',
+    nameTag: 'ストーム',
     active: { effect: { kind: 'multi_hit_attack', mult: 0.8, useStat: 'atk', hitCount: 3, attackKind: 'strike' } },
   },
   {
