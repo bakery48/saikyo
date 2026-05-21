@@ -255,7 +255,7 @@ export const SKILLS: SkillCard[] = [
     id: 'sk-sr-021',
     name: '吸命波',
     rarity: 'SR',
-    nameTag: 'ライフドレイン',
+    nameTag: 'タブー',
     active: { effect: { kind: 'drain_hp', amount: 3 } },
   },
   {
