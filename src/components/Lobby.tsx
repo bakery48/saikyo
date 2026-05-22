@@ -1,14 +1,49 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { GameSocket } from '../lib/useGameSocket';
+
+const SETTINGS_KEY = 'saikyo-lobby-settings';
+
+function loadSettings() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSettings(s: { totalRounds: number; miniRoundsPerRound: number; eventCardCount: number }) {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  } catch {}
+}
 
 export function Lobby({ socket }: { socket: GameSocket }) {
   const [name, setName] = useState('Player');
   const [joinId, setJoinId] = useState('');
   const [totalRounds, setTotalRounds] = useState(3);
   const [miniRoundsPerRound, setMiniRoundsPerRound] = useState(3);
+  const [eventCardCount, setEventCardCount] = useState(1);
   const trimmed = name.trim();
+
+  useEffect(() => {
+    const s = loadSettings();
+    if (!s) return;
+    if (s.totalRounds) setTotalRounds(s.totalRounds);
+    if (s.miniRoundsPerRound) setMiniRoundsPerRound(s.miniRoundsPerRound);
+    if (s.eventCardCount) setEventCardCount(s.eventCardCount);
+  }, []);
+
+  function handleChange(setter: (v: number) => void, key: string) {
+    return (v: number) => {
+      setter(v);
+      const current = loadSettings() ?? {};
+      saveSettings({ totalRounds, miniRoundsPerRound, eventCardCount, ...current, [key]: v });
+    };
+  }
 
   return (
     <section style={{ display: 'grid', gap: 16, maxWidth: 640 }}>
@@ -40,12 +75,17 @@ export function Lobby({ socket }: { socket: GameSocket }) {
         <SliderRow
           label="ラウンド数"
           value={totalRounds}
-          onChange={setTotalRounds}
+          onChange={handleChange(setTotalRounds, 'totalRounds')}
         />
         <SliderRow
           label="ミニラウンド数 (I・A・D / round)"
           value={miniRoundsPerRound}
-          onChange={setMiniRoundsPerRound}
+          onChange={handleChange(setMiniRoundsPerRound, 'miniRoundsPerRound')}
+        />
+        <SliderRow
+          label="イベントカード枚数（倍率）"
+          value={eventCardCount}
+          onChange={handleChange(setEventCardCount, 'eventCardCount')}
         />
       </fieldset>
 
@@ -57,6 +97,7 @@ export function Lobby({ socket }: { socket: GameSocket }) {
               playerName: trimmed || 'Player',
               totalRounds,
               miniRoundsPerRound,
+              eventCardCount,
             })
           }
           disabled={!socket.connected}

@@ -122,6 +122,7 @@ export class GameWsServer {
           {
             totalRounds: msg.totalRounds,
             miniRoundsPerRound: msg.miniRoundsPerRound,
+            eventCardCount: msg.eventCardCount,
           },
         );
         this.send(ws, { type: 'room_state', room: this.roomManager.toRoomView(room) });
@@ -132,6 +133,7 @@ export class GameWsServer {
         const room = this.roomManager.setSettings(playerId, {
           totalRounds: msg.totalRounds,
           miniRoundsPerRound: msg.miniRoundsPerRound,
+          eventCardCount: msg.eventCardCount,
           skillCardCounts: msg.skillCardCounts,
         });
         this.broadcastRoomState(room.id);
@@ -287,6 +289,7 @@ export class GameWsServer {
       yieldForAnimation: true,
       totalRounds: room.totalRounds,
       miniRoundsPerRound: room.miniRoundsPerRound,
+      eventCardCount: room.eventCardCount,
       skillCardCounts: room.skillCardCounts,
     });
     this.games.set(room.id, game);

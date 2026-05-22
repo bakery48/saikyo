@@ -41,6 +41,8 @@ export type RoomView = {
   miniRoundsPerRound: number;
   /** Per-card skill deck counts (cardId -> 0|1|2|3). Missing entries use rarity defaults. */
   skillCardCounts: Record<string, number>;
+  /** Event deck size multiplier (1-3). */
+  eventCardCount: number;
 };
 
 /** Compact view used in the lobby's room list. */
@@ -134,6 +136,7 @@ export type ClientMessage =
       playerName: string;
       totalRounds?: number;
       miniRoundsPerRound?: number;
+      eventCardCount?: number;
     }
   | { type: 'join_room'; roomId: string; playerName: string }
   /** Reconnect handshake: try to reclaim a seat held during the grace period. */
@@ -146,6 +149,7 @@ export type ClientMessage =
       type: 'set_room_settings';
       totalRounds?: number;
       miniRoundsPerRound?: number;
+      eventCardCount?: number;
       skillCardCounts?: Record<string, number>;
     }
   | { type: 'submit_pick'; baseId: string }

@@ -87,6 +87,7 @@ export class GameRunner {
     yieldForAnimation?: boolean;
     totalRounds?: number;
     miniRoundsPerRound?: number;
+    eventCardCount?: number;
     skillCardCounts?: Record<string, number>;
   }) {
     this.seed = opts.seed;
@@ -96,6 +97,7 @@ export class GameRunner {
       players: opts.humans.map((h) => ({ id: h.id, name: h.name, isCPU: false })),
       totalRounds: opts.totalRounds,
       miniRoundsPerRound: opts.miniRoundsPerRound,
+      eventCardCount: opts.eventCardCount,
       skillCardCounts: opts.skillCardCounts,
     });
     this.humanIds = new Set(opts.humans.map((h) => h.id));

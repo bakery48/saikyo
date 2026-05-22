@@ -1,7 +1,10 @@
 'use client';
+import { useEffect } from 'react';
 import type { GameSocket } from '../lib/useGameSocket';
 import type { Rarity, SkillCard } from '../server/engine/types';
 import { SKILLS } from '../server/engine/cards/skills';
+
+const SKILL_COUNTS_KEY = 'saikyo-skill-counts';
 
 const RARITY_COLORS: Record<Rarity, string> = {
   N: '#888',
@@ -29,6 +32,21 @@ export function RoomView({ socket }: { socket: GameSocket }) {
 
   const skillCardCounts: Record<string, number> = room.skillCardCounts ?? {};
 
+  // Auto-apply saved skill counts when host enters a freshly-created room
+  useEffect(() => {
+    if (!isHost || room.inGame || Object.keys(skillCardCounts).length > 0) return;
+    try {
+      const raw = localStorage.getItem(SKILL_COUNTS_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as Record<string, number>;
+        if (Object.keys(saved).length > 0) {
+          socket.send({ type: 'set_room_settings', skillCardCounts: saved });
+        }
+      }
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function getCount(card: SkillCard): number {
     return skillCardCounts[card.id] ?? defaultSkillCount(card);
   }
@@ -36,6 +54,7 @@ export function RoomView({ socket }: { socket: GameSocket }) {
   function setCardCount(cardId: string, count: number) {
     const newCounts = { ...skillCardCounts, [cardId]: count };
     socket.send({ type: 'set_room_settings', skillCardCounts: newCounts });
+    try { localStorage.setItem(SKILL_COUNTS_KEY, JSON.stringify(newCounts)); } catch {}
   }
 
   function setRarityCount(rarity: Rarity, count: number) {
@@ -46,6 +65,7 @@ export function RoomView({ socket }: { socket: GameSocket }) {
       }
     }
     socket.send({ type: 'set_room_settings', skillCardCounts: newCounts });
+    try { localStorage.setItem(SKILL_COUNTS_KEY, JSON.stringify(newCounts)); } catch {}
   }
 
   const skillsByRarity: Record<Rarity, typeof SKILLS> = { N: [], R: [], SR: [], SSR: [] };
@@ -89,6 +109,14 @@ export function RoomView({ socket }: { socket: GameSocket }) {
           editable={isHost && !room.inGame}
           onChange={(v) =>
             socket.send({ type: 'set_room_settings', miniRoundsPerRound: v })
+          }
+        />
+        <SettingRow
+          label="イベントカード枚数（倍率）"
+          value={room.eventCardCount}
+          editable={isHost && !room.inGame}
+          onChange={(v) =>
+            socket.send({ type: 'set_room_settings', eventCardCount: v })
           }
         />
       </fieldset>

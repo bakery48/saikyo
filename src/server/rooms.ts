@@ -25,6 +25,8 @@ export type Room = {
   miniRoundsPerRound: number;
   /** Per-card skill deck counts (cardId -> 0|1|2|3). Missing entries use rarity defaults. */
   skillCardCounts: Record<string, number>;
+  /** Event deck size multiplier (1-3). */
+  eventCardCount: number;
 };
 
 export class RoomManager {
@@ -33,7 +35,7 @@ export class RoomManager {
 
   createRoom(
     player: RoomPlayer,
-    settings?: { totalRounds?: number; miniRoundsPerRound?: number },
+    settings?: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number },
   ): Room {
     if (this.playerToRoom.has(player.id)) {
       throw new Error('player already in a room');
@@ -47,6 +49,7 @@ export class RoomManager {
       inGame: false,
       totalRounds: clampSetting(settings?.totalRounds ?? 3),
       miniRoundsPerRound: clampSetting(settings?.miniRoundsPerRound ?? 3),
+      eventCardCount: clampSetting(settings?.eventCardCount ?? 1),
       skillCardCounts: {},
     };
     this.rooms.set(id, room);
@@ -132,6 +135,7 @@ export class RoomManager {
       inGame: room.inGame,
       totalRounds: room.totalRounds,
       miniRoundsPerRound: room.miniRoundsPerRound,
+      eventCardCount: room.eventCardCount,
       skillCardCounts: room.skillCardCounts,
     };
   }
@@ -142,7 +146,7 @@ export class RoomManager {
    */
   setSettings(
     hostId: string,
-    settings: { totalRounds?: number; miniRoundsPerRound?: number; skillCardCounts?: Record<string, number> },
+    settings: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number; skillCardCounts?: Record<string, number> },
   ): Room {
     const room = this.getRoomByPlayer(hostId);
     if (!room) throw new Error('not in a room');
@@ -153,6 +157,9 @@ export class RoomManager {
     }
     if (settings.miniRoundsPerRound !== undefined) {
       room.miniRoundsPerRound = clampSetting(settings.miniRoundsPerRound);
+    }
+    if (settings.eventCardCount !== undefined) {
+      room.eventCardCount = clampSetting(settings.eventCardCount);
     }
     if (settings.skillCardCounts !== undefined) {
       room.skillCardCounts = settings.skillCardCounts;
