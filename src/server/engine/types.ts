@@ -900,4 +900,6 @@ export type GameState = {
   extraBattlePending: boolean;
   /** Set when an extra battle starts so the following reward returns to battle instead of advancing the round. */
   returnToBattleAfterReward: boolean;
+  /** How many action phases have been completed in the current cycle (0 = none yet, 1 = first done). Resets to 0 after the second action completes. */
+  actionPhasesThisCycle: number;
 };

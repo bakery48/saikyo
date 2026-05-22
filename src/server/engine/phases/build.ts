@@ -131,10 +131,22 @@ export function resolveBuildPhase(state: GameState): void {
   state.buildPhase = null;
   state.log.push({ kind: 'build_resolved' });
 
-  state.phase = 'event';
+  // Final round: skip battle and go directly to tournament.
+  if (state.round >= state.totalRounds) {
+    state.miniRound = 1;
+    state.phase = 'tournament';
+    state.log.push({
+      kind: 'phase_change',
+      phase: 'tournament',
+      round: state.round,
+      miniRound: state.miniRound,
+    });
+    return;
+  }
+  state.phase = 'battle';
   state.log.push({
     kind: 'phase_change',
-    phase: 'event',
+    phase: 'battle',
     round: state.round,
     miniRound: state.miniRound,
   });

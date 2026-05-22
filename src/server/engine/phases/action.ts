@@ -310,10 +310,11 @@ export function startActionPhase(state: GameState): void {
 
   if (state.skipNextActionPhase) {
     state.skipNextActionPhase = false;
-    state.phase = 'draft';
+    state.actionPhasesThisCycle = 0;
+    state.phase = 'event';
     state.log.push({
       kind: 'phase_change',
-      phase: 'draft',
+      phase: 'event',
       round: state.round,
       miniRound: state.miniRound,
     });
@@ -487,11 +488,25 @@ export function resolveActionPhase(state: GameState): void {
   }
   state.actionPhase = null;
   state.actionPhaseSummary = summary.plays.length > 0 ? summary : null;
-  state.phase = 'draft';
-  state.log.push({
-    kind: 'phase_change',
-    phase: 'draft',
-    round: state.round,
-    miniRound: state.miniRound,
-  });
+  if ((state.actionPhasesThisCycle ?? 0) === 0) {
+    // First action done — run a second action phase before event.
+    state.actionPhasesThisCycle = 1;
+    state.phase = 'action';
+    state.log.push({
+      kind: 'phase_change',
+      phase: 'action',
+      round: state.round,
+      miniRound: state.miniRound,
+    });
+  } else {
+    // Second action done — advance to event.
+    state.actionPhasesThisCycle = 0;
+    state.phase = 'event';
+    state.log.push({
+      kind: 'phase_change',
+      phase: 'event',
+      round: state.round,
+      miniRound: state.miniRound,
+    });
+  }
 }

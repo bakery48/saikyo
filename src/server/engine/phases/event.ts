@@ -333,27 +333,24 @@ export function resolveEventPhase(state: GameState): void {
 }
 
 function advanceFromEvent(state: GameState): void {
+  // extra_battle event: trigger an immediate battle before continuing to draft.
   if (state.extraBattlePending) {
-    // Flag tells reward phase to return here (extra battle) instead of advancing the round.
     state.extraBattlePending = false;
     state.returnToBattleAfterReward = true;
-  }
-  // Final round: skip battle and go directly to tournament.
-  if (!state.returnToBattleAfterReward && state.round >= state.totalRounds) {
-    state.miniRound = 1;
-    state.phase = 'tournament';
+    state.phase = 'battle';
     state.log.push({
       kind: 'phase_change',
-      phase: 'tournament',
+      phase: 'battle',
       round: state.round,
       miniRound: state.miniRound,
     });
     return;
   }
-  state.phase = 'battle';
+  // Normal flow: proceed to draft (battle handled after build in build.ts).
+  state.phase = 'draft';
   state.log.push({
     kind: 'phase_change',
-    phase: state.phase,
+    phase: 'draft',
     round: state.round,
     miniRound: state.miniRound,
   });

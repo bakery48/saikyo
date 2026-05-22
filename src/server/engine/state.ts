@@ -164,6 +164,7 @@ export function createInitialState(opts: {
     skipNextActionPhase: false,
     extraBattlePending: false,
     returnToBattleAfterReward: false,
+    actionPhasesThisCycle: 0,
   };
   // Deal the initial action card hand (4 cards each) right at game start so
   // players can see their hand from the very beginning, even during monster pick.
