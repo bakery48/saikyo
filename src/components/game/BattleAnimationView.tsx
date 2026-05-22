@@ -170,6 +170,7 @@ function buildBattleMessages(
   const defSide: 'a' | 'b' = atkSide === 'a' ? 'b' : 'a';
   const atkName = getName(atkSide);
   const defName = getName(defSide);
+  const skillName = skillUse.name;
 
   const dmgEvents = events.filter(
     (e): e is Extract<BattleEvent, { kind: 'damage' }> =>
@@ -186,42 +187,47 @@ function buildBattleMessages(
       e.kind === 'damage' && e.to === atkSide && e.amount > 0)
     .reduce((s, e) => s + e.amount, 0);
 
-  // Primary: action + immediate result
-  primary.push(
-    totalDmg > 0 || hasMiss
-      ? `${atkName}　の攻撃！　${skillUse.name}！`
-      : `${atkName}　は　${skillUse.name}　を使った！`,
-  );
-  if (hasMiss) {
-    primary.push(`${defName}には当たらない！　MISS！`);
-  } else if (totalDmg > 0) {
-    for (const e of dmgEvents) {
-      primary.push(`${defName}に　${e.amount}のダメージ！`);
-    }
-  } else if (healTotal > 0) {
-    primary.push(`${atkName}は　${healTotal}回復した！`);
-  }
-  if (selfDmg > 0) {
-    primary.push(`${atkName}にも　${selfDmg}のダメージ！`);
-  }
-
-  // Effects: secondary consequences shown after a pause
+  // Collect secondary effects
+  const effectLines: string[] = [];
   for (const e of events) {
     if (e.kind === 'shield_absorb') {
-      effects.push(`${getName(e.player)}のシールドが　${e.absorbed}防いだ！`);
+      effectLines.push(`${getName(e.player)}のシールドが　${e.absorbed}防いだ！`);
     } else if (e.kind === 'buff' && e.amount > 0) {
-      effects.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　上がった！`);
+      effectLines.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　${e.amount}上がった！`);
     } else if (e.kind === 'debuff') {
-      effects.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　下がった！`);
+      effectLines.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　${e.amount}下がった！`);
     } else if (e.kind === 'paralysis_applied') {
-      effects.push(`${getName(e.player)}は　麻痺した！`);
+      effectLines.push(`${getName(e.player)}は　麻痺した！`);
     } else if (e.kind === 'paralysis_cleared') {
-      effects.push(`${getName(e.player)}の　麻痺が1スタック解けた！`);
+      effectLines.push(`${getName(e.player)}の　麻痺が1スタック解けた！`);
     } else if (e.kind === 'turn_skipped') {
-      effects.push(`${getName(e.player)}は　麻痺して動けない！`);
+      effectLines.push(`${getName(e.player)}は　麻痺して動けない！`);
     } else if (e.kind === 'nullified') {
-      effects.push(`${defName}はスキルを無効化した！`);
+      effectLines.push(`${defName}はスキルを無効化した！`);
     }
+  }
+
+  // Primary: just the action type + immediate results (no skill name)
+  if (totalDmg > 0 || hasMiss) {
+    primary.push(`${atkName}　の攻撃！`);
+    if (hasMiss) {
+      primary.push(`${defName}には当たらない！　MISS！`);
+    } else {
+      for (const e of dmgEvents) {
+        primary.push(`${defName}に　${e.amount}のダメージ！`);
+      }
+    }
+    if (selfDmg > 0) primary.push(`${atkName}にも　${selfDmg}のダメージ！`);
+  } else {
+    // Non-attack skill: show skill name on line 1
+    primary.push(`${atkName}　は　${skillName}　を使った！`);
+    if (healTotal > 0) primary.push(`${atkName}は　${healTotal}回復した！`);
+  }
+
+  // Effects: prefixed with skill trigger line when there are secondaries
+  if (effectLines.length > 0) {
+    effects.push(`${atkName}　の${skillName}が発動！`);
+    effects.push(...effectLines);
   }
 
   return { primary, effects };
