@@ -399,6 +399,21 @@ export function syncMonsterFromSlots(state: GameState, player: Player): void {
     }
   }
 
+  // Passive-type cards in skillStock are always active (UI says "スロット不要").
+  for (const card of player.skillStock) {
+    if (card.isPassive && card.passive) {
+      acquiredPassives.push({
+        id: card.id,
+        name: card.name,
+        trigger: card.passive.trigger,
+        effect: card.passive.effect,
+        rarity: card.rarity,
+        nameTag: card.rarity === 'N' ? undefined : card.nameTag,
+        tag: card.tag,
+      });
+    }
+  }
+
   for (let b = 0; b < (player.bonusSlots ?? 0); b++) {
     actives.push({
       id: `bonus-slot-${b}`,
