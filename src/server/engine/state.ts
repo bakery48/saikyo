@@ -54,6 +54,8 @@ export function createInitialState(opts: {
   eventCardCount?: number;
   /** Maximum seats (4 or 8, default 8). CPUs fill empty seats up to this count. */
   maxPlayers?: 4 | 8;
+  /** Initial action hand size per player (1-9, default 3). */
+  initialActionHandSize?: number;
 }): GameState {
   const maxSeats = opts.maxPlayers === 4 ? 4 : 8;
   if (opts.players.length < 0 || opts.players.length > maxSeats) {
@@ -165,8 +167,9 @@ export function createInitialState(opts: {
   };
   // Deal the initial action card hand (4 cards each) right at game start so
   // players can see their hand from the very beginning, even during monster pick.
+  const initialHandSize = Math.max(1, Math.min(9, Math.floor(opts.initialActionHandSize ?? INITIAL_ACTION_HAND_SIZE)));
   for (const player of fullPlayers) {
-    for (let i = 0; i < INITIAL_ACTION_HAND_SIZE; i++) {
+    for (let i = 0; i < initialHandSize; i++) {
       const card = drawTop(state.decks.action, state.decks.actionGrave, rng);
       if (!card) break;
       player.actionHand.push(card);

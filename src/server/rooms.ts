@@ -5,6 +5,11 @@ function clampSetting(n: number): number {
   return Math.max(1, Math.min(3, Math.floor(n)));
 }
 
+function clampHandSize(n: number): number {
+  if (!Number.isFinite(n)) return 3;
+  return Math.max(1, Math.min(9, Math.floor(n)));
+}
+
 export type RoomPlayer = {
   id: string; // session/player id
   name: string;
@@ -27,6 +32,8 @@ export type Room = {
   eventCardCount: number;
   /** Maximum player slots (4 or 8). */
   maxPlayers: 4 | 8;
+  /** Initial action hand size per player (1-9). */
+  initialActionHandSize: number;
 };
 
 export class RoomManager {
@@ -35,7 +42,7 @@ export class RoomManager {
 
   createRoom(
     player: RoomPlayer,
-    settings?: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number; maxPlayers?: 4 | 8 },
+    settings?: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number; maxPlayers?: 4 | 8; initialActionHandSize?: number },
   ): Room {
     if (this.playerToRoom.has(player.id)) {
       throw new Error('player already in a room');
@@ -52,6 +59,7 @@ export class RoomManager {
       eventCardCount: clampSetting(settings?.eventCardCount ?? 1),
       skillCardCounts: {},
       maxPlayers: settings?.maxPlayers === 4 ? 4 : 8,
+      initialActionHandSize: clampHandSize(settings?.initialActionHandSize ?? 3),
     };
     this.rooms.set(id, room);
     this.playerToRoom.set(player.id, id);
@@ -140,6 +148,7 @@ export class RoomManager {
       eventCardCount: room.eventCardCount,
       skillCardCounts: room.skillCardCounts,
       maxPlayers: room.maxPlayers,
+      initialActionHandSize: room.initialActionHandSize,
     };
   }
 
@@ -149,7 +158,7 @@ export class RoomManager {
    */
   setSettings(
     hostId: string,
-    settings: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number; maxPlayers?: 4 | 8; skillCardCounts?: Record<string, number> },
+    settings: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number; maxPlayers?: 4 | 8; initialActionHandSize?: number; skillCardCounts?: Record<string, number> },
   ): Room {
     const room = this.getRoomByPlayer(hostId);
     if (!room) throw new Error('not in a room');
@@ -166,6 +175,9 @@ export class RoomManager {
     }
     if (settings.maxPlayers !== undefined) {
       room.maxPlayers = settings.maxPlayers === 4 ? 4 : 8;
+    }
+    if (settings.initialActionHandSize !== undefined) {
+      room.initialActionHandSize = clampHandSize(settings.initialActionHandSize);
     }
     if (settings.skillCardCounts !== undefined) {
       room.skillCardCounts = settings.skillCardCounts;

@@ -90,6 +90,7 @@ export class GameRunner {
     eventCardCount?: number;
     skillCardCounts?: Record<string, number>;
     maxPlayers?: 4 | 8;
+    initialActionHandSize?: number;
   }) {
     this.seed = opts.seed;
     this.state = createInitialState({
@@ -101,6 +102,7 @@ export class GameRunner {
       eventCardCount: opts.eventCardCount,
       skillCardCounts: opts.skillCardCounts,
       maxPlayers: opts.maxPlayers,
+      initialActionHandSize: opts.initialActionHandSize,
     });
     this.humanIds = new Set(opts.humans.map((h) => h.id));
     this.pauseOnReveal = opts.pauseOnReveal ?? false;

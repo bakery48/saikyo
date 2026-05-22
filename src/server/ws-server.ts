@@ -124,6 +124,7 @@ export class GameWsServer {
             miniRoundsPerRound: msg.miniRoundsPerRound,
             eventCardCount: msg.eventCardCount,
             maxPlayers: msg.maxPlayers,
+            initialActionHandSize: msg.initialActionHandSize,
           },
         );
         this.send(ws, { type: 'room_state', room: this.roomManager.toRoomView(room) });
@@ -136,6 +137,7 @@ export class GameWsServer {
           miniRoundsPerRound: msg.miniRoundsPerRound,
           eventCardCount: msg.eventCardCount,
           maxPlayers: msg.maxPlayers,
+          initialActionHandSize: msg.initialActionHandSize,
           skillCardCounts: msg.skillCardCounts,
         });
         this.broadcastRoomState(room.id);
@@ -294,6 +296,7 @@ export class GameWsServer {
       eventCardCount: room.eventCardCount,
       skillCardCounts: room.skillCardCounts,
       maxPlayers: room.maxPlayers,
+      initialActionHandSize: room.initialActionHandSize,
     });
     this.games.set(room.id, game);
     room.inGame = true;

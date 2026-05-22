@@ -45,6 +45,8 @@ export type RoomView = {
   eventCardCount: number;
   /** Maximum number of players (4 or 8). */
   maxPlayers: 4 | 8;
+  /** Initial action hand size per player (1-9). */
+  initialActionHandSize: number;
 };
 
 /** Compact view used in the lobby's room list. */
@@ -141,6 +143,7 @@ export type ClientMessage =
       miniRoundsPerRound?: number;
       eventCardCount?: number;
       maxPlayers?: 4 | 8;
+      initialActionHandSize?: number;
     }
   | { type: 'join_room'; roomId: string; playerName: string }
   /** Reconnect handshake: try to reclaim a seat held during the grace period. */
@@ -155,6 +158,7 @@ export type ClientMessage =
       miniRoundsPerRound?: number;
       eventCardCount?: number;
       maxPlayers?: 4 | 8;
+      initialActionHandSize?: number;
       skillCardCounts?: Record<string, number>;
     }
   | { type: 'submit_pick'; baseId: string }
