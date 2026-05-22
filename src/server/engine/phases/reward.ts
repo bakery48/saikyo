@@ -2,9 +2,9 @@ import type { GameState, Player, RewardChoice, StatKey } from '../types';
 import { drawTop } from '../deck';
 import { addSkillCardToMonster, getPlayer, makeRng, saveRng } from '../state';
 
-/** Magnitude of each stat-up reward. Uniform +2 across all stats. */
+/** Magnitude of each stat-up reward. */
 export const STAT_UP_AMOUNT: Record<StatKey, number> = {
-  hp: 2,
+  hp: 24,
   atk: 2,
   def: 2,
   spd: 2,
