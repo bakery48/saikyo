@@ -158,12 +158,13 @@ function buildBattleMessages(
   events: BattleEvent[],
   aName: string,
   bName: string,
-): string[] {
+): { primary: string[]; effects: string[] } {
   const getName = (side: 'a' | 'b') => (side === 'a' ? aName : bName);
-  const msgs: string[] = [];
+  const primary: string[] = [];
+  const effects: string[] = [];
 
   const skillUse = events[0];
-  if (!skillUse || skillUse.kind !== 'skill_use') return msgs;
+  if (!skillUse || skillUse.kind !== 'skill_use') return { primary, effects };
 
   const atkSide = skillUse.player;
   const defSide: 'a' | 'b' = atkSide === 'a' ? 'b' : 'a';
@@ -185,60 +186,85 @@ function buildBattleMessages(
       e.kind === 'damage' && e.to === atkSide && e.amount > 0)
     .reduce((s, e) => s + e.amount, 0);
 
-  // Line 1: action
-  msgs.push(
+  // Primary: action + immediate result
+  primary.push(
     totalDmg > 0 || hasMiss
       ? `${atkName}　の攻撃！　${skillUse.name}！`
       : `${atkName}　は　${skillUse.name}　を使った！`,
   );
-
-  // Line 2: primary result
   if (hasMiss) {
-    msgs.push(`${defName}には当たらない！　MISS！`);
+    primary.push(`${defName}には当たらない！　MISS！`);
   } else if (totalDmg > 0) {
     for (const e of dmgEvents) {
-      msgs.push(`${defName}に　${e.amount}のダメージ！`);
+      primary.push(`${defName}に　${e.amount}のダメージ！`);
     }
   } else if (healTotal > 0) {
-    msgs.push(`${atkName}は　${healTotal}回復した！`);
+    primary.push(`${atkName}は　${healTotal}回復した！`);
+  }
+  if (selfDmg > 0) {
+    primary.push(`${atkName}にも　${selfDmg}のダメージ！`);
   }
 
-  // Extra lines: shield absorb, buffs/debuffs, paralysis, self-damage, turn skip
+  // Effects: secondary consequences shown after a pause
   for (const e of events) {
     if (e.kind === 'shield_absorb') {
-      msgs.push(`${getName(e.player)}のシールドが　${e.absorbed}防いだ！`);
+      effects.push(`${getName(e.player)}のシールドが　${e.absorbed}防いだ！`);
     } else if (e.kind === 'buff' && e.amount > 0) {
-      msgs.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　上がった！`);
+      effects.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　上がった！`);
     } else if (e.kind === 'debuff') {
-      msgs.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　下がった！`);
+      effects.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　下がった！`);
     } else if (e.kind === 'paralysis_applied') {
-      msgs.push(`${getName(e.player)}は　麻痺した！`);
+      effects.push(`${getName(e.player)}は　麻痺した！`);
     } else if (e.kind === 'paralysis_cleared') {
-      msgs.push(`${getName(e.player)}の　麻痺が1スタック解けた！`);
+      effects.push(`${getName(e.player)}の　麻痺が1スタック解けた！`);
     } else if (e.kind === 'turn_skipped') {
-      msgs.push(`${getName(e.player)}は　麻痺して動けない！`);
+      effects.push(`${getName(e.player)}は　麻痺して動けない！`);
     } else if (e.kind === 'nullified') {
-      msgs.push(`${defName}はスキルを無効化した！`);
+      effects.push(`${defName}はスキルを無効化した！`);
     }
   }
-  if (selfDmg > 0 && atkSide !== defSide) {
-    msgs.push(`${atkName}にも　${selfDmg}のダメージ！`);
-  }
 
-  return msgs;
+  return { primary, effects };
 }
 
 function BattleMessageWindow({
-  messages,
+  primary,
+  effects,
   stepKey,
   verdict,
 }: {
-  messages: string[];
+  primary: string[];
+  effects: string[];
   stepKey: string;
   verdict: string | null;
 }) {
-  const lines = verdict ? [verdict] : messages;
-  if (lines.length === 0) return null;
+  if (verdict) {
+    return (
+      <MessageBox stepKey={stepKey}>
+        <FadeInLine text={verdict} delayMs={0} />
+      </MessageBox>
+    );
+  }
+  if (primary.length === 0 && effects.length === 0) return null;
+  // Effects start after all primary lines have had time to appear.
+  const effectsStartMs = primary.length * 220 + 350;
+  return (
+    <MessageBox stepKey={stepKey}>
+      {primary.map((msg, i) => (
+        <FadeInLine key={`p${i}`} text={msg} delayMs={i * 220} />
+      ))}
+      {effects.length > 0 && (
+        <div style={{ borderTop: '1px solid #334', marginTop: 6, paddingTop: 6 }}>
+          {effects.map((msg, i) => (
+            <FadeInLine key={`e${i}`} text={msg} delayMs={effectsStartMs + i * 220} />
+          ))}
+        </div>
+      )}
+    </MessageBox>
+  );
+}
+
+function MessageBox({ stepKey, children }: { stepKey: string; children: React.ReactNode }) {
   return (
     <div
       style={{
@@ -252,21 +278,9 @@ function BattleMessageWindow({
       }}
     >
       <div style={{ display: 'grid', gap: 5 }} key={stepKey}>
-        {lines.map((msg, i) => (
-          <FadeInLine key={i} text={msg} delayMs={i * 220} />
-        ))}
+        {children}
       </div>
-      {/* scroll cursor */}
-      <span
-        style={{
-          position: 'absolute',
-          bottom: 8,
-          right: 12,
-          fontSize: 12,
-          color: '#6688cc',
-          opacity: 0.8,
-        }}
-      >
+      <span style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 12, color: '#6688cc', opacity: 0.8 }}>
         ▼
       </span>
     </div>
@@ -534,7 +548,7 @@ export function BattleStage({
   const battleMessages =
     !preroll && !battleDone && stepIdx < stepLogIndices.length
       ? buildBattleMessages(currentSkillEventRange, aMonName, bMonName)
-      : [];
+      : { primary: [], effects: [] };
 
   return (
     <section style={{ display: 'grid', gap: 16 }}>
@@ -650,7 +664,8 @@ export function BattleStage({
       </div>
 
       <BattleMessageWindow
-        messages={battleMessages}
+        primary={battleMessages.primary}
+        effects={battleMessages.effects}
         stepKey={msgWindowKey}
         verdict={battleDone ? verdict : null}
       />
