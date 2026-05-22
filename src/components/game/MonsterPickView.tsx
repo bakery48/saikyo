@@ -193,7 +193,7 @@ export function MonsterPickView({
                   width: 72,
                   margin: 6,
                   borderRadius: 4,
-                  background: '#4a7a9b',
+                  background: '#fff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
