@@ -626,7 +626,14 @@ function takeDamage(
       }
     }
   }
-  if (dmg > 0) target.lastDamageTaken = dmg;
+  if (dmg > 0) {
+    target.lastDamageTaken = dmg;
+    // Being hit while paralyzed clears 1 stack (case-C nerf).
+    if (target.skipTurnsRemaining > 0) {
+      target.skipTurnsRemaining -= 1;
+      log.push({ kind: 'paralysis_cleared', player: side });
+    }
+  }
   return dmg;
 }
 

@@ -92,9 +92,9 @@ export const SKILLS: SkillCard[] = [
   // ─── 麻痺系 ────────────────────────────────────────────────────────────────
   { id: 'sk-n-030', name: '痺れ', rarity: 'N', nameTag: '電撃', active: { effect: { kind: 'pause_opponent', stacks: 1 } } },
   { id: 'sk-r-069', name: '麻痺打ち', rarity: 'R', nameTag: 'ライトニング', active: { effect: { kind: 'attack_and_paralyze', mult: 0.8, useStat: 'atk', attackKind: 'passthrough', stacks: 1 } } },
-  { id: 'sk-r-070', name: '強電撃', rarity: 'R', nameTag: 'サンダー', active: { effect: { kind: 'pause_opponent', stacks: 2 } } },
-  { id: 'sk-sr-058', name: '雷鳴撃', rarity: 'SR', nameTag: 'サンダーボルト', active: { effect: { kind: 'attack_and_paralyze', mult: 1.2, useStat: 'atk', attackKind: 'passthrough', stacks: 2 } } },
-  { id: 'sk-ssr-029', name: '時の枷', rarity: 'SSR', nameTag: 'テンポラルチェーン', active: { effect: { kind: 'pause_opponent', stacks: 3 } } },
+  { id: 'sk-r-070', name: '強電撃', rarity: 'R', nameTag: 'サンダー', active: { effect: { kind: 'pause_opponent', stacks: 1 } } },
+  { id: 'sk-sr-058', name: '雷鳴撃', rarity: 'SR', nameTag: 'サンダーボルト', active: { effect: { kind: 'attack_and_paralyze', mult: 1.2, useStat: 'atk', attackKind: 'passthrough', stacks: 1 } } },
+  { id: 'sk-ssr-029', name: '時の枷', rarity: 'SSR', nameTag: 'テンポラルチェーン', active: { effect: { kind: 'pause_opponent', stacks: 2 } } },
   { id: 'sk-sr-014', name: 'ハリケーン', rarity: 'SR', nameTag: 'ハリケーン', active: { effect: { kind: 'shuffle_opponent_actives' } } },
   { id: 'sk-sr-015', name: '二重起動', rarity: 'SR', nameTag: 'ダブル', active: { effect: { kind: 'next_multi_attack', extraCount: 1, failurePenalty: 2 } } },
   { id: 'sk-sr-016', name: '螺旋の乱舞', rarity: 'SSR', nameTag: 'スパイラル', active: { effect: { kind: 'multi_hit_attack', mult: 0.7, useStat: 'atk', hitCount: 4, attackKind: 'passthrough' } } },

@@ -601,6 +601,8 @@ export type BattleEvent =
   | { kind: 'passive'; player: 'a' | 'b'; passiveId: string }
   /** Paralysis[N] was applied to a side. */
   | { kind: 'paralysis_applied'; player: 'a' | 'b'; stacks: number }
+  /** Receiving damage cleared 1 paralysis stack. */
+  | { kind: 'paralysis_cleared'; player: 'a' | 'b' }
   /** A side's turn was skipped (consumed a pending pause flag). */
   | { kind: 'turn_skipped'; player: 'a' | 'b' }
   /** A side's remaining actives were shuffled. */

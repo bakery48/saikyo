@@ -473,7 +473,7 @@ export const MONSTERS: MonsterBase[] = [
         id: 'okuninushi-p1',
         name: '迸る稲妻',
         trigger: { kind: 'on_deal_damage' },
-        effect: { kind: 'paralyze_on_active', percent: 30 },
+        effect: { kind: 'paralyze_on_active', percent: 15 },
       },
     ],
     uniqueActionCard: { id: 'unique-okuninushi', name: '雷神の加護', effect: { kind: 'stat_mod', stat: 'spd', amount: 2 } },

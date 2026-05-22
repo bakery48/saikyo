@@ -98,6 +98,8 @@ function formatBattleEvent(e: BattleEvent, aName: string, bName: string): string
       return `  ${who(e.player)} パッシブ発動（${e.passiveId}）`;
     case 'paralysis_applied':
       return `  ${who(e.player)} に麻痺[${e.stacks}]付与`;
+    case 'paralysis_cleared':
+      return `  ${who(e.player)} 被弾で麻痺1スタック解除`;
     case 'turn_skipped':
       return `  ${who(e.player)} のターンをスキップ（麻痺）`;
     case 'actives_shuffled':
