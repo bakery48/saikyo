@@ -9,6 +9,7 @@ import type {
   Monster,
 } from '../../server/engine/types';
 import { COLOR_HEX, COLOR_LABEL } from '../../lib/colors';
+import { describeActiveEffect } from '../../lib/skill-text';
 
 const STEP_MS = 2000;
 const PREROLL_MS = 3000;
@@ -811,6 +812,7 @@ function MonsterColumn({
                   }}
                 >
                   <span style={{ opacity: 0.5, fontSize: 11, marginRight: 3 }}>S{a.order}</span>{a.name}
+                  <div style={{ fontSize: 11, opacity: 0.6, marginTop: 1 }}>{describeActiveEffect(a.effect)}</div>
                 </li>
               );
             })}
