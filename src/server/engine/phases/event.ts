@@ -271,6 +271,11 @@ function applyEventEffect(state: GameState, card: EventCard, targets: Player[]):
         t.skillStock = [];
         break;
       }
+      case 'add_bonus_slot': {
+        t.bonusSlots = (t.bonusSlots ?? 0) + 1;
+        syncMonsterFromSlots(state, t);
+        break;
+      }
       case 'steal_skill': {
         if (t.skillStock.length === 0) break;
         const others = state.players.filter((p) => p !== t && p.monster);

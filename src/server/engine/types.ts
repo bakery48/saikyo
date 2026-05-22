@@ -496,7 +496,8 @@ export type EventEffect =
   | { kind: 'discard_skills'; count: number }
   | { kind: 'rotate_skill' }
   | { kind: 'pool_and_redistribute_skills'; count: number }
-  | { kind: 'clear_all_stocks' };
+  | { kind: 'clear_all_stocks' }
+  | { kind: 'add_bonus_slot' };
 
 export type EventCard = {
   id: string;
@@ -651,6 +652,8 @@ export type Player = {
    * Removing slot N sets activeSlotCount = N-1, making slots N..8 inactive.
    */
   activeSlotCount: number;
+  /** Extra empty battle slots granted by event cards. Each adds one default-attack turn at the end. */
+  bonusSlots: number;
 };
 
 export type Phase =

@@ -58,6 +58,9 @@ export const EVENTS: EventCard[] = [
   { id: 'ev-035', name: '世界侵食',     target: 'all',        effect: { kind: 'all_stats_mod', amount: -2 } },
   { id: 'ev-w01', name: '世界の祝福',   target: 'all',        effect: { kind: 'all_stats_mod', amount:  2 } },
 
+  // ── bonus slot ──────────────────────────────────────────────────────────────
+  { id: 'ev-slot01', name: '覚醒の儀式', target: 'all', effect: { kind: 'add_bonus_slot' } },
+
   // ── targeted special ────────────────────────────────────────────────────────
   { id: 'ev-030', name: '旋風',         target: 'random',     effect: { kind: 'shuffle_actives' } },
   { id: 'ev-032', name: '大徴収',       target: 'all',        effect: { kind: 'discard_action_card' } },

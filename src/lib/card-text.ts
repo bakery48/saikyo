@@ -133,6 +133,8 @@ export function describeEventEffect(card: EventCard): string {
       return `全員がストックからランダムに${e.count}枚ずつ供出し、まとめてシャッフルして再配布`;
     case 'discard_skills':
       return `スロットのスキルカードをランダムに${e.count}枚捨てる`;
+    case 'add_bonus_slot':
+      return 'バトルスロットが1増える（空きスロット追加）';
   }
 }
 

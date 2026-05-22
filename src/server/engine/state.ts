@@ -77,6 +77,7 @@ export function createInitialState(opts: {
     skillStock: [],
     skillSlots: makeInitialSlots(pi),
     activeSlotCount: 9,
+    bonusSlots: 0,
   }));
   let cpuIdx = 1;
   while (seats.length < 8) {
@@ -91,6 +92,7 @@ export function createInitialState(opts: {
       skillStock: [],
       skillSlots: makeInitialSlots(pi),
       activeSlotCount: 9,
+      bonusSlots: 0,
     });
     cpuIdx++;
   }
@@ -390,6 +392,15 @@ export function syncMonsterFromSlots(state: GameState, player: Player): void {
         effect: card.active.effect,
       });
     }
+  }
+
+  for (let b = 0; b < (player.bonusSlots ?? 0); b++) {
+    actives.push({
+      id: `bonus-slot-${b}`,
+      name: '空きスロット',
+      order: player.activeSlotCount + b + 1,
+      effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' },
+    });
   }
 
   player.monster.actives = actives;
