@@ -150,6 +150,165 @@ function TournamentBattleView({
   );
 }
 
+// ─── Message window helpers ──────────────────────────────────────────────────
+
+const STAT_JP: Record<string, string> = { hp: 'HP', atk: 'ATK', def: 'DEF', spd: 'SPD' };
+
+function buildBattleMessages(
+  events: BattleEvent[],
+  aName: string,
+  bName: string,
+): string[] {
+  const getName = (side: 'a' | 'b') => (side === 'a' ? aName : bName);
+  const msgs: string[] = [];
+
+  const skillUse = events[0];
+  if (!skillUse || skillUse.kind !== 'skill_use') return msgs;
+
+  const atkSide = skillUse.player;
+  const defSide: 'a' | 'b' = atkSide === 'a' ? 'b' : 'a';
+  const atkName = getName(atkSide);
+  const defName = getName(defSide);
+
+  const dmgEvents = events.filter(
+    (e): e is Extract<BattleEvent, { kind: 'damage' }> =>
+      e.kind === 'damage' && e.to === defSide && e.amount > 0,
+  );
+  const totalDmg = dmgEvents.reduce((s, e) => s + e.amount, 0);
+  const hitCount = dmgEvents.length;
+  const hasMiss = events.some(e => e.kind === 'miss' && e.to === defSide);
+  const healTotal = events
+    .filter((e): e is Extract<BattleEvent, { kind: 'heal' }> =>
+      e.kind === 'heal' && e.player === atkSide && e.amount > 0)
+    .reduce((s, e) => s + e.amount, 0);
+  const selfDmg = events
+    .filter((e): e is Extract<BattleEvent, { kind: 'damage' }> =>
+      e.kind === 'damage' && e.to === atkSide && e.amount > 0)
+    .reduce((s, e) => s + e.amount, 0);
+
+  // Line 1: action
+  msgs.push(
+    totalDmg > 0 || hasMiss
+      ? `${atkName}　の攻撃！　${skillUse.name}！`
+      : `${atkName}　は　${skillUse.name}　を使った！`,
+  );
+
+  // Line 2: primary result
+  if (hasMiss) {
+    msgs.push(`${defName}には当たらない！　MISS！`);
+  } else if (totalDmg > 0) {
+    msgs.push(
+      hitCount > 1
+        ? `${defName}に　${totalDmg}のダメージ！（${hitCount}連撃）`
+        : `${defName}に　${totalDmg}のダメージ！`,
+    );
+  } else if (healTotal > 0) {
+    msgs.push(`${atkName}は　${healTotal}回復した！`);
+  }
+
+  // Extra lines: shield absorb, buffs/debuffs, paralysis, self-damage, turn skip
+  for (const e of events) {
+    if (e.kind === 'shield_absorb') {
+      msgs.push(`${getName(e.player)}のシールドが　${e.absorbed}防いだ！`);
+    } else if (e.kind === 'buff' && e.amount > 0) {
+      msgs.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　上がった！`);
+    } else if (e.kind === 'debuff') {
+      msgs.push(`${getName(e.player)}の　${STAT_JP[e.stat] ?? e.stat}が　下がった！`);
+    } else if (e.kind === 'paralysis_applied') {
+      msgs.push(`${getName(e.player)}は　麻痺した！`);
+    } else if (e.kind === 'paralysis_cleared') {
+      msgs.push(`${getName(e.player)}の　麻痺が1スタック解けた！`);
+    } else if (e.kind === 'turn_skipped') {
+      msgs.push(`${getName(e.player)}は　麻痺して動けない！`);
+    } else if (e.kind === 'nullified') {
+      msgs.push(`${defName}はスキルを無効化した！`);
+    }
+  }
+  if (selfDmg > 0 && atkSide !== defSide) {
+    msgs.push(`${atkName}にも　${selfDmg}のダメージ！`);
+  }
+
+  return msgs;
+}
+
+function BattleMessageWindow({
+  messages,
+  stepKey,
+  verdict,
+}: {
+  messages: string[];
+  stepKey: string;
+  verdict: string | null;
+}) {
+  const lines = verdict ? [verdict] : messages;
+  if (lines.length === 0) return null;
+  return (
+    <div
+      style={{
+        background: 'rgba(4, 6, 28, 0.93)',
+        border: '3px solid #4455aa',
+        borderRadius: 8,
+        padding: '12px 18px 14px',
+        minHeight: 72,
+        position: 'relative',
+        boxShadow: '0 0 16px rgba(60,80,200,0.35)',
+      }}
+    >
+      <div style={{ display: 'grid', gap: 5 }} key={stepKey}>
+        {lines.map((msg, i) => (
+          <FadeInLine key={i} text={msg} delayMs={i * 220} />
+        ))}
+      </div>
+      {/* scroll cursor */}
+      <span
+        style={{
+          position: 'absolute',
+          bottom: 8,
+          right: 12,
+          fontSize: 12,
+          color: '#6688cc',
+          opacity: 0.8,
+        }}
+      >
+        ▼
+      </span>
+    </div>
+  );
+}
+
+function FadeInLine({ text, delayMs }: { text: string; delayMs: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.animate(
+      [
+        { opacity: 0, transform: 'translateY(5px)' },
+        { opacity: 1, transform: 'translateY(0)' },
+      ],
+      { duration: 180, delay: delayMs, fill: 'forwards', easing: 'ease-out' },
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <div
+      ref={ref}
+      style={{
+        opacity: 0,
+        fontSize: 15,
+        color: '#e8eaff',
+        fontFamily: '"Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif',
+        letterSpacing: '0.04em',
+        lineHeight: 1.5,
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+// ─── BattleStage ─────────────────────────────────────────────────────────────
+
 export function BattleStage({
   state,
   match,
@@ -363,6 +522,14 @@ export function BattleStage({
             : '引き分け'
         : null;
 
+  const aMonName = aMon?.name ?? aPlayer?.name ?? 'A';
+  const bMonName = bMon?.name ?? bPlayer?.name ?? 'B';
+  const msgWindowKey = preroll ? 'preroll' : battleDone ? 'done' : `step-${stepIdx}`;
+  const battleMessages =
+    !preroll && !battleDone && stepIdx < stepLogIndices.length
+      ? buildBattleMessages(currentSkillEventRange, aMonName, bMonName)
+      : [];
+
   return (
     <section style={{ display: 'grid', gap: 16 }}>
       <h2 style={{ margin: 0 }}>{title ?? '戦闘'}</h2>
@@ -471,6 +638,12 @@ export function BattleStage({
         )}
         {verdict && <VictoryBanner key={verdict} winner={winnerName} isDraw={winnerSide === 'draw'} />}
       </div>
+
+      <BattleMessageWindow
+        messages={battleMessages}
+        stepKey={msgWindowKey}
+        verdict={battleDone ? verdict : null}
+      />
     </section>
   );
 }
