@@ -325,8 +325,10 @@ export function startActionPhase(state: GameState): void {
   const pending: string[] = [];
   for (const player of state.players) {
     if (!player.monster) continue;
-    const card = drawTop(state.decks.action, state.decks.actionGrave, rng);
-    if (card) player.actionHand.push(card);
+    for (let i = 0; i < 4; i++) {
+      const card = drawTop(state.decks.action, state.decks.actionGrave, rng);
+      if (card) player.actionHand.push(card);
+    }
     pending.push(player.id);
   }
   saveRng(state, rng);
@@ -462,6 +464,9 @@ export function resolveActionPhase(state: GameState): void {
     }
     // Unique card stays in hand forever; regular cards go to the graveyard.
     if (!isUnique) state.decks.actionGrave.push(card);
+    // Discard the rest of this player's drawn hand back to the graveyard.
+    state.decks.actionGrave.push(...player.actionHand);
+    player.actionHand = [];
     // Build a summary string with the swap-target info if applicable.
     let effectDesc: string;
     if (card.effect.kind === 'swap_actives' && play.swap) {

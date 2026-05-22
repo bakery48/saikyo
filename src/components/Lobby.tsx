@@ -15,7 +15,7 @@ function loadSettings() {
   }
 }
 
-function saveSettings(s: { totalRounds: number; miniRoundsPerRound: number; eventCardCount: number; maxPlayers: number; initialActionHandSize: number }) {
+function saveSettings(s: { totalRounds: number; miniRoundsPerRound: number; eventCardCount: number; maxPlayers: number }) {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
   } catch {}
@@ -28,7 +28,6 @@ export function Lobby({ socket }: { socket: GameSocket }) {
   const [miniRoundsPerRound, setMiniRoundsPerRound] = useState(3);
   const [eventCardCount, setEventCardCount] = useState(1);
   const [maxPlayers, setMaxPlayers] = useState<4 | 8>(8);
-  const [initialActionHandSize, setInitialActionHandSize] = useState(3);
   const trimmed = name.trim();
 
   useEffect(() => {
@@ -38,21 +37,20 @@ export function Lobby({ socket }: { socket: GameSocket }) {
     if (s.miniRoundsPerRound) setMiniRoundsPerRound(s.miniRoundsPerRound);
     if (s.eventCardCount) setEventCardCount(s.eventCardCount);
     if (s.maxPlayers === 4 || s.maxPlayers === 8) setMaxPlayers(s.maxPlayers);
-    if (s.initialActionHandSize) setInitialActionHandSize(s.initialActionHandSize);
   }, []);
 
   function handleChange(setter: (v: number) => void, key: string) {
     return (v: number) => {
       setter(v);
       const current = loadSettings() ?? {};
-      saveSettings({ totalRounds, miniRoundsPerRound, eventCardCount, maxPlayers, initialActionHandSize, ...current, [key]: v });
+      saveSettings({ totalRounds, miniRoundsPerRound, eventCardCount, maxPlayers, ...current, [key]: v });
     };
   }
 
   function handleMaxPlayersChange(v: 4 | 8) {
     setMaxPlayers(v);
     const current = loadSettings() ?? {};
-    saveSettings({ totalRounds, miniRoundsPerRound, eventCardCount, initialActionHandSize, ...current, maxPlayers: v });
+    saveSettings({ totalRounds, miniRoundsPerRound, eventCardCount, ...current, maxPlayers: v });
   }
 
   return (
@@ -97,13 +95,6 @@ export function Lobby({ socket }: { socket: GameSocket }) {
           value={eventCardCount}
           onChange={handleChange(setEventCardCount, 'eventCardCount')}
         />
-        <SliderRow
-          label="アクション初期手札枚数"
-          value={initialActionHandSize}
-          min={1}
-          max={9}
-          onChange={handleChange(setInitialActionHandSize, 'initialActionHandSize')}
-        />
         <label style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 13 }}>
           <span style={{ minWidth: 220 }}>プレイヤー人数</span>
           <span style={{ display: 'flex', gap: 6 }}>
@@ -138,7 +129,6 @@ export function Lobby({ socket }: { socket: GameSocket }) {
               miniRoundsPerRound,
               eventCardCount,
               maxPlayers,
-              initialActionHandSize,
             })
           }
           disabled={!socket.connected}

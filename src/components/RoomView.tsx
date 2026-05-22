@@ -119,16 +119,6 @@ export function RoomView({ socket }: { socket: GameSocket }) {
             socket.send({ type: 'set_room_settings', eventCardCount: v })
           }
         />
-        <SettingRow
-          label="アクション初期手札枚数"
-          value={room.initialActionHandSize}
-          min={1}
-          max={9}
-          editable={isHost && !room.inGame}
-          onChange={(v) =>
-            socket.send({ type: 'set_room_settings', initialActionHandSize: v })
-          }
-        />
         <label style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 13 }}>
           <span style={{ minWidth: 220 }}>プレイヤー人数</span>
           <span style={{ display: 'flex', gap: 6 }}>
