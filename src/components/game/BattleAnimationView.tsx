@@ -662,7 +662,7 @@ function MonsterColumn({
             position: 'relative',
             width: 184,
             height: 184,
-            background: `${COLOR_HEX[player.color] ?? '#888'}22`,
+            background: '#fff',
             borderRadius: 8,
           }}
         >
