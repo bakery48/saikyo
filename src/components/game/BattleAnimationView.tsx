@@ -367,6 +367,15 @@ export function BattleStage({
   const aHp = computeHp(appliedEvents, 'a', aHpStart);
   const bHp = computeHp(appliedEvents, 'b', bHpStart);
 
+  // Starting stats from the battle_start snapshot (includes battle_start passives).
+  const battleStartEvt = match.log.find(
+    (e): e is Extract<BattleEvent, { kind: 'battle_start' }> => e.kind === 'battle_start',
+  );
+  const aBaseStats: SimpleStats = battleStartEvt?.a.stats ?? aMon?.stats ?? { atk: 0, def: 0, spd: 0 };
+  const bBaseStats: SimpleStats = battleStartEvt?.b.stats ?? bMon?.stats ?? { atk: 0, def: 0, spd: 0 };
+  const aCurrentStats = computeStats(appliedEvents, 'a', aBaseStats);
+  const bCurrentStats = computeStats(appliedEvents, 'b', bBaseStats);
+
   const currentEvent =
     !preroll && stepIdx < stepLogIndices.length
       ? match.log[stepLogIndices[stepIdx]!]
@@ -581,6 +590,8 @@ export function BattleStage({
           healAmount={healAmountA > 0 ? healAmountA : null}
           floatKey={`float-a-${stepIdx}`}
           hitKind={currentAttackKind}
+          baseStats={aBaseStats}
+          currentStats={aCurrentStats}
         />
         <div
           style={{
@@ -630,6 +641,8 @@ export function BattleStage({
             healAmount={healAmountB > 0 ? healAmountB : null}
             floatKey={`float-b-${stepIdx}`}
             hitKind={currentAttackKind}
+            baseStats={bBaseStats}
+            currentStats={bCurrentStats}
             mirror
           />
         )}
@@ -722,6 +735,8 @@ function MonsterColumn({
   floatKey,
   hitKind,
   mirror = false,
+  baseStats,
+  currentStats,
 }: {
   player: ClientPlayer | undefined;
   mon: Monster | null;
@@ -758,6 +773,10 @@ function MonsterColumn({
   hitKind: Exclude<AttackKind, 'passthrough'>;
   /** Mirror the monster art horizontally (used for the right-hand side). */
   mirror?: boolean;
+  /** Battle-start stats (after battle_start passives). Used as the diff baseline. */
+  baseStats: SimpleStats;
+  /** Current stats after accumulated buffs/debuffs. */
+  currentStats: SimpleStats;
 }) {
   if (!player || !mon) {
     return (
@@ -900,6 +919,30 @@ function MonsterColumn({
             }}
           />
         </div>
+      </div>
+
+      {/* Current stats (ATK / DEF / SPD) with buff/debuff coloring */}
+      <div style={{ display: 'flex', gap: 6, justifyContent: 'space-around' }}>
+        {(['atk', 'def', 'spd'] as const).map((stat) => {
+          const cur = currentStats[stat];
+          const diff = cur - baseStats[stat];
+          const color = diff > 0 ? '#27ae60' : diff < 0 ? '#c0392b' : '#555';
+          return (
+            <div key={stat} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 42 }}>
+              <span style={{ fontSize: 10, color: '#999', letterSpacing: '0.05em' }}>
+                {stat.toUpperCase()}
+              </span>
+              <span style={{ fontSize: 15, fontWeight: 700, color, transition: 'color 300ms' }}>
+                {cur}
+              </span>
+              {diff !== 0 && (
+                <span style={{ fontSize: 10, color, lineHeight: 1 }}>
+                  {diff > 0 ? `+${diff}` : diff}
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Passive card */}
@@ -1853,6 +1896,27 @@ function computeHp(events: BattleEvent[], side: 'a' | 'b', baseHp: number): numb
     else if (e.kind === 'heal' && e.player === side) hp = e.hpAfter;
   }
   return hp;
+}
+
+type SimpleStats = { atk: number; def: number; spd: number };
+
+/** Accumulate buff/debuff events to get current ATK/DEF/SPD for a side. */
+function computeStats(events: BattleEvent[], side: 'a' | 'b', base: SimpleStats): SimpleStats {
+  let atk = base.atk, def = base.def, spd = base.spd;
+  for (const e of events) {
+    if (e.kind === 'buff' && e.player === side) {
+      if (e.stat === 'atk') atk += e.amount;
+      else if (e.stat === 'def') def += e.amount;
+      else if (e.stat === 'spd') spd += e.amount;
+    } else if (e.kind === 'debuff' && e.player === side) {
+      if (e.stat === 'atk') atk -= e.amount;
+      else if (e.stat === 'def') def -= e.amount;
+      else if (e.stat === 'spd') spd -= e.amount;
+    } else if (e.kind === 'sin_bonus' && e.player === side) {
+      atk += e.atk; def += e.def; spd += e.spd;
+    }
+  }
+  return { atk: Math.max(0, atk), def: Math.max(0, def), spd: Math.max(0, spd) };
 }
 
 /** Skill ids that have already been used by the given side up to and including the current step. */
