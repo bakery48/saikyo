@@ -175,7 +175,6 @@ function buildBattleMessages(
       e.kind === 'damage' && e.to === defSide && e.amount > 0,
   );
   const totalDmg = dmgEvents.reduce((s, e) => s + e.amount, 0);
-  const hitCount = dmgEvents.length;
   const hasMiss = events.some(e => e.kind === 'miss' && e.to === defSide);
   const healTotal = events
     .filter((e): e is Extract<BattleEvent, { kind: 'heal' }> =>
@@ -197,11 +196,9 @@ function buildBattleMessages(
   if (hasMiss) {
     msgs.push(`${defName}には当たらない！　MISS！`);
   } else if (totalDmg > 0) {
-    msgs.push(
-      hitCount > 1
-        ? `${defName}に　${totalDmg}のダメージ！（${hitCount}連撃）`
-        : `${defName}に　${totalDmg}のダメージ！`,
-    );
+    for (const e of dmgEvents) {
+      msgs.push(`${defName}に　${e.amount}のダメージ！`);
+    }
   } else if (healTotal > 0) {
     msgs.push(`${atkName}は　${healTotal}回復した！`);
   }
