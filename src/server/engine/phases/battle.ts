@@ -58,11 +58,12 @@ export function runBattlePhase(state: GameState): void {
   if (state.phase !== 'battle') throw new Error('not in battle phase');
   const pairs = makePairs(state);
   const matches: BattleMatch[] = [];
-  const losers: string[] = [];
+  const rewardPlayers: string[] = [];
 
   for (const [aId, bId] of pairs) {
     if (!bId) {
       // Player has a bye -- treat as automatic win, no opponent.
+      rewardPlayers.push(aId);
       matches.push({
         a: aId,
         b: aId,
@@ -107,8 +108,8 @@ export function runBattlePhase(state: GameState): void {
       log: result.log,
     });
     state.log.push({ kind: 'battle_match', a: aId, b: bId, winner: result.winner });
-    if (result.winner === 'a') losers.push(bId);
-    else if (result.winner === 'b') losers.push(aId);
+    rewardPlayers.push(aId);
+    rewardPlayers.push(bId);
     // draw -> nobody gets a reward
   }
 
@@ -120,7 +121,7 @@ export function runBattlePhase(state: GameState): void {
 
   const battleState: BattlePhaseState = { matches };
   state.battle = battleState;
-  state.reward = { pendingPlayerIds: losers, choices: {} };
+  state.reward = { pendingPlayerIds: rewardPlayers, choices: {} };
   state.phase = 'reward';
   state.log.push({
     kind: 'phase_change',
