@@ -77,10 +77,13 @@ function TournamentBattleView({
   myId: string | null;
 }) {
   const bracket = state.tournament?.bracket ?? [];
-  const currentRound = state.tournament?.currentRound ?? 1;
+  // Use the last completed match's round number rather than currentRound:
+  // currentRound is already incremented before the animation broadcast fires,
+  // so the last match of a round would be filtered out if we used currentRound.
+  const animRound = bracket.length > 0 ? bracket[bracket.length - 1]!.round : 1;
 
-  // All matches resolved so far in the current round.
-  const roundMatches = bracket.filter((m) => m.round === currentRound);
+  // All matches resolved so far in the animated round.
+  const roundMatches = bracket.filter((m) => m.round === animRound);
 
   const [selectedIdx, setSelectedIdx] = useState<number>(() => Math.max(0, roundMatches.length - 1));
 
@@ -107,7 +110,7 @@ function TournamentBattleView({
 
   return (
     <section style={{ display: 'grid', gap: 12 }}>
-      <h2 style={{ margin: 0 }}>トーナメント R{currentRound}</h2>
+      <h2 style={{ margin: 0 }}>トーナメント R{animRound}</h2>
 
       {/* Match selector — only shown when there are multiple matches in this round */}
       {roundMatches.length > 1 && (

@@ -390,7 +390,11 @@ export class GameWsServer {
     if (!game.consumeTournamentMatchResolved()) return false;
     const bracket = game.state.tournament?.bracket ?? [];
     const lastMatch = bracket[bracket.length - 1];
-    if (!lastMatch) return false;
+    if (!lastMatch) {
+      // No real matches yet (all byes so far): skip animation and continue.
+      this.driveGame(room);
+      return true;
+    }
     let skillUses = 0;
     for (const e of lastMatch.log) if (e.kind === 'skill_use') skillUses++;
     if (skillUses === 0) {
