@@ -78,8 +78,8 @@ export function RoomView({ socket }: { socket: GameSocket }) {
       <header>
         <h2 style={{ margin: 0 }}>Room {room.id}</h2>
         <p style={{ margin: '4px 0', opacity: 0.7 }}>
-          {room.players.length}/8 プレイヤー
-          {room.players.length < 8 ? ` (残り ${8 - room.players.length} はCPUで補充)` : ''}
+          {room.players.length}/{room.maxPlayers} プレイヤー
+          {room.players.length < room.maxPlayers ? ` (残り ${room.maxPlayers - room.players.length} はCPUで補充)` : ''}
         </p>
       </header>
 
@@ -119,6 +119,29 @@ export function RoomView({ socket }: { socket: GameSocket }) {
             socket.send({ type: 'set_room_settings', eventCardCount: v })
           }
         />
+        <label style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 13 }}>
+          <span style={{ minWidth: 220 }}>プレイヤー人数</span>
+          <span style={{ display: 'flex', gap: 6 }}>
+            {([4, 8] as const).map((n) => (
+              <button
+                key={n}
+                disabled={!canEdit}
+                onClick={() => socket.send({ type: 'set_room_settings', maxPlayers: n })}
+                style={{
+                  padding: '2px 12px',
+                  fontWeight: room.maxPlayers === n ? 700 : 400,
+                  background: room.maxPlayers === n ? '#2980b9' : '#eee',
+                  color: room.maxPlayers === n ? '#fff' : '#333',
+                  border: '1px solid #ccc',
+                  borderRadius: 4,
+                  cursor: canEdit ? 'pointer' : 'default',
+                }}
+              >
+                {n}人
+              </button>
+            ))}
+          </span>
+        </label>
       </fieldset>
 
       <fieldset

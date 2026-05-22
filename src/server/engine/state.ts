@@ -52,9 +52,12 @@ export function createInitialState(opts: {
   skillCardCounts?: Record<string, number>;
   /** Multiplier for the event deck size (1-3, default 1). */
   eventCardCount?: number;
+  /** Maximum seats (4 or 8, default 8). CPUs fill empty seats up to this count. */
+  maxPlayers?: 4 | 8;
 }): GameState {
-  if (opts.players.length < 0 || opts.players.length > 8) {
-    throw new Error('players must be 0..8 (CPUs fill remaining slots)');
+  const maxSeats = opts.maxPlayers === 4 ? 4 : 8;
+  if (opts.players.length < 0 || opts.players.length > maxSeats) {
+    throw new Error(`players must be 0..${maxSeats} (CPUs fill remaining slots)`);
   }
   const totalRounds = clampRoundCount(opts.totalRounds ?? 3);
   const miniRoundsPerRound = clampRoundCount(opts.miniRoundsPerRound ?? 3);
@@ -82,7 +85,7 @@ export function createInitialState(opts: {
     bonusSlots: 0,
   }));
   let cpuIdx = 1;
-  while (seats.length < 8) {
+  while (seats.length < maxSeats) {
     const pi = seats.length;
     seats.push({
       id: `cpu-${cpuIdx}`,
@@ -102,7 +105,7 @@ export function createInitialState(opts: {
   const shuffledColors = shuffle(PLAYER_COLORS, rng);
   const fullPlayers: Player[] = seats.map((p, i) => ({ ...p, color: shuffledColors[i]! }));
 
-  const monsterPool = shuffle(MONSTERS.filter((m) => !m.hidden), rng).slice(0, 8);
+  const monsterPool = shuffle(MONSTERS.filter((m) => !m.hidden), rng).slice(0, maxSeats);
 
   const monsterPick: MonsterPickState = {
     pool: monsterPool,

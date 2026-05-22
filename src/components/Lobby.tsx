@@ -15,7 +15,7 @@ function loadSettings() {
   }
 }
 
-function saveSettings(s: { totalRounds: number; miniRoundsPerRound: number; eventCardCount: number }) {
+function saveSettings(s: { totalRounds: number; miniRoundsPerRound: number; eventCardCount: number; maxPlayers: number }) {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
   } catch {}
@@ -27,6 +27,7 @@ export function Lobby({ socket }: { socket: GameSocket }) {
   const [totalRounds, setTotalRounds] = useState(3);
   const [miniRoundsPerRound, setMiniRoundsPerRound] = useState(3);
   const [eventCardCount, setEventCardCount] = useState(1);
+  const [maxPlayers, setMaxPlayers] = useState<4 | 8>(8);
   const trimmed = name.trim();
 
   useEffect(() => {
@@ -35,14 +36,21 @@ export function Lobby({ socket }: { socket: GameSocket }) {
     if (s.totalRounds) setTotalRounds(s.totalRounds);
     if (s.miniRoundsPerRound) setMiniRoundsPerRound(s.miniRoundsPerRound);
     if (s.eventCardCount) setEventCardCount(s.eventCardCount);
+    if (s.maxPlayers === 4 || s.maxPlayers === 8) setMaxPlayers(s.maxPlayers);
   }, []);
 
   function handleChange(setter: (v: number) => void, key: string) {
     return (v: number) => {
       setter(v);
       const current = loadSettings() ?? {};
-      saveSettings({ totalRounds, miniRoundsPerRound, eventCardCount, ...current, [key]: v });
+      saveSettings({ totalRounds, miniRoundsPerRound, eventCardCount, maxPlayers, ...current, [key]: v });
     };
+  }
+
+  function handleMaxPlayersChange(v: 4 | 8) {
+    setMaxPlayers(v);
+    const current = loadSettings() ?? {};
+    saveSettings({ totalRounds, miniRoundsPerRound, eventCardCount, ...current, maxPlayers: v });
   }
 
   return (
@@ -87,6 +95,28 @@ export function Lobby({ socket }: { socket: GameSocket }) {
           value={eventCardCount}
           onChange={handleChange(setEventCardCount, 'eventCardCount')}
         />
+        <label style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 13 }}>
+          <span style={{ minWidth: 220 }}>プレイヤー人数</span>
+          <span style={{ display: 'flex', gap: 6 }}>
+            {([4, 8] as const).map((n) => (
+              <button
+                key={n}
+                onClick={() => handleMaxPlayersChange(n)}
+                style={{
+                  padding: '2px 12px',
+                  fontWeight: maxPlayers === n ? 700 : 400,
+                  background: maxPlayers === n ? '#2980b9' : '#eee',
+                  color: maxPlayers === n ? '#fff' : '#333',
+                  border: '1px solid #ccc',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                }}
+              >
+                {n}人
+              </button>
+            ))}
+          </span>
+        </label>
       </fieldset>
 
       <div style={{ display: 'flex', gap: 8 }}>
@@ -98,6 +128,7 @@ export function Lobby({ socket }: { socket: GameSocket }) {
               totalRounds,
               miniRoundsPerRound,
               eventCardCount,
+              maxPlayers,
             })
           }
           disabled={!socket.connected}
@@ -144,7 +175,7 @@ export function Lobby({ socket }: { socket: GameSocket }) {
                 }}
               >
                 <div>
-                  <strong>{r.id}</strong> · host: {r.hostName} · {r.playerCount}/8{' '}
+                  <strong>{r.id}</strong> · host: {r.hostName} · {r.playerCount}/{r.maxPlayers ?? 8}{' '}
                   {r.inGame ? '(in game)' : ''}
                 </div>
                 <button
@@ -155,7 +186,7 @@ export function Lobby({ socket }: { socket: GameSocket }) {
                       playerName: trimmed || 'Player',
                     })
                   }
-                  disabled={r.playerCount >= 8 || !socket.connected}
+                  disabled={r.playerCount >= (r.maxPlayers ?? 8) || !socket.connected}
                 >
                   {r.inGame ? '復帰' : 'Join'}
                 </button>

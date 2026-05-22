@@ -43,6 +43,8 @@ export type RoomView = {
   skillCardCounts: Record<string, number>;
   /** Event deck size multiplier (1-3). */
   eventCardCount: number;
+  /** Maximum number of players (4 or 8). */
+  maxPlayers: 4 | 8;
 };
 
 /** Compact view used in the lobby's room list. */
@@ -51,6 +53,7 @@ export type RoomSummary = {
   hostName: string;
   playerCount: number;
   inGame: boolean;
+  maxPlayers: 4 | 8;
 };
 
 /** Player as seen by clients during a game. */
@@ -137,6 +140,7 @@ export type ClientMessage =
       totalRounds?: number;
       miniRoundsPerRound?: number;
       eventCardCount?: number;
+      maxPlayers?: 4 | 8;
     }
   | { type: 'join_room'; roomId: string; playerName: string }
   /** Reconnect handshake: try to reclaim a seat held during the grace period. */
@@ -150,6 +154,7 @@ export type ClientMessage =
       totalRounds?: number;
       miniRoundsPerRound?: number;
       eventCardCount?: number;
+      maxPlayers?: 4 | 8;
       skillCardCounts?: Record<string, number>;
     }
   | { type: 'submit_pick'; baseId: string }

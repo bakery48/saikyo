@@ -1,7 +1,5 @@
 import type { RoomPlayerView, RoomSummary, RoomView } from '../shared/messages';
 
-const MAX_PLAYERS = 8;
-
 function clampSetting(n: number): number {
   if (!Number.isFinite(n)) return 3;
   return Math.max(1, Math.min(3, Math.floor(n)));
@@ -27,6 +25,8 @@ export type Room = {
   skillCardCounts: Record<string, number>;
   /** Event deck size multiplier (1-3). */
   eventCardCount: number;
+  /** Maximum player slots (4 or 8). */
+  maxPlayers: 4 | 8;
 };
 
 export class RoomManager {
@@ -35,7 +35,7 @@ export class RoomManager {
 
   createRoom(
     player: RoomPlayer,
-    settings?: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number },
+    settings?: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number; maxPlayers?: 4 | 8 },
   ): Room {
     if (this.playerToRoom.has(player.id)) {
       throw new Error('player already in a room');
@@ -51,6 +51,7 @@ export class RoomManager {
       miniRoundsPerRound: clampSetting(settings?.miniRoundsPerRound ?? 3),
       eventCardCount: clampSetting(settings?.eventCardCount ?? 1),
       skillCardCounts: {},
+      maxPlayers: settings?.maxPlayers === 4 ? 4 : 8,
     };
     this.rooms.set(id, room);
     this.playerToRoom.set(player.id, id);
@@ -64,7 +65,7 @@ export class RoomManager {
     const room = this.rooms.get(roomId);
     if (!room) throw new Error('room not found');
     if (room.inGame && !opts.allowInGame) throw new Error('game already started');
-    if (room.players.length >= MAX_PLAYERS) throw new Error('room is full');
+    if (room.players.length >= room.maxPlayers) throw new Error('room is full');
     if (room.players.some((p) => p.id === player.id)) {
       throw new Error('already in room');
     }
@@ -118,6 +119,7 @@ export class RoomManager {
       hostName: r.players.find((p) => p.id === r.hostId)?.name ?? '???',
       playerCount: r.players.length,
       inGame: r.inGame,
+      maxPlayers: r.maxPlayers,
     }));
   }
 
@@ -137,6 +139,7 @@ export class RoomManager {
       miniRoundsPerRound: room.miniRoundsPerRound,
       eventCardCount: room.eventCardCount,
       skillCardCounts: room.skillCardCounts,
+      maxPlayers: room.maxPlayers,
     };
   }
 
@@ -146,7 +149,7 @@ export class RoomManager {
    */
   setSettings(
     hostId: string,
-    settings: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number; skillCardCounts?: Record<string, number> },
+    settings: { totalRounds?: number; miniRoundsPerRound?: number; eventCardCount?: number; maxPlayers?: 4 | 8; skillCardCounts?: Record<string, number> },
   ): Room {
     const room = this.getRoomByPlayer(hostId);
     if (!room) throw new Error('not in a room');
@@ -160,6 +163,9 @@ export class RoomManager {
     }
     if (settings.eventCardCount !== undefined) {
       room.eventCardCount = clampSetting(settings.eventCardCount);
+    }
+    if (settings.maxPlayers !== undefined) {
+      room.maxPlayers = settings.maxPlayers === 4 ? 4 : 8;
     }
     if (settings.skillCardCounts !== undefined) {
       room.skillCardCounts = settings.skillCardCounts;
