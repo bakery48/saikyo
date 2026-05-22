@@ -79,6 +79,13 @@ export function MyMonsterPanel({
       </summary>
 
       <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
+        <img
+          src={`/monsters/${monster.baseId}.png`}
+          alt={monster.name}
+          style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 6, border: '2px solid #ccc', background: '#fff' }}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+        />
+
         <MonsterDetails monster={monster} />
 
         <div>
