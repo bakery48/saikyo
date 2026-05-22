@@ -804,6 +804,8 @@ function resolveAttack(args: {
     amount: actual,
     hpAfter: defender.hp,
   });
+  // Once-buffs (buff_self duration:'once') protect against the next hit — consume them now.
+  if (actual > 0) consumeOnceBuffs(defender);
   // low_damage_bonus: if the hit dealt ≤ threshold, add bonus true damage.
   for (const p of attackerPassives) {
     if (p.effect.kind === 'low_damage_bonus' && actual <= p.effect.threshold) {
@@ -1182,7 +1184,6 @@ function applySkill(args: {
   if (user.nullifyOpponentNext) {
     user.nullifyOpponentNext = false;
     log.push({ kind: 'nullified', player: userSide, skillId: skill.id });
-    consumeOnceBuffs(user);
     user.nextAmp = 1;
     user.activesUsedCount += 1;
     return;
@@ -1208,7 +1209,6 @@ function applySkill(args: {
       log.push({ kind: 'damage', from: userSide, to: userSide, amount: penalty, hpAfter: user.hp });
     }
     log.push({ kind: 'skill_fizzle', player: userSide, skillId: skill.id, selfDamage: penalty });
-    consumeOnceBuffs(user);
     user.nextAmp = 1;
     user.activesUsedCount += 1;
     applySelfDecay(user, userPassives, userSide, log);
@@ -2083,8 +2083,7 @@ function applySkill(args: {
       break;
     }
   }
-  // After applying, per-active counters update and once-buffs/amp consume.
-  consumeOnceBuffs(user);
+  // After applying, per-active counters update. Once-buffs are consumed on take-damage (see resolveAttack).
   user.nextAmp = 1;
   user.activesUsedCount += 1;
   // Remember this effect so the opponent's `mimic_last` can replay it.
