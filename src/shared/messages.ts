@@ -41,6 +41,8 @@ export type RoomView = {
   miniRoundsPerRound: number;
   /** Per-card skill deck counts (cardId -> 0|1|2|3). Missing entries use rarity defaults. */
   skillCardCounts: Record<string, number>;
+  /** Per-card action deck counts (cardId -> count). Missing entries use card.count. */
+  actionCardCounts: Record<string, number>;
   /** Event deck size multiplier (1-3). */
   eventCardCount: number;
   /** Maximum number of players (4 or 8). */
@@ -156,6 +158,7 @@ export type ClientMessage =
       eventCardCount?: number;
       maxPlayers?: 4 | 8;
       skillCardCounts?: Record<string, number>;
+      actionCardCounts?: Record<string, number>;
     }
   | { type: 'submit_pick'; baseId: string }
   | { type: 'submit_draft'; skillId: string }

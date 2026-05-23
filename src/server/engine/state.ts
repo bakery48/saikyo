@@ -48,6 +48,8 @@ export function createInitialState(opts: {
   miniRoundsPerRound?: number;
   /** Per-card skill deck counts (cardId -> 0|1|2|3). Missing entries use rarity defaults. */
   skillCardCounts?: Record<string, number>;
+  /** Per-card action deck counts (cardId -> count). Missing entries use card.count. */
+  actionCardCounts?: Record<string, number>;
   /** Multiplier for the event deck size (1-3, default 1). */
   eventCardCount?: number;
   /** Maximum seats (4 or 8, default 8). CPUs fill empty seats up to this count. */
@@ -129,7 +131,7 @@ export function createInitialState(opts: {
     phase: 'pick_monster',
     decks: {
       event: shuffle(EVENTS.flatMap(c => Array<EventCard>((c.count ?? 1) * Math.max(1, Math.min(3, Math.floor(opts.eventCardCount ?? 1)))).fill(c)), rng),
-      action: shuffle(ACTIONS.flatMap(c => Array<ActionCard>(c.count ?? 1).fill(c)), rng),
+      action: shuffle(ACTIONS.flatMap(c => Array<ActionCard>(opts.actionCardCounts?.[c.id] ?? c.count ?? 1).fill(c)), rng),
       skill: (() => {
         const skillDeck: SkillCard[] = [];
         for (const card of SKILLS) {

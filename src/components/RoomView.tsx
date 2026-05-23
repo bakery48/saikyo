@@ -3,8 +3,10 @@ import { useEffect } from 'react';
 import type { GameSocket } from '../lib/useGameSocket';
 import type { Rarity, SkillCard } from '../server/engine/types';
 import { SKILLS } from '../server/engine/cards/skills';
+import { ACTIONS } from '../server/engine/cards/actions';
 
 const SKILL_COUNTS_KEY = 'saikyo-skill-counts';
+const ACTION_COUNTS_KEY = 'saikyo-action-counts';
 
 const RARITY_COLORS: Record<Rarity, string> = {
   N: '#888',
@@ -31,6 +33,7 @@ export function RoomView({ socket }: { socket: GameSocket }) {
   const canEdit = isHost && !room.inGame;
 
   const skillCardCounts: Record<string, number> = room.skillCardCounts ?? {};
+  const actionCardCounts: Record<string, number> = room.actionCardCounts ?? {};
 
   // Auto-apply saved skill counts when host enters a freshly-created room
   useEffect(() => {
@@ -41,6 +44,21 @@ export function RoomView({ socket }: { socket: GameSocket }) {
         const saved = JSON.parse(raw) as Record<string, number>;
         if (Object.keys(saved).length > 0) {
           socket.send({ type: 'set_room_settings', skillCardCounts: saved });
+        }
+      }
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-apply saved action counts when host enters a freshly-created room
+  useEffect(() => {
+    if (!isHost || room.inGame || Object.keys(actionCardCounts).length > 0) return;
+    try {
+      const raw = localStorage.getItem(ACTION_COUNTS_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as Record<string, number>;
+        if (Object.keys(saved).length > 0) {
+          socket.send({ type: 'set_room_settings', actionCardCounts: saved });
         }
       }
     } catch {}
@@ -66,6 +84,16 @@ export function RoomView({ socket }: { socket: GameSocket }) {
     }
     socket.send({ type: 'set_room_settings', skillCardCounts: newCounts });
     try { localStorage.setItem(SKILL_COUNTS_KEY, JSON.stringify(newCounts)); } catch {}
+  }
+
+  function getActionCount(cardId: string, defaultCount: number): number {
+    return actionCardCounts[cardId] ?? defaultCount;
+  }
+
+  function setActionCardCount(cardId: string, count: number) {
+    const newCounts = { ...actionCardCounts, [cardId]: count };
+    socket.send({ type: 'set_room_settings', actionCardCounts: newCounts });
+    try { localStorage.setItem(ACTION_COUNTS_KEY, JSON.stringify(newCounts)); } catch {}
   }
 
   const skillsByRarity: Record<Rarity, typeof SKILLS> = { N: [], R: [], SR: [], SSR: [] };
@@ -236,6 +264,57 @@ export function RoomView({ socket }: { socket: GameSocket }) {
             </div>
           </div>
         ))}
+      </fieldset>
+
+      <fieldset
+        style={{
+          border: '1px solid #ccc',
+          borderRadius: 6,
+          padding: '8px 12px',
+          display: 'grid',
+          gap: 8,
+        }}
+      >
+        <legend style={{ padding: '0 4px', fontSize: 13, fontWeight: 600 }}>
+          アクションデッキ設定 {canEdit ? '(ホストのみ編集可)' : '(読み取り専用)'}
+        </legend>
+        <div style={{ display: 'grid', gap: 3 }}>
+          {ACTIONS.map((card) => {
+            const def = card.count ?? 1;
+            const current = getActionCount(card.id, def);
+            const max = Math.max(10, def * 3);
+            return (
+              <div
+                key={card.id}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}
+              >
+                <span style={{ minWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {card.name}
+                </span>
+                <span style={{ opacity: 0.45, fontSize: 11, minWidth: 32 }}>既定{def}</span>
+                {Array.from({ length: max + 1 }, (_, n) => (
+                  <button
+                    key={n}
+                    disabled={!canEdit}
+                    onClick={() => setActionCardCount(card.id, n)}
+                    style={{
+                      fontSize: 11,
+                      padding: '2px 6px',
+                      cursor: canEdit ? 'pointer' : 'default',
+                      background: current === n ? '#555' : '#eee',
+                      color: current === n ? '#fff' : '#333',
+                      border: '1px solid #ccc',
+                      borderRadius: 3,
+                      minWidth: 22,
+                    }}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
+        </div>
       </fieldset>
 
       <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 6 }}>
