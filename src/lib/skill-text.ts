@@ -420,12 +420,13 @@ export function describePassive(p: { trigger: PassiveTrigger; effect: PassiveEff
  * Return the description text for a SkillCard.
  * Uses `card.description` if manually set; otherwise auto-generates from the effect.
  */
-export function describeSkillCard(c: { active?: { effect: SkillEffect }; passive?: { trigger: PassiveTrigger; effect: PassiveEffect }; description?: string; tag?: string }): string {
+export function describeSkillCard(c: { active?: { effect: SkillEffect; speedRush?: boolean }; passive?: { trigger: PassiveTrigger; effect: PassiveEffect }; description?: string; tag?: string }): string {
   if (c.description) return c.description;
   if (c.active) {
     const base = describeActiveEffect(c.active.effect);
-    if (c.tag === 'sin') return `${base} ／ 【罪】罪の数でバトル開始時にATK自動強化`;
-    return base;
+    const prefix = c.active.speedRush ? '【速攻】' : '';
+    const suffix = c.tag === 'sin' ? ' ／ 【罪】罪の数でバトル開始時にATK自動強化' : '';
+    return `${prefix}${base}${suffix}`;
   }
   if (c.passive) return `パッシブ：${describePassive(c.passive)}`;
   return '';

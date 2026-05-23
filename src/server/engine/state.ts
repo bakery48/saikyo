@@ -384,6 +384,7 @@ export function syncMonsterFromSlots(state: GameState, player: Player): void {
         rarity: card.rarity,
         nameTag: card.rarity === 'N' ? undefined : card.nameTag,
         tag: card.tag,
+        speedRush: card.active.speedRush,
         effect: card.active.effect,
       });
     }

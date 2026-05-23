@@ -229,6 +229,8 @@ export type ActiveSkill = {
   nameTag?: string;
   /** Optional classification tag (e.g., 'sin'). Used by passives that scale with tagged skills. */
   tag?: SkillTag;
+  /** 速攻: if true, this skill only takes effect in slot 1 or 2. Slot 3+ causes a fizzle. */
+  speedRush?: boolean;
   effect: SkillEffect;
 };
 

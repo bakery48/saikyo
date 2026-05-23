@@ -1213,6 +1213,15 @@ function applySkill(args: {
     return;
   }
   log.push({ kind: 'skill_use', player: userSide, skillId: skill.id, name: skill.name });
+  // 速攻: only effective in slot 1 or 2 (activesUsedCount is the number already consumed).
+  if (skill.speedRush && user.activesUsedCount >= 2) {
+    log.push({ kind: 'skill_fizzle', player: userSide, skillId: skill.id, selfDamage: 0 });
+    user.nextAmp = 1;
+    user.activesUsedCount += 1;
+    applySelfDecay(user, userPassives, userSide, log);
+    applyOnActiveUsedPassives(user, userPassives, userSide, log);
+    return;
+  }
   const e = skill.effect;
   // Multi-attack pending: only attack/true_damage qualify; otherwise fizzle and self-damage.
   if (user.pendingMultiAttack > 0 && e.kind !== 'attack' && e.kind !== 'true_damage') {
