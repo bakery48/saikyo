@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ClientGameState } from '../../shared/messages';
 import type { GameSocket } from '../../lib/useGameSocket';
 import type { SkillCard } from '../../server/engine/types';
@@ -80,6 +80,9 @@ export function BuildPhaseView({
     setSlots(next);
   };
 
+  const dragFromRef = useRef<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+
   const changeActiveCount = (delta: number): void => {
     const next = Math.max(0, Math.min(TOTAL_SLOTS, activeSlotCount + delta));
     setActiveSlotCount(next);
@@ -138,21 +141,30 @@ export function BuildPhaseView({
           {slots.map((card, idx) => {
             const isActive = idx < activeSlotCount;
             const isDefault = isActive && card === null;
+            const canDrag = iAmPending && !submitted && isActive;
+            const isDragOver = dragOverIdx === idx;
             return (
               <div
                 key={idx}
                 className={card?.rarity === 'SSR' ? 'ssr-card' : undefined}
+                draggable={canDrag}
+                onDragStart={canDrag ? () => { dragFromRef.current = idx; } : undefined}
+                onDragOver={canDrag ? (e) => { e.preventDefault(); setDragOverIdx(idx); } : undefined}
+                onDrop={canDrag ? (e) => { e.preventDefault(); if (dragFromRef.current !== null && dragFromRef.current !== idx) moveSlot(dragFromRef.current, idx); dragFromRef.current = null; setDragOverIdx(null); } : undefined}
+                onDragEnd={() => { dragFromRef.current = null; setDragOverIdx(null); }}
                 style={{
-                  border: `2px solid ${isActive ? (card ? SKILL_CATEGORY_COLOR[getSkillCategory(card)] : '#bbb') : '#ddd'}`,
+                  border: `2px solid ${isDragOver ? '#0066cc' : isActive ? (card ? SKILL_CATEGORY_COLOR[getSkillCategory(card)] : '#bbb') : '#ddd'}`,
                   borderRadius: 8,
                   padding: 8,
-                  background: !isActive ? '#f5f5f5' : isDefault ? '#fafafa' : '#fff',
+                  background: isDragOver ? '#e8f0ff' : !isActive ? '#f5f5f5' : isDefault ? '#fafafa' : '#fff',
                   opacity: !isActive ? 0.45 : 1,
                   minHeight: 72,
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 2,
                   position: 'relative',
+                  cursor: canDrag ? 'grab' : 'default',
+                  transition: 'border-color 100ms, background 100ms',
                 }}
               >
                 <div style={{ fontSize: 10, opacity: 0.5, marginBottom: 2 }}>スロット {idx + 1}{!isActive ? ' （不活性）' : ''}</div>
