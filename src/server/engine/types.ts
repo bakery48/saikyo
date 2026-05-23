@@ -410,7 +410,9 @@ export type PassiveEffect =
   /** Any normal shield or reflect shield gained by this side is converted to ghost shield instead. */
   | { kind: 'shield_reflect_to_ghost' }
   /** At battle_start, buff ATK by (passiveCount × perPassive) for the battle. */
-  | { kind: 'passive_count_atk_buff'; perPassive: number };
+  | { kind: 'passive_count_atk_buff'; perPassive: number }
+  /** When dealing damage, take floor(damageDealt / denominator) as true self-damage. */
+  | { kind: 'recoil'; denominator: number };
 
 export type PassiveSkill = {
   id: string;

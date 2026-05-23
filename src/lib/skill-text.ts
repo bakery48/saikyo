@@ -347,6 +347,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `永続的に相手のシールドを無視して攻撃する（DEFは通常通り計算）`;
     case 'passive_count_atk_buff':
       return `バトル開始時、パッシブ数×${e.perPassive}だけATKをバフ（バトル中）`;
+    case 'recoil':
+      return `攻撃が当たるたびに与ダメの1/${e.denominator}を自分も受ける`;
   }
 }
 

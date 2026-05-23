@@ -563,11 +563,11 @@ function takeDamage(
       target.thresholdShield = 0; // shield broken by a large hit
     }
   }
-  if (!pierceReductions && target.damageReduction > 0) {
+  if (!pierceReductions && target.damageReduction !== 0) {
     const passive = passives.find(
       (p) => p.effect.kind === 'damage_reduction' && p.trigger.kind === 'on_take_damage',
     );
-    if (passive && dmg > 0) log.push({ kind: 'passive', player: side, passiveId: passive.id });
+    if (passive && dmg > 0 && target.damageReduction > 0) log.push({ kind: 'passive', player: side, passiveId: passive.id });
     dmg = Math.max(0, dmg - target.damageReduction);
   }
   // 逆境 low_hp_damage_reduction: extra reduction while at or below half HP.
@@ -955,6 +955,7 @@ function resolveAttack(args: {
     }
   }
   applyLifesteal(attacker, attackerPassives, actual, attackerSide, log);
+  applyRecoil(attacker, attackerPassives, actual, attackerSide, log);
   applyHexDef(attacker, attackerPassives, defender, attackerSide, defenderSide, actual, log);
   applyCounterDamage(
     defender,
@@ -1159,6 +1160,24 @@ function applyLifesteal(
     log.push({ kind: 'heal', player: side, amount: applied, hpAfter: attacker.hp });
     log.push({ kind: 'passive', player: side, passiveId: passive.id });
   }
+}
+
+/** 憤怒 recoil: when dealing damage, take floor(damage / denominator) as self-damage. */
+function applyRecoil(
+  attacker: CombatStats,
+  passives: PassiveSkill[],
+  damageDealt: number,
+  side: Side,
+  log: BattleEvent[],
+): void {
+  if (damageDealt <= 0) return;
+  const passive = passives.find((p) => p.effect.kind === 'recoil');
+  if (!passive || passive.effect.kind !== 'recoil') return;
+  const recoil = Math.floor(damageDealt / Math.max(1, passive.effect.denominator));
+  if (recoil <= 0) return;
+  attacker.hp -= recoil;
+  log.push({ kind: 'damage', from: side, to: side, amount: recoil, hpAfter: attacker.hp });
+  log.push({ kind: 'passive', player: side, passiveId: passive.id });
 }
 
 function applySkill(args: {
