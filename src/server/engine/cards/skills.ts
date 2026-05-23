@@ -11,7 +11,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-n-001', name: '体当たり', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-n-032', name: '先制打', rarity: 'N', active: { speedRush: true, effect: { kind: 'attack', mult: 1.3, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-n-009', name: '小回復', rarity: 'N', active: { effect: { kind: 'heal', amount: 3 } } },
-  { id: 'sk-n-010', name: '小盾', rarity: 'N', active: { effect: { kind: 'shield', amount: 2 } } },
+  { id: 'sk-n-010', name: '小盾', rarity: 'N', active: { effect: { kind: 'shield', amount: 12 } } },
   { id: 'sk-n-011', name: '気合溜め', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 3, duration: 'once' } } },
   { id: 'sk-n-012', name: '守護の構え', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'def', amount: 3, duration: 'once' } } },
   { id: 'sk-n-013', name: '威嚇', rarity: 'N', active: { effect: { kind: 'debuff_target', stat: 'atk', amount: 2, duration: 'battle' } } },
@@ -26,7 +26,7 @@ export const SKILLS: SkillCard[] = [
   // ─── R (Rare) ──────────────────────────────────────────────────────────────
   { id: 'sk-r-001', name: '強攻撃', rarity: 'R', nameTag: 'パワー', active: { effect: { kind: 'attack', mult: 1.3, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-r-002', name: '貫通刺突', rarity: 'SR', nameTag: 'ピアサー', active: { effect: { kind: 'true_damage', amount: 6 } } },
-  { id: 'sk-r-004', name: 'いばらの盾', rarity: 'R', nameTag: 'ソーン', active: { effect: { kind: 'reflect_shield', amount: 3 } } },
+  { id: 'sk-r-004', name: 'いばらの盾', rarity: 'R', nameTag: 'ソーン', active: { effect: { kind: 'reflect_shield', amount: 18 } } },
   { id: 'sk-r-054', name: 'オーラ', rarity: 'R', nameTag: 'オーラ', active: { effect: { kind: 'threshold_shield', threshold: 3 } } },
   { id: 'sk-r-073', name: '電光石火', rarity: 'R', nameTag: 'ブリッツ', active: { speedRush: true, effect: { kind: 'attack', mult: 1.7, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-r-005', name: '気力解放', rarity: 'R', nameTag: 'レイジ', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'once' } } },
@@ -38,7 +38,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-029', name: '闘気', rarity: 'R', nameTag: 'フォース', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-012', name: '見切り', rarity: 'SR', nameTag: 'ウィザード', active: { effect: { kind: 'nullify_next' } } },
   { id: 'sk-r-015', name: '癒しの一滴', rarity: 'R', nameTag: 'リトル', active: { effect: { kind: 'heal', amount: 5 } } },
-  { id: 'sk-r-016', name: '中盾', rarity: 'R', nameTag: 'シルバー', active: { effect: { kind: 'shield', amount: 4 } } },
+  { id: 'sk-r-016', name: '中盾', rarity: 'R', nameTag: 'シルバー', active: { effect: { kind: 'shield', amount: 24 } } },
   { id: 'sk-r-055', name: '盾割り', rarity: 'R', nameTag: 'シールドブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.0, multShield: 2.0, attackKind: 'strike' } } },
   // ─── 七つの大罪 (Sin cards) — all passive demerits ──────────────────────
   { id: 'sk-r-056', name: '虚栄の罪', rarity: 'N', nameTag: 'プライド', tag: 'sin', isPassive: true,
@@ -86,8 +86,8 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'インペリアル', active: { effect: { kind: 'attack', mult: 1.6, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-003', name: '青眼の滅光', rarity: 'SSR', nameTag: 'ブルーアイズ', active: { effect: { kind: 'true_damage', amount: 8 } } },
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
-  { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ジャイアント', active: { effect: { kind: 'shield', amount: 7 } } },
-  { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 5 } } },
+  { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ジャイアント', active: { effect: { kind: 'shield', amount: 42 } } },
+  { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 30 } } },
   { id: 'sk-sr-046', name: 'ハイ・オーラ', rarity: 'SR', nameTag: 'ハイオーラ', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.25, threshold: 5 } } },
   { id: 'sk-sr-047', name: '鎧砕き', rarity: 'SR', nameTag: 'アーマークラッシャー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.2, multShield: 3.0, attackKind: 'strike' } } },
   { id: 'sk-sr-006', name: '剛力の解放', rarity: 'SR', nameTag: 'グレイト', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'battle' } } },
@@ -113,8 +113,8 @@ export const SKILLS: SkillCard[] = [
 
   // ─── SSR ───────────────────────────────────────────────────────────────────
   { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'アルティメット', active: { effect: { kind: 'attack', mult: 2.0, useStat: 'atk', attackKind: 'passthrough' } } },
-  { id: 'sk-ssr-003', name: '聖なる盾', rarity: 'SSR', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 12 } } },
-  { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッド', active: { effect: { kind: 'reflect_shield', amount: 10 } } },
+  { id: 'sk-ssr-003', name: '聖なる盾', rarity: 'SSR', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 72 } } },
+  { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッド', active: { effect: { kind: 'reflect_shield', amount: 60 } } },
   { id: 'sk-ssr-019', name: 'マキシマム・オーラ', rarity: 'SSR', nameTag: 'マキシマム', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.5, threshold: 7 } } },
   { id: 'sk-ssr-020', name: '絶壁砕き', rarity: 'SSR', nameTag: 'ウォールブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.5, multShield: 4.0, attackKind: 'strike' } } },
   { id: 'sk-ssr-004', name: '大噴火', rarity: 'SSR', nameTag: 'ボルケーノ', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
@@ -245,7 +245,7 @@ export const SKILLS: SkillCard[] = [
     name: '血の盾',
     rarity: 'R',
     nameTag: 'ブラッド',
-    active: { effect: { kind: 'pay_hp_shield', hpCost: 4, shieldAmount: 7 } },
+    active: { effect: { kind: 'pay_hp_shield', hpCost: 4, shieldAmount: 42 } },
   },
   // ── SR actives (new) ────────────────────────────────────────────────────
   {
@@ -933,7 +933,7 @@ export const SKILLS: SkillCard[] = [
     isPassive: true,
     passive: {
       trigger: { kind: 'battle_start' },
-      effect: { kind: 'grant_shield', amount: 1 },
+      effect: { kind: 'grant_shield', amount: 6 },
     },
   },
   {
@@ -1031,7 +1031,7 @@ export const SKILLS: SkillCard[] = [
     isPassive: true,
     passive: {
       trigger: { kind: 'on_own_turn_start' },
-      effect: { kind: 'regen_shield', amount: 2 },
+      effect: { kind: 'regen_shield', amount: 12 },
     },
   },
   // SR passives
