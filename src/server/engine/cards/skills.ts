@@ -10,7 +10,7 @@ export const SKILLS: SkillCard[] = [
   // ─── N (Normal) ────────────────────────────────────────────────────────────
   { id: 'sk-n-001', name: '体当たり', rarity: 'N', active: { effect: { kind: 'attack', mult: 1.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-n-032', name: '先制打', rarity: 'N', active: { speedRush: true, effect: { kind: 'attack', mult: 1.3, useStat: 'atk', attackKind: 'passthrough' } } },
-  { id: 'sk-n-009', name: '小回復', rarity: 'N', active: { effect: { kind: 'heal', amount: 3 } } },
+  { id: 'sk-n-009', name: '小回復', rarity: 'N', active: { effect: { kind: 'heal', amount: 4 } } },
   { id: 'sk-n-010', name: '小盾', rarity: 'N', active: { effect: { kind: 'shield', amount: 12 } } },
   { id: 'sk-n-011', name: '気合溜め', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 3, duration: 'once' } } },
   { id: 'sk-n-012', name: '守護の構え', rarity: 'N', active: { effect: { kind: 'buff_self', stat: 'def', amount: 3, duration: 'once' } } },
@@ -37,7 +37,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-010', name: '氷の束縛', rarity: 'R', nameTag: 'アイス', active: { effect: { kind: 'debuff_target', stat: 'spd', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-029', name: '闘気', rarity: 'R', nameTag: 'フォース', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-012', name: '見切り', rarity: 'SR', nameTag: 'ウィザード', active: { effect: { kind: 'nullify_next' } } },
-  { id: 'sk-r-015', name: '癒しの一滴', rarity: 'R', nameTag: 'リトル', active: { effect: { kind: 'heal', amount: 5 } } },
+  { id: 'sk-r-015', name: '癒しの一滴', rarity: 'R', nameTag: 'リトル', active: { effect: { kind: 'heal', amount: 8 } } },
   { id: 'sk-r-016', name: '中盾', rarity: 'R', nameTag: 'シルバー', active: { effect: { kind: 'shield', amount: 24 } } },
   { id: 'sk-r-055', name: '盾割り', rarity: 'R', nameTag: 'シールドブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.0, multShield: 2.0, attackKind: 'strike' } } },
   // ─── 七つの大罪 (Sin cards) — all passive demerits ──────────────────────
@@ -85,7 +85,8 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-035', name: '神速滅殺', rarity: 'SSR', nameTag: 'アルティメット', active: { speedRush: true, effect: { kind: 'attack', mult: 2.8, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'インペリアル', active: { effect: { kind: 'attack', mult: 1.6, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-003', name: '青眼の滅光', rarity: 'SSR', nameTag: 'ブルーアイズ', active: { effect: { kind: 'true_damage', amount: 20 } } },
-  { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
+  { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 12 } } },
+  { id: 'sk-ssr-036', name: '聖光の奇跡', rarity: 'SSR', nameTag: 'ミラクル', active: { effect: { kind: 'heal', amount: 16 } } },
   { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ジャイアント', active: { effect: { kind: 'shield', amount: 42 } } },
   { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 15 } } },
   { id: 'sk-sr-046', name: 'ハイ・オーラ', rarity: 'SR', nameTag: 'ハイオーラ', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.25, threshold: 5 } } },
