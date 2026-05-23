@@ -103,18 +103,18 @@
 - 全プレイヤーをランダムにシャッフルしてペアリング
 - 奇数の場合は1人が不戦勝（bye）
 - 各試合はバトルエンジンで解決（後述）
-- 敗者リストが `state.reward.pendingPlayerIds` に格納される
+- 勝者・敗者・bye の全プレイヤーが `state.reward.pendingPlayerIds` に格納される（引き分けは除外）
 - 完了後 `phase = 'reward'`
 
 ### 6. 鍛え直しフェーズ (reward)
 
-- **対象：** バトルで負けたプレイヤー（勝者・bye・引き分けは対象外）
+- **対象：** バトルに参加した全プレイヤー（勝者・敗者・bye を含む。引き分けは対象外）
 - **選択肢：**
-  - `stat_up` (stat: StatKey) → HP/ATK/DEF/SPD いずれか +2
+  - `stat_up` (stat: StatKey) → HP+24 / ATK+2 / DEF+2 / SPD+2 いずれか
   - `skill_top` → スキルデッキ先頭を獲得
 - CPU は greedy ポリシーで自動選択
 - 全員確定後 `state.battle = null`、`state.reward = null`
-- `round < 3` → `round += 1`、`miniRound = 1`、`phase = 'event'`
+- `round < totalRounds` → `round += 1`、`miniRound = 1`、`phase = 'action'`
 
 ### 7. トーナメント (tournament)
 
@@ -150,6 +150,38 @@
 - MISSすると `kind: 'miss'` ログが残り、UIに `MISS!` 表示
 - お試し機能なのでフラグ1つでオフ可能
 
+### スキルキーワード
+
+| キーワード | 意味 |
+|-----------|------|
+| **【速攻】** | スロット1・2に配置した場合のみ有効。スロット3以降は不発（ターン消費のみ）。`ActiveSkill.speedRush = true` で指定。 |
+| **【廃棄】** | 使用後にスロットを消費し戻らない（`rewind_skill` 効果に内包）。 |
+| **【必中】** | 回避不可の攻撃（`pin_attack` 効果に内包）。 |
+| **【罪】** | 七つの大罪カード。パッシブとして常時デメリット効果を発揮。4枚以上でバトル開始時に自動ボーナス発動（下記参照）。 |
+
+### 罪（Sin）システム
+
+七つの大罪カードはすべてパッシブ。保有するだけでデメリットが常時発動する。
+
+| カード | デメリット |
+|--------|-----------|
+| 虚栄の罪 | battle_start: DEF-3 |
+| 嫉妬の罪 | battle_start: ATK-3 |
+| 怠惰の罪 | battle_start: SPD-3 |
+| 憤怒の罪 | 攻撃ヒット時: 与ダメ×1/3を自分も受ける |
+| 強欲の罪 | スキル使用ごと: ATK-1 |
+| 暴食の罪 | battle_start: HP-8 |
+| 色欲の罪 | 常時: 被ダメ+2 |
+
+**自動ボーナス（4罪以上でバトル開始時に発動）：**
+
+| 罪数 | ATK | DEF | SPD |
+|------|-----|-----|-----|
+| 4 | +4 | — | — |
+| 5 | +10 | +5 | — |
+| 6 | +18 | +12 | — |
+| 7 | +28 | +14 | +7 |
+
 ### スキル効果
 
 | 種類 | 処理 |
@@ -157,7 +189,7 @@
 | `attack` | ダメージ = max(1, floor(stat × mult × nextAmp + perActiveAmp × 使用数 − DEF)) |
 | `true_damage` | DEF・シールド無視のダメージ |
 | `heal` | 自分のHP回復（バトル開始時HP＝最大HPを超えない） |
-| `shield` | 次の被ダメージを軽減（1回限り） |
+| `shield` | 被ダメを累積吸収（残量が尽きるまで毎ヒット軽減） |
 | `buff_self` | 自分のステータスをバフ（once=次のアクティブのみ / battle=バトル中） |
 | `debuff_target` | 相手のステータスをデバフ |
 | `next_amp` | 次の攻撃の倍率を設定 |
@@ -172,6 +204,8 @@
 | `on_own_turn_start` | 自分のターン開始時 |
 | `on_take_damage` | 被ダメージ時 |
 | `on_deal_damage` | 与ダメージ時 |
+| `on_own_active_used` | 自分のアクティブスキル使用後 |
+| `on_last_active_used` | 自分の最後のアクティブスキル使用後 |
 
 ### 勝利判定（アクティブ消費後）
 
