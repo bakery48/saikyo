@@ -177,7 +177,7 @@ export function describePassiveTrigger(t: PassiveTrigger): string {
 export function describePassiveEffect(e: PassiveEffect): string {
   switch (e.kind) {
     case 'stat_mod':
-      return `${e.stat.toUpperCase()}+${e.amount}`;
+      return `${e.stat.toUpperCase()}${e.amount >= 0 ? '+' : ''}${e.amount}`;
     case 'first_attack_amp':
       return `初撃ダメージ×${e.amount}`;
     case 'first_attack_true':
@@ -189,7 +189,7 @@ export function describePassiveEffect(e: PassiveEffect): string {
     case 'spd_roll_bonus':
       return `先攻後攻判定のダイス出目に+${e.amount}`;
     case 'damage_reduction':
-      return `被ダメ−${e.amount}`;
+      return e.amount >= 0 ? `被ダメ−${e.amount}` : `被ダメ+${-e.amount}（呪い）`;
     case 'turn_start_heal':
       return `HP+${e.amount} 回復`;
     case 'turn_start_heal_even':
@@ -245,7 +245,7 @@ export function describePassiveEffect(e: PassiveEffect): string {
       if (e.atk > 0) parts.push(`ATK-${e.atk}`);
       if (e.def > 0) parts.push(`DEF-${e.def}`);
       if (e.spd > 0) parts.push(`SPD-${e.spd}`);
-      return parts.join('・');
+      return `行動ごとに${parts.join('・')}`;
     }
     case 'reverse_actives_both':
       return `両者のスロット順が逆になる`;
@@ -336,7 +336,9 @@ export function describePassiveEffect(e: PassiveEffect): string {
     case 'immortal_first_phase':
       return `自分のスロット使用回数${e.until}回未満まで被ダメ無効`;
     case 'chronos':
-      return `バトル開始時にATK/DEF/SPD+${e.allBonus}、自分のターン開始時にHP-${e.hpDrain}`;
+      return e.allBonus > 0
+        ? `バトル開始時にATK/DEF/SPD+${e.allBonus}、自分のターン開始時にHP-${e.hpDrain}`
+        : `自分のターン開始時にHP-${e.hpDrain}`;
     case 'final_form':
       return `最後の自分の攻撃で与ダメ+${e.amount}`;
     case 'absolute_zero':
@@ -345,6 +347,8 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `永続的に相手のシールドを無視して攻撃する（DEFは通常通り計算）`;
     case 'passive_count_atk_buff':
       return `バトル開始時、パッシブ数×${e.perPassive}だけATKをバフ（バトル中）`;
+    case 'sin_scale_bonus':
+      return `バトル開始時、所持罪カード1枚につき ATK+${e.atkPerSin} / DEF+${e.defPerSin} / SPD+${e.spdPerSin}（バトル中）`;
   }
 }
 
