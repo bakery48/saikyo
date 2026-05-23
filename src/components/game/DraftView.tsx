@@ -20,18 +20,15 @@ export function DraftView({
   const iAmPending = !!myId && !!draft && draft.pendingPlayerIds.includes(myId);
 
   const [tentative, setTentative] = useState<string | null>(null);
-  const [packOpened, setPackOpened] = useState(false);
+  // Track which draft session the pack was opened in (round-miniRound key).
+  // This avoids useEffect timing issues: the check is synchronous on every render.
+  const draftSessionKey = `${state.round}-${state.miniRound}`;
+  const [openedSession, setOpenedSession] = useState<string | null>(null);
+  const packOpened = openedSession === draftSessionKey;
 
   useEffect(() => {
     setTentative(null);
   }, [draft?.passIndex, !!myCommitted, iAmPending]);
-
-  // Reset pack-opened state when a new draft session begins
-  useEffect(() => {
-    if (!draft) return;
-    setPackOpened(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft?.draftOrder.join(',')]);
 
   if (!draft) return <p>ドラフト準備中...</p>;
 
@@ -54,7 +51,7 @@ export function DraftView({
     return (
       <section style={{ display: 'grid', gap: 16 }}>
         <h2 style={{ margin: 0 }}>パック・ドラフト</h2>
-        <PackReveal cardCount={myPack.length} onOpened={() => setPackOpened(true)} />
+        <PackReveal cardCount={myPack.length} onOpened={() => setOpenedSession(draftSessionKey)} />
         <PendingStrip state={state} />
       </section>
     );
