@@ -26,7 +26,7 @@ export const SKILLS: SkillCard[] = [
   // ─── R (Rare) ──────────────────────────────────────────────────────────────
   { id: 'sk-r-001', name: '強攻撃', rarity: 'R', nameTag: 'パワー', active: { effect: { kind: 'attack', mult: 1.3, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-r-002', name: '貫通刺突', rarity: 'SR', nameTag: 'ピアサー', active: { effect: { kind: 'true_damage', amount: 6 } } },
-  { id: 'sk-r-004', name: 'いばらの盾', rarity: 'R', nameTag: 'ソーン', active: { effect: { kind: 'reflect_shield', amount: 18 } } },
+  { id: 'sk-r-004', name: 'いばらの盾', rarity: 'R', nameTag: 'ソーン', active: { effect: { kind: 'reflect_shield', amount: 9 } } },
   { id: 'sk-r-054', name: 'オーラ', rarity: 'R', nameTag: 'オーラ', active: { effect: { kind: 'threshold_shield', threshold: 3 } } },
   { id: 'sk-r-073', name: '電光石火', rarity: 'R', nameTag: 'ブリッツ', active: { speedRush: true, effect: { kind: 'attack', mult: 1.7, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-r-005', name: '気力解放', rarity: 'R', nameTag: 'レイジ', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'once' } } },
@@ -87,7 +87,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-sr-003', name: '青眼の滅光', rarity: 'SSR', nameTag: 'ブルーアイズ', active: { effect: { kind: 'true_damage', amount: 8 } } },
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
   { id: 'sk-sr-005', name: '大盾', rarity: 'SR', nameTag: 'ジャイアント', active: { effect: { kind: 'shield', amount: 42 } } },
-  { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 30 } } },
+  { id: 'sk-sr-044', name: '鉄棘の盾', rarity: 'SR', nameTag: 'アイアンソーン', active: { effect: { kind: 'reflect_shield', amount: 15 } } },
   { id: 'sk-sr-046', name: 'ハイ・オーラ', rarity: 'SR', nameTag: 'ハイオーラ', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.25, threshold: 5 } } },
   { id: 'sk-sr-047', name: '鎧砕き', rarity: 'SR', nameTag: 'アーマークラッシャー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.2, multShield: 3.0, attackKind: 'strike' } } },
   { id: 'sk-sr-006', name: '剛力の解放', rarity: 'SR', nameTag: 'グレイト', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'battle' } } },
@@ -114,7 +114,7 @@ export const SKILLS: SkillCard[] = [
   // ─── SSR ───────────────────────────────────────────────────────────────────
   { id: 'sk-ssr-001', name: '究極奥義', rarity: 'SSR', nameTag: 'アルティメット', active: { effect: { kind: 'attack', mult: 2.0, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-ssr-003', name: '聖なる盾', rarity: 'SSR', nameTag: 'ガーディアン', active: { effect: { kind: 'shield', amount: 72 } } },
-  { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッド', active: { effect: { kind: 'reflect_shield', amount: 60 } } },
+  { id: 'sk-ssr-018', name: '返り血の盾', rarity: 'SSR', nameTag: 'ブラッド', active: { effect: { kind: 'reflect_shield', amount: 30 } } },
   { id: 'sk-ssr-019', name: 'マキシマム・オーラ', rarity: 'SSR', nameTag: 'マキシマム', active: { effect: { kind: 'pay_hp_threshold_shield', hpCostFraction: 0.5, threshold: 7 } } },
   { id: 'sk-ssr-020', name: '絶壁砕き', rarity: 'SSR', nameTag: 'ウォールブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.5, multShield: 4.0, attackKind: 'strike' } } },
   { id: 'sk-ssr-004', name: '大噴火', rarity: 'SSR', nameTag: 'ボルケーノ', active: { effect: { kind: 'next_amp', mult: 3.0 } } },
