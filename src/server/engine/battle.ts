@@ -1213,8 +1213,8 @@ function applySkill(args: {
     return;
   }
   log.push({ kind: 'skill_use', player: userSide, skillId: skill.id, name: skill.name });
-  // 速攻: only effective in slot 1 or 2 (activesUsedCount is the number already consumed).
-  if (skill.speedRush && user.activesUsedCount >= 2) {
+  // 速攻: only effective in slot 1 or 2 (order is the 1-based slot position).
+  if (skill.speedRush && skill.order > 2) {
     log.push({ kind: 'skill_fizzle', player: userSide, skillId: skill.id, selfDamage: 0 });
     user.nextAmp = 1;
     user.activesUsedCount += 1;
