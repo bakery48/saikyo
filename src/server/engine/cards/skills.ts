@@ -53,9 +53,6 @@ export const SKILLS: SkillCard[] = [
     passive: { trigger: { kind: 'on_own_active_used' }, effect: { kind: 'self_decay', hp: 2, atk: 0, def: 0, spd: 0 } } },
   { id: 'sk-r-062', name: '色欲の罪', rarity: 'N', nameTag: 'ラスト', tag: 'sin', isPassive: true,
     passive: { trigger: { kind: 'on_own_turn_start' }, effect: { kind: 'chronos', allBonus: 0, hpDrain: 1 } } },
-  // ─── 七罪の加護 (Sin synergy passive) ─────────────────────────────────────
-  { id: 'sk-r-099', name: '七罪の加護', rarity: 'SR', nameTag: '七罪', isPassive: true,
-    passive: { trigger: { kind: 'battle_start' }, effect: { kind: 'sin_scale_bonus', atkPerSin: 3, defPerSin: 2, spdPerSin: 1 } } },
   { id: 'sk-r-017', name: '要塞', rarity: 'R', nameTag: 'フォートレス', active: { effect: { kind: 'buff_self', stat: 'def', amount: 4, duration: 'battle' } } },
   { id: 'sk-r-018', name: '速攻', rarity: 'R', nameTag: 'ウィング', active: { effect: { kind: 'attack', mult: 1.1, useStat: 'spd', attackKind: 'passthrough' } } },
   { id: 'sk-r-019', name: 'シールドバッシュ', rarity: 'R', nameTag: 'バッシュ', active: { effect: { kind: 'attack', mult: 1.2, useStat: 'def', attackKind: 'strike' } } },

@@ -351,18 +351,6 @@ function applyBattleStartPassives(
           log.push({ kind: 'passive', player: side, passiveId: p.id });
         }
         break;
-      case 'sin_scale_bonus':
-        if (p.trigger.kind === 'battle_start') {
-          const atkBonus = p.effect.atkPerSin * sinCount;
-          const defBonus = p.effect.defPerSin * sinCount;
-          const spdBonus = p.effect.spdPerSin * sinCount;
-          self.atkMod += atkBonus;
-          self.defMod += defBonus;
-          self.spdMod += spdBonus;
-          log.push({ kind: 'sin_bonus', player: side, sinCount, atk: atkBonus, def: defBonus, spd: spdBonus });
-          log.push({ kind: 'passive', player: side, passiveId: p.id });
-        }
-        break;
       case 'absolute_zero':
         if (p.trigger.kind === 'battle_start') {
           opponent.cannotDodge = true;
@@ -399,6 +387,20 @@ function applyBattleStartPassives(
   }
 
   self.sinCount = sinCount;
+
+  // Automatic sin bonus: 1-3 sins are pure demerrit; payoff starts at 4.
+  if (sinCount >= 4) {
+    const atkPerSin = sinCount >= 7 ? 4 : sinCount >= 6 ? 3 : sinCount >= 5 ? 2 : 1;
+    const defPerSin = sinCount >= 6 ? 2 : sinCount >= 5 ? 1 : 0;
+    const spdPerSin = sinCount >= 7 ? 1 : 0;
+    const atkBonus = atkPerSin * sinCount;
+    const defBonus = defPerSin * sinCount;
+    const spdBonus = spdPerSin * sinCount;
+    self.atkMod += atkBonus;
+    if (defBonus > 0) self.defMod += defBonus;
+    if (spdBonus > 0) self.spdMod += spdBonus;
+    log.push({ kind: 'sin_bonus', player: side, sinCount, atk: atkBonus, def: defBonus, spd: spdBonus });
+  }
 
   return { spdRollBonus };
 }

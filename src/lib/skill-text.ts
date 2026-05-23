@@ -347,8 +347,6 @@ export function describePassiveEffect(e: PassiveEffect): string {
       return `永続的に相手のシールドを無視して攻撃する（DEFは通常通り計算）`;
     case 'passive_count_atk_buff':
       return `バトル開始時、パッシブ数×${e.perPassive}だけATKをバフ（バトル中）`;
-    case 'sin_scale_bonus':
-      return `バトル開始時、所持罪カード1枚につき ATK+${e.atkPerSin} / DEF+${e.defPerSin} / SPD+${e.spdPerSin}（バトル中）`;
   }
 }
 

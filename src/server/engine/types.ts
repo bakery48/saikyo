@@ -410,9 +410,7 @@ export type PassiveEffect =
   /** Any normal shield or reflect shield gained by this side is converted to ghost shield instead. */
   | { kind: 'shield_reflect_to_ghost' }
   /** At battle_start, buff ATK by (passiveCount × perPassive) for the battle. */
-  | { kind: 'passive_count_atk_buff'; perPassive: number }
-  /** At battle start, gain ATK/DEF/SPD based on the count of sin-tagged skills held. */
-  | { kind: 'sin_scale_bonus'; atkPerSin: number; defPerSin: number; spdPerSin: number };
+  | { kind: 'passive_count_atk_buff'; perPassive: number };
 
 export type PassiveSkill = {
   id: string;
