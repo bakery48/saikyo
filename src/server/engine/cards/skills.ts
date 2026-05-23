@@ -40,11 +40,11 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-055', name: '盾割り', rarity: 'R', nameTag: 'シールドブレイカー', active: { effect: { kind: 'shield_break_attack', useStat: 'atk', multNoShield: 1.0, multShield: 2.0, attackKind: 'strike' } } },
   // ─── 七つの大罪 (Sin cards) — all passive demerits ──────────────────────
   { id: 'sk-r-056', name: '虚栄の罪', rarity: 'N', nameTag: 'プライド', tag: 'sin', isPassive: true,
-    passive: { trigger: { kind: 'battle_start' }, effect: { kind: 'stat_mod', stat: 'def', amount: -4 } } },
+    passive: { trigger: { kind: 'battle_start' }, effect: { kind: 'stat_mod', stat: 'def', amount: -3 } } },
   { id: 'sk-r-057', name: '嫉妬の罪', rarity: 'N', nameTag: 'エンヴィ', tag: 'sin', isPassive: true,
     passive: { trigger: { kind: 'battle_start' }, effect: { kind: 'stat_mod', stat: 'atk', amount: -3 } } },
   { id: 'sk-r-058', name: '怠惰の罪', rarity: 'N', nameTag: 'スロウス', tag: 'sin', isPassive: true,
-    passive: { trigger: { kind: 'battle_start' }, effect: { kind: 'stat_mod', stat: 'spd', amount: -5 } } },
+    passive: { trigger: { kind: 'battle_start' }, effect: { kind: 'stat_mod', stat: 'spd', amount: -3 } } },
   { id: 'sk-r-059', name: '憤怒の罪', rarity: 'N', nameTag: 'ラース', tag: 'sin', isPassive: true,
     passive: { trigger: { kind: 'on_deal_damage' }, effect: { kind: 'recoil', denominator: 3 } } },
   { id: 'sk-r-060', name: '強欲の罪', rarity: 'N', nameTag: 'グリード', tag: 'sin', isPassive: true,
