@@ -28,7 +28,7 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-r-002', name: '貫通刺突', rarity: 'SR', nameTag: 'ピアサー', active: { effect: { kind: 'true_damage', amount: 6 } } },
   { id: 'sk-r-004', name: 'いばらの盾', rarity: 'R', nameTag: 'ソーン', active: { effect: { kind: 'reflect_shield', amount: 3 } } },
   { id: 'sk-r-054', name: 'オーラ', rarity: 'R', nameTag: 'オーラ', active: { effect: { kind: 'threshold_shield', threshold: 3 } } },
-  { id: 'sk-r-073', name: '電光石火', rarity: 'R', nameTag: 'ラッシュ', active: { speedRush: true, effect: { kind: 'attack', mult: 1.7, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-r-073', name: '電光石火', rarity: 'R', nameTag: 'ブリッツ', active: { speedRush: true, effect: { kind: 'attack', mult: 1.7, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-r-005', name: '気力解放', rarity: 'R', nameTag: 'レイジ', active: { effect: { kind: 'buff_self', stat: 'atk', amount: 6, duration: 'once' } } },
   { id: 'sk-r-006', name: '岩石防御', rarity: 'R', nameTag: 'ロックアーマー', active: { effect: { kind: 'buff_self', stat: 'def', amount: 6, duration: 'once' } } },
   { id: 'sk-r-007', name: '光速', rarity: 'R', nameTag: 'スカイ', active: { effect: { kind: 'buff_self', stat: 'spd', amount: 4, duration: 'battle' } } },
@@ -81,7 +81,8 @@ export const SKILLS: SkillCard[] = [
   { id: 'sk-ssr-025', name: '神風返し', rarity: 'SSR', nameTag: 'テンペスト', active: { effect: { kind: 'target_stat_damage', stat: 'spd', mult: 1.3 } } },
 
   // ─── SR (Super Rare) ───────────────────────────────────────────────────────
-  { id: 'sk-sr-062', name: '覇気一閃', rarity: 'SR', nameTag: '覇気', active: { speedRush: true, effect: { kind: 'attack', mult: 2.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-sr-062', name: '覇気一閃', rarity: 'SR', nameTag: 'アサルト', active: { speedRush: true, effect: { kind: 'attack', mult: 2.0, useStat: 'atk', attackKind: 'passthrough' } } },
+  { id: 'sk-ssr-035', name: '神速滅殺', rarity: 'SSR', nameTag: 'アルティメット', active: { speedRush: true, effect: { kind: 'attack', mult: 2.8, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-001', name: '必殺攻撃', rarity: 'SR', nameTag: 'インペリアル', active: { effect: { kind: 'attack', mult: 1.6, useStat: 'atk', attackKind: 'passthrough' } } },
   { id: 'sk-sr-003', name: '青眼の滅光', rarity: 'SSR', nameTag: 'ブルーアイズ', active: { effect: { kind: 'true_damage', amount: 8 } } },
   { id: 'sk-sr-004', name: '大回復', rarity: 'SR', nameTag: 'セイント', active: { effect: { kind: 'heal', amount: 8 } } },
