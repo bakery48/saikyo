@@ -64,12 +64,16 @@ export function createInitialState(opts: {
   // Pad with CPUs up to 8 first; colors are assigned after shuffling so that
   // the assignment is deterministic per seed but unrelated to seat order.
   const makeInitialSlots = (pi: number): (import('./types').SkillCard | null)[] =>
-    Array.from({ length: 9 }, (_, si) => ({
-      id: `init-atk-${pi}-${si}`,
-      name: '攻撃',
-      rarity: 'N' as const,
-      active: { effect: { kind: 'attack' as const, mult: 1.0, useStat: 'atk' as const, attackKind: 'passthrough' as const } },
-    }));
+    Array.from({ length: 9 }, (_, si) =>
+      si < 5
+        ? ({
+            id: `init-atk-${pi}-${si}`,
+            name: '攻撃',
+            rarity: 'N' as const,
+            active: { effect: { kind: 'attack' as const, mult: 1.0, useStat: 'atk' as const, attackKind: 'passthrough' as const } },
+          })
+        : null,
+    );
   const seats: Omit<Player, 'color'>[] = opts.players.map((p, pi) => ({
     id: p.id,
     name: p.name,
