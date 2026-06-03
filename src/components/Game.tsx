@@ -58,6 +58,28 @@ function formatPhaseTitle(state: ClientGameState): string {
   }
 }
 
+function RoundBadge({ state }: { state: ClientGameState }) {
+  const inRound = ['event', 'action', 'draft', 'build', 'battle', 'reward'].includes(state.phase);
+  if (!inRound) return null;
+  const showMini = ['event', 'action', 'draft', 'build'].includes(state.phase);
+  return (
+    <span
+      style={{
+        fontSize: 11,
+        fontWeight: 600,
+        padding: '2px 8px',
+        borderRadius: 999,
+        background: '#e8f0ff',
+        color: '#2255aa',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      R{state.round}/{state.totalRounds}
+      {showMini && <> · M{state.miniRound}/{state.miniRoundsPerRound}</>}
+    </span>
+  );
+}
+
 export function Game({ socket }: { socket: GameSocket }) {
   const state = socket.game;
   if (!state) return <p>ゲームデータを待機中...</p>;
@@ -91,6 +113,7 @@ export function Game({ socket }: { socket: GameSocket }) {
             退出
           </button>
           <strong>{formatPhaseTitle(state)}</strong>
+          <RoundBadge state={state} />
           <RulesButton />
           <MonsterCodexButton />
           <BgmPlayer />

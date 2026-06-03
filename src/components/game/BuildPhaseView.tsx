@@ -5,6 +5,7 @@ import type { GameSocket } from '../../lib/useGameSocket';
 import type { SkillCard } from '../../server/engine/types';
 import { describeSkillCard } from '../../lib/skill-text';
 import { getSkillCategory, SKILL_CATEGORY_COLOR } from '../../lib/card-text';
+import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 
 const TOTAL_SLOTS = 9;
 
@@ -119,15 +120,31 @@ export function BuildPhaseView({
         スキルをスロットに配置して「確定」を押してください。スロット数はアクティブスキルの数を決めます（未設定スロットはアタックになります）。
       </p>
 
-      {submitted ? (
-        <p style={{ margin: 0, opacity: 0.7 }}>
-          送信済み — 他プレイヤーを待機中… ({totalCount - pendingCount}/{totalCount})
-        </p>
-      ) : !iAmPending ? (
-        <p style={{ margin: 0, opacity: 0.7 }}>
-          待機中… ({totalCount - pendingCount}/{totalCount})
-        </p>
-      ) : null}
+      {/* Player waiting strip */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, fontSize: 12, alignItems: 'center' }}>
+        {state.players.filter((p) => p.monster).map((p) => {
+          const isPending = buildPhase.pendingPlayerIds.includes(p.id);
+          const isDone = !isPending;
+          const isSelf = p.id === myId;
+          return (
+            <span
+              key={p.id}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '3px 8px', borderRadius: 999,
+                background: isDone ? '#0066cc' : '#eee',
+                color: isDone ? '#fff' : '#333',
+                border: isSelf ? '2px solid #0066cc' : '1px solid #ccc',
+              }}
+            >
+              <span style={pieceStyle(p.color, { size: 10 })} />
+              {p.name}
+              {p.isCPU && ' 🤖'}
+              {isDone ? ' ✓' : ' …'}
+            </span>
+          );
+        })}
+      </div>
 
       {/* Active slot count indicator */}
       <div style={{ fontSize: 13, opacity: 0.7 }}>
@@ -143,6 +160,14 @@ export function BuildPhaseView({
             const isDefault = isActive && card === null;
             const canDrag = iAmPending && !submitted && isActive;
             const isDragOver = dragOverIdx === idx;
+            const isSpeedRush = !!(card?.active?.speedRush);
+            const speedRushValid = isSpeedRush && idx < 2;
+            const speedRushInvalid = isSpeedRush && idx >= 2;
+            const borderColor = isDragOver ? '#0066cc'
+              : !isActive ? '#ddd'
+              : speedRushValid ? '#22aa44'
+              : speedRushInvalid ? '#cc3333'
+              : card ? SKILL_CATEGORY_COLOR[getSkillCategory(card)] : '#bbb';
             return (
               <div
                 key={idx}
@@ -153,7 +178,7 @@ export function BuildPhaseView({
                 onDrop={canDrag ? (e) => { e.preventDefault(); if (dragFromRef.current !== null && dragFromRef.current !== idx) moveSlot(dragFromRef.current, idx); dragFromRef.current = null; setDragOverIdx(null); } : undefined}
                 onDragEnd={() => { dragFromRef.current = null; setDragOverIdx(null); }}
                 style={{
-                  border: `2px solid ${isDragOver ? '#0066cc' : isActive ? (card ? SKILL_CATEGORY_COLOR[getSkillCategory(card)] : '#bbb') : '#ddd'}`,
+                  border: `2px solid ${borderColor}`,
                   borderRadius: 8,
                   padding: 8,
                   background: isDragOver ? '#e8f0ff' : !isActive ? '#f5f5f5' : isDefault ? '#fafafa' : '#fff',
@@ -167,7 +192,11 @@ export function BuildPhaseView({
                   transition: 'border-color 100ms, background 100ms',
                 }}
               >
-                <div style={{ fontSize: 10, opacity: 0.5, marginBottom: 2 }}>スロット {idx + 1}{!isActive ? ' （不活性）' : ''}</div>
+                <div style={{ fontSize: 10, opacity: 0.5, marginBottom: 2, display: 'flex', gap: 4, alignItems: 'center' }}>
+                  スロット {idx + 1}{!isActive ? ' （不活性）' : ''}
+                  {speedRushValid && <span style={{ color: '#22aa44', fontWeight: 700 }}>【速攻】✓</span>}
+                  {speedRushInvalid && <span style={{ color: '#cc3333', fontWeight: 700 }}>【速攻】✗</span>}
+                </div>
                 {!isActive ? (
                   <>
                     <span style={{ fontSize: 12, opacity: 0.4 }}>—</span>
@@ -231,7 +260,7 @@ export function BuildPhaseView({
             alignSelf: 'flex-start',
           }}
         >
-          このビルドで確定
+          確定
         </button>
       )}
 

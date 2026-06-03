@@ -75,10 +75,10 @@ export function DraftView({
       {iAmPending && !myCommitted && (
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={confirm} disabled={!tentative}>
-            決定
+            確定
           </button>
           <button onClick={() => setTentative(null)} disabled={!tentative} type="button">
-            選択取消
+            取消
           </button>
         </div>
       )}

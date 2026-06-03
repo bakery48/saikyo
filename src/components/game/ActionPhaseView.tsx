@@ -120,7 +120,7 @@ export function ActionPhaseView({
         <h2 style={{ margin: 0 }}>アクションフェーズ</h2>
         <p style={{ margin: 0, opacity: 0.85 }}>
           {iAmPending && !myCommitted
-            ? '👉 手札から1枚を選んで「決定」を押してください。'
+            ? '👉 手札から1枚を選んで「確定」を押してください。'
             : myCommitted
               ? `決定済み — 待機中… (${submittedCount}/${totalPending})`
               : `(${submittedCount}/${totalPending}) 待機中…`}
@@ -132,11 +132,11 @@ export function ActionPhaseView({
           <>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <button onClick={confirm} disabled={!canConfirm}>
-                決定 {tentative ? `(${tentativeCard?.name})` : ''}
+                確定 {tentative ? `(${tentativeCard?.name})` : ''}
                 {isChoiceCard && tentativeStat ? ` → ${tentativeStat.toUpperCase()}` : ''}
               </button>
               <button onClick={() => setTentative(null)} disabled={!tentative} type="button">
-                クリア
+                取消
               </button>
             </div>
             {isChoiceCard && (
