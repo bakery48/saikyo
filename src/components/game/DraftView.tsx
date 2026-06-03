@@ -93,15 +93,25 @@ export function DraftView({
           gap: 8,
         }}
       >
-        {myPack.map((c) => {
+        {(() => {
+          // K: detect conflicted card IDs during revealing phase
+          const pickedIds = Object.values(draft.submittedPicks);
+          const idCount: Record<string, number> = {};
+          for (const id of pickedIds) idCount[id] = (idCount[id] ?? 0) + 1;
+          const conflictIds = new Set(Object.entries(idCount).filter(([, n]) => n > 1).map(([id]) => id));
+
+          return myPack.map((c) => {
           const isSelected = tentative === c.id || myCommitted === c.id;
           const canClick = iAmPending && !myCommitted;
+          const isConflict = draft.revealing && conflictIds.has(c.id);
+          const ssrClass = c.rarity === 'SSR' ? 'ssr-card' : '';
+          const conflictClass = isConflict ? 'draft-shake' : '';
           return (
             <button
-              key={c.id}
+              key={`${c.id}-${isConflict ? 'shake' : 'still'}`}
               disabled={!canClick}
               onClick={() => placeOrCommit(c.id)}
-              className={c.rarity === 'SSR' ? 'ssr-card' : undefined}
+              className={[ssrClass, conflictClass].filter(Boolean).join(' ') || undefined}
               style={{
                 border: `2px solid ${isSelected ? '#0066cc' : SKILL_CATEGORY_COLOR[getSkillCategory(c)]}`,
                 borderRadius: 8,
@@ -125,7 +135,8 @@ export function DraftView({
               )}
             </button>
           );
-        })}
+        });
+        })()}
         {myPack.length === 0 && <p style={{ opacity: 0.5 }}>（パックは空です）</p>}
       </div>
 
@@ -389,6 +400,7 @@ function PendingStrip({ state }: { state: ClientGameState }) {
         return (
           <span
             key={p.id}
+            className={pending && !submitted ? 'badge-pending' : undefined}
             title={`${p.name}（${COLOR_LABEL[p.color]}） 獲得済 ${acquired}`}
             style={{
               display: 'inline-flex',
@@ -423,9 +435,10 @@ function AcquiredStrip({
   if (acquired.length === 0) return <p style={{ opacity: 0.5, fontSize: 12 }}>（まだ獲得していません）</p>;
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-      {acquired.map((c) => (
+      {acquired.map((c, i) => (
         <span
           key={c.id}
+          className={i === acquired.length - 1 ? 'card-get' : undefined}
           style={{
             padding: '2px 8px',
             background: SKILL_CATEGORY_COLOR[getSkillCategory(c)],

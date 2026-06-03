@@ -539,6 +539,7 @@ function PlayerLegend({
         return (
           <span
             key={p.id}
+            className={pending && !submitted ? 'badge-pending' : undefined}
             title={`${p.name}（${COLOR_LABEL[p.color]}）${status}`}
             style={{
               display: 'inline-flex',

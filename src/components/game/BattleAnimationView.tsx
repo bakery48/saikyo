@@ -66,7 +66,7 @@ export function BattleAnimationView({
     );
   }
 
-  return <BattleStage state={state} match={myMatch} />;
+  return <BattleStage state={state} match={myMatch} myId={myId} />;
 }
 
 function TournamentBattleView({
@@ -330,10 +330,12 @@ export function BattleStage({
   state,
   match,
   title,
+  myId,
 }: {
   state: ClientGameState;
   match: BattleMatch;
   title?: string;
+  myId?: string | null;
 }) {
   // Indices in the log of every skill_use event (one per "action" the user
   // wants to see step through at STEP_MS).
@@ -552,6 +554,18 @@ export function BattleStage({
             : '引き分け'
         : null;
 
+  const mySide = myId === match.a ? 'a' : myId === match.b ? 'b' : null;
+  const myPersonalResult =
+    battleDone && mySide && winnerSide
+      ? winnerSide === 'draw' ? 'draw'
+        : winnerSide === mySide ? 'win' : 'lose'
+      : null;
+
+  const firstMoverName =
+    firstSide === 'a' ? (aPlayer?.name ?? 'A')
+    : firstSide === 'b' ? (bPlayer?.name ?? 'B')
+    : null;
+
   const aMonName = aMon?.name ?? aPlayer?.name ?? 'A';
   const bMonName = bMon?.name ?? bPlayer?.name ?? 'B';
   const msgWindowKey = preroll ? 'preroll' : battleDone ? 'done' : `step-${stepIdx}`;
@@ -679,6 +693,7 @@ export function BattleStage({
           />
         )}
         {verdict && <VictoryBanner key={verdict} winner={winnerName} isDraw={winnerSide === 'draw'} />}
+        {myPersonalResult && <PersonalResultBanner key={myPersonalResult} result={myPersonalResult} />}
       </div>
 
       <BattleMessageWindow
@@ -738,6 +753,58 @@ function VictoryBanner({ winner, isDraw }: { winner: string | null; isDraw: bool
           textShadow: `0 0 20px ${color}, 0 0 40px ${color}`,
           whiteSpace: 'nowrap',
           boxShadow: `0 0 60px rgba(0,0,0,0.7)`,
+        }}
+      >
+        {text}
+      </div>
+    </div>
+  );
+}
+
+function PersonalResultBanner({ result }: { result: 'win' | 'lose' | 'draw' }) {
+  const isWin = result === 'win';
+  const isDraw = result === 'draw';
+  const text = isWin ? '🎉 あなたの勝利！' : isDraw ? '引き分け' : '😔 あなたの敗北…';
+  const color = isWin ? '#22aa44' : isDraw ? '#888' : '#cc3333';
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.animate(
+      [
+        { opacity: 0, transform: 'translate(-50%, calc(-50% + 80px)) scale(0.6)' },
+        { opacity: 1, transform: 'translate(-50%, calc(-50% + 80px)) scale(1.05)', offset: 0.3, easing: 'ease-out' },
+        { opacity: 1, transform: 'translate(-50%, calc(-50% + 80px)) scale(1.0)', offset: 0.65 },
+        { opacity: 0, transform: 'translate(-50%, calc(-50% + 80px)) scale(1.0)' },
+      ],
+      { duration: 2600, fill: 'forwards' },
+    );
+  }, []);
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, calc(-50% + 80px))',
+        pointerEvents: 'none',
+        zIndex: 11,
+        opacity: 0,
+      }}
+    >
+      <div
+        style={{
+          background: 'rgba(0,0,0,0.72)',
+          border: `3px solid ${color}`,
+          borderRadius: 12,
+          padding: '14px 36px',
+          color,
+          fontSize: 26,
+          fontWeight: 900,
+          letterSpacing: 2,
+          textShadow: `0 0 12px ${color}`,
+          whiteSpace: 'nowrap',
         }}
       >
         {text}
@@ -944,11 +1011,12 @@ function MonsterColumn({
           }}
         >
           <div
+            className={hpPct <= 30 ? 'hp-danger' : undefined}
             style={{
               width: `${hpPct}%`,
               height: '100%',
-              background: hpPct > 30 ? '#3c3' : '#c44',
-              transition: 'width 400ms',
+              background: hpPct > 50 ? '#3c3' : hpPct > 30 ? '#f90' : '#c44',
+              transition: 'width 400ms, background 600ms',
             }}
           />
         </div>
@@ -1165,6 +1233,20 @@ function DiceRollBanner({
         gap: 6,
       }}
     >
+      {firstSide && (
+        <div
+          style={{
+            textAlign: 'center',
+            fontWeight: 900,
+            fontSize: 20,
+            color: '#cc6600',
+            letterSpacing: '0.06em',
+            animation: 'champion-pop 0.4s cubic-bezier(0.22,1,0.36,1) both',
+          }}
+        >
+          ⚡ {winnerName}　先攻！
+        </div>
+      )}
       <div
         style={{
           display: 'grid',

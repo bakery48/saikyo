@@ -69,6 +69,46 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             0%   { transform: translateY(0) rotate(0deg);    opacity: 1; }
             100% { transform: translateY(90vh) rotate(720deg); opacity: 0; }
           }
+          @keyframes hp-pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.45; }
+          }
+          .hp-danger {
+            animation: hp-pulse 0.9s ease-in-out infinite;
+          }
+          @keyframes draft-shake {
+            0%   { transform: translateX(0); }
+            18%  { transform: translateX(-6px); }
+            36%  { transform: translateX(6px); }
+            54%  { transform: translateX(-4px); }
+            72%  { transform: translateX(4px); }
+            88%  { transform: translateX(-2px); }
+            100% { transform: translateX(0); }
+          }
+          .draft-shake {
+            animation: draft-shake 0.5s ease-out;
+          }
+          @keyframes badge-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,102,204,0); }
+            50%       { box-shadow: 0 0 0 5px rgba(0,102,204,0.25); }
+          }
+          .badge-pending {
+            animation: badge-pulse 1.4s ease-in-out infinite;
+          }
+          @keyframes card-get {
+            0%   { transform: scale(0.7); opacity: 0; }
+            60%  { transform: scale(1.12); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          .card-get {
+            animation: card-get 0.4s cubic-bezier(0.22,1,0.36,1) both;
+          }
+          @keyframes first-mover-pop {
+            0%   { transform: translate(-50%,-50%) scale(0.4); opacity: 0; }
+            55%  { transform: translate(-50%,-50%) scale(1.08); opacity: 1; }
+            75%  { transform: translate(-50%,-50%) scale(1.0); opacity: 1; }
+            100% { transform: translate(-50%,-50%) scale(1.0); opacity: 0; }
+          }
         `}</style>
       </head>
       <body>{children}</body>

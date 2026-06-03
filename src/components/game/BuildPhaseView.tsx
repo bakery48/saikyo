@@ -135,6 +135,7 @@ export function BuildPhaseView({
                 background: isDone ? '#0066cc' : '#eee',
                 color: isDone ? '#fff' : '#333',
                 border: isSelf ? '2px solid #0066cc' : '1px solid #ccc',
+                animation: !isDone ? 'badge-pulse 1.4s ease-in-out infinite' : undefined,
               }}
             >
               <span style={pieceStyle(p.color, { size: 10 })} />
