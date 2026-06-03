@@ -349,12 +349,16 @@ export function BattleStage({
   const [stepIdx, setStepIdx] = useState(0);
   // Whether we're still showing the pre-battle dice roll display.
   const [preroll, setPreroll] = useState(true);
+  // VS煽り → ダイスロールの2段階
+  const [vsStage, setVsStage] = useState<'vs' | 'dice'>('vs');
 
   useEffect(() => {
     setStepIdx(0);
     setPreroll(true);
-    const t = setTimeout(() => setPreroll(false), PREROLL_MS);
-    return () => clearTimeout(t);
+    setVsStage('vs');
+    const tDice = setTimeout(() => setVsStage('dice'), 1400);
+    const tBattle = setTimeout(() => setPreroll(false), PREROLL_MS);
+    return () => { clearTimeout(tDice); clearTimeout(tBattle); };
   }, [match.a, match.b]);
 
   useEffect(() => {
@@ -569,7 +573,15 @@ export function BattleStage({
             : `行動 ${stepIdx + 1} / ${stepLogIndices.length}`}
       </p>
 
-      {preroll && !isBye && (
+      {preroll && !isBye && vsStage === 'vs' && (
+        <VsBanner
+          aName={aMonName}
+          bName={bMonName}
+          aMon={aMon}
+          bMon={bMon}
+        />
+      )}
+      {preroll && !isBye && vsStage === 'dice' && (
         <DiceRollBanner
           aPlayer={aPlayer}
           bPlayer={bPlayer}
@@ -942,7 +954,7 @@ function MonsterColumn({
         </div>
       </div>
 
-      {/* Current stats (ATK / DEF / SPD) with buff/debuff coloring */}
+      {/* Current stats (ATK / DEF / SPD) with buff/debuff coloring + bounce */}
       <div style={{ display: 'flex', gap: 6, justifyContent: 'space-around' }}>
         {(['atk', 'def', 'spd'] as const).map((stat) => {
           const cur = currentStats[stat];
@@ -953,7 +965,11 @@ function MonsterColumn({
               <span style={{ fontSize: 10, color: '#999', letterSpacing: '0.05em' }}>
                 {stat.toUpperCase()}
               </span>
-              <span style={{ fontSize: 15, fontWeight: 700, color, transition: 'color 300ms' }}>
+              <span
+                key={`${stat}-${cur}`}
+                className="stat-bounce"
+                style={{ fontSize: 15, fontWeight: 700, color }}
+              >
                 {cur}
               </span>
               {diff !== 0 && (
@@ -1062,11 +1078,64 @@ function MonsterColumn({
   );
 }
 
-/**
- * Pre-battle banner showing the dice roll for initiative — both sides' SPD
- * + die = total, with the winning side flagged as "先攻". Held on screen for
- * PREROLL_MS before the skill animation kicks in.
- */
+function VsBanner({
+  aName, bName, aMon, bMon,
+}: {
+  aName: string; bName: string;
+  aMon: Monster | null | undefined;
+  bMon: Monster | null | undefined;
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 0,
+        padding: '24px 0',
+        animation: 'champion-pop 0.45s cubic-bezier(0.22,1,0.36,1) both',
+      }}
+    >
+      {/* Side A */}
+      <div style={{ flex: 1, textAlign: 'right', paddingRight: 20 }}>
+        <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 4 }}>{aName}</div>
+        {aMon && (
+          <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.6 }}>
+            HP {aMon.stats.hp} · ATK {aMon.stats.atk} · DEF {aMon.stats.def} · SPD {aMon.stats.spd}
+          </div>
+        )}
+      </div>
+      {/* VS */}
+      <div
+        style={{
+          fontWeight: 900,
+          fontSize: 28,
+          color: '#cc2200',
+          letterSpacing: '-0.02em',
+          padding: '8px 16px',
+          border: '3px solid #cc2200',
+          borderRadius: 8,
+          lineHeight: 1,
+          background: 'rgba(204,34,0,0.06)',
+          flexShrink: 0,
+        }}
+      >
+        VS
+      </div>
+      {/* Side B */}
+      <div style={{ flex: 1, textAlign: 'left', paddingLeft: 20 }}>
+        <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 4 }}>{bName}</div>
+        {bMon && (
+          <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.6 }}>
+            HP {bMon.stats.hp} · ATK {bMon.stats.atk} · DEF {bMon.stats.def} · SPD {bMon.stats.spd}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** DiceRollBanner: shows per-player dice + SPD totals, flagging the winner as 先攻. */
 function DiceRollBanner({
   aPlayer,
   bPlayer,

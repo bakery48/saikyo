@@ -36,6 +36,39 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             animation: ssr-shine 2.4s ease-in-out infinite;
             pointer-events: none;
           }
+          @keyframes phase-banner-slide {
+            0%   { transform: translateY(-110%); opacity: 0; }
+            12%  { transform: translateY(0);     opacity: 1; }
+            78%  { transform: translateY(0);     opacity: 1; }
+            100% { transform: translateY(-110%); opacity: 0; }
+          }
+          .phase-banner {
+            animation: phase-banner-slide 0.85s cubic-bezier(0.22,1,0.36,1) forwards;
+          }
+          @keyframes stat-bounce {
+            0%   { transform: scale(1); }
+            28%  { transform: scale(1.5); }
+            58%  { transform: scale(0.88); }
+            82%  { transform: scale(1.06); }
+            100% { transform: scale(1); }
+          }
+          .stat-bounce {
+            display: inline-block;
+            animation: stat-bounce 0.42s ease-out;
+          }
+          @keyframes champion-glow {
+            0%, 100% { text-shadow: 0 0 8px #d4a000, 0 0 20px #d4a000; }
+            50%       { text-shadow: 0 0 24px #ffd700, 0 0 48px #ffd700, 0 0 72px #ffa500; }
+          }
+          @keyframes champion-pop {
+            0%   { transform: scale(0.4); opacity: 0; }
+            65%  { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          @keyframes confetti-fall {
+            0%   { transform: translateY(0) rotate(0deg);    opacity: 1; }
+            100% { transform: translateY(90vh) rotate(720deg); opacity: 0; }
+          }
         `}</style>
       </head>
       <body>{children}</body>

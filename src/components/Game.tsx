@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useRef, useState } from 'react';
 import type { GameSocket } from '../lib/useGameSocket';
 import type { ClientGameState } from '../shared/messages';
 import { MonsterPickView } from './game/MonsterPickView';
@@ -80,12 +81,63 @@ function RoundBadge({ state }: { state: ClientGameState }) {
   );
 }
 
+function PhaseTransitionBanner({ state }: { state: ClientGameState }) {
+  const phaseKey = `${state.phase}-${state.round}-${state.miniRound}`;
+  const [bannerKey, setBannerKey] = useState<string | null>(null);
+  const [bannerLabel, setBannerLabel] = useState('');
+  const prevKey = useRef(phaseKey);
+
+  useEffect(() => {
+    if (phaseKey === prevKey.current) return;
+    prevKey.current = phaseKey;
+    const label = PHASE_LABEL[state.phase] ?? state.phase;
+    setBannerLabel(label);
+    setBannerKey(phaseKey);
+    const t = setTimeout(() => setBannerKey(null), 850);
+    return () => clearTimeout(t);
+  }, [phaseKey, state.phase]);
+
+  if (!bannerKey) return null;
+  return (
+    <div
+      key={bannerKey}
+      className="phase-banner"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        pointerEvents: 'none',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        style={{
+          background: 'linear-gradient(90deg, #0a1a3a, #0066cc, #0a1a3a)',
+          color: '#fff',
+          fontWeight: 800,
+          fontSize: 18,
+          letterSpacing: '0.12em',
+          padding: '10px 32px',
+          borderRadius: '0 0 12px 12px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
+        }}
+      >
+        {bannerLabel}
+      </div>
+    </div>
+  );
+}
+
 export function Game({ socket }: { socket: GameSocket }) {
   const state = socket.game;
   if (!state) return <p>ゲームデータを待機中...</p>;
 
   return (
     <section style={{ display: 'grid', gap: 16 }}>
+      <PhaseTransitionBanner state={state} />
       <header
         style={{
           borderBottom: '1px solid #ddd',
