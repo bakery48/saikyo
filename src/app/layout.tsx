@@ -109,6 +109,33 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             75%  { transform: translate(-50%,-50%) scale(1.0); opacity: 1; }
             100% { transform: translate(-50%,-50%) scale(1.0); opacity: 0; }
           }
+          @keyframes monster-enter {
+            0%   { transform: translateY(24px) scale(0.92); opacity: 0; }
+            70%  { transform: translateY(-4px) scale(1.02); opacity: 1; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+          }
+          @keyframes card-flip-in {
+            0%   { transform: rotateY(90deg) scale(0.96); opacity: 0.2; }
+            60%  { transform: rotateY(-8deg) scale(1.02); opacity: 1; }
+            100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+          }
+          .card-flip-in {
+            animation: card-flip-in 0.5s cubic-bezier(0.22,1,0.36,1) both;
+            transform-origin: left center;
+          }
+          @keyframes reward-pop {
+            0%   { transform: translateY(0) scale(1); opacity: 1; }
+            40%  { transform: translateY(-28px) scale(1.4); opacity: 1; }
+            100% { transform: translateY(-52px) scale(0.9); opacity: 0; }
+          }
+          .reward-pop {
+            position: absolute;
+            pointer-events: none;
+            font-weight: 700;
+            font-size: 20px;
+            color: #0066cc;
+            animation: reward-pop 1.1s ease-out forwards;
+          }
         `}</style>
       </head>
       <body>{children}</body>

@@ -1,9 +1,19 @@
 'use client';
+import { useEffect, useState } from 'react';
 import type { ClientGameState } from '../../shared/messages';
 import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 
 export function EventPhaseView({ state }: { state: ClientGameState }) {
   const ev = state.eventPhaseSummary;
+  const [flipped, setFlipped] = useState(false);
+  const [flipKey, setFlipKey] = useState(0);
+
+  useEffect(() => {
+    setFlipped(false);
+    setFlipKey((k) => k + 1);
+    const t = setTimeout(() => setFlipped(true), 120);
+    return () => clearTimeout(t);
+  }, [ev?.cardName]);
 
   return (
     <section style={{ display: 'grid', gap: 12 }}>
@@ -14,6 +24,8 @@ export function EventPhaseView({ state }: { state: ClientGameState }) {
       ) : (
         <>
           <div
+            key={flipKey}
+            className={flipped ? 'card-flip-in' : undefined}
             style={{
               border: '2px solid #6c8',
               background: 'linear-gradient(160deg, #f0fbe9, #e9f8f3)',
@@ -21,6 +33,7 @@ export function EventPhaseView({ state }: { state: ClientGameState }) {
               padding: 14,
               display: 'grid',
               gap: 6,
+              opacity: flipped ? 1 : 0,
             }}
           >
             <div style={{ fontSize: 11, color: '#587', letterSpacing: 1 }}>EVENT CARD</div>

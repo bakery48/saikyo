@@ -10,6 +10,7 @@ import type {
 } from '../../server/engine/types';
 import { COLOR_HEX, COLOR_LABEL } from '../../lib/colors';
 import { describeActiveEffect } from '../../lib/skill-text';
+import { getSeVolume } from '../BgmPlayer';
 
 const STEP_MS = 2000;
 const PREROLL_MS = 3000;
@@ -24,10 +25,10 @@ const ATTACK_SE: Partial<Record<Exclude<AttackKind, 'passthrough'>, string>> = {
   wind:   '/audio/se/wind.mp3',
 };
 
-function playSE(src: string, volume = 0.6): void {
+function playSE(src: string): void {
   try {
     const a = new Audio(src);
-    a.volume = volume;
+    a.volume = getSeVolume();
     a.play().catch(() => {});
   } catch {
     // ignore — audio blocked or unavailable
@@ -54,10 +55,18 @@ export function BattleAnimationView({
     return <TournamentBattleView state={state} myId={myId} />;
   }
   const matches = state.battle?.matches ?? [];
-  const myMatch =
-    matches.find((m) => m.a === myId || m.b === myId) ?? matches[0];
+  const myMatchIdx = matches.findIndex((m) => m.a === myId || m.b === myId);
+  const [selectedIdx, setSelectedIdx] = useState<number>(() => Math.max(0, myMatchIdx));
 
-  if (!myMatch) {
+  // Auto-select player's own match when matches load
+  useEffect(() => {
+    if (myMatchIdx >= 0) setSelectedIdx(myMatchIdx);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matches.length]);
+
+  const selectedMatch = matches[Math.min(selectedIdx, matches.length - 1)];
+
+  if (!selectedMatch) {
     return (
       <section style={{ display: 'grid', gap: 12 }}>
         <h2 style={{ margin: 0 }}>戦闘</h2>
@@ -66,7 +75,40 @@ export function BattleAnimationView({
     );
   }
 
-  return <BattleStage state={state} match={myMatch} myId={myId} />;
+  const getName = (id: string) => state.players.find((p) => p.id === id)?.name ?? id;
+
+  return (
+    <section style={{ display: 'grid', gap: 12 }}>
+      {matches.length > 1 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {matches.map((m, i) => {
+            const isMe = m.a === myId || m.b === myId;
+            const active = i === Math.min(selectedIdx, matches.length - 1);
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedIdx(i)}
+                style={{
+                  padding: '4px 10px',
+                  fontSize: 12,
+                  fontWeight: active ? 700 : 400,
+                  background: active ? '#0066cc' : '#eee',
+                  color: active ? '#fff' : '#333',
+                  border: isMe ? '2px solid #f90' : '2px solid transparent',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                }}
+              >
+                {getName(m.a)} vs {getName(m.b)}
+                {isMe ? ' ★' : ''}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <BattleStage state={state} match={selectedMatch} myId={myId} />
+    </section>
+  );
 }
 
 function TournamentBattleView({

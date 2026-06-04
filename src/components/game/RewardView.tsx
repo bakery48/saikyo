@@ -6,10 +6,17 @@ import type { StatKey } from '../../server/engine/types';
 import { BattleLogView } from './BattleLogView';
 
 const STAT_LABEL: Record<StatKey, string> = {
-  hp: 'HP +2',
+  hp: 'HP +24',
   atk: 'ATK +2',
   def: 'DEF +2',
   spd: 'SPD +2',
+};
+
+const STAT_POP_COLOR: Record<StatKey, string> = {
+  hp: '#4caf50',
+  atk: '#f44336',
+  def: '#2196f3',
+  spd: '#ff9800',
 };
 
 export function RewardView({
@@ -25,11 +32,23 @@ export function RewardView({
   const iAmPending = !!myId && reward.pendingPlayerIds.includes(myId);
   const myChoice = myId ? reward.choices[myId] : undefined;
 
+  const [popAnim, setPopAnim] = useState<{ key: number; label: string; color: string } | null>(null);
+
   const matchInfo = state.battle?.matches ?? [];
   const myMatch = matchInfo.find((m) => m.a === myId || m.b === myId);
   const lostMessage = myMatch
     ? `${matchPartnerName(myMatch, myId, state)} に敗北しました…`
     : '';
+
+  const handleStatUp = (stat: StatKey) => {
+    setPopAnim({ key: Date.now(), label: STAT_LABEL[stat], color: STAT_POP_COLOR[stat] });
+    socket.send({ type: 'submit_reward', choice: { kind: 'stat_up', stat } });
+  };
+
+  const handleSkillTop = () => {
+    setPopAnim({ key: Date.now(), label: 'スキル獲得！', color: '#9c27b0' });
+    socket.send({ type: 'submit_reward', choice: { kind: 'skill_top' } });
+  };
 
   return (
     <section style={{ display: 'grid', gap: 12 }}>
@@ -38,29 +57,40 @@ export function RewardView({
         <>
           <p style={{ margin: 0 }}>{lostMessage} 鍛え直す内容を選んでください:</p>
           {myChoice ? (
-            <p style={{ opacity: 0.7 }}>選択済み — 他のプレイヤーを待っています…</p>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <p style={{ opacity: 0.7, margin: 0 }}>選択済み — 他のプレイヤーを待っています…</p>
+              {popAnim && (
+                <span
+                  key={popAnim.key}
+                  className="reward-pop"
+                  style={{ color: popAnim.color, top: 0, left: 0 }}
+                >
+                  {popAnim.label}
+                </span>
+              )}
+            </div>
           ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              <button
-                onClick={() =>
-                  socket.send({ type: 'submit_reward', choice: { kind: 'skill_top' } })
-                }
-              >
-                スキルカードを引く (top of deck)
+            <div style={{ position: 'relative', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              <button onClick={handleSkillTop}>
+                スキルカードを引く
               </button>
               {(['hp', 'atk', 'def', 'spd'] as StatKey[]).map((stat) => (
                 <button
                   key={stat}
-                  onClick={() =>
-                    socket.send({
-                      type: 'submit_reward',
-                      choice: { kind: 'stat_up', stat },
-                    })
-                  }
+                  onClick={() => handleStatUp(stat)}
                 >
                   {STAT_LABEL[stat]}
                 </button>
               ))}
+              {popAnim && (
+                <span
+                  key={popAnim.key}
+                  className="reward-pop"
+                  style={{ color: popAnim.color, top: -8, left: 0 }}
+                >
+                  {popAnim.label}
+                </span>
+              )}
             </div>
           )}
         </>

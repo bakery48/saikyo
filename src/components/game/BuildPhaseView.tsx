@@ -9,6 +9,45 @@ import { COLOR_LABEL, pieceStyle } from '../../lib/colors';
 
 const TOTAL_SLOTS = 9;
 
+const RARITY_RANK: Record<string, number> = { SSR: 4, SR: 3, R: 2, N: 1 };
+
+function buildRecommendedSlots(
+  allCards: SkillCard[],
+): { slots: (SkillCard | null)[]; activeSlotCount: number } {
+  const pool = allCards.filter((c) => c.active);
+  if (pool.length === 0) return { slots: Array(TOTAL_SLOTS).fill(null), activeSlotCount: 0 };
+
+  // Separate speed-rush cards from the rest
+  const speedRush = pool.filter((c) => c.active?.speedRush);
+  const normal = pool.filter((c) => !c.active?.speedRush);
+
+  // Sort by rarity desc, then prefer attack effects
+  const attackKinds = new Set(['attack', 'multi_hit_attack', 'true_damage', 'deja_vu_attack']);
+  const rank = (c: SkillCard): number => {
+    const rarity = RARITY_RANK[c.rarity] ?? 1;
+    const isAtk = c.active && attackKinds.has(c.active.effect.kind) ? 2 : 0;
+    const isBuff = c.active?.effect.kind === 'buff_self' ? 1 : 0;
+    return rarity * 10 + isAtk + isBuff;
+  };
+  speedRush.sort((a, b) => rank(b) - rank(a));
+  normal.sort((a, b) => rank(b) - rank(a));
+
+  const ordered: SkillCard[] = [];
+  // Place up to 2 speed rush in first slots
+  ordered.push(...speedRush.slice(0, 2));
+  // Fill remaining with normal cards (highest rank first)
+  ordered.push(...normal);
+  // If fewer than 2 speed rush, fill remaining slots from the rest
+  if (speedRush.length > 2) ordered.push(...speedRush.slice(2));
+
+  const count = Math.min(ordered.length, TOTAL_SLOTS);
+  const slots: (SkillCard | null)[] = Array(TOTAL_SLOTS).fill(null);
+  for (let i = 0; i < count; i++) {
+    slots[i] = ordered[i]!;
+  }
+  return { slots, activeSlotCount: count };
+}
+
 export function BuildPhaseView({
   state,
   socket,
@@ -245,24 +284,46 @@ export function BuildPhaseView({
         </div>
       </div>
 
-      {/* Submit button */}
+      {/* Recommend + Submit buttons */}
       {iAmPending && !submitted && (
-        <button
-          onClick={handleSubmit}
-          style={{
-            padding: '10px 24px',
-            fontSize: 15,
-            fontWeight: 700,
-            background: '#0066cc',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 8,
-            cursor: 'pointer',
-            alignSelf: 'flex-start',
-          }}
-        >
-          確定
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={() => {
+              const allActive = [...(state.mySkillStock ?? []), ...(state.mySkillSlots ?? []).filter((c): c is SkillCard => c !== null)];
+              const rec = buildRecommendedSlots(allActive);
+              setSlots(rec.slots);
+              setActiveSlotCount(rec.activeSlotCount);
+            }}
+            style={{
+              padding: '10px 18px',
+              fontSize: 14,
+              background: '#f5f0ff',
+              color: '#5500aa',
+              border: '2px solid #aa88ff',
+              borderRadius: 8,
+              cursor: 'pointer',
+              fontWeight: 600,
+            }}
+          >
+            おすすめビルド ✨
+          </button>
+          <button
+            onClick={handleSubmit}
+            style={{
+              padding: '10px 24px',
+              fontSize: 15,
+              fontWeight: 700,
+              background: '#0066cc',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+            }}
+          >
+            確定
+          </button>
+        </div>
       )}
 
       {/* Active skill stock */}
